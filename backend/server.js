@@ -5,9 +5,9 @@ const express = require('express');
 //create express app
 const app = express();
 
-//create middleware - logs request path and request method
+//create middleware - logs request url, request path and request method
 app.use((req,res,next) => {
-    console.log("Request path:",req.path, '\n', "Request method:", req.method);
+    console.log("Request URL:", req.url, '\n', "Request path:",req.path, '\n', "Request method:", req.method);
     next();
 })
 
