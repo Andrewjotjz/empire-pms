@@ -1,6 +1,12 @@
 //import modules
-require('dotenv').config()
+const dotenv = require('dotenv');
+// Load the .env file first
+dotenv.config();
+// Load the .env.local file
+dotenv.config({ path: '.env.local' });
+
 const express = require('express');
+const mongoose = require('mongoose');
 
 //create express app
 const app = express();
@@ -17,7 +23,13 @@ app.get('/', (req,res) => {
     res.json({msg: message})
 });
 
-//Connect to DB - currently using JSON
-app.listen(process.env.PORT, () => {
-    console.log("Connected to DB. Listening to port", process.env.PORT)
-});
+//Connect to DB - currently using MongoDB
+mongoose.connect(process.env.MONG_URI)
+    .then(() => {
+        app.listen(process.env.PORT, () => {
+            console.log("Connected to MongoDB. Listening to port", process.env.PORT, " for request...")
+        })
+    })
+    .catch((error) => {
+        console.log(error)
+    });
