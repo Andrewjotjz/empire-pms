@@ -36,13 +36,11 @@ const employeeSchema = new Schema({
         type: String,
         required: true
     },
-    // Optional field for password reset token
     employee_password_token: {
         type: String
     },
-    // Enum for employee roles
     employee_roles: {
-        type: [String],
+        type: String,
         required: true,
         enum: ['Admin', 'Foreman', 'Manager', 'Purchaser', 'Employee'],
         default: ['Employee']
@@ -65,7 +63,7 @@ const employeeSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Payment'
     }]
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Employee', employeeSchema);

@@ -11,7 +11,7 @@ const supplierMaterialTypeSchema = new Schema({
         type: String,
         required: true,
     }
-})
+}, { timestamps: true })
 
 //create a new Schema object and define Supplier's contact schema/properties in its parameter.
 const supplierContactSchema = new Schema({
@@ -31,7 +31,7 @@ const supplierContactSchema = new Schema({
         type: Boolean,
         default: false
     }
-});
+}, { timestamps: true });
 
 // Create a new Schema object and define Supplier's schema/properties in its parameter.
 const supplierSchema = new Schema({
@@ -65,7 +65,7 @@ const supplierSchema = new Schema({
         type: Boolean,
         default: false
     },
-    supplier_material_type: {
+    supplier_material_types: {
         type: [supplierMaterialTypeSchema]
     },
     projects: [{
@@ -84,7 +84,7 @@ const supplierSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Invoice'
     }]
-});
+}, { timestamps: true });
 
 // Custom validation function for array limit
 function arrayLimit(val) {

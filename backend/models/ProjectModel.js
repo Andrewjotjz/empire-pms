@@ -21,7 +21,7 @@ const projectContactSchema = new Schema({
         type: Boolean,
         default: false
     }
-});
+}, { timestamps: true });
 
 //create a new Schema object, and define Project's schema/properties in its parameter.
 const projectSchema = new Schema({
@@ -49,7 +49,7 @@ const projectSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Supplier'
     }]
-});
+}, { timestamps: true });
 
 // Custom validation function for array limit
 function arrayLimit(val) {

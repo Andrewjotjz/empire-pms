@@ -4,29 +4,37 @@ const mongoose = require('mongoose');
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
-//create a new Schema object and define Order's schema/properties in its parameter.
-const orderSchema = new Schema({
+//create new Schema object and define Invoice schema/properties in its parameter
+const invoiceSchema = new Schema({
+    invoice_ref: {
+        type: String,
+        required: true
+    },
     supplier: {
         type: Schema.Types.ObjectId,
         ref: 'Supplier',
         required: true
     },
-    order_ref: {
-        type: String,
-        required: true
-    },
-    order_date: {
+    invoice_issue_date: {
         type: Date,
-        default: Date.now,
         required: true
     },
-    order_est_date: {
-        type: Date
+    invoice_received_date: {
+        type: Date,
+        default: Date.now
     },
-    order_est_time: {
-        type: Date
+    invoice_due_date: {
+        type: Date,
+        default: function() {
+            return new Date(Date.now() + 30*24*60*60*1000); // 30 days in milliseconds
+        }
     },
-    products: [{
+    order: {
+        type: Schema.Types.ObjectId,
+        ref: 'Order',
+        required: true
+    },
+    products: [{    //THIS Array is exactly the same as 'Order model' because we want to pull the data from order.
         product_id: {   //this will point at product_id, product_name, product_sku, product_number_a, product_unit_a, etc....
             type: Schema.Types.ObjectId,
             ref: 'Product',
@@ -57,39 +65,50 @@ const orderSchema = new Schema({
             min: 0
         }
     }],
-    order_total_amount: {
+    invoiced_delivery_fee: {
         type: Number,
-        required: true,
         min: 0
     },
-    order_internal_comments: {
+    invoiced_other_fee: {
+        type: Number,
+        min: 0
+    },
+    invoiced_credit: {
+        type: Number,
+        min: 0
+    },
+    invoiced_raw_total_amount_incl_gst: {
+        type: Number,
+        min: 0,
+        required: true
+    },
+    invoiced_calculated_total_amount_incl_gst: {
+        type: Number,
+        min: 0,
+        required: true
+    },
+    invoice_is_stand_alone: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    invoice_internal_comment: {
         type: String
     },
-    order_notes_to_supplier: {
-        type: String
-    },
-    order_isarchived: {
+    invoice_isarchived: {
         type: Boolean,
         default: false
     },
-    invoices: [{
+    payment: {
         type: Schema.Types.ObjectId,
-        ref: 'Invoice'
-    }],
-    project: {
-        type: Schema.Types.ObjectId,
-        ref: 'Project'
+        ref: 'Payment'
     },
-    deliveries: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Delivery'
-    }],
-    statuses: [{
+    status: {
         type: Schema.Types.ObjectId,
         ref: 'Status',
         required: true
-    }]
-}, { timestamps: true });
+    },
+});
 
 //export the model
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('Invoice', invoiceSchema);
