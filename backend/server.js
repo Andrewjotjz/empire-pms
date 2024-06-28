@@ -19,6 +19,10 @@ app.use((req,res,next) => {
     next();
 })
 
+//create middleware -  parse incoming requests with JSON payloads. 
+//It parses the JSON string in the request body and converts it into a JavaScript object, which is then attached to the req.body property.
+app.use(express.json());
+
 //route handler
 app.use('/api/company', companyRoute);
 
