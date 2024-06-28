@@ -50,11 +50,11 @@ const employeeSchema = new Schema({
         type: Boolean,
         default: false
     },
-    companies: [{
+    companies: {
         type: Schema.Types.ObjectId,
         required: true,
         ref: 'Company'
-    }],
+    },
     projects: [{
         type: Schema.Types.ObjectId,
         ref: 'Project'

@@ -92,7 +92,7 @@ const invoiceSchema = new Schema({
         default: false,
         required: true
     },
-    invoice_internal_comment: {
+    invoice_internal_comments: {
         type: String
     },
     invoice_isarchived: {
