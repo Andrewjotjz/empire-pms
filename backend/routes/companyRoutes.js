@@ -1,5 +1,6 @@
 //import modules
 const express = require('express');
+const { getSingleCompany, createNewCompany, updateSingleCompany } = require('../controllers/companyController')
 
 //create express' router
 const router = express.Router();
@@ -19,6 +20,6 @@ router.put('/:id', updateSingleCompany)
 //DELETE - delete a single company
 //? Currently the whole system only has one company 'EmpireCBS', perhaps in the future, an admin can create multiple companies and delete the company if needed.
 
-//export the companyRoute's router module
+//export the companyRoutes' router module
 module.exports = router;
 

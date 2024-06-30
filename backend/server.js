@@ -7,7 +7,7 @@ dotenv.config({ path: '.env.local' });
 
 const express = require('express');
 const mongoose = require('mongoose');
-const companyRoute = require('./routes/companyRoute');
+const companyRoutes = require('./routes/companyRoutes');
 
 //create express app
 const app = express();
@@ -24,7 +24,7 @@ app.use((req,res,next) => {
 app.use(express.json());
 
 //route handler
-app.use('/api/company', companyRoute);
+app.use('/api/company', companyRoutes);
 
 
 //Connect to DB - currently using MongoDB
