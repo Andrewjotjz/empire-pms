@@ -44,7 +44,8 @@ const getSinglePayment = async (req, res) => {
 const createNewPayment = async (req, res) => {
     //retrieve incoming request (along with new Payment object) by using 'req' object property 'body', which stores new Payment object.
     //destructure all relevant attributes in new Payment object
-    const { } = req.body;
+    const { payment_type, payment_ref, supplier, payment_method, payment_datetime, payment_raw_total_amount_incl_gst, 
+        payment_outstanding_amount, period_start_date, period_end_date, invoices, status, employees, payment_internal_comments } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.

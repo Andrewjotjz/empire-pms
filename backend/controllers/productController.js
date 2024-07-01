@@ -44,11 +44,15 @@ const getSingleProduct = async (req, res) => {
 const createNewProduct = async (req, res) => {
     //retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
     //destructure all relevant attributes in new Product object
-    const { } = req.body;
+    const { product_sku, product_name, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+        product_price_unit_b, product_effective_date, product_types, product_next_available_stock_date, product_isarchived,
+        supplier, project, alias } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Product = await productModel.create({ })
+        const Product = await productModel.create({ product_sku, product_name, product_number_a, product_unit_a, product_price_unit_a, 
+            product_number_b, product_unit_b, product_price_unit_b, product_effective_date, product_types, product_next_available_stock_date,
+             product_isarchived, supplier, project, alias })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Product)
     }

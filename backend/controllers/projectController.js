@@ -44,11 +44,11 @@ const getSingleProject = async (req, res) => {
 const createNewProject = async (req, res) => {
     //retrieve incoming request (along with new Project object) by using 'req' object property 'body', which stores new Project object.
     //destructure all relevant attributes in new Project object
-    const { } = req.body;
+    const { project_name, project_contacts, project_address, project_isarchived, employees, suppliers } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Project = await projectModel.create({ })
+        const Project = await projectModel.create({ project_name, project_contacts, project_address, project_isarchived, employees, suppliers })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Project)
     }

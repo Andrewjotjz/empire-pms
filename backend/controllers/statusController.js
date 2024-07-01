@@ -44,11 +44,13 @@ const getSingleStatus = async (req, res) => {
 const createNewStatus = async (req, res) => {
     //retrieve incoming request (along with new Status object) by using 'req' object property 'body', which stores new Status object.
     //destructure all relevant attributes in new Status object
-    const { } = req.body;
+    const { status_name, status_type, employee, status_change_datetime, status_change_details, 
+        order, status_internal_comment } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Status = await statusModel.create({ })
+        const Status = await statusModel.create({ status_name, status_type, employee, status_change_datetime, status_change_details, 
+            order, status_internal_comment })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Status)
     }

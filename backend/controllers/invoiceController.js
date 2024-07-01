@@ -44,11 +44,17 @@ const getSingleInvoice = async (req, res) => {
 const createNewInvoice = async (req, res) => {
     //retrieve incoming request (along with new Invoice object) by using 'req' object property 'body', which stores new Invoice object.
     //destructure all relevant attributes in new Invoice object
-    const { } = req.body;
+    const { invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, order, products,
+        invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
+        invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
+        invoice_isarchived, payment, status } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Invoice = await invoiceModel.create({ })
+        const Invoice = await invoiceModel.create({ invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, 
+            order, products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
+            invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
+            invoice_isarchived, payment, status })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Invoice)
     }

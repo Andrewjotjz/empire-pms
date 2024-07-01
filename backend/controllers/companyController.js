@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 
 //Controller function - GET all companies
 //? Currently not required, perhaps in the future, an admin user can create multiple companies.
-/******************
 const getAllCompanies = async (req,res) => {
     //'req' object not in used
     //create a new model called Company, await, and assign it with all company documents in the company collection, sort created date in descending order
@@ -12,7 +11,6 @@ const getAllCompanies = async (req,res) => {
     //invoke 'res' object method: status() and json(), pass relevant data to them
     res.status(200).json(Company)
     }
-********************/
 
 //Controller function - GET a single company
 const getSingleCompany = async (req,res) => {
@@ -49,11 +47,13 @@ const getSingleCompany = async (req,res) => {
 const createNewCompany = async (req,res) => {
     //retrieve incoming request (along with new company object) by using 'req' object property 'body', which stores new company object.
     //destructure all relevant attributes in new company object
-    const { } = req.body
+    const { company_name, company_abn, company_address, company_business_phone, company_business_email, company_created_date,
+        employees } = req.body
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes
-        const Company = await companyModel.create({})
+        const Company = await companyModel.create({ company_name, company_abn, company_address, company_business_phone, 
+            company_business_email, company_created_date, employees })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Company)
     }
@@ -98,7 +98,6 @@ const updateSingleCompany = async (req,res) => {
 
 //Controller - DELETE a company 
 //? Currently the whole system only has one company 'EmpireCBS', perhaps in the future, an admin can create multiple companies and delete the company if needed.
-/******************
 const deleteSingleCompany = async (req,res) => {
     //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
     //destructure the 'id' object
@@ -128,4 +127,6 @@ const deleteSingleCompany = async (req,res) => {
         res.status(200).json(Company)
     }
 }
-******************/
+
+//export controller module
+module.exports = { getAllCompanies, getSingleCompany, createNewCompany, updateSingleCompany, deleteSingleCompany };

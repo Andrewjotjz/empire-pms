@@ -44,11 +44,15 @@ const getSingleSupplier = async (req, res) => {
 const createNewSupplier = async (req, res) => {
     //retrieve incoming request (along with new Supplier object) by using 'req' object property 'body', which stores new Supplier object.
     //destructure all relevant attributes in new Supplier object
-    const { } = req.body;
+    const { supplier_name, supplier_contacts, supplier_address, supplier_payment_term, supplier_payment_term_description,
+         supplier_payment_method_details, supplier_type, supplier_isarchived, supplier_material_types, projects, products, 
+         orders, invoices } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Supplier = await supplierModel.create({ })
+        const Supplier = await supplierModel.create({ supplier_name, supplier_contacts, supplier_address, supplier_payment_term, supplier_payment_term_description,
+            supplier_payment_method_details, supplier_type, supplier_isarchived, supplier_material_types, projects, products, 
+            orders, invoices })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Supplier)
     }

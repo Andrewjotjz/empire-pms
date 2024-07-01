@@ -44,11 +44,11 @@ const getSingleDelivery = async (req, res) => {
 const createNewDelivery = async (req, res) => {
     //retrieve incoming request (along with new Delivery object) by using 'req' object property 'body', which stores new Delivery object.
     //destructure all relevant attributes in new Delivery object
-    const { } = req.body;
+    const { delivery_evidence_type, delivery_evidence_reference, products, delivery_receiving_date, status, order, supplier} = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Delivery = await deliveryModel.create({ })
+        const Delivery = await deliveryModel.create({ delivery_evidence_type, delivery_evidence_reference, products, delivery_receiving_date, status, order, supplier})
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Delivery)
     }

@@ -108,7 +108,7 @@ const invoiceSchema = new Schema({
         ref: 'Status',
         required: true
     },
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Invoice', invoiceSchema);

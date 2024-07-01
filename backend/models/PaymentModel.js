@@ -71,7 +71,7 @@ const paymentSchema = new Schema({
     payment_internal_comments: {
         type: String
     }
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Payment', paymentSchema);

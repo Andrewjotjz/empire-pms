@@ -44,11 +44,13 @@ const getSingleEmployee = async (req, res) => {
 const createNewEmployee = async (req, res) => {
     //retrieve incoming request (along with new Employee object) by using 'req' object property 'body', which stores new employee object.
     //destructure all relevant attributes in new Employee object
-    const { } = req.body;
+    const { employee_email, employee_first_name, employee_last_name, employee_external_id, employee_business_phone, employee_mobile_phone,
+        employee_password, employee_password_token, employee_roles, employee_isarchived, companies, projects, payments } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Employee = await employeeModel.create({ })
+        const Employee = await employeeModel.create({ employee_email, employee_first_name, employee_last_name, employee_external_id, employee_business_phone, employee_mobile_phone,
+            employee_password, employee_password_token, employee_roles, employee_isarchived, companies, projects, payments })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Employee)
     }

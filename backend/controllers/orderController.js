@@ -44,11 +44,13 @@ const getSingleOrder = async (req, res) => {
 const createNewOrder = async (req, res) => {
     //retrieve incoming request (along with new Order object) by using 'req' object property 'body', which stores new Order object.
     //destructure all relevant attributes in new Order object
-    const { } = req.body;
+    const { supplier, order_ref, order_date, order_est_date, order_est_time, products, order_total_amount, order_internal_comments,
+        order_notes_to_supplier, order_isarchived, invoices, project, deliveries, statuses } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Order = await orderModel.create({ })
+        const Order = await orderModel.create({ supplier, order_ref, order_date, order_est_date, order_est_time, products, 
+            order_total_amount, order_internal_comments, order_notes_to_supplier, order_isarchived, invoices, project, deliveries, statuses })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Order)
     }

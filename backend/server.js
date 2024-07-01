@@ -32,22 +32,22 @@ app.use(express.json());
 //route handler
 app.use('/api/company', companyRoutes);
 app.use('/api/employee', employeeRoutes);
-app.use('/api/employee', aliasRoutes);
-app.use('/api/employee', deliveryRoutes);
-app.use('/api/employee', invoiceRoutes);
-app.use('/api/employee', orderRoutes);
-app.use('/api/employee', paymentRoutes);
-app.use('/api/employee', productRoutes);
-app.use('/api/employee', projectRoutes);
-app.use('/api/employee', statusRoutes);
-app.use('/api/employee', supplierRoutes);
+app.use('/api/alias', aliasRoutes);
+app.use('/api/delivery', deliveryRoutes);
+app.use('/api/invoice', invoiceRoutes);
+app.use('/api/order', orderRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/product', productRoutes);
+app.use('/api/project', projectRoutes);
+app.use('/api/status', statusRoutes);
+app.use('/api/supplier', supplierRoutes);
 
 
 //Connect to DB - currently using MongoDB
 mongoose.connect(process.env.MONG_URI)
     .then(() => {
         app.listen(process.env.PORT, () => {
-            console.log("Connected to MongoDB. Listening to port", process.env.PORT, " for request...")
+            console.log("Connected to MongoDB. Listening to port", process.env.PORT, "for request...")
         })
     })
     .catch((error) => {

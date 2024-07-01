@@ -49,7 +49,7 @@ const deliverySchema = new Schema({
         ref: 'Supplier'
     },
 
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Delivery', deliverySchema);
