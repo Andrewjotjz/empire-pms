@@ -1,9 +1,9 @@
 //import modules
-const express = require('express');
+const { Router } = require('express');
 const { getSingleCompany, createNewCompany, updateSingleCompany } = require('../controllers/companyController')
 
 //create express' router
-const router = express.Router();
+const router = Router();
 
 //GET - get all companies
 //? currently not required, perhaps in the future, an admin user can create multiple companies.
