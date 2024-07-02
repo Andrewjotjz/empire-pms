@@ -36,9 +36,10 @@ const deliverySchema = new Schema({
         type: Date,
         required: true
     },
-    status: {   //NEEDS TO BE REVIEWED
-        type: Schema.Types.ObjectId,
-        ref: 'Status'
+    delivery_status: {
+        type: String,
+        required: true,
+        enum: ["Partially delivered", "Delivered"]
     },
     order: {
         type: Schema.Types.ObjectId,

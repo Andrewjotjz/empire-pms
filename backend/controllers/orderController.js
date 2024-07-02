@@ -45,12 +45,12 @@ const createNewOrder = async (req, res) => {
     //retrieve incoming request (along with new Order object) by using 'req' object property 'body', which stores new Order object.
     //destructure all relevant attributes in new Order object
     const { supplier, order_ref, order_date, order_est_date, order_est_time, products, order_total_amount, order_internal_comments,
-        order_notes_to_supplier, order_isarchived, invoices, project, deliveries, statuses } = req.body;
+        order_notes_to_supplier, order_isarchived, deliveries, invoices, project, order_status } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Order = await orderModel.create({ supplier, order_ref, order_date, order_est_date, order_est_time, products, 
-            order_total_amount, order_internal_comments, order_notes_to_supplier, order_isarchived, invoices, project, deliveries, statuses })
+        const Order = await orderModel.create({ supplier, order_ref, order_date, order_est_date, order_est_time, products, order_total_amount, order_internal_comments,
+            order_notes_to_supplier, order_isarchived, deliveries, invoices, project, order_status })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Order)
     }
@@ -96,7 +96,7 @@ const updateSingleOrder = async (req,res) => {
 //Controller function - DELETE to delete a single Order
 const deleteSingleOrder = async (req,res) => {
     //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
-    const { id } = body.params;
+    const { id } = req.params;
     //check if the ID object exists in mongoDB database.
     if (!mongoose.Types.ObjectId.isValid(id)) {
         //if ID doesn't exist, return error 404 details

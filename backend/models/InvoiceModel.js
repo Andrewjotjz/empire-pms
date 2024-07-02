@@ -100,14 +100,21 @@ const invoiceSchema = new Schema({
         default: false
     },
     payment: {
-        type: Schema.Types.ObjectId,
-        ref: 'Payment'
+        payment_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Payment',
+            required: true
+        },
+        payment_status: {
+            type: String,
+            required: true
+        }
     },
-    status: {
-        type: Schema.Types.ObjectId,
-        ref: 'Status',
-        required: true
-    },
+    invoice_status: {
+        type: String,
+        enum: ["Invoice received - To review", "Invoice received - To reconcile", "Invoice received - Reviewed", "Invoice received - Cancelled", "Settled"],
+        default: "Invoice received - To review"
+    }
 }, { timestamps: true });
 
 //export the model

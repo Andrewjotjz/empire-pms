@@ -47,14 +47,14 @@ const createNewInvoice = async (req, res) => {
     const { invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, order, products,
         invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
         invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
-        invoice_isarchived, payment, status } = req.body;
+        invoice_isarchived, payment, invoice_status } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
         const Invoice = await invoiceModel.create({ invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, 
             order, products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
             invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
-            invoice_isarchived, payment, status })
+            invoice_isarchived, payment, invoice_status })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Invoice)
     }
@@ -100,7 +100,7 @@ const updateSingleInvoice = async (req,res) => {
 //Controller function - DELETE to delete a single Invoice
 const deleteSingleInvoice = async (req,res) => {
     //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
-    const { id } = body.params;
+    const { id } = req.params;
     //check if the ID object exists in mongoDB database.
     if (!mongoose.Types.ObjectId.isValid(id)) {
         //if ID doesn't exist, return error 404 details

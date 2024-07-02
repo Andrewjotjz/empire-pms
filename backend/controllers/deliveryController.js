@@ -44,11 +44,11 @@ const getSingleDelivery = async (req, res) => {
 const createNewDelivery = async (req, res) => {
     //retrieve incoming request (along with new Delivery object) by using 'req' object property 'body', which stores new Delivery object.
     //destructure all relevant attributes in new Delivery object
-    const { delivery_evidence_type, delivery_evidence_reference, products, delivery_receiving_date, status, order, supplier} = req.body;
+    const { delivery_evidence_type, delivery_evidence_reference, products, delivery_receiving_date, status, delivery_status, order, supplier } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Delivery = await deliveryModel.create({ delivery_evidence_type, delivery_evidence_reference, products, delivery_receiving_date, status, order, supplier})
+        const Delivery = await deliveryModel.create({ delivery_evidence_type, delivery_evidence_reference, products, delivery_receiving_date, status, delivery_status, order, supplier })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Delivery)
     }
@@ -94,7 +94,7 @@ const updateSingleDelivery = async (req,res) => {
 //Controller function - DELETE to delete a single Delivery
 const deleteSingleDelivery = async (req,res) => {
     //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
-    const { id } = body.params;
+    const { id } = req.params;
     //check if the ID object exists in mongoDB database.
     if (!mongoose.Types.ObjectId.isValid(id)) {
         //if ID doesn't exist, return error 404 details

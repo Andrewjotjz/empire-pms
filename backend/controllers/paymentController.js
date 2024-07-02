@@ -45,11 +45,12 @@ const createNewPayment = async (req, res) => {
     //retrieve incoming request (along with new Payment object) by using 'req' object property 'body', which stores new Payment object.
     //destructure all relevant attributes in new Payment object
     const { payment_type, payment_ref, supplier, payment_method, payment_datetime, payment_raw_total_amount_incl_gst, 
-        payment_outstanding_amount, period_start_date, period_end_date, invoices, status, employees, payment_internal_comments } = req.body;
+        payment_outstanding_amount, period_start_date, period_end_date, invoices, payment_status, employees, payment_internal_comments } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Payment = await paymentModel.create({ })
+        const Payment = await paymentModel.create({ payment_type, payment_ref, supplier, payment_method, payment_datetime, payment_raw_total_amount_incl_gst, 
+            payment_outstanding_amount, period_start_date, period_end_date, invoices, payment_status, employees, payment_internal_comments } )
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Payment)
     }
@@ -95,7 +96,7 @@ const updateSinglePayment = async (req,res) => {
 //Controller function - DELETE to delete a single Payment
 const deleteSinglePayment = async (req,res) => {
     //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
-    const { id } = body.params;
+    const { id } = req.params;
     //check if the ID object exists in mongoDB database.
     if (!mongoose.Types.ObjectId.isValid(id)) {
         //if ID doesn't exist, return error 404 details

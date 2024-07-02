@@ -94,7 +94,7 @@ const updateSingleAlias = async (req,res) => {
 //Controller function - DELETE to delete a single Alias
 const deleteSingleAlias = async (req,res) => {
     //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
-    const { id } = body.params;
+    const { id } = req.params;
     //check if the ID object exists in mongoDB database.
     if (!mongoose.Types.ObjectId.isValid(id)) {
         //if ID doesn't exist, return error 404 details
