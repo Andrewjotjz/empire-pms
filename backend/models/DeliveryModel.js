@@ -13,6 +13,7 @@ const deliverySchema = new Schema({
     },
     delivery_evidence_reference: {
         type: String,
+        unique: true,
         required: true
     },
     products: [{

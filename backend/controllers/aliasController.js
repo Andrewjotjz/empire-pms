@@ -44,11 +44,11 @@ const getSingleAlias = async (req, res) => {
 const createNewAlias = async (req, res) => {
     //retrieve incoming request (along with new Alias object) by using 'req' object property 'body', which stores new Alias object.
     //destructure all relevant attributes in new Alias object
-    const { alias_name, alias_type } = req.body;
+    const { alias_name } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Alias = await aliasModel.create({ alias_name, alias_type })
+        const Alias = await aliasModel.create({ alias_name })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Alias)
     }

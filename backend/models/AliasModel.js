@@ -10,11 +10,6 @@ const aliasSchema = new Schema({
         type: String,
         unique: true,
         required: true
-    },
-    alias_type: {
-        type: String,
-        required: true,
-        enum: ['Plasterboard', 'Metal', 'Compound']
     }
 }, { timestamps: true })
 
