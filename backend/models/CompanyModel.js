@@ -37,7 +37,6 @@ const companySchema = new Schema({
     },
     employees: [{
         type: Schema.Types.ObjectId,
-        required: true,
         ref: 'Employee'
     }]
 }, { timestamps: true })

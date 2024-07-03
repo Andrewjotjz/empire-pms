@@ -13,6 +13,7 @@ const orderSchema = new Schema({
     },
     order_ref: {
         type: String,
+        unique: true,
         required: true
     },
     order_date: {
@@ -46,12 +47,7 @@ const orderSchema = new Schema({
             required: true,
             min: 0
         },
-        order_gross_amount_a: {
-            type: Number,
-            required: true,
-            min: 0
-        },
-        order_gross_amount_b: {
+        order_gross_amount: {
             type: Number,
             required: true,
             min: 0
@@ -72,24 +68,52 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     },
+    //One order can be created without delivery. But if there's delivery, there must be a delivery_ID and delivery_status
+    deliveries: [{
+        _id: false,
+        delivery_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Delivery',
+            required: true
+        },
+        delivery_status: {
+            type: String,
+            required: true
+        }
+    }],
+    //One order can be created without invoice. But if there's invoice, there must be an invoice_ID and invoice_status
     invoices: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Invoice'
+        _id: false,
+        invoice_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'Invoice',
+            required: true
+        },
+        invoice_status: {
+            type: String,
+            required: true
+        }
     }],
     project: {
         type: Schema.Types.ObjectId,
-        ref: 'Project'
-    },
-    deliveries: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Delivery'
-    }],
-    statuses: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Status',
+        ref: 'Project',
         required: true
-    }]
+    },
+    order_status: {
+        type: String,
+        required: true,
+        enum: ["Draft","Pending","Approved","Rejected","Cancelled"]
+    }
 }, { timestamps: true });
+
+// Mongoose Pre-save hook to check if there's at least one product
+orderSchema.pre('save', function(next) {
+    if (this.products.length === 0) {
+        const err = new Error("An order must have at least one product. Please use SKU:'OTHER001' if required.");
+        return next(err);
+    }
+    next();
+});
 
 //export the model
 module.exports = mongoose.model('Order', orderSchema);

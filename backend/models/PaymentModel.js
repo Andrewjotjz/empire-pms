@@ -12,7 +12,8 @@ const paymentSchema = new Schema({
         enum: ['Invoice', 'Bulk invoices (statement)']
     },
     payment_ref: {
-        type: String
+        type: String,
+        unique: true
     },
     supplier: {
         type: Schema.Types.ObjectId,
@@ -47,6 +48,7 @@ const paymentSchema = new Schema({
         required: true
     },
     invoices: [{
+        _id: false,
         invoice_id: {
         type: Schema.Types.ObjectId,
         ref: 'Invoice',
@@ -58,10 +60,11 @@ const paymentSchema = new Schema({
             min: 0
         }
     }],
-    status: {
-        type: Schema.Types.ObjectId,
-        ref: 'Status',
-        required: true
+    payment_status: {
+        type: String,
+        required: true,
+        enum: ["Draft","Reviewed","Fully Settled","Partially Settled"],
+        default: "Draft"
     },
     employees: [{
         type: Schema.Types.ObjectId,
@@ -71,7 +74,7 @@ const paymentSchema = new Schema({
     payment_internal_comments: {
         type: String
     }
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Payment', paymentSchema);
