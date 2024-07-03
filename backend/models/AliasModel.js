@@ -8,12 +8,8 @@ const Schema = mongoose.Schema;
 const aliasSchema = new Schema({
     alias_name: {
         type: String,
+        unique: true,
         required: true
-    },
-    alias_type: {
-        type: String,
-        required: true,
-        enum: ['Plasterboard', 'Metal', 'Compound']
     }
 }, { timestamps: true })
 

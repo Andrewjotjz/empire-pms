@@ -13,6 +13,7 @@ const deliverySchema = new Schema({
     },
     delivery_evidence_reference: {
         type: String,
+        unique: true,
         required: true
     },
     products: [{
@@ -36,9 +37,10 @@ const deliverySchema = new Schema({
         type: Date,
         required: true
     },
-    status: {   //NEEDS TO BE REVIEWED
-        type: Schema.Types.ObjectId,
-        ref: 'Status'
+    delivery_status: {
+        type: String,
+        required: true,
+        enum: ["Partially delivered", "Delivered"]
     },
     order: {
         type: Schema.Types.ObjectId,
@@ -49,7 +51,7 @@ const deliverySchema = new Schema({
         ref: 'Supplier'
     },
 
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Delivery', deliverySchema);

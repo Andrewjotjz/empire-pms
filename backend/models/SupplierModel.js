@@ -5,14 +5,6 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 
-//create a new Schema object and define Supplier's material-type schema/properties in its parameter.
-const supplierMaterialTypeSchema = new Schema({
-    type_name: {
-        type: String,
-        required: true,
-    }
-}, { timestamps: true })
-
 //create a new Schema object and define Supplier's contact schema/properties in its parameter.
 const supplierContactSchema = new Schema({
     name: {
@@ -66,15 +58,11 @@ const supplierSchema = new Schema({
         default: false
     },
     supplier_material_types: {
-        type: [supplierMaterialTypeSchema]
+        type: String
     },
     projects: [{
         type: Schema.Types.ObjectId,
         ref: 'Project'
-    }],
-    products: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Product'
     }],
     orders: [{
         type: Schema.Types.ObjectId,
