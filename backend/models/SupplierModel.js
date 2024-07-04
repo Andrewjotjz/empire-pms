@@ -13,7 +13,7 @@ const supplierContactSchema = new Schema({
     },
     phone: {
         type: String,
-        match: [/^\+?[1-9]\d{1,14}$/, 'Please fill a valid phone number'] // E.164 format
+        match: [/^[0-9\s+]\d{7,15}$/, 'Please fill a valid phone number'] // E.164 format
     },
     email: {
         type: String,

@@ -2,6 +2,8 @@
 const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+//import routers from routes folder
 const companyRoutes = require('./routes/companyRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const aliasRoutes = require('./routes/aliasRoutes');
@@ -13,23 +15,32 @@ const projectRoutes = require('./routes/projectRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
+//import function from middlewares folder
+const { checkUser } = require('./middlewares/authMiddleware');
 // Load the .env file
 dotenv.config();
+
+
 
 //create express app
 const app = express();
 
+
+
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
     console.log("Request URL:", req.url, '\n', "Request path:",req.path, '\n', "Request method:", req.method);
-    next();
-})
-
+    next();})
 //create middleware - parse incoming requests with JSON payloads. 
 //It parses the JSON string in the request body and converts it into a JavaScript object, which is then attached to the req.body property.
 app.use(express.json());
+//create middleware - cookie parser
+app.use(cookieParser());
+
+
 
 //route handler
+app.get('*', checkUser); //'*' means to apply to every single route
 app.use('/api/company', companyRoutes);
 app.use('/api/employee', employeeRoutes);
 app.use('/api/alias', aliasRoutes);
@@ -41,6 +52,7 @@ app.use('/api/product', productRoutes);
 app.use('/api/project', projectRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/supplier', supplierRoutes);
+
 
 
 //Connect to DB - currently using MongoDB
