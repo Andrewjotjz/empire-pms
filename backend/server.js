@@ -13,6 +13,8 @@ const projectRoutes = require('./routes/projectRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
+const fs = require('fs');
+
 // Load the .env file
 dotenv.config();
 
@@ -53,3 +55,4 @@ mongoose.connect(process.env.MONG_URI)
     .catch((error) => {
         console.log(error)
     });
+

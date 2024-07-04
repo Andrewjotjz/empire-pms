@@ -1,6 +1,7 @@
 //import modules
 const mongoose = require('mongoose');
 
+
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
@@ -15,4 +16,5 @@ const aliasSchema = new Schema({
 
 
 //export the model
-module.exports = mongoose.model('Alias', aliasSchema);
+const Alias = mongoose.model('Alias', aliasSchema);
+module.exports = Alias;

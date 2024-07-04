@@ -1,0 +1,674 @@
+[
+    {
+      "supplier_name": "Intex",
+      "supplier_contacts": [
+        {
+          "name": "Lianna (Sales)",
+          "phone": "0393579299",
+          "email": "sales@intex.com.au",
+          "is_primary": true
+        },
+        {
+          "name": "Dylan",
+          "phone": "",
+          "email": "Dylan.Major@intex.com.au",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "screws / small materials",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "CSP Plasterboard",
+      "supplier_contacts": [
+        {
+          "name": "Conal",
+          "phone": "0404652886",
+          "email": "conal.g@cspplaster.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "insulation (batt / ecowool insu) / sarking",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Bell Plaster",
+      "supplier_contacts": [
+        {
+          "name": "Gary",
+          "phone": "0448001781",
+          "email": "commercial@bellplaster.com.au",
+          "is_primary": true
+        },
+        {
+          "name": "Leanne",
+          "phone": "",
+          "email": "leanne@bellplaster.com.au",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 60",
+      "supplier_payment_term_description": "2 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "plasterboard / metal / kingspan (rigid insu) / access panel",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "SpeedPanel",
+      "supplier_contacts": [
+        {
+          "name": "Jack (Sales)",
+          "phone": "0391156625",
+          "email": "orders@speedpanel.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "speedpanel",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "K8",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "0391156625",
+          "email": "orders@k8global.com",
+          "is_primary": true
+        },
+        {
+          "name": "Nina",
+          "phone": "",
+          "email": "nina@k8global.com",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "plasterboard / metal / pirmax",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Hilti",
+      "supplier_contacts": [
+        {
+          "name": "Mark",
+          "phone": "0410541353",
+          "email": "mark.hargreaves@hilti.com",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "screws / small materials / power tools",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Comfab",
+      "supplier_contacts": [
+        {
+          "name": "Paul",
+          "phone": "0412789727",
+          "email": "paul@comfab.com.au",
+          "is_primary": true
+        },
+        {
+          "name": "Sales",
+          "phone": "",
+          "email": "sales@comfab.com.au",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "access panel",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "AllFasterner",
+      "supplier_contacts": [
+        {
+          "name": "Brayden",
+          "phone": "0437404288",
+          "email": "sales@allfasterners.com.au",
+          "is_primary": true
+        },
+        {
+          "name": "Brayden",
+          "phone": "",
+          "email": "brayden.b@allfasterners.com.au",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "screws / small materials",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Prostud",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "",
+          "email": "sales@prostud.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "yellow charge",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Demar Timber",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "0394813200",
+          "email": "sales@demar.com.au",
+          "is_primary": true
+        },
+        {
+          "name": "Paul",
+          "phone": "",
+          "email": "paul@demar.com.au",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Timber / Plywood",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Platinum",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "0383904703",
+          "email": "",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Main",
+      "supplier_isarchived": false,
+      "supplier_material_types": "yellow charge",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Richmond Rolling S",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "1300474246",
+          "email": "sales@richmondau.com",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Trolley wheels / rollers",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Abyss Welding",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "0398769090",
+          "email": "admin@abysswelding.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Landing trolleys for Crane Pallets",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Synergy",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "1300796305",
+          "email": "sales@saasaus.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Landing trolleys for Crane Pallets / Access and Scaffolds",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "United Forklift",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "1300852740",
+          "email": "",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Forklifts / Scissor Lifts",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Melbourne Equipment",
+      "supplier_contacts": [
+        {
+          "name": "Sales or Andrew",
+          "phone": "1300637368",
+          "email": "Andrew.Walker@merentals.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Forklifts / Scissor Lifts",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "A2 Cleaning",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "0394551990",
+          "email": "a2.abseiling@ccserv.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Rope Access Window cleaning",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Central Scaffolds",
+      "supplier_contacts": [
+        {
+          "name": "Cindy",
+          "phone": "0409930726",
+          "email": "cindy@centralscaffolds.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Scaffolds",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Mates United",
+      "supplier_contacts": [
+        {
+          "name": "TBC",
+          "phone": "",
+          "email": "",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Fire Caulk",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Melbourne Plaster Profiles",
+      "supplier_contacts": [
+        {
+          "name": "Sales or John",
+          "phone": "0417331744",
+          "email": "sales@melbourneplasterprofiles.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Bulkhead (Custom made Plasterboard)",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "SiteSafe",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "1300964898",
+          "email": "sales@sitesafe.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Site 'Safe/Locker'",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "1300 Temp Fence",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "1300836733",
+          "email": "",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Crowd Control Barrier ??",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Control Hire",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "0286105677",
+          "email": "info@controlhire.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Cutting Station",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Burelli Roofing",
+      "supplier_contacts": [
+        {
+          "name": "Mark Burelli",
+          "phone": "0419315268",
+          "email": "mburelli@bigpond.net.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Color Bond",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Bunnings",
+      "supplier_contacts": [
+        {
+          "name": "Empire Acc : 243756879",
+          "phone": "1800980050",
+          "email": "powerpass@bunnings.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Tools",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "RVT Group",
+      "supplier_contacts": [
+        {
+          "name": "Casey Marsh",
+          "phone": "1300086248",
+          "email": "casey.marsh@rvtgroup.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Soundex Cutting Enclosure",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "Supagas",
+      "supplier_contacts": [
+        {
+          "name": "Tracey",
+          "phone": "1300017872",
+          "email": "supabays@supagas.com.au",
+          "is_primary": true
+        },
+        {
+          "name": "Tracey",
+          "phone": "",
+          "email": "TraceyElsbury@supagas.com.au",
+          "is_primary": false
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "SealWell",
+      "supplier_contacts": [
+        {
+          "name": "Anthony",
+          "phone": "0477555785",
+          "email": "Anthony@sealwell.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "TBC",
+      "supplier_payment_term_description": "TBC",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Firefly Batt Insulation",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "HickoryPlus",
+      "supplier_contacts": [
+        {
+          "name": "Sales",
+          "phone": "",
+          "email": "hickoryplus@hickory.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Net 30",
+      "supplier_payment_term_description": "1 month allowance",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Special",
+      "supplier_isarchived": false,
+      "supplier_material_types": "Hickory defects",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    },
+    {
+      "supplier_name": "meTecnoPIR",
+      "supplier_contacts": [
+        {
+          "name": "Rocky",
+          "phone": "0497025946",
+          "email": "rocky.saffioti@metecnopir.com.au",
+          "is_primary": true
+        }
+      ],
+      "supplier_address": "",
+      "supplier_payment_term": "Not commenced",
+      "supplier_payment_term_description": "Not commenced",
+      "supplier_payment_method_details": "Bank Transfer",
+      "supplier_type": "Inactive",
+      "supplier_isarchived": false,
+      "supplier_material_types": "MetecnoTherm (rigid insulation)",
+      "projects": [],
+      "orders": [],
+      "invoices": []
+    }
+  ]
