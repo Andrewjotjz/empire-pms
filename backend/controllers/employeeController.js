@@ -1,6 +1,73 @@
 //import modules
 const employeeModel = require('../models/employeeModel');
 const mongoose = require('mongoose');
+//import jwt module
+const jwt = require('jsonwebtoken');
+
+//Handle employee login/signup errors
+const handleErrors = (err) => {
+    console.log(err.message, err.code);
+    let errors = { email: '', password: '' };
+  
+    // incorrect email
+    if (err.message === 'incorrect email') {
+      errors.email = 'That email is not registered';
+    }
+  
+    // incorrect password
+    if (err.message === 'incorrect password') {
+      errors.password = 'That password is incorrect';
+    }
+  
+    // duplicate email error
+    if (err.code === 11000) {
+      errors.email = 'that email is already registered';
+      return errors;
+    }
+  
+    // validation errors
+    if (err.message.includes('user validation failed')) {
+      // console.log(err);
+      Object.values(err.errors).forEach(({ properties }) => {
+        // console.log(val);
+        // console.log(properties);
+        errors[properties.path] = properties.message;
+      });
+    }
+  
+    return errors;
+  }
+//Create json web token
+const maxAge = 5 * 60; //5 minutes in seconds
+const createToken = (id) => {
+    //header&payload + secret = signature
+    //user's { id } represents payload, 'empirepms2024 secret' represents secret. Use jwt's sign() to get signature. Which results in 'encoded token'.
+    return jwt.sign({ id }, 'empirepms2024 secret', {
+    //Then, define 'age' to Token by using 'expiresIn' attribute
+    expiresIn: maxAge
+  });
+};
+
+
+//Controller function - POST to login employee
+const loginEmployee = async (req,res) => {
+    //! insert comment
+    const { employee_email, employee_password } = req.body;
+
+    try {
+        //! insert comment
+        const Employee = await employeeModel.login(employee_email, employee_password);
+        const token = createToken(Employee._id);
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 }); //in millisecond
+        res.status(200).json({ user: Employee._id, token });
+    } 
+    catch (err) {
+        //! insert comment
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+    }
+}
+
 
 //Controller function - GET all employees
 const getAllEmployees = async (req, res) => {
@@ -8,6 +75,7 @@ const getAllEmployees = async (req, res) => {
     //create a new model called Employees, await, and assign it with all employee documents in the employee collection, sort created date in descending order
     const Employees = await employeeModel.find({}).sort({createdAt: -1})
     //invoke 'res' object method: status() and json(), pass relevant data to them
+    console.log(Employees)
     res.status(200).json(Employees);
 }
 
@@ -121,5 +189,18 @@ const deleteSingleEmployee = async (req,res) => {
     }
 }
 
+
+//Controller function - GET to logout employee
+const logoutEmployee = (req,res) => {
+    //replace json web token (1st param), with another empty cookie (2nd param), and set the maxAge to 1 millisecond.
+    res.cookie('jwt', '', { maxAge: 1 });
+    //after log out, redirect user to login page
+    // res.redirect('/');
+    res.json({msg: "This employee has successfully logged out"})
+    console.log("Employee successfully logged out.")
+}
+
+
+
 //export controller module
-module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, deleteSingleEmployee };
+module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, deleteSingleEmployee, loginEmployee, logoutEmployee };

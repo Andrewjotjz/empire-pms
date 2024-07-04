@@ -1,25 +1,27 @@
 //import modules
 const express = require('express');
 const { getAllPayments, getSinglePayment, createNewPayment, updateSinglePayment, deleteSinglePayment } = require('../controllers/paymentController')
+//import function from middlewares folder
+const { requireAuth } = require('../middlewares/authMiddleware');
 
 //create express' router
 const router = express.Router();
 
 
 //GET - get all Payments
-router.get('/', getAllPayments)
+router.get('/', requireAuth, getAllPayments)
 
 //GET - get a single Payment
-router.get('/:id', getSinglePayment)
+router.get('/:id', requireAuth, getSinglePayment)
 
 //POST - create a new Payment
-router.post('/create', createNewPayment)
+router.post('/create', requireAuth, createNewPayment)
 
 //PUT - update a single Payment
-router.put('/:id', updateSinglePayment)
+router.put('/:id', requireAuth, updateSinglePayment)
 
 //DELETE - delete a single Payment
-router.delete('/:id', deleteSinglePayment)
+router.delete('/:id', requireAuth, deleteSinglePayment)
 
 
 //export router module that handles all Payment routes
