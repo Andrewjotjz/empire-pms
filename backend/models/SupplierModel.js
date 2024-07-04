@@ -14,7 +14,7 @@ const supplierContactSchema = new Schema({
     },
     phone: {
         type: String,
-        match: [/^[0-9\s+-]{7,15}$/, 'Please fill a valid phone number']// E.164 format
+        match: [/^[0-9\s+]\d{7,15}$/, 'Please fill a valid phone number'] // E.164 format
     },
     email: {
         type: String,
@@ -86,18 +86,3 @@ function arrayLimit(val) {
 // Export the model
 const Supplier = mongoose.model('Supplier', supplierSchema);
 module.exports = Supplier;
-
-// // Read JSON file containing data to import
-// const jsonFilePath = './data/Data_Supplier.json';
-// const jsonData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
-
-// // Insert JSON data into MongoDB
-// Supplier.insertMany(jsonData)
-//   .then((docs) => {
-//     console.log('Data imported successfully:', docs);
-//     mongoose.connection.close(); // Close MongoDB connection after importing
-//   })
-//   .catch((error) => {
-//     console.error('Error importing data:', error);
-//     mongoose.connection.close(); // Close MongoDB connection in case of error
-//   });

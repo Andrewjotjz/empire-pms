@@ -16,5 +16,8 @@ const aliasSchema = new Schema({
 
 
 //export the model
-const Alias = mongoose.model('Alias', aliasSchema);
+// const Alias = mongoose.model('Alias', aliasSchema);
+
+// check if the model already exists before creating it
+const Alias = mongoose.models.Alias || mongoose.model('Alias', aliasSchema);
 module.exports = Alias;

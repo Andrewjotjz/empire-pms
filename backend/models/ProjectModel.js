@@ -12,6 +12,7 @@ const projectContactSchema = new Schema({
     },
     phone: {
         type: String,
+        match: [/^[0-9\s+]\d{7,15}$/, 'Please fill a valid phone number'] // E.164 format
     },
     email: {
         type: String,
