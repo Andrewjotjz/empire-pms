@@ -27,7 +27,7 @@ router.put('/:id', requireAuth, updateSingleEmployee)
 router.delete('/:id', requireAuth, deleteSingleEmployee)
 
 //POST - login existing employee
-router.post('/login', requireAuth, loginEmployee)
+router.post('/login', loginEmployee)
 
 
 

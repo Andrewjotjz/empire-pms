@@ -1,5 +1,6 @@
 //import modules
 const mongoose = require('mongoose');
+const fs = require('fs');
 
 //create mongoose's schema
 const Schema = mongoose.Schema;
@@ -80,4 +81,8 @@ function arrayLimit(val) {
 }
 
 //export the model
-module.exports = mongoose.model('Supplier', supplierSchema);
+//module.exports = mongoose.model('Supplier', supplierSchema);
+
+// Export the model
+const Supplier = mongoose.model('Supplier', supplierSchema);
+module.exports = Supplier;

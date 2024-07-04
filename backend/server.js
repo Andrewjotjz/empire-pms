@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+
+
 //import routers from routes folder
 const companyRoutes = require('./routes/companyRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
@@ -15,8 +17,13 @@ const projectRoutes = require('./routes/projectRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
+
+//import from importJSONtoDB file
+const importJSONtoDB = require('./importJSONtoDB'); 
+
 //import function from middlewares folder
 const { checkUser } = require('./middlewares/authMiddleware');
+
 // Load the .env file
 dotenv.config();
 
