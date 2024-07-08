@@ -58,7 +58,7 @@ const employeeSchema = new Schema({
         required: true,
         type: Schema.Types.ObjectId,
         ref: 'Company',
-        default: '6683398a7b83205fd037d6c5' //'_id' for Empire CBS
+        default: '6682523ac777f1c67a29f5ae' //'_id' for Empire CBS
     },
     projects: [{
         type: Schema.Types.ObjectId,
