@@ -1,12 +1,19 @@
 //import modules
 const mongoose = require('mongoose');
 const fs = require('fs');
-const Alias = require('./models/AliasModel'); 
 
-// importJsonToDb();
+const Alias = require('./models/AliasModel'); 
+// const Employee = require('./models/EmployeeModel'); 
+
+// const Project = require('./models/ProjectModel'); 
+
+// console.log('./models/ProjectModel');
+
+
+// importJsonToDB();
 
 // Insert JSON data into MongoDB
-async function importJsonToDb() {
+async function importJsonToDB() {
     
     // Read JSON file containing data to import
     const jsonFilePath = './data/Data_Alias.json';  

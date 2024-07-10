@@ -1,5 +1,5 @@
 //import modules
-const aliasModel = require('../models/aliasModel');
+const aliasModel = require('../models/AliasModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Aliases
