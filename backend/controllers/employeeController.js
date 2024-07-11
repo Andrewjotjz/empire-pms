@@ -59,12 +59,12 @@ const loginEmployee = async (req,res) => {
         const Employee = await employeeModel.login(employee_email, employee_password);
         const token = createToken(Employee._id);
         res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 }); //in millisecond
-        res.status(200).json({ user: Employee._id, token });
+        res.status(200).json({employee: Employee});
     } 
     catch (err) {
         //! insert comment
         const errors = handleErrors(err);
-        res.status(400).json({ errors });
+        res.status(400).json({errors});
     }
 }
 

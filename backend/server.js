@@ -18,8 +18,6 @@ const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 
-//import from importJSONtoDB file
-const importJSONtoDB = require('./importJSONtoDB'); 
 
 //import function from middlewares folder
 const { checkUser } = require('./middlewares/authMiddleware');
@@ -28,11 +26,8 @@ const { checkUser } = require('./middlewares/authMiddleware');
 dotenv.config();
 
 
-
 //create express app
 const app = express();
-
-
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {

@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const Alias = require('./models/AliasModel'); 
 
-// importJsonToDb();
-
 // Insert JSON data into MongoDB
 async function importJsonToDb() {
     
