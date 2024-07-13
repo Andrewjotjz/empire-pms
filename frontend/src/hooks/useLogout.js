@@ -1,7 +1,6 @@
 //import modules and files
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux'
 import { clearLocalUser } from '../redux/localUserSlice'
 
@@ -30,11 +29,7 @@ export const useLogout = () => {
       setError(null);
       // navigate user to login page
       navigate('/EmpirePMS/login')
-      // push toast to notify successful login
-      toast.info(`Session ended. Please login.`, {
-        position: "top-right"
-      });
-      return res.json();
+      return res.json(); //! this json message not being used. In backend, check logout() API for json message.
     })
     .catch(err => {
       if (err.name === 'AbortError') {

@@ -1,6 +1,6 @@
 //import modules
 const jwt = require('jsonwebtoken');
-const employeeModel = require('../models/employeeModel');
+const employeeModel = require('../models/EmployeeModel');
 
 const requireAuth = (req, res, next) => {
   //retrieve json web token by using request's cookie which will be sent to the server

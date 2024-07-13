@@ -17,6 +17,6 @@ export const employeeSlice = createSlice({
     }
 })
 
-export const { setEmployeeDetails, clearEmployeeDetails } = employeeSlice.actions
+export const { setEmployeeDetails, clearEmployeeDetails, updateEmployeeDetails } = employeeSlice.actions
 
 export default employeeSlice.reducer

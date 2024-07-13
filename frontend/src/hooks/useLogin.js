@@ -35,27 +35,28 @@ export const useLogin = () => {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ employee_email: email, employee_password: password })
     })
-    const user_json = await response.json()
+    //returns a 'Promise' that resolves to a JavaScript object. This object is the result of parsing the JSON body text from the response.
+    const promise = await response.json()
 
     if (!response.ok) {
       setIsLoading(false)
-      if(user_json.errors){
+      if(promise.errors){
         setError("Email or password is incorrect")
       }
     }
     if (response.ok) {
       // save the user to local storage
-      localStorage.setItem('localUser', JSON.stringify(user_json))
+      localStorage.setItem('localUser', JSON.stringify(promise))
 
       // update the localUserState
-      dispatch(setLocalUser(user_json))
+      dispatch(setLocalUser(promise))
 
       // navigate client to dashboard page
       navigate('/EmpirePMS/dashboard')
 
       // push toast to notify successful login
       toast.success(`Login successful!`, {
-        position: "top-right"
+        position: "bottom-right"
       });
 
       // update loading state

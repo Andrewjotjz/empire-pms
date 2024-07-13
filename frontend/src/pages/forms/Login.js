@@ -13,26 +13,40 @@ const Login = () => {
   }
 
   return (
-    <form className="login" onSubmit={handleSubmit}>
-      <h3>Sign In</h3>
-      
-      <label>Email address:</label>
-      <input 
-        type="email" 
-        onChange={(e) => setEmail(e.target.value)} 
-        value={email}
-      />
-      <label>Password:</label>
-      <input 
-        type="password" 
-        onChange={(e) => setPassword(e.target.value)} 
-        value={password}
-      />
+    <div className="container mt-5">
+      <form className="login" onSubmit={handleSubmit}>
+        <h3 className="mb-3">Sign In</h3>
+        
+        <div className="mb-3">
+          <label htmlFor="email" className="form-label">Email address:</label>
+          <input 
+            type="email" 
+            className="form-control" 
+            id="email" 
+            onChange={(e) => setEmail(e.target.value)} 
+            value={email}
+          />
+        </div>
 
-      <button disabled={isLoading}>Log in</button>
-      {error && <div className="error">{error}</div>}
-    </form>
-  )
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">Password:</label>
+          <input 
+            type="password" 
+            className="form-control" 
+            id="password" 
+            onChange={(e) => setPassword(e.target.value)} 
+            value={password}
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Log in'}
+        </button>
+
+        {error && <div className="alert alert-danger mt-3">{error}</div>}
+      </form>
+    </div>
+  );
 }
 
-export default Login
+export default Login;
