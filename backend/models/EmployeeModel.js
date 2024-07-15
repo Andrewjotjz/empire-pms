@@ -84,9 +84,9 @@ employeeSchema.pre('save', async function(next) {
       if (auth) {
         return Employee;
       }
-      throw Error('incorrect email or password');
+      throw Error('incorrect password');
     }
-    throw Error('incorrect email or password');
+    throw Error('incorrect email');
   };
 
 //export the model

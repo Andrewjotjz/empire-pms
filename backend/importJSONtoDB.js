@@ -14,7 +14,6 @@ const ProductPrice = require('./models/ProductPriceModel');
 
 // console.log('./models/ProductModel');
 
-
 // importJsonToDB();
 
 // Insert JSON data into MongoDB
