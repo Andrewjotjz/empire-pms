@@ -17,6 +17,8 @@ const projectRoutes = require('./routes/projectRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
+const productPriceRoutes = require('./routes/productPriceRoutes');
+
 
 
 //import function from middlewares folder
@@ -54,6 +56,8 @@ app.use('/api/product', productRoutes);
 app.use('/api/project', projectRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/supplier', supplierRoutes);
+app.use('/api/productprice', productPriceRoutes);
+
 
 
 

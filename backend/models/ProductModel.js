@@ -15,38 +15,6 @@ const productSchema = new Schema({
         trim: true,
         required: true
     },
-    product_number_a: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_unit_a: {
-        type: String,
-        required: true
-    },
-    product_price_unit_a: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_number_b: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_unit_b: {
-        type: String,
-        required: true
-    },
-    product_price_unit_b: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_effective_date: {
-        type: Date,
-        required: true
-    },
     product_types: {
         type: String,
         enum: ["Compound",
@@ -69,28 +37,31 @@ const productSchema = new Schema({
             "SpeedPanel(Accessories)"],
         required: true
     },
-    product_next_available_stock_date: {
-        type: Date
+    product_actual_size: {
+        type: Number,
+        required: true,
+        min: 0
     },
-    product_isarchived: {
-        type: Boolean,
-        default: false
+    product_next_available_stock_date: {
+        type: Date, 
+        default: null
     },
     supplier: {
         type: Schema.Types.ObjectId,
         ref: 'Supplier',
         required: true
     },
-    project: {
-        type: Schema.Types.ObjectId,
-        ref: 'Project',
-        required: true
-    },
     alias: {
         type: Schema.Types.ObjectId,
         ref: 'Alias'
+    },
+    product_isarchived: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
-//export the model
-module.exports = mongoose.model('Product', productSchema);
+
+// check if the model already exists before creating it
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+module.exports = Product;
