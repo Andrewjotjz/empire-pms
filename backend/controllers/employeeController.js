@@ -38,7 +38,8 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-const maxAge = 10 * 60; //10 minutes in seconds
+
+const maxAge = 60 * 60; //60 minutes in seconds
 const createToken = (id) => {
     //header&payload + secret = signature
     //user's { id } represents payload, 'empirepms2024 secret' represents secret. Use jwt's sign() to get signature. Which results in 'encoded token'.

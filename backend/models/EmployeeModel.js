@@ -26,9 +26,7 @@ const employeeSchema = new Schema({
         required: true
     },
     employee_external_id: {
-        type: String,
-        unique: true,
-        sparse: true
+        type: String
     },
     employee_business_phone: {
         type: String,
@@ -58,7 +56,7 @@ const employeeSchema = new Schema({
         required: true,
         type: Schema.Types.ObjectId,
         ref: 'Company',
-        default: '6682523ac777f1c67a29f5ae' //'_id' for Empire CBS
+        default: '6682523ac777f1c67a29f5ae' //'_id' for Empire CBS 
     },
     projects: [{
         type: Schema.Types.ObjectId,
@@ -92,4 +90,5 @@ employeeSchema.pre('save', async function(next) {
   };
 
 //export the model
-module.exports = mongoose.model('Employee', employeeSchema);
+const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
+module.exports = Employee;

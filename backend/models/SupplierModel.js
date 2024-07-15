@@ -60,19 +60,7 @@ const supplierSchema = new Schema({
     },
     supplier_material_types: {
         type: String
-    },
-    projects: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Project'
-    }],
-    orders: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Order'
-    }],
-    invoices: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Invoice'
-    }]
+    }
 }, { timestamps: true });
 
 // Custom validation function for array limit
