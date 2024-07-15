@@ -1,5 +1,5 @@
 //import modules
-const employeeModel = require('../models/employeeModel');
+const employeeModel = require('../models/EmployeeModel');
 const mongoose = require('mongoose');
 //import jwt module
 const jwt = require('jsonwebtoken');
@@ -38,6 +38,7 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
+
 const maxAge = 60 * 60; //60 minutes in seconds
 const createToken = (id) => {
     //header&payload + secret = signature
@@ -59,12 +60,12 @@ const loginEmployee = async (req,res) => {
         const Employee = await employeeModel.login(employee_email, employee_password);
         const token = createToken(Employee._id);
         res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 }); //in millisecond
-        res.status(200).json({ user: Employee._id, token });
+        res.status(200).json(Employee);
     } 
     catch (err) {
         //! insert comment
         const errors = handleErrors(err);
-        res.status(400).json({ errors });
+        res.status(400).json({errors});
     }
 }
 
@@ -155,7 +156,7 @@ const updateSingleEmployee = async (req,res) => {
         res.status(400).json({msg: "ID exists, however there is no such employee"});
     }
     else {
-        //if Employee does exists, pass new Company object to 'res' object method
+        //if Employee does exists, pass new Employee object to 'res' object method
         res.status(200).json(Employee);
     }
 }

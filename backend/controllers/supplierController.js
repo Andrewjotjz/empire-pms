@@ -128,7 +128,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
 };
 
 // Controller function - GET all products by supplier
-const getsingleSupplierProducts = async (req, res) => {
+const getSingleSupplierProducts = async (req, res) => {
     const { id } = req.params;
     const { all } = req.query;
 
@@ -146,11 +146,11 @@ const getsingleSupplierProducts = async (req, res) => {
 };
 
 // Controller function - GET a single product by supplier and product ID
-const getsingleproductbySupplier = async (req, res) => {
-    const { supplierId, productId } = req.params;
+const getSingleProductBySupplier = async (req, res) => {
+    const { id, productId } = req.params;
 
     try {
-        const supplierObjectId = new mongoose.Types.ObjectId(supplierId);
+        const supplierObjectId = new mongoose.Types.ObjectId(id);
         const productObjectId = new mongoose.Types.ObjectId(productId);
 
         const formattedResults = await fetchProductsWithPrices(supplierObjectId, productObjectId);
@@ -245,4 +245,4 @@ const deleteSingleSupplier = async (req,res) => {
 }
 
 //export controller module
-module.exports = { getAllSuppliers, getSingleSupplier, fetchProductsWithPrices, getsingleSupplierProducts, getsingleproductbySupplier, createNewSupplier, updateSingleSupplier, deleteSingleSupplier };
+module.exports = { getAllSuppliers, getSingleSupplier, fetchProductsWithPrices, getSingleSupplierProducts, getSingleProductBySupplier, createNewSupplier, updateSingleSupplier, deleteSingleSupplier };
