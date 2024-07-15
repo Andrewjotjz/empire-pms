@@ -2,12 +2,17 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
 
-const Alias = require('./models/AliasModel'); 
+// const Alias = require('./models/AliasModel'); 
+
 // const Employee = require('./models/EmployeeModel'); 
 
 // const Project = require('./models/ProjectModel'); 
 
-// console.log('./models/ProjectModel');
+// const Product = require('./models/ProductModel'); 
+
+const ProductPrice = require('./models/ProductPriceModel'); 
+
+// console.log('./models/ProductModel');
 
 
 // importJsonToDB();
@@ -16,11 +21,11 @@ const Alias = require('./models/AliasModel');
 async function importJsonToDB() {
     
     // Read JSON file containing data to import
-    const jsonFilePath = './data/Data_Alias.json';  
+    const jsonFilePath = './data/Data_ProductPrice.json';  
     const jsonData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8')); 
 
 
-    Alias.insertMany(jsonData)
+    ProductPrice.insertMany(jsonData)
     .then((docs) => {
         console.log('Data imported successfully:', docs);
         mongoose.connection.close(); // Close MongoDB connection after importing
