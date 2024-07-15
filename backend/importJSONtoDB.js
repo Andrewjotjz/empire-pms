@@ -36,5 +36,4 @@ async function importJsonToDB() {
     });
     
   }
-
-
+  
