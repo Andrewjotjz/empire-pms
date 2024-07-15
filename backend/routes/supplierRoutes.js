@@ -18,7 +18,7 @@ router.get('/:id', requireAuth, getSingleSupplier)
 router.get('/:id/products', requireAuth, getsingleSupplierProducts)
 
 //GET - get one product data related to a single Supplier
-router.get('/:supplierId/products/:productId', requireAuth, getsingleproductbySupplier)
+router.get('/:id/products/:productId', requireAuth, getsingleproductbySupplier)
 
 //POST - create a new Supplier
 router.post('/create', requireAuth, createNewSupplier)
