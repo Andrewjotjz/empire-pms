@@ -1,5 +1,7 @@
 //import modules
 const supplierModel = require('../models/supplierModel');
+const productModel = require('../models/ProductModel');
+const productPriceModel = require('../models/ProductPriceModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Suppliers
@@ -39,6 +41,125 @@ const getSingleSupplier = async (req, res) => {
         res.status(200).json(Supplier)
     }
 }
+
+// Helper function to fetch products and their prices
+const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null) => {
+    const matchCondition = {
+        'product.supplier': supplierObjectId
+    };
+    if (productObjectId) {
+        matchCondition['product._id'] = productObjectId;
+    }
+
+    const ProductsWithPrices = await productPriceModel.aggregate([
+        {
+            $lookup: {
+                from: 'products', // Ensure this is the correct collection name
+                localField: 'product_id',
+                foreignField: '_id',
+                as: 'product'
+            }
+        },
+        { $unwind: '$product' }, // Flatten the product array
+        {
+            $match: matchCondition // Match the supplier ID and optionally the product ID
+        },
+        {
+            $lookup: {
+                from: 'aliases', // Ensure this is the correct collection name
+                localField: 'product.alias',
+                foreignField: '_id',
+                as: 'alias'
+            }
+        },
+        { $unwind: { path: '$alias', preserveNullAndEmptyArrays: true }}, 
+        {
+            $lookup: {
+                from: 'projects',
+                localField: 'projects',
+                foreignField: '_id',
+                as: 'projectDetails'
+            }   
+        },
+        {
+            $project: {
+                product: {
+                    _id: '$product._id',
+                    product_sku: '$product.product_sku',
+                    product_name: '$product.product_name',
+                    product_types: '$product.product_types',
+                    product_actual_size: '$product.product_actual_size',
+                    product_next_available_stock_date: '$product.product_next_available_stock_date',
+                    supplier: '$product.supplier',
+                    alias: '$product.alias',
+                    alias_name: '$alias.alias_name',
+                    product_isarchived: '$product.product_isarchived',
+                    createdAt: '$product.createdAt',
+                    updatedAt: '$product.updatedAt',
+                },
+                productPrice: {
+                    _id: '$_id',
+                    product_id: '$product_id',
+                    product_unit_a: '$product_unit_a',
+                    product_number_a: '$product_number_a',
+                    product_price_unit_a: '$product_price_unit_a',
+                    product_unit_b: '$product_unit_b',
+                    product_number_b: '$product_number_b',
+                    product_price_unit_b: '$product_price_unit_b',
+                    price_fixed: '$price_fixed',
+                    product_effective_date: '$product_effective_date',
+                    projects: '$projects',
+                    project_names: '$projectDetails.project_name', // Get project names
+                    createdAt: '$createdAt',
+                    updatedAt: '$updatedAt',
+                }
+            }
+        }
+    ]);
+
+    return ProductsWithPrices.map(item => ({
+        product: {
+            ...item.product,
+        },
+        productPrice: {
+            ...item.productPrice,
+        }
+    }));
+};
+
+// Controller function - GET all products by supplier
+const getSingleSupplierProducts = async (req, res) => {
+    const { id } = req.params;
+    const { all } = req.query;
+
+    try {
+        if (all === 'true' || !all) {
+            const supplierObjectId = new mongoose.Types.ObjectId(id);
+            const formattedResults = await fetchProductsWithPrices(supplierObjectId);
+            res.status(200).json(formattedResults);
+        } else {
+            return res.status(404).json({ message: 'Please enter the correct query parameter' });
+        }
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+// Controller function - GET a single product by supplier and product ID
+const getSingleProductBySupplier = async (req, res) => {
+    const { id, productId } = req.params;
+
+    try {
+        const supplierObjectId = new mongoose.Types.ObjectId(id);
+        const productObjectId = new mongoose.Types.ObjectId(productId);
+
+        const formattedResults = await fetchProductsWithPrices(supplierObjectId, productObjectId);
+        res.status(200).json(formattedResults);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 
 //Controller function - POST to create a new Supplier
 const createNewSupplier = async (req, res) => {
@@ -124,4 +245,4 @@ const deleteSingleSupplier = async (req,res) => {
 }
 
 //export controller module
-module.exports = { getAllSuppliers, getSingleSupplier, createNewSupplier, updateSingleSupplier, deleteSingleSupplier };
+module.exports = { getAllSuppliers, getSingleSupplier, fetchProductsWithPrices, getSingleSupplierProducts, getSingleProductBySupplier, createNewSupplier, updateSingleSupplier, deleteSingleSupplier };

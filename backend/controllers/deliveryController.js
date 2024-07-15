@@ -1,5 +1,5 @@
 //import modules
-const deliveryModel = require('../models/deliveryModel');
+const deliveryModel = require('../models/DeliveryModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Deliveries

@@ -1,5 +1,6 @@
 //import modules
-const productModel = require('../models/productModel');
+const productModel = require('../models/ProductModel');
+const productPriceModel = require('../models/ProductPriceModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Products
@@ -27,6 +28,9 @@ const getSingleProduct = async (req, res) => {
     //create a new model called Product, await, and assign it with the Product document, which can be found in the Product collection, find using ID
     const Product = await productModel.findById(id)
 
+    // Get all the product prices based on the product id
+    const ProductPrices = await productPriceModel.find({product_id: id});
+
     //check if there's 'null' or 'undefined' in 'Product'.
     if (!Product) {
         //if Product doesn't exist, return error 400 page details
@@ -36,31 +40,46 @@ const getSingleProduct = async (req, res) => {
     }
     else {
         //if Product does exists, pass relevant data to 'res' object method
-        res.status(200).json(Product)
+        res.status(200).json({ Product, ProductPrices});
+
     }
 }
 
+
+
 //Controller function - POST to create a new Product
 const createNewProduct = async (req, res) => {
-    //retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
-    //destructure all relevant attributes in new Product object
-    const { product_sku, product_name, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-        product_price_unit_b, product_effective_date, product_types, product_next_available_stock_date, product_isarchived,
-        supplier, project, alias } = req.body;
+    // retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
+    // destructure all relevant attributes in new Product object
+    const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+        supplier, alias, product_isarchived, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+        product_price_unit_b, product_effective_date, projects} = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Product = await productModel.create({ product_sku, product_name, product_number_a, product_unit_a, product_price_unit_a, 
-            product_number_b, product_unit_b, product_price_unit_b, product_effective_date, product_types, product_next_available_stock_date,
-             product_isarchived, supplier, project, alias })
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        res.status(200).json(Product)
+
+        const Product = await productModel.create({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+            supplier, alias, product_isarchived });
+
+        // Get product object id then insert Price Info into productPrice table
+        // Need to add verification when it exist product price
+        if (product_price_unit_a != null){
+
+            const product_id = Product._id;
+            const ProductPrice = await productPriceModel.create({ product_id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+                product_price_unit_b, product_effective_date, projects });
+
+            res.status(200).json({ Product, ProductPrice });
+        }else{
+            //invoke 'res' object method: status() and json(), pass relevant data to them
+            res.status(200).json(Product);
+        }
     }
     catch (error) {
         //if Company creation has error, pass error object and 400 page details
         //invoke 'res' object method: status() and json(), pass relevant data to them
         //! DESIGN 400 PAGE
-        res.status(400).json({error: error.message})
+        res.status(400).json({error: error.message});
     }
 }
 
@@ -110,6 +129,11 @@ const deleteSingleProduct = async (req,res) => {
     //create a new model called Product, await for database operation, which is find Company document and delete using id (as param)
     const Product = await productModel.findByIdAndDelete({_id: id})
 
+
+    // At the same time need to delete related product Prices
+    const ProductPrices =await productPriceModel.deleteMany({ product_id: id });
+
+
     //check if there's 'null' or 'undefined' in 'Product'.
     if (!Product) {
         //if Product doesn't exist, return error 400 page details
@@ -119,7 +143,7 @@ const deleteSingleProduct = async (req,res) => {
     }
     else {
         //if Product does exists, pass relevant data to 'res' object method
-        res.status(200).json(Product)
+        res.status(200).json({Product, ProductPrices})
     }
 }
 
