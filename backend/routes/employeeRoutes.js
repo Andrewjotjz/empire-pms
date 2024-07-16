@@ -24,7 +24,7 @@ router.post('/create', requireAuth, createNewEmployee)
 router.put('/:id', requireAuth, updateSingleEmployee)
 
 //PUT - update a single employee's password
-router.put('/:id/change-password', changeEmployeePassword);
+router.put('/:id/change-password', requireAuth, changeEmployeePassword);
 
 //DELETE - delete a single employee
 router.delete('/:id', requireAuth, deleteSingleEmployee)

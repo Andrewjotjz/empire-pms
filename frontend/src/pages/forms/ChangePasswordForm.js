@@ -21,15 +21,22 @@ const ChangePasswordForm = () => {
 
     // Component functions and variables
     const handleBackClick = (employee_id) => navigate(`/EmpirePMS/employee/${employee_id}`);
-    
-    const checkPassword = () => setIsPasswordValid(confirmPassword === newPassword);
+        
+    const checkPassword = () => {
+        if (newPassword !== confirmPassword){
+            setIsPasswordValid(false);
+            return false;
+        }
+        setIsPasswordValid(true)
+        return true;
+    }
     
     const handleSubmit = (event) => {
         event.preventDefault();
         if (checkPassword()) {
             changePassword(newPassword);
         }
-    };   
+    };    
     
     //Display DOM
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
