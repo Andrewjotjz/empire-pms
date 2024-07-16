@@ -76,18 +76,18 @@ employeeSchema.pre('save', async function(next) {
     next();
   });
   
-  // static method to login user
-  employeeSchema.statics.login = async function(email, password) {
-    const Employee = await this.findOne({ employee_email: email });
-    if (Employee) {
-      const auth = await bcrypt.compare(password, Employee.employee_password);
-      if (auth) {
-        return Employee;
-      }
-      throw Error('incorrect password');
+// static method to login user
+employeeSchema.statics.login = async function(email, password) {
+const Employee = await this.findOne({ employee_email: email });
+if (Employee) {
+    const auth = await bcrypt.compare(password, Employee.employee_password);
+    if (auth) {
+    return Employee;
     }
-    throw Error('incorrect email');
-  };
+    throw Error('incorrect password');
+}
+throw Error('incorrect email');
+};
 
 //export the model
 const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

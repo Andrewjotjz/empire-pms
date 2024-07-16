@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import Dropdown from "react-bootstrap/Dropdown"
 
 const EmployeeDetails = () => {
     //Component state declaration
@@ -19,10 +20,12 @@ const EmployeeDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const handleEditClick = () => {
-        navigate(`/EmpirePMS/employee/${id}/edit`, { state: id })
-    }
+    const handleEditClick = () => navigate(`/EmpirePMS/employee/${id}/edit`, { state: id });
 
+    const handleChangePassword = () => navigate(`/EmpirePMS/employee/${id}/change-password`, { state: id });
+
+    const handleResetPassword = () => navigate(`/EmpirePMS/employee/${id}`);
+    
     //Render component
     useEffect(() => {
         const fetchEmployee = async () => {
@@ -68,11 +71,15 @@ const EmployeeDetails = () => {
                 <div className="d-flex justify-content-between mb-3">
                     <Link to="/EmpirePMS/employee" className="btn btn-secondary">Back</Link>
                     <button className="btn btn-primary" onClick={handleEditClick}>Edit Account</button>
-                    <select className="form-select w-auto">
-                        <option>ACTIONS</option>
-                        <option>Email Password Reset</option>
-                        <option>Change Password</option>
-                    </select>
+                    <Dropdown>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            ACTIONS
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item onClick={handleResetPassword}>Reset Password</Dropdown.Item>
+                            <Dropdown.Item onClick={handleChangePassword}>Change Password</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </div>
                 <div className="d-flex mb-3">
                     <button className="btn btn-outline-dark">Details</button>

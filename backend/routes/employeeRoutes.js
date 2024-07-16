@@ -1,6 +1,6 @@
 //import modules
 const express = require('express');
-const { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, deleteSingleEmployee, loginEmployee, logoutEmployee } = require('../controllers/employeeController')
+const { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee } = require('../controllers/employeeController')
 //import function from middlewares folder
 const { requireAuth } = require('../middlewares/authMiddleware');
 
@@ -22,6 +22,9 @@ router.post('/create', requireAuth, createNewEmployee)
 
 //PUT - update a single employee
 router.put('/:id', requireAuth, updateSingleEmployee)
+
+//PUT - update a single employee's password
+router.put('/:id/change-password', changeEmployeePassword);
 
 //DELETE - delete a single employee
 router.delete('/:id', requireAuth, deleteSingleEmployee)

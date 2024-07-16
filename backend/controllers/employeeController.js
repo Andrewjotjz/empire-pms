@@ -3,6 +3,7 @@ const employeeModel = require('../models/EmployeeModel');
 const mongoose = require('mongoose');
 //import jwt module
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 //Handle employee login/signup errors
 const handleErrors = (err) => {
@@ -76,7 +77,6 @@ const getAllEmployees = async (req, res) => {
     //create a new model called Employees, await, and assign it with all employee documents in the employee collection, sort created date in descending order
     const Employees = await employeeModel.find({}).sort({createdAt: -1})
     //invoke 'res' object method: status() and json(), pass relevant data to them
-    console.log(Employees)
     res.status(200).json(Employees);
 }
 
@@ -161,6 +161,41 @@ const updateSingleEmployee = async (req,res) => {
     }
 }
 
+// Controller function - PUT to change employee password
+const changeEmployeePassword = async (req, res) => {
+    // Retrieve incoming request id and new password
+    const { id } = req.params;
+    const { employee_password } = req.body;
+
+    // Check if the ID object exists in MongoDB database
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ msg: "Invalid employee ID." });
+    }
+
+    try {
+        // Hash the new password
+        const salt = await bcrypt.genSalt();
+        const hashedPassword = await bcrypt.hash(employee_password, salt);
+
+        // Update the employee's password in the database
+        const employee = await employeeModel.findByIdAndUpdate(
+            { _id: id },
+            { employee_password: hashedPassword },
+            { new: true, runValidators: true }
+        );
+
+        // Check if the employee exists
+        if (!employee) {
+            return res.status(404).json({ msg: "Employee not found." });
+        }
+
+        // Return success response
+        res.status(200).json({ msg: "Password updated successfully." });
+    } catch (error) {
+        // Handle errors
+        res.status(500).json({ error: error.message });
+    }
+};
 
 //Controller function - DELETE to delete a single employee
 const deleteSingleEmployee = async (req,res) => {
@@ -204,4 +239,4 @@ const logoutEmployee = (req,res) => {
 
 
 //export controller module
-module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, deleteSingleEmployee, loginEmployee, logoutEmployee };
+module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee };

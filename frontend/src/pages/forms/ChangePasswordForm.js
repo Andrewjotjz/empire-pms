@@ -1,9 +1,8 @@
 // Import modules
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { setEmployeeDetails } from '../../redux/employeeSlice';
-import { useUpdateEmployee } from '../../hooks/useUpdateEmployee'; 
+import { useSelector } from 'react-redux';
+import { useChangePassword } from '../../hooks/useChangePassword'; 
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 
@@ -15,32 +14,23 @@ const ChangePasswordForm = () => {
 
     // Component state declaration
     const employeeState = useSelector((state) => state.employeeReducer.employeeState);
-    const dispatch = useDispatch();
-    const { update, isLoadingState, errorState } = useUpdateEmployee();
+    const { changePassword, isLoadingState, errorState } = useChangePassword();
+    const [ newPassword, setNewPassword ] = useState('');
     const [ confirmPassword, setConfirmPassword ] = useState('');
-    const [ isPasswordValid, setIsPasswordValid ] = useState('true')
+    const [ isPasswordValid, setIsPasswordValid ] = useState(true);
 
     // Component functions and variables
     const handleBackClick = (employee_id) => navigate(`/EmpirePMS/employee/${employee_id}`);
     
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        dispatch(setEmployeeDetails({
-            ...employeeState,
-            [name]: value,
-        }));
-    };
-
-    const checkPassword = () => {
-        if (confirmPassword !== employeeState.employee_password) {
-            setIsPasswordValid(false)
-        }
-    }
+    const checkPassword = () => setIsPasswordValid(confirmPassword === newPassword);
+    
     const handleSubmit = (event) => {
         event.preventDefault();
-        update(employeeState);
-    };
-
+        if (checkPassword()) {
+            changePassword(newPassword);
+        }
+    };   
+    
     //Display DOM
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
@@ -67,19 +57,23 @@ const ChangePasswordForm = () => {
                                 <label className="form-label">Email:</label>
                                 <p className="form-label">{employeeState.employee_email}</p>
                             </div>
+                        <div/>
+                        <div className="row">
                             <div className="col-md-6 mb-3">
                                 <label className="form-label">New Password:</label>
                                 <input 
                                     className="form-control" 
                                     name="employee_password" 
-                                    value={employeeState.employee_password} 
-                                    onChange={handleInputChange} 
+                                    value={newPassword} 
+                                    onChange={(e) => {setNewPassword(e.target.value)}} 
                                     placeholder='password'
                                     required
                                     onInvalid={(e) => e.target.setCustomValidity('Enter password')}
                                     onInput={(e) => e.target.setCustomValidity('')}
                                 />
                             </div>
+                        </div>
+                        <div className="row">
                             <div className="col-md-6 mb-3">
                                 <label className="form-label">Confirm Password:</label>
                                 <input 
@@ -89,14 +83,15 @@ const ChangePasswordForm = () => {
                                     onChange={(e) => {setConfirmPassword(e.target.value)}} 
                                     placeholder='password'
                                     required
-                                    onInvalid={(e) => e.target.setCustomValidity('Please re-enter your new passowrd')}
+                                    onInvalid={(e) => e.target.setCustomValidity('Please re-enter your new password')}
                                     onInput={(e) => e.target.setCustomValidity('')}
                                 />
                             </div>
-                            { }
+                        </div>
+                            { !isPasswordValid && 
                             <div className="col-md-6 mb-3">
-                                <p className="form-label">Password does not match. Please re-enter your password.</p>
-                            </div>
+                                <p className="form-label text-danger">Password does not match. Please re-enter your password.</p>
+                            </div> }
                             <div className="d-flex justify-content-between mb-3">
                                 <button className="btn btn-primary" type="submit">SUBMIT</button>
                             </div>

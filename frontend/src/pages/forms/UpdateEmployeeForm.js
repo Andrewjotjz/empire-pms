@@ -18,7 +18,9 @@ const UpdateEmployeeForm = () => {
     const { update, isLoadingState, errorState } = useUpdateEmployee();
 
     // Component functions and variables
-    const handleBackClick = (employee_id) => navigate(`/EmpirePMS/employee/${employee_id}`);
+    const handleChangePasswordClick = () => navigate(`/EmpirePMS/employee/${retrieved_id}/change-password`, {state: retrieved_id});
+
+    const handleBackClick = () => navigate(`/EmpirePMS/employee/${retrieved_id}`);
     
     const handleInputChange = (event) => {
         const { name, value } = event.target;
@@ -52,8 +54,8 @@ const UpdateEmployeeForm = () => {
                     </div>
                     <form className="card-body" onSubmit={handleSubmit}>
                         <div className="d-flex justify-content-between mb-3">
-                            <button type="button" onClick={() => handleBackClick(retrieved_id)} className="btn btn-secondary">BACK</button>
-                            <button type="button" className="btn btn-primary">CHANGE PASSWORD</button>
+                            <button type="button" onClick={handleBackClick} className="btn btn-secondary">BACK</button>
+                            <button type="button" className="btn btn-primary" onClick={handleChangePasswordClick}>CHANGE PASSWORD</button>
                         </div>
                         <div className="d-flex mb-3">
                             <button type="button" className="btn btn-outline-dark">Account</button>
