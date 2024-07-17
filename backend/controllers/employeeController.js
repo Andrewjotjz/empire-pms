@@ -1,9 +1,31 @@
 //import modules
-const employeeModel = require('../models/EmployeeModel');
+const employeeModel = require('../models/employeeModel');
 const mongoose = require('mongoose');
-//import jwt module
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto')
+
+// send email function
+const sendEmail = (email, subject, message) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'joojoe15@gmail.com',
+            pass: "dhce cqxb cpfj dhhx"
+        }
+    });
+
+    const mailOptions = {
+        from: 'joojoe15@gmail.com',
+        to: email,
+        subject: subject,
+        text: message
+    };
+
+    return transporter.sendMail(mailOptions);
+};
+
 
 //Handle employee login/signup errors
 const handleErrors = (err) => {
@@ -114,12 +136,12 @@ const createNewEmployee = async (req, res) => {
     //retrieve incoming request (along with new Employee object) by using 'req' object property 'body', which stores new employee object.
     //destructure all relevant attributes in new Employee object
     const { employee_email, employee_first_name, employee_last_name, employee_external_id, employee_business_phone, employee_mobile_phone,
-        employee_password, employee_password_token, employee_roles, employee_isarchived, companies, projects, payments } = req.body;
+        employee_password, employee_roles, employee_isarchived, companies, projects, payments, employee_password_token, employee_reset_token_expires } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
         const Employee = await employeeModel.create({ employee_email, employee_first_name, employee_last_name, employee_external_id, employee_business_phone, employee_mobile_phone,
-            employee_password, employee_password_token, employee_roles, employee_isarchived, companies, projects, payments })
+            employee_password, employee_password_token, employee_roles, employee_isarchived, companies, projects, payments, employee_password_token, employee_reset_token_expires })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Employee)
     }
@@ -173,26 +195,17 @@ const changeEmployeePassword = async (req, res) => {
     }
 
     try {
-        // Hash the new password
-        const salt = await bcrypt.genSalt();
-        const hashedPassword = await bcrypt.hash(employee_password, salt);
+        const employee = await employeeModel.findById(id);
 
-        // Update the employee's password in the database
-        const employee = await employeeModel.findByIdAndUpdate(
-            { _id: id },
-            { employee_password: hashedPassword },
-            { new: true, runValidators: true }
-        );
-
-        // Check if the employee exists
         if (!employee) {
             return res.status(404).json({ msg: "Employee not found." });
         }
 
-        // Return success response
+        employee.employee_password = employee_password; // Set the new password directly
+        await employee.save(); // This will trigger the pre-save middleware
+
         res.status(200).json({ msg: "Password updated successfully." });
     } catch (error) {
-        // Handle errors
         res.status(500).json({ error: error.message });
     }
 };
@@ -226,6 +239,77 @@ const deleteSingleEmployee = async (req,res) => {
 }
 
 
+// POST send password reset email
+const sendPasswordResetEmail = async (req, res) => {
+    console.log("#1 check: Start sendPasswordResetEmail");
+    const { id } = req.params;
+
+    try {
+        const employee = await employeeModel.findById(id);
+        console.log("#2 check: Employee found", employee);
+
+        if (!employee) {
+            console.log("#3 check: Employee not found");
+            return res.status(404).json({ error: 'Employee not found' });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        console.log("#4 check: Reset token generated", resetToken);
+
+        employee.employee_password_token = resetToken;
+        console.log("#5 check: Reset token assigned to employee");
+
+        employee.employee_reset_token_expires = Date.now() + 3600000; // 1 hour
+        console.log("#6 check: Token expiry set");
+
+        await employee.save();
+        console.log("#7 check: Employee saved");
+
+        const resetUrl = `http://localhost:3001/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
+        console.log("#8 check: Reset URL created", resetUrl);
+
+        const message = `You are receiving this because you (or someone else) have requested the reset of a password for your account. Please click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
+        console.log("#9 check: Message created");
+
+        await sendEmail(employee.employee_email, 'Password Reset Request', message);
+        console.log("#10 check: Email sent");
+
+        res.status(200).json({ msg: 'Password reset email sent' });
+        console.log("#11 check: Response sent");
+    } catch (err) {
+        console.error("#12 check: Error caught", err);
+        res.status(400).json({ error: err.message });
+    }
+};
+
+// POST reset employee's password
+const resetEmployeePassword = async (req, res) => {
+    const { token, id, newPassword } = req.body;
+
+    try {
+        const employee = await employeeModel.findOne({
+            _id: id,
+            employee_password_token: token,
+            employee_reset_token_expires: { $gt: Date.now() }
+        });
+
+        if (!employee) {
+            return res.status(400).json({ error: 'Password reset token is invalid or has expired' });
+        }
+
+        employee.employee_password = newPassword; // Set the new password directly
+        employee.employee_password_token = undefined;
+        employee.employee_reset_token_expires = undefined;
+
+        await employee.save(); // This will trigger the pre-save middleware
+
+        res.status(200).json({ message: 'Password has been reset' });
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+};
+
+
 //Controller function - GET to logout employee
 const logoutEmployee = (req,res) => {
     //replace json web token (1st param), with another empty cookie (2nd param), and set the maxAge to 1 millisecond.
@@ -239,4 +323,4 @@ const logoutEmployee = (req,res) => {
 
 
 //export controller module
-module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee };
+module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee, sendPasswordResetEmail, resetEmployeePassword };

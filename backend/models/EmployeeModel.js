@@ -1,14 +1,14 @@
-//import modules
+// Import modules
 const mongoose = require('mongoose');
-//import email validator module
+// Import email validator module
 const { isEmail } = require('validator');
-//import bcrypt (password hash) module
+// Import bcrypt (password hash) module
 const bcrypt = require('bcrypt');
 
-//create mongoose's schema
+// Create mongoose's schema
 const Schema = mongoose.Schema;
 
-//create a new Schema object, and define Employee's schema/properties in its parameter.
+// Create a new Schema object and define Employee's schema/properties in its parameter.
 const employeeSchema = new Schema({
     employee_email: {
         type: String,
@@ -45,9 +45,9 @@ const employeeSchema = new Schema({
         type: String,
         required: true,
         enum: ['Admin', 'Foreman', 'Manager', 'Purchaser', 'Employee'],
-        default: ['Employee']
+        default: 'Employee'
     },
-    //not mandatory but default is 'false'
+    // Not mandatory but default is 'false'
     employee_isarchived: {
         type: Boolean,
         default: false
@@ -56,7 +56,7 @@ const employeeSchema = new Schema({
         required: true,
         type: Schema.Types.ObjectId,
         ref: 'Company',
-        default: '6682523ac777f1c67a29f5ae' //'_id' for Empire CBS 
+        default: '6682523ac777f1c67a29f5ae' // '_id' for Empire CBS 
     },
     projects: [{
         type: Schema.Types.ObjectId,
@@ -65,30 +65,39 @@ const employeeSchema = new Schema({
     payments: [{
         type: Schema.Types.ObjectId,
         ref: 'Payment'
-    }]
+    }],
+    employee_password_token: {
+        type: String,
+        required: false
+    },
+    employee_reset_token_expires: {
+        type: Date,
+        required: false
+    }
 }, { timestamps: true });
 
-
-// fire a function before doc saved to db
+// Fire a function before doc saved to db
 employeeSchema.pre('save', async function(next) {
-    const salt = await bcrypt.genSalt();
-    this.employee_password = await bcrypt.hash(this.employee_password, salt);
-    next();
-  });
-  
-// static method to login user
-employeeSchema.statics.login = async function(email, password) {
-const Employee = await this.findOne({ employee_email: email });
-if (Employee) {
-    const auth = await bcrypt.compare(password, Employee.employee_password);
-    if (auth) {
-    return Employee;
+    if (this.isModified('employee_password')) {
+        const salt = await bcrypt.genSalt();
+        this.employee_password = await bcrypt.hash(this.employee_password, salt);
     }
-    throw Error('incorrect password');
-}
-throw Error('incorrect email');
+    next();
+});
+
+// Static method to login user
+employeeSchema.statics.login = async function(email, password) {
+    const Employee = await this.findOne({ employee_email: email });
+    if (Employee) {
+        const auth = await bcrypt.compare(password, Employee.employee_password);
+        if (auth) {
+            return Employee;
+        }
+        throw Error('incorrect password');
+    }
+    throw Error('incorrect email');
 };
 
-//export the model
+// Export the model
 const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
 module.exports = Employee;
