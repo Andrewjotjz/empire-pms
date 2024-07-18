@@ -38,10 +38,6 @@ const EmployeeDetails = () => {
     
             const data = await response.json();
     
-            if (data.tokenError) {
-                throw new Error(data.tokenError);
-            }
-    
             // Navigate only if successful
             navigate(`/EmpirePMS/employee/${id}`);
     

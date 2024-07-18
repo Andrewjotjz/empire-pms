@@ -1,8 +1,7 @@
 //import modules
-const employeeModel = require('../models/employeeModel');
+const employeeModel = require('../models/EmployeeModel');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto')
 
