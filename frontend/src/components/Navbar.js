@@ -25,12 +25,12 @@ const Navbar = () => {
 
   //Display DOM
   //Check if the current path is "/EmpirePMS/login"
-  if (location.pathname === "/EmpirePMS/login") {
+  if (location.pathname === "/EmpirePMS/login" || location.pathname === "/EmpirePMS/employee/reset-password" ) {
     return (
     <header>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container-fluid">
-          <Link className="navbar-brand" to="/EmpirePMS/dashboard">EmpirePMS</Link>
+          <Link className="navbar-brand" to="/EmpirePMS/login">EmpirePMS</Link>
         </div>
       </nav>
     </header>)

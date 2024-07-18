@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAddEmployee } from '../../hooks/useAddEmployee'; 
+import { toast } from 'react-toastify';
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 
@@ -23,6 +24,11 @@ const NewEmployeeForm = () => {
     });
 
     // Component functions and variables
+    const isValidEmail = (email) => {
+        const pattern = /[a-zA-Z0-9._%+-]+@empirecbs\.com/;
+        return pattern.test(email);
+    };
+
     const handleBackClick = () => navigate(`/EmpirePMS/employee/`);
 
     const handleInputChange = (event) => {
@@ -35,6 +41,15 @@ const NewEmployeeForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        
+        if (!isValidEmail(employeeState.employee_email)) {
+            // push toast to notify successful login
+            toast.error(`Email must be in this format xxxx.xxxx@empirecbs.com!`, {
+                position: "bottom-right"
+            });
+            return;
+        }
+
         addEmployee(employeeState);
     };
 
@@ -122,9 +137,9 @@ const NewEmployeeForm = () => {
                                 name="employee_email" 
                                 value={employeeState.employee_email}
                                 onChange={handleInputChange}
-                                placeholder='john.doe@example.com'
+                                placeholder='yourname@empirecbs.com'
                                 required
-                                onInvalid={(e) => e.target.setCustomValidity('Enter email')}
+                                onInvalid={(e) => e.target.setCustomValidity('Enter email and must be in this format yourname@empirecbs.com')}
                                 onInput={(e) => e.target.setCustomValidity('')}
                             />
                         </div>

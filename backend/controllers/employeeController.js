@@ -2,29 +2,8 @@
 const employeeModel = require('../models/EmployeeModel');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const crypto = require('crypto')
-
-// send email function
-const sendEmail = (email, subject, message) => {
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'joojoe15@gmail.com',
-            pass: "dhce cqxb cpfj dhhx"
-        }
-    });
-
-    const mailOptions = {
-        from: 'joojoe15@gmail.com',
-        to: email,
-        subject: subject,
-        text: message
-    };
-
-    return transporter.sendMail(mailOptions);
-};
-
+const sendEmail = require('../utils/sendEmailServices')
 
 //Handle employee login/signup errors
 const handleErrors = (err) => {
@@ -240,43 +219,110 @@ const deleteSingleEmployee = async (req,res) => {
 
 // POST send password reset email
 const sendPasswordResetEmail = async (req, res) => {
-    console.log("#1 check: Start sendPasswordResetEmail");
     const { id } = req.params;
 
     try {
         const employee = await employeeModel.findById(id);
-        console.log("#2 check: Employee found", employee);
 
-        if (!employee) {
-            console.log("#3 check: Employee not found");
-            return res.status(404).json({ error: 'Employee not found' });
+        if (!employee) { return res.status(404).json({ error: 'Employee not found' }); }
+
+        if (employee.employee_email === "andrewjot1998@gmail.com" || employee.employee_email === "shannon.c@empirecbs.com" ) {
+            const resetToken = crypto.randomBytes(32).toString('hex');
+
+            employee.employee_password_token = resetToken;
+
+            employee.employee_reset_token_expires = Date.now() + 3600000; // 1 hour
+
+            await employee.save();
+
+            const resetUrl = `http://localhost:3001/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
+
+            const message = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    .email-container {
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333;
+                        max-width: 600px;
+                        margin: 0 auto;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    }
+                    .email-header {
+                        background-color: #090a1f;
+                        padding: 20px;
+                        text-align: center;
+                        color: #f7f2f2;
+                    }
+                    .email-header img {
+                        max-width: 120px;
+                        margin-bottom: 20px;
+                    }
+                    .email-body {
+                        padding: 20px;
+                        background-color: #ffffff;
+                    }
+                    .email-body p {
+                        margin: 10px 0;
+                    }
+                    .email-footer {
+                        background-color: #f4f4f4;
+                        padding: 10px;
+                        text-align: center;
+                        font-size: 12px;
+                        color: #999;
+                    }
+                    .button {
+                        display: inline-block;
+                        padding: 10px 20px;
+                        margin: 20px 0;
+                        font-size: 16px;
+                        color: #ffffff;
+                        background-color: #090a1f;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        transition: background-color 0.3s ease;
+                    }
+                    .button:hover {
+                        background-color: #161c33;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="email-header">
+                        <img src="https://via.placeholder.com/120" alt="Company Logo">
+                        <h1>EmpirePMS</h1>
+                    </div>
+                    <div class="email-body">
+                        <p>Dear ${employee.employee_first_name} ${employee.employee_last_name},</p>
+                        <p>We have received a request to reset the password for your account associated with this email address. Please click the button below to reset your password:</p>
+                        <p style="text-align: center;"><a href="${resetUrl}" class="button">Reset Password</a></p>
+                        <p>This link will expire in one hour. If you did not request a password reset, please ignore this email or contact IT support immediately.</p>
+                        <p>Thank you,</p>
+                        <p>IT Administrator<br>EMPIRE COMMERCIAL BUILDINGS SOLUTIONS PTY LTD<br>20 Trade Place, Vermont 3133<br>P: 03 7043 3320</p>
+                    </div>
+                    <div class="email-footer">
+                        <p>&copy; ${new Date().getFullYear()} EmpirePMS. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            `;
+
+            await sendEmail(employee.employee_email, 'Password Reset Request', message);
+
+            res.status(200).json({ msg: 'Password reset email sent' });
         }
-
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        console.log("#4 check: Reset token generated", resetToken);
-
-        employee.employee_password_token = resetToken;
-        console.log("#5 check: Reset token assigned to employee");
-
-        employee.employee_reset_token_expires = Date.now() + 3600000; // 1 hour
-        console.log("#6 check: Token expiry set");
-
-        await employee.save();
-        console.log("#7 check: Employee saved");
-
-        const resetUrl = `http://localhost:3001/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
-        console.log("#8 check: Reset URL created", resetUrl);
-
-        const message = `You are receiving this because you (or someone else) have requested the reset of a password for your account. Please click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
-        console.log("#9 check: Message created");
-
-        await sendEmail(employee.employee_email, 'Password Reset Request', message);
-        console.log("#10 check: Email sent");
-
-        res.status(200).json({ msg: 'Password reset email sent' });
-        console.log("#11 check: Response sent");
+        else {
+            throw new Error('Target email address is not secured. Please contact Andrew Jot')
+        }
     } catch (err) {
-        console.error("#12 check: Error caught", err);
         res.status(400).json({ error: err.message });
     }
 };

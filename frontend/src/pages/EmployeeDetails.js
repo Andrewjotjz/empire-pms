@@ -26,6 +26,8 @@ const EmployeeDetails = () => {
     const handleChangePassword = () => navigate(`/EmpirePMS/employee/${id}/change-password`, { state: id });
 
     const handleSendResetPassword = async () => {
+        setIsLoadingState(true);
+        
         try {
             const response = await fetch(`/api/employee/${id}/send-reset-password-email`, {
                 method: 'POST',
@@ -35,8 +37,6 @@ const EmployeeDetails = () => {
             if (!response.ok) {
                 throw new Error('Failed to send password reset email');
             }
-    
-            const data = await response.json();
     
             // Navigate only if successful
             navigate(`/EmpirePMS/employee/${id}`);

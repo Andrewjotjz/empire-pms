@@ -32,7 +32,7 @@ router.delete('/:id', requireAuth, deleteSingleEmployee)
 router.post('/login', loginEmployee)
 
 //POST - send password reset email
-router.post('/:id/send-reset-password-email', sendPasswordResetEmail)
+router.post('/:id/send-reset-password-email', requireAuth, sendPasswordResetEmail)
 
 //POST - reset employee's password using token
 router.post('/reset-password', resetEmployeePassword)
