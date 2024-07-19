@@ -115,27 +115,27 @@ const EmployeeDetails = () => {
                 </div>
                 <div className="row">
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Name:</label>
+                        <label className="form-label fw-bold">Name:</label>
                         <p className="form-label">{employeeState.employee_first_name} {employeeState.employee_last_name}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Email:</label>
+                        <label className="form-label fw-bold">Email:</label>
                         <p className="form-label">{employeeState.employee_email}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Contact:</label>
+                        <label className="form-label fw-bold">Contact:</label>
                         <p className="form-label">{employeeState.employee_mobile_phone}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Role:</label>
+                        <label className="form-label fw-bold">Role:</label>
                         <p className="form-label">{employeeState.employee_roles}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Company:</label>
+                        <label className="form-label fw-bold">Company:</label>
                         <p className="form-label">{employeeState.companies}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Projects:</label>
+                        <label className="form-label fw-bold">Projects:</label>
                         <p className="form-label">Some project data...</p>
                     </div>
                 </div>

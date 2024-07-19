@@ -21,7 +21,9 @@ const Supplier = () => {
         dispatch(clearSupplierState());
         navigate('/EmpirePMS/supplier/create');
     }
+
     const handleTableClick = (id) => navigate(`/EmpirePMS/supplier/${id}`, { state: id });
+    
     const supplierTable = Array.isArray(supplierState) && supplierState.length > 0 ? (
         <div className="container">
             <table className="table table-bordered table-hover">

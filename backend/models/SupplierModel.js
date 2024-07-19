@@ -68,9 +68,6 @@ function arrayLimit(val) {
     return val.length <= 5;
 }
 
-//export the model
-//module.exports = mongoose.model('Supplier', supplierSchema);
-
 // Export the model
 const Supplier = mongoose.model('Supplier', supplierSchema);
 module.exports = Supplier;
