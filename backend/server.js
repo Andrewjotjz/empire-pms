@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const moment = require('moment-timezone');
+
 
 
 //import routers from routes folder
@@ -19,6 +21,9 @@ const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const productPriceRoutes = require('./routes/productPriceRoutes');
 
+
+//import from importJSONtoDB file
+const importJSONtoDB = require('./importJSONtoDB'); 
 
 
 //import function from middlewares folder

@@ -4,6 +4,11 @@ const mongoose = require('mongoose');
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
+// Transfer local date and time
+const moment = require('moment-timezone');
+const now_test = '2024-02-02T21:30:00.000+00:00'; 
+console.log('Local Time (Australia/Melbourne):', moment(now_test).format('YYYY-MM-DD HH:mm')); 
+
 //create a new Schema object and define Order's schema/properties in its parameter.
 const orderSchema = new Schema({
     supplier: {
@@ -21,10 +26,7 @@ const orderSchema = new Schema({
         default: Date.now,
         required: true
     },
-    order_est_date: {
-        type: Date
-    },
-    order_est_time: {
+    order_est_datetime: {
         type: Date
     },
     products: [{
@@ -33,30 +35,45 @@ const orderSchema = new Schema({
             ref: 'Product',
             required: true
         },
-        location: {     //these are not in PRODUCT model, but additional information relating to a particular product
+        order_product_location: {     //these are not in PRODUCT model, but additional information relating to a particular product
             type: String,
             required: true
         },
-        order_qty_a: {
+        order_product_qty_a: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        order_product_qty_b: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        order_product_price_unit_a: {
             type: Number,
             required: true,
             min: 0
         },
-        order_qty_b: {
+        order_product_gross_amount: {
             type: Number,
-            required: true,
-            min: 0
+            required: true        
+        }
+    }],
+    custom_products:[{
+        custom_product_name:{
+            type: String
+        }, 
+        custom_product_location: {
+            type: String
         },
-        order_gross_amount: {
-            type: Number,
-            required: true,
-            min: 0
+        custom_order_qty:{
+            type: Number
         }
     }],
     order_total_amount: {
         type: Number,
-        required: true,
-        min: 0
+        required: true, 
+        default: 0
     },
     order_internal_comments: {
         type: String
@@ -75,10 +92,6 @@ const orderSchema = new Schema({
             type: Schema.Types.ObjectId,
             ref: 'Delivery',
             required: true
-        },
-        delivery_status: {
-            type: String,
-            required: true
         }
     }],
     //One order can be created without invoice. But if there's invoice, there must be an invoice_ID and invoice_status
@@ -87,10 +100,6 @@ const orderSchema = new Schema({
         invoice_id: {
             type: Schema.Types.ObjectId,
             ref: 'Invoice',
-            required: true
-        },
-        invoice_status: {
-            type: String,
             required: true
         }
     }],
@@ -108,12 +117,13 @@ const orderSchema = new Schema({
 
 // Mongoose Pre-save hook to check if there's at least one product
 orderSchema.pre('save', function(next) {
-    if (this.products.length === 0) {
-        const err = new Error("An order must have at least one product. Please use SKU:'OTHER001' if required.");
+    if (this.products.length === 0 || this.custom_products.length ===0) {
+        const err = new Error("An order must have at least one product.");
         return next(err);
     }
     next();
 });
 
 //export the model
-module.exports = mongoose.model('Order', orderSchema);
+const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
+module.exports = Order;
