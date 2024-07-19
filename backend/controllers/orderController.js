@@ -1,5 +1,5 @@
 //import modules
-const orderModel = require('../models/orderModel');
+const orderModel = require('../models/OrderModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Orders
