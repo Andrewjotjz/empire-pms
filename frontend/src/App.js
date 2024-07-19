@@ -14,6 +14,7 @@ import EmployeeDetails from './pages/EmployeeDetails';
 import UpdateEmployeeForm from "./pages/forms/UpdateEmployeeForm";
 import NewEmployeeForm from "./pages/forms/NewEmployeeForm";
 import ChangePasswordForm from "./pages/forms/ChangePasswordForm";
+import PasswordReset from "./components/PasswordReset";
 
 function App() {
   //App state declaration
@@ -39,6 +40,7 @@ function App() {
             <Route path="/EmpirePMS/employee/:id/change-password" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ChangePasswordForm />} />
             <Route path="/EmpirePMS/employee/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateEmployeeForm />} />
             <Route path="/EmpirePMS/employee/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewEmployeeForm />} />
+            <Route path="/EmpirePMS/employee/reset-password" element={<PasswordReset />} />
           </Routes>
         </div>
       </BrowserRouter>

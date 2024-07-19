@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
+import { toast } from 'react-toastify';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import Dropdown from "react-bootstrap/Dropdown"
@@ -24,7 +25,34 @@ const EmployeeDetails = () => {
 
     const handleChangePassword = () => navigate(`/EmpirePMS/employee/${id}/change-password`, { state: id });
 
-    const handleResetPassword = () => navigate(`/EmpirePMS/employee/${id}`);
+    const handleSendResetPassword = async () => {
+        setIsLoadingState(true);
+        
+        try {
+            const response = await fetch(`/api/employee/${id}/send-reset-password-email`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json',},
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to send password reset email');
+            }
+    
+            // Navigate only if successful
+            navigate(`/EmpirePMS/employee/${id}`);
+    
+            // Display success message
+            toast.success(`Password reset email sent successfully!`, {
+                position: "bottom-right"
+            });
+    
+            // Update loading state
+            setIsLoadingState(false);
+        } catch (error) {
+            setErrorState(error.message);
+            setIsLoadingState(false);
+        }
+    };
     
     //Render component
     useEffect(() => {
@@ -76,7 +104,7 @@ const EmployeeDetails = () => {
                             ACTIONS
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={handleResetPassword}>Reset Password</Dropdown.Item>
+                            <Dropdown.Item onClick={handleSendResetPassword}>Email Password Reset</Dropdown.Item>
                             <Dropdown.Item onClick={handleChangePassword}>Change Password</Dropdown.Item>
                         </Dropdown.Menu>
                     </Dropdown>
