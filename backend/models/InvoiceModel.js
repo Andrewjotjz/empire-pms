@@ -40,51 +40,61 @@ const invoiceSchema = new Schema({
             ref: 'Product',
             required: true
         },
-        location: {     //these are not in PRODUCT model, but additional information relating to a particular product
+        invoice_product_location: {     //these are not in PRODUCT model, but additional information relating to a particular product
             type: String,
             required: true
         },
-        order_qty_a: {
+        // ** change name to invoice_qty 
+        invoice_product_qty_a: {
             type: Number,
             required: true,
             min: 0
         },
-        order_qty_b: {
+        // ** add on product price, for easily display infor, no need to search in the productprice table
+        invoice_product_price_unit: {
             type: Number,
             required: true,
             min: 0
         },
-        order_gross_amount_a: {
-            type: Number,
-            required: true,
-            min: 0
-        },
-        order_gross_amount_b: {
+        // ** only need to store the invoiced_gross_amont 
+        invoice_product_gross_amount_a: {
             type: Number,
             required: true,
             min: 0
         }
     }],
+    custom_products:[{
+        custom_product_name:{
+            type: String
+        }, 
+        custom_product_location: {
+            type: String
+        },
+        custom_order_qty:{
+            type: Number
+        }, 
+        custom_order_price:{
+            type: Number
+        }, 
+        custom_order_gross_amount:{
+            type: Number
+        }
+    }],
     invoiced_delivery_fee: {
-        type: Number,
-        min: 0
+        type: Number
     },
     invoiced_other_fee: {
-        type: Number,
-        min: 0
+        type: Number
     },
     invoiced_credit: {
-        type: Number,
-        min: 0
+        type: Number
     },
     invoiced_raw_total_amount_incl_gst: {
         type: Number,
-        min: 0,
         required: true
     },
     invoiced_calculated_total_amount_incl_gst: {
         type: Number,
-        min: 0,
         required: true
     },
     invoice_is_stand_alone: {
@@ -103,15 +113,12 @@ const invoiceSchema = new Schema({
         payment_id: {
             type: Schema.Types.ObjectId,
             ref: 'Payment'
-        },
-        payment_status: {
-            type: String
         }
     },
     invoice_status: {
         type: String,
-        enum: ["Invoice received - To review", "Invoice received - To reconcile", "Invoice received - Reviewed", "Invoice received - Cancelled", "Settled"],
-        default: "Invoice received - To review"
+        enum: ["To review", "To reconcile", "Reviewed", "Cancelled", "Settled"],
+        default: "To review"
     }
 }, { timestamps: true });
 

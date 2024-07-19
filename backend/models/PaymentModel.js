@@ -54,6 +54,7 @@ const paymentSchema = new Schema({
         ref: 'Invoice',
         required: true
         },
+        // ** Not necessary, already exist in the invoice db
         gross_total_amount: {
             type: Number,
             required: true,

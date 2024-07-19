@@ -1,5 +1,7 @@
 //import modules
 const productPriceModel = require('../models/ProductPriceModel');
+const productModel = require('../models/ProductModel');
+
 const mongoose = require('mongoose');
 
 
