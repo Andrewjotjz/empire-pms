@@ -53,17 +53,12 @@ const UpdateEmployeeForm = () => {
                         <h1>EDIT ACCOUNT DETAILS</h1>
                     </div>
                     <form className="card-body" onSubmit={handleSubmit}>
-                        <div className="d-flex justify-content-between mb-3">
-                            <button type="button" onClick={handleBackClick} className="btn btn-secondary">BACK</button>
-                            <button type="button" className="btn btn-primary" onClick={handleChangePasswordClick}>CHANGE PASSWORD</button>
-                        </div>
-                        <div className="d-flex mb-3">
-                            <button type="button" className="btn btn-outline-dark">Account</button>
-                            <button type="button" className="btn btn-outline-dark">Projects</button>
+                        <div className="d-flex justify-content-end mb-3">
+                            <button type="button" className="btn btn-secondary bg" onClick={handleChangePasswordClick}>CHANGE PASSWORD</button>
                         </div>
                         <div className="row">
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">First name:</label>
+                                <label className="form-label fw-bold">First name:</label>
                                 <input 
                                     className="form-control" 
                                     name="employee_first_name" 
@@ -76,7 +71,7 @@ const UpdateEmployeeForm = () => {
                                 />
                             </div>
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Last name:</label>
+                                <label className="form-label fw-bold">Last name:</label>
                                 <input 
                                     className="form-control" 
                                     name="employee_last_name" 
@@ -89,7 +84,7 @@ const UpdateEmployeeForm = () => {
                                 />
                             </div>
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Role:</label>
+                                <label className="form-label fw-bold">Role:</label>
                                 <select 
                                     className="form-control"
                                     name="employee_roles" 
@@ -103,7 +98,7 @@ const UpdateEmployeeForm = () => {
                                 </select>
                             </div>
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Contact:</label>
+                                <label className="form-label fw-bold">Contact:</label>
                                 <input 
                                     className="form-control" 
                                     name="employee_mobile_phone" 
@@ -113,7 +108,7 @@ const UpdateEmployeeForm = () => {
                                 />
                             </div>
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Email:</label>
+                                <label className="form-label fw-bold">Email:</label>
                                 <input 
                                     className="form-control" 
                                     name="employee_email" 
@@ -122,12 +117,22 @@ const UpdateEmployeeForm = () => {
                                 />
                             </div>
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Company:</label>
+                                <label className="form-label fw-bold">Company:</label>
                                 <input 
                                     className="form-control" 
                                     name="companies" 
                                     value={employeeState.companies} 
                                     disabled
+                                />
+                            </div>
+                            <div className="col-md-6 mb-3">
+                                <label className="form-label fw-bold">Archived:</label>
+                                <input 
+                                    type="checkbox"
+                                    className="form-check-input m-1" 
+                                    name="employee_isarchived" 
+                                    checked={employeeState.employee_isarchived} 
+                                    onChange={(e) => handleInputChange({ target: { name: 'employee_isarchived', value: e.target.checked }})}
                                 />
                             </div>
                             <div className="d-flex justify-content-between mb-3">

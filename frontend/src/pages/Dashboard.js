@@ -5,7 +5,7 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 const Dashboard = () => {
     return (
         <Container className="dashboard">
-            <h1>Dashboard</h1>
+            <h1 className='mb-3 text-3xl font-bold'>Dashboard</h1>
             <Row>
                 <Col md={6}>
                     <Card className="mb-4">

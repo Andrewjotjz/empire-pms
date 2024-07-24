@@ -18,6 +18,7 @@ import PasswordReset from "./components/PasswordReset";
 import SupplierDetails from "./pages/SupplierDetails";
 import UpdateSupplierForm from "./pages/forms/UpdateSupplierForm";
 import NewSupplierForm from "./pages/forms/NewSupplierForm";
+import ProductDetails from "./pages/ProductDetails";
 
 function App() {
   //App state declaration
@@ -42,6 +43,9 @@ function App() {
             <Route path="/EmpirePMS/supplier/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierDetails />} />
             <Route path="/EmpirePMS/supplier/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateSupplierForm />} />
             <Route path="/EmpirePMS/supplier/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewSupplierForm />} />
+
+            <Route path="/EmpirePMS/supplier/:id/products/:productId" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProductDetails />} />
+            
             <Route path="/EmpirePMS/employee/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <EmployeeDetails />} />
             <Route path="/EmpirePMS/employee/:id/change-password" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ChangePasswordForm />} />
             <Route path="/EmpirePMS/employee/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateEmployeeForm />} />

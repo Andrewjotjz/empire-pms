@@ -56,9 +56,6 @@ const ChangePasswordForm = () => {
                         <h1>CHANGE PASSWORD</h1>
                     </div>
                     <form className="card-body" onSubmit={handleSubmit}>
-                        <div className="d-flex justify-content-between mb-3">
-                            <button type="button" onClick={() => handleBackClick(retrieved_id)} className="btn btn-secondary">BACK</button>
-                        </div>
                         <div className="row">
                             <div className="col-md-6 mb-3">
                                 <label className="form-label">Email:</label>
@@ -100,6 +97,7 @@ const ChangePasswordForm = () => {
                                 <p className="form-label text-danger">Password does not match. Please re-enter your password.</p>
                             </div> }
                             <div className="d-flex justify-content-between mb-3">
+                                <button type="button" onClick={() => handleBackClick(retrieved_id)} className="btn btn-secondary">BACK</button>
                                 <button className="btn btn-primary" type="submit">SUBMIT</button>
                             </div>
                         </div>

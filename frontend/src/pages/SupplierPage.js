@@ -12,6 +12,7 @@ const Supplier = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [isArchive, setIsArchive] = useState(false);
 
     //Component router
     const navigate = useNavigate();
@@ -41,8 +42,8 @@ const Supplier = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {supplierState.map((supplier, index) => (
-                        <tr key={supplier._id} onClick={() => handleTableClick(supplier._id)}>
+                    {supplierState.filter(supplier => supplier.supplier_isarchived === isArchive).map((supplier, index) => (
+                        <tr key={supplier._id} onClick={() => handleTableClick(supplier._id)} className="cursor-pointer">
                             <th scope="row">{index + 1}</th>
                             <td>{supplier.supplier_name}</td>
                             <td>
@@ -133,7 +134,7 @@ const Supplier = () => {
                     <h1>SUPPLIERS</h1>
                 </div>
                 <div className="card-body">
-                    <div className="row mb-3">
+                    <div className="row mb-1">
                         <div className="col-md-6">
                             <input
                                 type="text"
@@ -143,15 +144,25 @@ const Supplier = () => {
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">
                             <button className="btn btn-primary" onClick={handleAddClick}>
-                                ADD SUPPLIER
+                                + ADD SUPPLIER
                             </button>
                         </div>
                     </div>
                     <div className="row mb-3">
-                        <div className="col-md-6">
-                            <button className="btn btn-outline-dark me-2">Current</button>
-                            <button className="btn btn-outline-dark">Archived</button>
-                        </div>
+                    <div className="col-md-6">
+                        <button 
+                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} 
+                            onClick={() => setIsArchive(false)}
+                        >
+                            Current
+                        </button>
+                        <button 
+                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50'}`} 
+                            onClick={() => setIsArchive(true)}
+                        >
+                            Archived
+                        </button>
+                    </div>
                         {supplierTable}
                     </div>
                 </div>

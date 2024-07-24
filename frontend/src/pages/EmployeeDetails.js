@@ -1,5 +1,5 @@
 //import modules
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
@@ -15,6 +15,7 @@ const EmployeeDetails = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [currentTab, setCurrentTab] = useState('employeeDetails');
 
     //Component router
     const { id } = useParams();
@@ -80,6 +81,56 @@ const EmployeeDetails = () => {
     }, [id, dispatch]);
 
     //Display DOM
+    const employeeDetails = (
+        <div className="row border mx-1 rounded-sm">
+            <div className="d-flex justify-content-end mt-2 mr-3">
+                    <Dropdown>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            ACTIONS
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item onClick={handleEditClick}>Edit Account</Dropdown.Item>
+                            <Dropdown.Item onClick={handleSendResetPassword}>Email Password Reset</Dropdown.Item>
+                            <Dropdown.Item onClick={handleChangePassword}>Change Password</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Name:</label>
+                <p className="form-label">{employeeState.employee_first_name} {employeeState.employee_last_name}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Email:</label>
+                <p className="form-label">{employeeState.employee_email}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Contact:</label>
+                <p className="form-label">{employeeState.employee_mobile_phone}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Role:</label>
+                <p className="form-label">{employeeState.employee_roles}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Company:</label>
+                <p className="form-label">{employeeState.companies}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Projects:</label>
+                <p className="form-label">Some project data...</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Status:</label>
+                {employeeState.employee_isarchived ? 
+                    (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                    (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
+                }
+            </div>
+        </div>
+    )
+
+    const employeeProjectsTable = ( <div className="border rounded-sm">some projects data...</div> )
+    
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState) {
@@ -92,53 +143,22 @@ const EmployeeDetails = () => {
     return (
         <div className="container mt-5">
         <div className="card">
-            <div className="card-header bg-dark text-white">
-                <h1>{localUserState.employee_email === employeeState.employee_email ? 'YOUR ACCOUNT' : 'EMPLOYEE ACCOUNT'}</h1>
-            </div>
+            <div className="card-header bg-dark text-white flex justify-between items-center">
+                    <button onClick={() => {navigate("/EmpirePMS/employee")}}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
+                        </svg>
+                    </button>
+                    <h1 className='mx-auto uppercase font-bold text-xl'>{localUserState.employee_email === employeeState.employee_email ? 'YOUR ACCOUNT' : 'EMPLOYEE ACCOUNT'}</h1>
+                </div>
             <div className="card-body">
-                <div className="d-flex justify-content-between mb-3">
-                    <Link to="/EmpirePMS/employee" className="btn btn-secondary">Back</Link>
-                    <button className="btn btn-primary" onClick={handleEditClick}>Edit Account</button>
-                    <Dropdown>
-                        <Dropdown.Toggle variant="success" id="dropdown-basic">
-                            ACTIONS
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item onClick={handleSendResetPassword}>Email Password Reset</Dropdown.Item>
-                            <Dropdown.Item onClick={handleChangePassword}>Change Password</Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
+                <div>
+                    <button className={`${currentTab === 'employeeDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('employeeDetails')}>Details</button>
+                    <button className={`${currentTab === 'employeeProjectsTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('employeeProjectsTable')}>Projects</button>
                 </div>
-                <div className="d-flex mb-3">
-                    <button className="btn btn-outline-dark">Details</button>
-                    <button className="btn btn-outline-dark">Projects</button>
-                </div>
-                <div className="row">
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">Name:</label>
-                        <p className="form-label">{employeeState.employee_first_name} {employeeState.employee_last_name}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">Email:</label>
-                        <p className="form-label">{employeeState.employee_email}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">Contact:</label>
-                        <p className="form-label">{employeeState.employee_mobile_phone}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">Role:</label>
-                        <p className="form-label">{employeeState.employee_roles}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">Company:</label>
-                        <p className="form-label">{employeeState.companies}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                        <label className="form-label fw-bold">Projects:</label>
-                        <p className="form-label">Some project data...</p>
-                    </div>
-                </div>
+                    {/* SWITCH BETWEEN COMPONENTS HERE */}
+                    {currentTab === 'employeeDetails' && employeeDetails}
+                    {currentTab === 'employeeProjectsTable' && employeeProjectsTable}
             </div>
         </div>
     </div>
