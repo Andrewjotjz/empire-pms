@@ -131,7 +131,7 @@ const Supplier = () => {
     return (
         <div className="container mt-5"><div className="card">
                 <div className="card-header bg-dark text-white">
-                    <h1>SUPPLIERS</h1>
+                    <h1 className='mx-auto uppercase font-bold text-xl'>SUPPLIERS</h1>
                 </div>
                 <div className="card-body">
                     <div className="row mb-1">
@@ -144,7 +144,12 @@ const Supplier = () => {
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">
                             <button className="btn btn-primary" onClick={handleAddClick}>
-                                + ADD SUPPLIER
+                                <div className='flex items-center'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <label>ADD SUPPLIER</label>
+                                </div>
                             </button>
                         </div>
                     </div>

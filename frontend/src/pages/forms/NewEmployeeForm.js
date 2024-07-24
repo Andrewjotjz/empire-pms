@@ -72,9 +72,6 @@ const NewEmployeeForm = () => {
                     <h1>NEW EMPLOYEE</h1>
                 </div>
                 <form className="card-body" onSubmit={handleSubmit}>
-                    <div className="d-flex justify-content-between mb-3">
-                        <button type="button" onClick={handleBackClick} className="btn btn-secondary">BACK</button>
-                    </div>
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <label className="form-label">First name:</label>

@@ -28,6 +28,8 @@ const SupplierDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
+    const handleAddProductClick = () => { return }
+
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
 
     const handleProductTableClick = (productId) => { 
@@ -130,11 +132,21 @@ const SupplierDetails = () => {
 
     const supplierProductsTable = Array.isArray(productState) && productState.length > 0 ? (
         <div>
-            <input
-                type="text"
-                className="form-control mb-1"
-                placeholder="Search..."
-            />
+            <div className="flex justify-between">
+                <input
+                    type="text"
+                    className="form-control mb-1 w-10/12"
+                    placeholder="Search..."
+                />
+                <button className="btn btn-primary mb-1" onClick={handleAddProductClick}>
+                    <div className='flex items-center'>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <label>ADD PRODUCT</label>
+                    </div>
+                </button>
+            </div>
             <table className="table table-bordered table-hover">
                 <thead className="thead-dark">
                     <tr className="table-primary">
@@ -173,19 +185,47 @@ const SupplierDetails = () => {
             </table>
         </div>
     ) : (
-        <div className='border'>Product API fetched successfully, but it might be empty...</div>
+        <div className='border'>
+            <div className='m-1'>
+                <label className='text-xl'>No products found in this supplier.</label>
+            </div>
+            <button className="btn btn-primary m-1" onClick={handleAddProductClick}>
+                <div className='flex items-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <label>ADD PRODUCT</label>
+                </div>
+            </button>
+        </div>
     );
 
     const supplierDetails = supplierState ? (
-        <div className="card-body border-1">
-            <div className="d-flex justify-content-end mb-3">
+        <div className="card-body border-1 relative">
+            <div className="absolute right-3">
                 <Dropdown>
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                         ACTIONS
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                        <Dropdown.Item onClick={handleEditSupplierClick}>EDIT DETAILS</Dropdown.Item>
-                        <Dropdown.Item onClick={() => setShowModal(true)}>{ supplierState.supplier_isarchived ? `UNARCHIVE` : `ARCHIVE`}</Dropdown.Item>
+                        <Dropdown.Item onClick={handleEditSupplierClick}>
+                            <div className='flex items-center'>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                    <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                                    <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                                </svg>
+                                <label>EDIT DETAILS</label>
+                            </div>
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => setShowModal(true)}>
+                            <div className='flex items-center'>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                    <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3Z" />
+                                    <path fillRule="evenodd" d="M13 6H3v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6ZM8.75 7.75a.75.75 0 0 0-1.5 0v2.69L6.03 9.22a.75.75 0 0 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.06 0l2.5-2.5a.75.75 0 1 0-1.06-1.06l-1.22 1.22V7.75Z" clipRule="evenodd" />
+                                </svg>
+                                <label>{ supplierState.supplier_isarchived ? `UNARCHIVE` : `ARCHIVE`}</label>
+                            </div>
+                        </Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
             </div>
@@ -274,7 +314,7 @@ const SupplierDetails = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
                         </svg>
                     </button>
-                    <h1 className='mx-auto uppercase font-bold text-xl'>{supplierState.supplier_name}</h1>
+                    <h1 className='mx-auto uppercase font-bold text-xl'>Supplier: {supplierState.supplier_name}</h1>
                 </div>
                 <div className="card-body">
                     <div>
