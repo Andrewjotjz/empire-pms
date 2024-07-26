@@ -13,6 +13,11 @@ import SupplierPage from './pages/SupplierPage';
 import EmployeeDetails from './pages/EmployeeDetails';
 import UpdateEmployeeForm from "./pages/forms/UpdateEmployeeForm";
 import NewEmployeeForm from "./pages/forms/NewEmployeeForm";
+import ChangePasswordForm from "./pages/forms/ChangePasswordForm";
+import PasswordReset from "./components/PasswordReset";
+import SupplierDetails from "./pages/SupplierDetails";
+import UpdateSupplierForm from "./pages/forms/UpdateSupplierForm";
+import NewSupplierForm from "./pages/forms/NewSupplierForm";
 
 function App() {
   //App state declaration
@@ -34,9 +39,14 @@ function App() {
             <Route path="/EmpirePMS/payment" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PaymentPage />} />
             <Route path="/EmpirePMS/project" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectPage />} />
             <Route path="/EmpirePMS/supplier" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierPage />} />
+            <Route path="/EmpirePMS/supplier/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierDetails />} />
+            <Route path="/EmpirePMS/supplier/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateSupplierForm />} />
+            <Route path="/EmpirePMS/supplier/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewSupplierForm />} />
             <Route path="/EmpirePMS/employee/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <EmployeeDetails />} />
+            <Route path="/EmpirePMS/employee/:id/change-password" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ChangePasswordForm />} />
             <Route path="/EmpirePMS/employee/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateEmployeeForm />} />
             <Route path="/EmpirePMS/employee/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewEmployeeForm />} />
+            <Route path="/EmpirePMS/employee/reset-password" element={<PasswordReset />} />
           </Routes>
         </div>
       </BrowserRouter>

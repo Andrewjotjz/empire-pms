@@ -3,8 +3,10 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
+import { toast } from 'react-toastify';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import Dropdown from "react-bootstrap/Dropdown"
 
 const EmployeeDetails = () => {
     //Component state declaration
@@ -19,10 +21,39 @@ const EmployeeDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const handleEditClick = () => {
-        navigate(`/EmpirePMS/employee/${id}/edit`, { state: id })
-    }
+    const handleEditClick = () => navigate(`/EmpirePMS/employee/${id}/edit`, { state: id });
 
+    const handleChangePassword = () => navigate(`/EmpirePMS/employee/${id}/change-password`, { state: id });
+
+    const handleSendResetPassword = async () => {
+        setIsLoadingState(true);
+        
+        try {
+            const response = await fetch(`/api/employee/${id}/send-reset-password-email`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json',},
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to send password reset email');
+            }
+    
+            // Navigate only if successful
+            navigate(`/EmpirePMS/employee/${id}`);
+    
+            // Display success message
+            toast.success(`Password reset email sent successfully!`, {
+                position: "bottom-right"
+            });
+    
+            // Update loading state
+            setIsLoadingState(false);
+        } catch (error) {
+            setErrorState(error.message);
+            setIsLoadingState(false);
+        }
+    };
+    
     //Render component
     useEffect(() => {
         const fetchEmployee = async () => {
@@ -68,11 +99,15 @@ const EmployeeDetails = () => {
                 <div className="d-flex justify-content-between mb-3">
                     <Link to="/EmpirePMS/employee" className="btn btn-secondary">Back</Link>
                     <button className="btn btn-primary" onClick={handleEditClick}>Edit Account</button>
-                    <select className="form-select w-auto">
-                        <option>ACTIONS</option>
-                        <option>Email Password Reset</option>
-                        <option>Change Password</option>
-                    </select>
+                    <Dropdown>
+                        <Dropdown.Toggle variant="success" id="dropdown-basic">
+                            ACTIONS
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item onClick={handleSendResetPassword}>Email Password Reset</Dropdown.Item>
+                            <Dropdown.Item onClick={handleChangePassword}>Change Password</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </div>
                 <div className="d-flex mb-3">
                     <button className="btn btn-outline-dark">Details</button>
@@ -80,27 +115,27 @@ const EmployeeDetails = () => {
                 </div>
                 <div className="row">
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Name:</label>
+                        <label className="form-label fw-bold">Name:</label>
                         <p className="form-label">{employeeState.employee_first_name} {employeeState.employee_last_name}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Email:</label>
+                        <label className="form-label fw-bold">Email:</label>
                         <p className="form-label">{employeeState.employee_email}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Contact:</label>
+                        <label className="form-label fw-bold">Contact:</label>
                         <p className="form-label">{employeeState.employee_mobile_phone}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Role:</label>
+                        <label className="form-label fw-bold">Role:</label>
                         <p className="form-label">{employeeState.employee_roles}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Company:</label>
+                        <label className="form-label fw-bold">Company:</label>
                         <p className="form-label">{employeeState.companies}</p>
                     </div>
                     <div className="col-md-6 mb-3">
-                        <label className="form-label">Projects:</label>
+                        <label className="form-label fw-bold">Projects:</label>
                         <p className="form-label">Some project data...</p>
                     </div>
                 </div>
