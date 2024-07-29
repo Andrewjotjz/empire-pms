@@ -28,9 +28,9 @@ const Navbar = () => {
   if (location.pathname === "/EmpirePMS/login" || location.pathname === "/EmpirePMS/employee/reset-password" ) {
     return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div className="container-fluid">
-          <Link className="navbar-brand" to="/EmpirePMS/login">EmpirePMS</Link>
+      <nav className="bg-gray-900 p-2">
+        <div className="container mx-auto">
+          <Link className="text-white text-lg font-bold" to="/EmpirePMS/login">EmpirePMS</Link>
         </div>
       </nav>
     </header>)
@@ -39,30 +39,19 @@ const Navbar = () => {
   return (
     localUser && Object.keys(localUser).length > 0 ? (
       <header>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-          <div className="container-fluid">
-            <Link className="navbar-brand" to="/EmpirePMS/dashboard">EmpirePMS</Link>
-            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarNav">
-              <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-                {localUser && (
-                  <li className="nav-item">
-                    <span className="nav-link">Welcome {localUser.employee_first_name}!</span>
-                  </li>
-                )}
-                {localUser && (
-                  <li className="nav-item">
-                    <button className="btn btn-outline-light" onClick={handleLogOutClick}>Log out</button>
-                  </li>
-                )}
-                {!localUser && (
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/EmpirePMS/login">Sign In</Link>
-                  </li>
-                )}
-              </ul>
+        <nav className="bg-gray-900 p-2">
+          <div className="container mx-auto flex justify-between items-center">
+            <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">EmpirePMS</Link>
+            <div className="flex items-center space-x-4">
+              {localUser && (
+                <span className="text-white">{localUser.employee_email}</span>
+              )}
+              {localUser && (
+                <button className="bg-transparent text-white border border-white px-4 py-2 rounded hover:bg-red-500" onClick={handleLogOutClick}>Log out</button>
+              )}
+              {!localUser && (
+                <Link className="text-white" to="/EmpirePMS/login">Sign In</Link>
+              )}
             </div>
           </div>
         </nav>

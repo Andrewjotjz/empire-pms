@@ -90,9 +90,6 @@ const NewSupplierForm = () => {
                     <h1>NEW SUPPLIER</h1>
                 </div>
                 <form className="card-body" onSubmit={handleSubmit}>
-                    <div className="d-flex justify-content-between mb-3">
-                        <button type="button" onClick={handleBackClick} className="btn btn-secondary">BACK</button>
-                    </div>
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <label className="form-label fw-bold">Supplier name:</label>
@@ -155,7 +152,7 @@ const NewSupplierForm = () => {
                         <div className="col-md-6 mb-3">
                             <label className="form-label fw-bold">Supplier type:</label>
                             <select 
-                                className="form-control" 
+                                className="form-control cursor-pointer" 
                                 name="supplier_type" 
                                 value={supplierState.supplier_type} 
                                 onChange={handleInputChange}
@@ -182,68 +179,75 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Archived:</label>
                             <input 
                                 type="checkbox"
-                                className="form-check-input" 
+                                className="form-check-input m-1" 
                                 name="supplier_isarchived" 
                                 checked={supplierState.supplier_isarchived} 
                                 onChange={(e) => handleInputChange({ target: { name: 'supplier_isarchived', value: e.target.checked } })}
                             />
                         </div>
-                        {supplierState.supplier_contacts.map((contact, index) => (
-                            <div key={index} className="col-md-12 mb-3">
-                                <h5>Contact {index + 1}</h5>
-                                <label className="form-label fw-bold">Primary Contact:</label>
-                                <input 
-                                    type="checkbox"
-                                    className="form-check-input" 
-                                    name="is_primary" 
-                                    checked={contact.is_primary} 
-                                    onChange={(e) => handleContactChange(index, { target: { name: 'is_primary', value: e.target.checked } })}
-                                />
-                                <div className="row">
+                        <div className='p-2'>
+                            {supplierState.supplier_contacts.map((contact, index) => (
+                                <div key={index} className="col-md-12 mb-3 border-y-2">
+                                    <h5 className='font-semibold text-lg text-decoration-line: underline'>Contact #{index + 1}</h5>
                                     <div className="col-md-4 mb-3">
-                                        <label className="form-label fw-bold">Name:</label>
+                                        <label className="form-label fw-bold">Primary Contact:</label>
                                         <input 
-                                            type="text"
-                                            className="form-control" 
-                                            name="name" 
-                                            value={contact.name} 
-                                            onChange={(e) => handleContactChange(index, e)}
-                                            placeholder="Contact Name"
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter contact name')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            type="checkbox"
+                                            className="form-check-input m-1" 
+                                            name="is_primary" 
+                                            checked={contact.is_primary} 
+                                            onChange={(e) => handleContactChange(index, { target: { name: 'is_primary', value: e.target.checked } })}
                                         />
                                     </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label fw-bold">Phone:</label>
-                                        <input 
-                                            type="text"
-                                            className="form-control" 
-                                            name="03 0000 0000" 
-                                            value={contact.phone} 
-                                            onChange={(e) => handleContactChange(index, e)}
-                                            placeholder="Phone"
-                                        />
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label fw-bold">Email:</label>
-                                        <input 
-                                            type="email"
-                                            className="form-control" 
-                                            name="example@mycompany.com" 
-                                            value={contact.email} 
-                                            onChange={(e) => handleContactChange(index, e)}
-                                            placeholder="Email"
-                                        />
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <button type="button" onClick={() => handleRemoveContact(index)} className="btn btn-danger">REMOVE</button>
+                                    <div className="row">
+                                        <div className="col-md-4 mb-3">
+                                            <label className="form-label fw-bold">Name:</label>
+                                            <input 
+                                                type="text"
+                                                className="form-control" 
+                                                name="name" 
+                                                value={contact.name} 
+                                                onChange={(e) => handleContactChange(index, e)}
+                                                placeholder="Contact Name"
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter contact name')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                            />
+                                        </div>
+                                        <div className="col-md-4 mb-3">
+                                            <label className="form-label fw-bold">Phone:</label>
+                                            <input 
+                                                type="text"
+                                                className="form-control" 
+                                                name="03 0000 0000" 
+                                                value={contact.phone} 
+                                                onChange={(e) => handleContactChange(index, e)}
+                                                placeholder="Phone"
+                                            />
+                                        </div>
+                                        <div className="col-md-4 mb-3">
+                                            <label className="form-label fw-bold">Email:</label>
+                                            <input 
+                                                type="email"
+                                                className="form-control" 
+                                                name="example@mycompany.com" 
+                                                value={contact.email} 
+                                                onChange={(e) => handleContactChange(index, e)}
+                                                placeholder="Email"
+                                            />
+                                        </div>
+                                        <div className="col-md-4 mb-3">
+                                            <button type="button" onClick={() => handleRemoveContact(index)} className="btn btn-danger">REMOVE</button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                        <button type="button" onClick={handleAddContact} className="btn btn-secondary mb-3">ADD MORE CONTACTS</button>
+                            ))}
+                        </div>
+                        <div className="col-md-12 mb-8">
+                            <button type="button" onClick={handleAddContact} className="btn btn-secondary">+ ADD MORE CONTACTS</button>
+                        </div>
                         <div className="d-flex justify-content-between mb-3">
+                            <button type="button" onClick={handleBackClick} className="btn btn-secondary">BACK</button>
                             <button className="btn btn-primary" type="submit">ADD TO COMPANY</button>
                         </div>
                     </div>

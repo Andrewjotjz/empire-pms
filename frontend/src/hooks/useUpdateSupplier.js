@@ -12,7 +12,7 @@ export const useUpdateSupplier = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const update = async (supplierState) => {
+    const update = async (supplierState, message) => {
         setIsLoadingState(true)
         setErrorState(null)
 
@@ -38,7 +38,7 @@ export const useUpdateSupplier = () => {
                     navigate(`/EmpirePMS/supplier/${supplierState._id}`)
                 
                     // push toast to notify successful login
-                    toast.success(`Supplier updated successfully!`, {
+                    toast.success(message ? message: "Supplier updated successfully", {
                         position: "bottom-right"
                     });
                 
