@@ -28,7 +28,7 @@ const SupplierDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const handleAddProductClick = () => { return }
+    const handleAddProductClick = () => { navigate(`/EmpirePMS/supplier/${id}/products/create`), { state: id } }
 
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
 
