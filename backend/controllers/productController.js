@@ -46,6 +46,58 @@ const getSingleProduct = async (req, res) => {
 }
 
 
+// Helper function to fetch products by type
+const fetchProductsByType = async (productType) => {
+    const matchCondition = {
+        'product_types': productType
+    };
+
+    const Products = await productModel.aggregate([
+        {
+            $match: matchCondition // Match the product type
+        },
+        {
+            $lookup: {
+                from: 'aliases', // Ensure this is the correct collection name
+                localField: 'alias',
+                foreignField: '_id',
+                as: 'aliasDetails'
+            }
+        },
+        { $unwind: { path: '$aliasDetails', preserveNullAndEmptyArrays: true } },
+        {
+            $project: {
+                _id: 1,
+                product_sku: 1,
+                product_name: 1,
+                product_types: 1,
+                product_actual_size: 1,
+                product_next_available_stock_date: 1,
+                supplier: 1,
+                alias: 1,
+                alias_name: '$aliasDetails.alias_name',
+                product_isarchived: 1,
+                createdAt: 1,
+                updatedAt: 1,
+            }
+        }
+    ]);
+
+    return Products;
+};
+
+
+// Controller function - GET products by type
+const getProductsByType = async (req, res) => {
+    const { type } = req.params;
+    try {
+        const formattedResults = await fetchProductsByType(type);
+        res.status(200).json(formattedResults);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 
 //Controller function - POST to create a new Product
 const createNewProduct = async (req, res) => {
@@ -148,4 +200,4 @@ const deleteSingleProduct = async (req,res) => {
 }
 
 //export controller module
-module.exports = { getAllProducts, getSingleProduct, createNewProduct, updateSingleProduct, deleteSingleProduct };
+module.exports = { getAllProducts, getSingleProduct, getProductsByType, createNewProduct, updateSingleProduct, deleteSingleProduct };
