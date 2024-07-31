@@ -60,11 +60,11 @@ const ProductDetails = () => {
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">ID</th>
-                        <th scope="col">Unit A</th>
                         <th scope="col">Number A</th>
+                        <th scope="col">Unit A</th>
                         <th scope="col">Price Unit A</th>
-                        <th scope="col">Unit B</th>
                         <th scope="col">Number B</th>
+                        <th scope="col">Unit B</th>
                         <th scope="col">Price Unit B</th>
                         <th scope="col">Price Fixed (?)</th>
                         <th scope="col">Effective Date</th>
@@ -75,12 +75,12 @@ const ProductDetails = () => {
                     {productState.map((item, index) => (
                         <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
                             <th scope="row">{index + 1}</th>
-                            <td>{item.productPrice.product_unit_a}</td>
                             <td>{item.productPrice.product_number_a}</td>
-                            <td>{item.productPrice.product_price_unit_a}</td>
-                            <td>{item.productPrice.product_unit_b}</td>
+                            <td>{item.productPrice.product_unit_a}</td>
+                            <td>${item.productPrice.product_price_unit_a}</td>
                             <td>{item.productPrice.product_number_b}</td>
-                            <td>{item.productPrice.product_price_unit_b}</td>
+                            <td>{item.productPrice.product_unit_b}</td>
+                            <td>${item.productPrice.product_price_unit_b}</td>
                             <td>{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
                             <td>{item.productPrice.product_effective_date}</td>
                             <td>

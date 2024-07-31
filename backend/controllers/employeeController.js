@@ -305,7 +305,7 @@ const sendPasswordResetEmail = async (req, res) => {
                         <p style="text-align: center;"><a href="${resetUrl}" class="button">Reset Password</a></p>
                         <p>This link will expire in one hour. If you did not request a password reset, please ignore this email or contact IT support immediately.</p>
                         <p>Thank you,</p>
-                        <p>IT Administrator<br>EMPIRE COMMERCIAL BUILDINGS SOLUTIONS PTY LTD<br>20 Trade Place, Vermont 3133<br>P: 03 7043 3320</p>
+                        <p>IT Administrator<br>EMPIRE COMMERCIAL BUILDINGS SOLUTIONS PTY LTD<br>20 Trade Place, Vermont 3133<br>P: 03 7076 2666</p>
                     </div>
                     <div class="email-footer">
                         <p>&copy; ${new Date().getFullYear()} EmpirePMS. All rights reserved.</p>

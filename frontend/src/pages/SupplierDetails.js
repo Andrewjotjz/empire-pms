@@ -28,7 +28,7 @@ const SupplierDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const handleAddProductClick = () => { navigate(`/EmpirePMS/supplier/${id}/products/create`), { state: id } }
+    const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
 
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
 
@@ -152,23 +152,23 @@ const SupplierDetails = () => {
                     <tr className="table-primary">
                         <th scope="col">SKU</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Unit A</th>
                         <th scope="col">Number A</th>
+                        <th scope="col">Unit A</th>
                         <th scope="col">Price A</th>
-                        <th scope="col">Size</th>
+                        <th scope="col">Actual M<span className='text-xs align-top'>2</span>/M</th>
                         <th scope="col">Type</th>
                         <th scope="col">Alias</th>
                         <th scope="col">Project Name</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {productState.map((product, index) => (
+                    {productState && productState.map((product, index) => (
                         <tr key={index} onClick={() => handleProductTableClick(product.product._id)} className='cursor-pointer'>
                             <th scope="row">{product.product.product_sku}</th>
                             <td>{product.product.product_name}</td>
-                            <td>{product.productPrice.product_unit_a}</td>
                             <td>{product.productPrice.product_number_a}</td>
-                            <td>{product.productPrice.product_price_unit_a}</td>
+                            <td>{product.productPrice.product_unit_a}</td>
+                            <td>${product.productPrice.product_price_unit_a}</td>
                             <td>{product.product.product_actual_size}</td>
                             <td>{product.product.product_types}</td>
                             <td>{product.product.alias_name}</td>

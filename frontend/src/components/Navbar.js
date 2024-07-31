@@ -1,5 +1,5 @@
 //import modules and files
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLogout } from '../hooks/useLogout';
 import { toast } from 'react-toastify';
 import NavbarSkeleton  from '../pages/loaders/NavbarSkeleton'
@@ -10,11 +10,16 @@ const Navbar = () => {
 
   //Component router
   const location = useLocation();
+  const navigate = useNavigate();
 
   //Component hooks
   const { logout } = useLogout();
 
   //Component functions and variables
+  const handleAccountClick = () => {
+    navigate('/EmpirePMS/account')
+  }
+
   const handleLogOutClick = () => {
     // push toast to notify successful login
     toast.success(`Logout successful!`, {
@@ -44,7 +49,7 @@ const Navbar = () => {
             <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">EmpirePMS</Link>
             <div className="flex items-center space-x-4">
               {localUser && (
-                <span className="text-white">{localUser.employee_email}</span>
+                <span className="text-white cursor-pointer" onClick={handleAccountClick}>{localUser.employee_email}</span>
               )}
               {localUser && (
                 <button className="bg-gray-900 text-white border border-white px-4 py-2 rounded hover:bg-red-700 hover:scale-95 ease-out duration-75 hover:font-bold" onClick={handleLogOutClick}>Logout</button>

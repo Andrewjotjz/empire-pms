@@ -3,6 +3,46 @@ const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
 const mongoose = require('mongoose');
 
+// Helper function to fetch products by type
+const fetchProductsByType = async (productType) => {
+    const matchCondition = {
+        'product_types': productType
+    };
+
+    const Products = await productModel.aggregate([
+        {
+            $match: matchCondition // Match the product type
+        },
+        {
+            $lookup: {
+                from: 'aliases', // Ensure this is the correct collection name
+                localField: 'alias',
+                foreignField: '_id',
+                as: 'aliasDetails'
+            }
+        },
+        { $unwind: { path: '$aliasDetails', preserveNullAndEmptyArrays: true } },
+        {
+            $project: {
+                _id: 1,
+                product_sku: 1,
+                product_name: 1,
+                product_types: 1,
+                product_actual_size: 1,
+                product_next_available_stock_date: 1,
+                supplier: 1,
+                alias: 1,
+                alias_name: '$aliasDetails.alias_name',
+                product_isarchived: 1,
+                createdAt: 1,
+                updatedAt: 1,
+            }
+        }
+    ]);
+
+    return Products;
+};
+
 //Controller function - GET all Products
 const getAllProducts = async (req, res) => {
     //'req' object not in used
@@ -45,49 +85,7 @@ const getSingleProduct = async (req, res) => {
     }
 }
 
-
-// Helper function to fetch products by type
-const fetchProductsByType = async (productType) => {
-    const matchCondition = {
-        'product_types': productType
-    };
-
-    const Products = await productModel.aggregate([
-        {
-            $match: matchCondition // Match the product type
-        },
-        {
-            $lookup: {
-                from: 'aliases', // Ensure this is the correct collection name
-                localField: 'alias',
-                foreignField: '_id',
-                as: 'aliasDetails'
-            }
-        },
-        { $unwind: { path: '$aliasDetails', preserveNullAndEmptyArrays: true } },
-        {
-            $project: {
-                _id: 1,
-                product_sku: 1,
-                product_name: 1,
-                product_types: 1,
-                product_actual_size: 1,
-                product_next_available_stock_date: 1,
-                supplier: 1,
-                alias: 1,
-                alias_name: '$aliasDetails.alias_name',
-                product_isarchived: 1,
-                createdAt: 1,
-                updatedAt: 1,
-            }
-        }
-    ]);
-
-    return Products;
-};
-
-
-// Controller function - GET products by type
+//Controller function - GET products by type
 const getProductsByType = async (req, res) => {
     const { type } = req.params;
     try {
@@ -98,20 +96,37 @@ const getProductsByType = async (req, res) => {
     }
 };
 
+// Controller method to get filtered products
+const getFilteredProducts = async (req, res) => {
+    const { type } = req.params;
+
+    if (!type) {
+        return res.status(400).json({ error: 'Product type is required' });
+    }
+
+    try {
+        const products = await productModel.find({ product_types: type })
+            .populate('alias')
+            .exec();
+
+        res.status(200).json(products);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 //Controller function - POST to create a new Product
 const createNewProduct = async (req, res) => {
     // retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
     // destructure all relevant attributes in new Product object
-    const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
-        supplier, alias, product_isarchived, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-        product_price_unit_b, product_effective_date, projects} = req.body;
+    const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
 
         const Product = await productModel.create({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
-            supplier, alias, product_isarchived });
+            supplier, alias, price_fixed, product_isarchived });
 
         // Get product object id then insert Price Info into productPrice table
         // Need to add verification when it exist product price
@@ -119,7 +134,7 @@ const createNewProduct = async (req, res) => {
 
             const product_id = Product._id;
             const ProductPrice = await productPriceModel.create({ product_id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-                product_price_unit_b, product_effective_date, projects });
+                product_price_unit_b, price_fixed, product_effective_date, projects });
 
             res.status(200).json({ Product, ProductPrice });
         }else{
@@ -134,7 +149,6 @@ const createNewProduct = async (req, res) => {
         res.status(400).json({error: error.message});
     }
 }
-
 
 //Controller function - PUT to update a single Product
 const updateSingleProduct = async (req,res) => {
@@ -164,7 +178,6 @@ const updateSingleProduct = async (req,res) => {
         res.status(200).json(Product);
     }
 }
-
 
 //Controller function - DELETE to delete a single Product
 const deleteSingleProduct = async (req,res) => {
@@ -200,4 +213,4 @@ const deleteSingleProduct = async (req,res) => {
 }
 
 //export controller module
-module.exports = { getAllProducts, getSingleProduct, getProductsByType, createNewProduct, updateSingleProduct, deleteSingleProduct };
+module.exports = { getAllProducts, getSingleProduct, getProductsByType, getFilteredProducts, createNewProduct, updateSingleProduct, deleteSingleProduct };

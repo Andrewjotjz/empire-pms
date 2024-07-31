@@ -12,7 +12,7 @@ export const useAddProduct = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const addProduct = async (productState, supplierState) => {
+    const addProduct = async (productState, supplierId) => {
         setIsLoadingState(true)
         setErrorState(null)
 

@@ -4,6 +4,7 @@ import employeeReducer from './employeeSlice'
 import localUserReducer from './localUserSlice'
 import supplierReducer from './supplierSlice'
 import productReducer from './productSlice'
+import projectReducer from './projectSlice'
 import aliasReducer from './aliasSlice'
 import productPriceReducer from './productPriceSlice'
 
@@ -13,6 +14,7 @@ export const store = configureStore({
         localUserReducer: localUserReducer,
         supplierReducer: supplierReducer,
         productReducer: productReducer,
+        projectReducer: projectReducer,
         aliasReducer: aliasReducer,
         productPriceReducer: productPriceReducer
     }

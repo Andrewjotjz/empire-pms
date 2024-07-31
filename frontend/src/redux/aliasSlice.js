@@ -17,6 +17,6 @@ export const aliasSlice = createSlice({
     }
 })
 
-export const { setAlias, clearAliases } = aliasSlice.actions
+export const { setAliases, clearAliases } = aliasSlice.actions
 
 export default aliasSlice.reducer
