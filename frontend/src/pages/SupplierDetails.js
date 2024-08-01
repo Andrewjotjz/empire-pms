@@ -109,23 +109,7 @@ const SupplierDetails = () => {
         fetchSupplierProducts();
     }, [id, dispatch]);
 
-    //Display DOM
-    const archiveModal = (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>{ supplierState.supplier_isarchived ? `Confirm Unarchive` : `Confirm Archive`}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>{ supplierState.supplier_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}</Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
-                    Cancel
-                </Button>
-                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
-                { supplierState.supplier_isarchived ? `Unarchive` : `Archive`}
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    )
+    // Display DOM
     const supplierProjectsTable = ( <>some projects data...</> )
 
     const supplierPurchaseOrdersTable = ( <>some purchase orders data...</> )
@@ -199,6 +183,27 @@ const SupplierDetails = () => {
             </button>
         </div>
     );
+    
+    const archiveModal = (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { supplierState && supplierState.supplier_isarchived ? `Confirm Unarchive` : `Confirm Archive`}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { supplierState && supplierState.supplier_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Cancel
+                </Button>
+                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
+                    { supplierState && supplierState.supplier_isarchived ? `Unarchive` : `Archive`}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
 
     const supplierDetails = supplierState ? (
         <div className="card-body border-1 relative">

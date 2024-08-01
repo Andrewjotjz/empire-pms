@@ -2,7 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { useAddProduct } from '../../hooks/useAddProduct'; 
+import { useAddAlias } from '../../hooks/useAddAlias'; 
 import { useFetchProductsByType } from '../../hooks/useFetchProductsByType'
 import { clearAliases } from '../../redux/aliasSlice';
 import { setProjects } from '../../redux/projectSlice';
@@ -20,17 +22,18 @@ const NewProductForm = () => {
     const dispatch = useDispatch();
     const { fetchProductsByType, productTypeIsLoadingState, productTypeErrorState } = useFetchProductsByType();
     const { addProduct, productIsLoadingState, productErrorState } = useAddProduct();
+    const { addAlias, aliasIsLoadingState, aliasErrorState } = useAddAlias();
 
     // Component state
     const aliasState = useSelector((state) => state.aliasReducer.aliasState)
     const projectState = useSelector((state) => state.projectReducer.projectState)
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
-    const [ aliasFieldToggle, setAliasFieldToggle ] = useState(true);
-    // !
+    const [aliasFieldToggle, setAliasFieldToggle] = useState(true);
+    const [customAliasState, setCustomAliasState] = useState('')
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    const [ productDetailsState, setProductDetailsState] = useState({
+    const [isInputCustomOpen, setIsInputCustomOpen] = useState(false);
+    const [productDetailsState, setProductDetailsState] = useState({
         product_sku: '',
         product_name: '',
         product_types: '',
@@ -38,7 +41,7 @@ const NewProductForm = () => {
         product_next_available_stock_date: '',
         product_isarchived: false,
         supplier: supplierId,
-        alias: '668e17d0342c271b1a28a0e6',
+        alias: '',
         product_unit_a: '',
         product_number_a: 1,
         product_price_unit_a: '',
@@ -72,8 +75,6 @@ const NewProductForm = () => {
         }));
     };
 
-
-    // !
     const handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
         setProductDetailsState((prevState) => {
@@ -84,11 +85,35 @@ const NewProductForm = () => {
         });
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        
-        addProduct(productDetailsState,supplierId);
+
+        if (!productDetailsState.projects.length > 0){
+            // push toast to notify successful creation
+            toast.error(`You must select one or more projects taht this new product applies to`, {
+                position: "bottom-right"
+            });
+            return;
+        }
+
+        if (isInputCustomOpen) {
+            try {
+                let newAliasID = await addAlias(customAliasState);
+                setProductDetailsState((prevState) => ({
+                    ...prevState,
+                    alias: newAliasID
+                }));
+            } catch (error) {
+                // push toast to notify successful creation
+                toast.error(error.message, {
+                    position: "bottom-right"
+                });
+                return; // exit the function if adding alias fails
+            }
+        }
+        await addProduct(productDetailsState, supplierId);
     };
+    
 
     //Render component
     useEffect(() => {
@@ -130,11 +155,11 @@ const NewProductForm = () => {
 
 
     // Display DOM
-    if (productTypeIsLoadingState || productIsLoadingState) {
+    if (productTypeIsLoadingState || productIsLoadingState || aliasIsLoadingState) {
         return <EmployeeDetailsSkeleton />;
     }
 
-    if (productTypeErrorState || productErrorState) {
+    if (productTypeErrorState || productErrorState || aliasErrorState) {
         if (productErrorState.includes("Session expired") || productErrorState.includes("jwt expired")) {
             return <div><SessionExpired /></div>;
         }
@@ -149,8 +174,6 @@ const NewProductForm = () => {
         }
         return (<div>Error: {errorState}</div>);
     }
-
-    console.log("projects array now: ", productDetailsState.projects)
 
     return (
         <div className="container mt-5"> 
@@ -227,28 +250,43 @@ const NewProductForm = () => {
                         </div>
                         
 
-                        {/* ALIAS TABLE */}
+                        {/***************************** ALIAS TABLE *************************/}
                         <div className="col-md-6 mb-3">
                             <label className="form-label font-bold">*Alias:</label>
-                            <select 
-                                className="form-control"
-                                name="alias"
-                                onChange={handleProductInputChange}
-                                disabled={aliasFieldToggle}
-                                required
-                            >
-                                <option value="">Select Alias</option>
-                                {aliasState && aliasState.length > 0 && 
-                                    Array.from(new Set(aliasState.map(product => product.alias ? product.alias._id : null)))
-                                        .filter(aliasId => aliasId !== null)
-                                        .map((aliasId, index) => {
-                                            const alias = aliasState.find(product => product.alias && product.alias._id === aliasId).alias;
-                                            return <option key={index} value={aliasId}>{alias.alias_name}</option>;
-                                        })
-                                }
-                            </select>
-                            <label className='text-xs italic text-gray-400'>Set alias to ('na') if not available</label>
+                            { !isInputCustomOpen && <div>
+                                <select 
+                                    className="form-control"
+                                    name="alias"
+                                    onChange={handleProductInputChange}
+                                    disabled={aliasFieldToggle}
+                                    required
+                                >
+                                    <option value="">Select Alias</option>
+                                    {aliasState && aliasState.length > 0 && 
+                                        Array.from(new Set(aliasState.map(product => product.alias ? product.alias._id : null)))
+                                            .filter(aliasId => aliasId !== null)
+                                            .map((aliasId, index) => {
+                                                const alias = aliasState.find(product => product.alias && product.alias._id === aliasId).alias;
+                                                return <option key={index} value={aliasId}>{alias.alias_name}</option>;
+                                            })
+                                    }
+                                </select>
+                                <label className='text-xs italic text-gray-400'>Set alias to ('na') if not available or create custom alias <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => setIsInputCustomOpen(!isInputCustomOpen)}>here</span></label>
+                            </div>}
+                            { isInputCustomOpen && <div>
+                                <input 
+                                    type='text'
+                                    className="form-control" 
+                                    name="alias" 
+                                    value={customAliasState} 
+                                    onChange={(e) => setCustomAliasState(e.target.value)}
+                                    onInvalid={(e) => e.target.setCustomValidity('Enter a new custom alias')}
+                                    onInput={(e) => e.target.setCustomValidity('')}
+                                />
+                                <label className='text-xs italic text-gray-400'>Don't want to create custom alias? <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => setIsInputCustomOpen(!isInputCustomOpen)}>Cancel</span></label>
+                            </div>}
                         </div>
+                        {/***************************** END *************************/}
 
                         {/* PRODUCT PRICE TABLE */}
                         <div className='grid grid-cols-2 gap-32 border-4 rounded p-3 mb-1'>
@@ -396,6 +434,9 @@ const NewProductForm = () => {
                                                             checked={productDetailsState.projects.includes(project._id)}
                                                             onChange={handleCheckboxChange}
                                                             className="mr-2"
+                                                            required
+                                                            onInvalid={(e) => e.target.setCustomValidity('You must select one or more project applied to this product')}
+                                                            onInput={(e) => e.target.setCustomValidity('')}
                                                         />
                                                         <label htmlFor={`project-${project._id}`} className="text-gray-900">{project.project_name}</label>
                                                     </li>
