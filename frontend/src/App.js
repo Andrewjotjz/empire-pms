@@ -9,6 +9,7 @@ import InvoicePage from './pages/InvoicePage';
 import OrderPage from './pages/OrderPage';
 import PaymentPage from './pages/PaymentPage';
 import ProjectPage from './pages/ProjectPage';
+import ProjectDetails from './pages/ProjectDetails';
 import SupplierPage from './pages/SupplierPage';
 import EmployeeDetails from './pages/EmployeeDetails';
 import UpdateEmployeeForm from "./pages/forms/UpdateEmployeeForm";
@@ -39,6 +40,7 @@ function App() {
             <Route path="/EmpirePMS/order" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <OrderPage />} />
             <Route path="/EmpirePMS/payment" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PaymentPage />} />
             <Route path="/EmpirePMS/project" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectPage />} />
+            <Route path="/EmpirePMS/project/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectDetails />} />
             <Route path="/EmpirePMS/supplier" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierPage />} />
             <Route path="/EmpirePMS/supplier/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierDetails />} />
             <Route path="/EmpirePMS/supplier/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateSupplierForm />} />
@@ -57,5 +59,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;

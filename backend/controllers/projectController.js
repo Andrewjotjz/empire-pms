@@ -1,15 +1,62 @@
 //import modules
 const projectModel = require('../models/projectModel');
+const employeeModel = require('../models/employeeModel');
+
 const mongoose = require('mongoose');
+
+
+
+const fetchProjectDetails = async (project_id) => {
+
+    // if project_id is null, find all projects, otherwise, find single project by id
+    const projects = await projectModel.find(project_id)
+    .sort({ createdAt: -1 })
+    .populate('suppliers', 'supplier_name supplier_isarchived')  // Populate suppliers with only the supplier_name field
+
+    // Find all employees related to the projects
+    const projectIds = projects.map(project => project._id);
+    const employees = await employeeModel.find({ projects: { $in: projectIds } }, 'employee_first_name employee_last_name employee_email employee_mobile_phone employee_roles projects');
+
+    // Map employees to their corresponding projects
+    const projectEmployeeMap = {};
+    employees.forEach(employee => {
+      employee.projects.forEach(projectId => {
+        if (!projectEmployeeMap[projectId]) {
+          projectEmployeeMap[projectId] = [];
+        }
+        projectEmployeeMap[projectId].push(employee);
+      });
+    });
+
+    // Attach employees to their corresponding projects
+    const projectsWithEmployees = projects.map(project => {
+      return {
+        ...project.toObject(),
+        employees: projectEmployeeMap[project._id] || []
+      };
+    });
+
+    return projectsWithEmployees; 
+
+};
+
 
 //Controller function - GET all Projects
 const getAllProjects = async (req, res) => {
     //'req' object not in used
     //create a new model called Projects, await, and assign it with all Project documents in the Project collection, sort created date in descending order
-    const Projects = await projectModel.find({}).sort({createdAt: -1})
-    //invoke 'res' object method: status() and json(), pass relevant data to them
-    res.status(200).json(Projects);
-}
+    // const Projects = await projectModel.find({}).sort({createdAt: -1})
+
+    try {
+        // Fetch all projects and populate the supplier names and employee names
+        const projectsWithDetails = await fetchProjectDetails({})
+    
+        // Respond with the populated project data
+        res.status(200).json(projectsWithDetails);
+      } catch (error) {
+        res.status(500).json({ message: error.message });
+      }
+    };
 
 //Controller function - GET single Project
 const getSingleProject = async (req, res) => {
@@ -25,10 +72,10 @@ const getSingleProject = async (req, res) => {
 
     //if ID exists in mongoDB database
     //create a new model called Project, await, and assign it with the Project document, which can be found in the Project collection, find using ID
-    const Project = await projectModel.findById(id)
+    const projectsWithDetails = await fetchProjectDetails({ _id: id });
 
     //check if there's 'null' or 'undefined' in 'Project'.
-    if (!Project) {
+    if (!projectsWithDetails) {
         //if Project doesn't exist, return error 400 page details
         //invoke 'res' object method: status() and json(), pass relevant data to them
         //! DESIGN 400 PAGE
@@ -36,7 +83,7 @@ const getSingleProject = async (req, res) => {
     }
     else {
         //if Project does exists, pass relevant data to 'res' object method
-        res.status(200).json(Project)
+        res.status(200).json(projectsWithDetails)
     }
 }
 

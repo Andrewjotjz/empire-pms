@@ -1,5 +1,5 @@
 //import modules
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation} from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSupplierState } from '../redux/supplierSlice';
@@ -11,6 +11,12 @@ import { Modal, Button } from "react-bootstrap";
 import { useUpdateSupplier } from '../hooks/useUpdateSupplier';
 
 const SupplierDetails = () => {
+    //Component router
+    const { id } = useParams();
+    console.log("Supplier detail page: ",id);
+    const navigate = useNavigate();
+    const location = useLocation();
+
     //Component state declaration
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
     const productState = useSelector((state) => state.productReducer.productState)
@@ -23,45 +29,10 @@ const SupplierDetails = () => {
     const { update } = useUpdateSupplier();
     const dispatch = useDispatch()
 
-    //Component router
-    const { id } = useParams();
-    const navigate = useNavigate();
-
-    //Component functions and variables
-    const handleAddProductClick = () => { return }
-
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
-
-    const handleProductTableClick = (productId) => { 
-        dispatch(clearProductState());
-        navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
-    }
-
-    const handleArchive = () => {    
-        let updatedState;
-        if (supplierState.supplier_isarchived === true) {
-            updatedState = {
-                ...supplierState,
-                supplier_isarchived: false,
-            };
-        } else {
-            updatedState = {
-                ...supplierState,
-                supplier_isarchived: true,
-            };
-        }
-    
-        dispatch(setSupplierState(updatedState));
-
-        update(updatedState, `Supplier has been ${supplierState.supplier_isarchived ? `unarchived` : `archived`}`);
-
-        setShowModal(false);
-    };
-
-    const handleEditSupplierClick = () => navigate(`/EmpirePMS/supplier/${id}/edit`, { state: id });
-    
     //Render component
     useEffect(() => {
+        console.log("useEffect ran");
+
         const fetchSupplierDetails = async () => {
             try {
                 const res = await fetch(`/api/supplier/${id}`);
@@ -75,6 +46,8 @@ const SupplierDetails = () => {
                 }
 
                 dispatch(setSupplierState(data));
+                console.log(data)
+
                 setIsLoadingState(false);
             } catch (err) {
                 setErrorState(err.message);
@@ -109,23 +82,59 @@ const SupplierDetails = () => {
         fetchSupplierProducts();
     }, [id, dispatch]);
 
-    //Display DOM
+
+
+    //Component functions and variables
+    const handleAddProductClick = () => { return }
+
+    const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
+
+    const handleProductTableClick = (productId) => { 
+        dispatch(clearProductState());
+        navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
+    }
+
+    const handleArchive = () => {    
+        let updatedState;
+        if (supplierState.supplier_isarchived === true) {
+            updatedState = {
+                ...supplierState,
+                supplier_isarchived: false,
+            };
+        } else {
+            updatedState = {
+                ...supplierState,
+                supplier_isarchived: true,
+            };
+        }
+    
+        dispatch(setSupplierState(updatedState));
+
+        update(updatedState, `Supplier has been ${supplierState.supplier_isarchived ? `unarchived` : `archived`}`);
+
+        setShowModal(false);
+    };
+
+    const handleEditSupplierClick = () => navigate(`/EmpirePMS/supplier/${id}/edit`, { state: id });
+    
+    // Display DOM
     const archiveModal = (
         <Modal show={showModal} onHide={() => setShowModal(false)}>
             <Modal.Header closeButton>
-                <Modal.Title>{ supplierState.supplier_isarchived ? `Confirm Unarchive` : `Confirm Archive`}</Modal.Title>
+                <Modal.Title>{ supplierState && supplierState.supplier_isarchived ?  `Confirm Unarchive` : `Confirm Archive`}</Modal.Title>
             </Modal.Header>
-            <Modal.Body>{ supplierState.supplier_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}</Modal.Body>
+            <Modal.Body>{ supplierState && supplierState.supplier_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}</Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
                     Cancel
                 </Button>
                 <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
-                { supplierState.supplier_isarchived ? `Unarchive` : `Archive`}
+                { supplierState && supplierState.supplier_isarchived ? `Unarchive` : `Archive`}
                 </Button>
             </Modal.Footer>
         </Modal>
     )
+
     const supplierProjectsTable = ( <>some projects data...</> )
 
     const supplierPurchaseOrdersTable = ( <>some purchase orders data...</> )
@@ -305,6 +314,7 @@ const SupplierDetails = () => {
         return (<div>Error: {errorState}</div>);
     }
 
+
     return (
         <div className="container mt-5">
             <div className="card">
@@ -333,6 +343,7 @@ const SupplierDetails = () => {
             { archiveModal }
         </div>
     );
+
 }
 
 export default SupplierDetails;

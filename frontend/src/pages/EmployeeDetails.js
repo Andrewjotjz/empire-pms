@@ -19,6 +19,7 @@ const EmployeeDetails = () => {
 
     //Component router
     const { id } = useParams();
+    console.log("This employee detail page: ", id)
     const navigate = useNavigate();
 
     //Component functions and variables
@@ -57,6 +58,8 @@ const EmployeeDetails = () => {
     
     //Render component
     useEffect(() => {
+        console.log("Employee page: useEffect ran");
+
         const fetchEmployee = async () => {
             try {
                 const res = await fetch(`/api/employee/${id}`);
