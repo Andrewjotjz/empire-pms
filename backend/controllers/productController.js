@@ -85,6 +85,7 @@ const getSingleProduct = async (req, res) => {
     }
 }
 
+//! Currently not being used in routes file.
 //Controller function - GET products by type
 const getProductsByType = async (req, res) => {
     const { type } = req.params;

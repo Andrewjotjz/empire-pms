@@ -1,5 +1,5 @@
 //import modules
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate} from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSupplierState } from '../redux/supplierSlice';
@@ -11,6 +11,10 @@ import { Modal, Button } from "react-bootstrap";
 import { useUpdateSupplier } from '../hooks/useUpdateSupplier';
 
 const SupplierDetails = () => {
+    //Component router
+    const { id } = useParams();
+    const navigate = useNavigate();
+
     //Component state declaration
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
     const productState = useSelector((state) => state.productReducer.productState)
@@ -23,14 +27,10 @@ const SupplierDetails = () => {
     const { update } = useUpdateSupplier();
     const dispatch = useDispatch()
 
-    //Component router
-    const { id } = useParams();
-    const navigate = useNavigate();
-
     //Component functions and variables
     const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
 
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
+    const handleBackClick = () => navigate(-1);
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
@@ -62,6 +62,8 @@ const SupplierDetails = () => {
     
     //Render component
     useEffect(() => {
+        console.log("useEffect ran");
+
         const fetchSupplierDetails = async () => {
             try {
                 const res = await fetch(`/api/supplier/${id}`);
@@ -75,6 +77,8 @@ const SupplierDetails = () => {
                 }
 
                 dispatch(setSupplierState(data));
+                console.log(data)
+
                 setIsLoadingState(false);
             } catch (err) {
                 setErrorState(err.message);
@@ -310,6 +314,7 @@ const SupplierDetails = () => {
         return (<div>Error: {errorState}</div>);
     }
 
+
     return (
         <div className="container mt-5">
             <div className="card">
@@ -338,6 +343,7 @@ const SupplierDetails = () => {
             { archiveModal }
         </div>
     );
+
 }
 
 export default SupplierDetails;
