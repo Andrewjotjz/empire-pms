@@ -83,6 +83,15 @@ const EmployeeDetails = () => {
     }, [id, dispatch]);
 
     //Display DOM
+    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+
+    if (errorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
+    }
+
     const employeeDetails = (
         <div className="card-body border-1 mx-1 rounded-sm relative">
             <div className="absolute right-4">
@@ -158,15 +167,6 @@ const EmployeeDetails = () => {
 
     const employeeProjectsTable = ( <div className="border rounded-sm">some projects data...</div> )
     
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
-
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
-            return(<div><SessionExpired /></div>)
-        }
-        return (<div>Error: {errorState}</div>);
-    }
-
     return (
         <div className="container mt-5">
         <div className="card">

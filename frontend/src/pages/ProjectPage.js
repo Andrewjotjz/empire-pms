@@ -75,6 +75,7 @@ const Project = () => {
                         <th scope="col">Name</th>
                         <th scope="col">Address</th>
                         <th scope="col">Suppliers</th>
+                        <th scope="col">Contacts</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -90,13 +91,7 @@ const Project = () => {
                                     </div>
                                 ))}
                             </td>
-                            {/* <td>
-                                {project.employees.map((employee,index) => (
-                                    <div key={index}>
-                                        {`${employee.employee_first_name} ${employee.employee_last_name}`}
-                                    </div>
-                                ))}
-                            </td> */}
+                            <td>Click to see more...</td>
                         </tr>
                     ))}
                 </tbody>

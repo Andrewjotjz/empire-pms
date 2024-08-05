@@ -62,8 +62,6 @@ const SupplierDetails = () => {
     
     //Render component
     useEffect(() => {
-        console.log("useEffect ran");
-
         const fetchSupplierDetails = async () => {
             try {
                 const res = await fetch(`/api/supplier/${id}`);
@@ -77,7 +75,6 @@ const SupplierDetails = () => {
                 }
 
                 dispatch(setSupplierState(data));
-                console.log(data)
 
                 setIsLoadingState(false);
             } catch (err) {
@@ -114,6 +111,16 @@ const SupplierDetails = () => {
     }, [id, dispatch]);
 
     // Display DOM
+    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+
+    if (errorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
+    }
+
+    
     const supplierProjectsTable = ( <>some projects data...</> )
 
     const supplierPurchaseOrdersTable = ( <>some purchase orders data...</> )
@@ -304,16 +311,6 @@ const SupplierDetails = () => {
     ): (
         <div className='border'>Supplier API fetched successfully, but it might be empty...</div>
     );
-
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
-
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
-            return(<div><SessionExpired /></div>)
-        }
-        return (<div>Error: {errorState}</div>);
-    }
-
 
     return (
         <div className="container mt-5">

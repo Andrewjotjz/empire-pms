@@ -22,6 +22,7 @@ import UpdateSupplierForm from "./pages/forms/UpdateSupplierForm";
 import NewSupplierForm from "./pages/forms/NewSupplierForm";
 import ProductDetails from "./pages/ProductDetails";
 import NewProductForm from "./pages/forms/NewProductForm";
+import NewProjectForm from "./pages/forms/NewProjectForm";
 
 function App() {
   //App state declaration
@@ -44,6 +45,7 @@ function App() {
             <Route path="/EmpirePMS/project" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectPage />} />
             <Route path="/EmpirePMS/account" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <AccountPage />} />
             <Route path="/EmpirePMS/project/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectDetails />} />
+            <Route path="/EmpirePMS/project/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewProjectForm />} />
             <Route path="/EmpirePMS/supplier" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierPage />} />
             <Route path="/EmpirePMS/supplier/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierDetails />} />
             <Route path="/EmpirePMS/supplier/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateSupplierForm />} />

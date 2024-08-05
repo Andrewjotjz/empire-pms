@@ -90,7 +90,7 @@ const NewProductForm = () => {
 
         if (!productDetailsState.projects.length > 0){
             // push toast to notify successful creation
-            toast.error(`You must select one or more projects taht this new product applies to`, {
+            toast.error(`You must select one or more projects that this new product applies to`, {
                 position: "bottom-right"
             });
             return;
@@ -111,7 +111,14 @@ const NewProductForm = () => {
                 return; // exit the function if adding alias fails
             }
         }
-        await addProduct(productDetailsState, supplierId);
+
+        try {
+            await addProduct(productDetailsState, supplierId);
+            } catch (error) {
+            toast.error(`Failed to add product: ${error.message}`, {
+                position: "bottom-right"
+            });
+        }
     };
     
 

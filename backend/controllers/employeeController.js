@@ -39,7 +39,6 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-
 const maxAge = 60 * 60; //60 minutes in seconds
 const createToken = (id) => {
     //header&payload + secret = signature
@@ -49,7 +48,6 @@ const createToken = (id) => {
     expiresIn: maxAge
   });
 };
-
 
 //Controller function - POST to login employee
 const loginEmployee = async (req,res) => {
@@ -69,7 +67,6 @@ const loginEmployee = async (req,res) => {
         res.status(400).json({errors});
     }
 }
-
 
 //Controller function - GET all employees
 const getAllEmployees = async (req, res) => {
@@ -130,7 +127,6 @@ const createNewEmployee = async (req, res) => {
         res.status(400).json({error: error.message})
     }
 }
-
 
 //Controller function - PUT to update a single employee
 const updateSingleEmployee = async (req,res) => {
@@ -215,7 +211,6 @@ const deleteSingleEmployee = async (req,res) => {
         res.status(200).json(Employee)
     }
 }
-
 
 // POST send password reset email
 const sendPasswordResetEmail = async (req, res) => {
@@ -353,7 +348,6 @@ const resetEmployeePassword = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 };
-
 
 //Controller function - GET to logout employee
 const logoutEmployee = (req,res) => {

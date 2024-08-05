@@ -2,14 +2,23 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { Modal, Button } from "react-bootstrap";
 //! import { setEmployeeDetails } from '../redux/employeeSlice';
 //! import { toast } from 'react-toastify';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import Dropdown from "react-bootstrap/Dropdown"
 import { setProjects } from '../redux/projectSlice';
+import { useUpdateProject } from '../hooks/useUpdateProject';
 
 const ProjectDetails = () => {
+    //Component router
+    const { id } = useParams();
+    const navigate = useNavigate();
+
+    //Component hooks
+    const { updateProject } = useUpdateProject();
+
     //Component state declaration
     //! const employeeState = useSelector((state) => state.employeeReducer.employeeState)
     // !
@@ -17,27 +26,38 @@ const ProjectDetails = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('projectDetailsTab');
 
-    //Component router
-    const { id } = useParams();
-    const navigate = useNavigate();
-
     //Component functions and variables
+    //!
+    const handleArchive = () => {    
+        let updatedState;
+        if (projectState.project_isarchived === true) {
+            updatedState = {
+                ...projectState,
+                project_isarchived: false,
+            };
+        } else {
+            updatedState = {
+                ...projectState,
+                project_isarchived: true,
+            };
+        }
+    
+        dispatch(setProjects(updatedState));
+
+        updateProject(updatedState, `Project has been ${projectState.project_isarchived ? `unarchived` : `archived`}`);
+
+        setShowModal(false);
+    };
+    
     const handleSupplierTableClick = (supplierID) => {
         navigate(`/EmpirePMS/supplier/${supplierID}`)
     }
 
-    const handleAddSupplierClick = () => {
-        return
-    }
-
     const handleEmployeeTableClick = (employeeID) => {
         navigate(`/EmpirePMS/employee/${employeeID}`)
-    }
-
-    const handleAddEmployeeClick = () => {
-        return
     }
 
     const handleEditClick = () => navigate(`/EmpirePMS/project/${id}/edit`, { state: id });
@@ -94,13 +114,13 @@ const ProjectDetails = () => {
                                 <label>EDIT PROJECT</label>
                             </div>
                         </Dropdown.Item>
-                        <Dropdown.Item onClick={() => {}}>
+                        <Dropdown.Item onClick={() => setShowModal(true)}>
                             <div className='flex items-center'>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 mr-2">
-                                    <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
-                                    <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                    <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3Z" />
+                                    <path fillRule="evenodd" d="M13 6H3v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6ZM8.75 7.75a.75.75 0 0 0-1.5 0v2.69L6.03 9.22a.75.75 0 0 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.06 0l2.5-2.5a.75.75 0 1 0-1.06-1.06l-1.22 1.22V7.75Z" clipRule="evenodd" />
                                 </svg>
-                                <label>PLACEHOLDER</label>
+                                <label>{ projectState.project_isarchived ? `UNARCHIVE` : `ARCHIVE`}</label>
                             </div>
                         </Dropdown.Item>
                         <Dropdown.Item onClick={() => {}}>
@@ -133,6 +153,28 @@ const ProjectDetails = () => {
             </div>
         </div>
     )
+    
+    //!
+    const archiveModal = (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { projectState && projectState.project_isarchived ? `Confirm Unarchive` : `Confirm Archive`}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { projectState && projectState.project_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Cancel
+                </Button>
+                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
+                    { projectState && projectState.project_isarchived ? `Unarchive` : `Archive`}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
 
     const employeesTab = Array.isArray(projectState.employees) && projectState.employees.length > 0 ? (
         <div className="border rounded-sm">
@@ -158,7 +200,7 @@ const ProjectDetails = () => {
                     ))}
                 </tbody>
             </table>
-            <button className="btn btn-primary m-1" onClick={handleAddEmployeeClick}>
+            <button className="btn btn-primary m-1" onClick={handleEditClick}>
                 <div className='flex items-center'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -172,7 +214,7 @@ const ProjectDetails = () => {
             <div className='m-1'>
                 <label className='text-xl'>No employees found in this project.</label>
             </div>
-            <button className="btn btn-primary m-1" onClick={handleAddEmployeeClick}>
+            <button className="btn btn-primary m-1" onClick={handleEditClick}>
                 <div className='flex items-center'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -233,13 +275,21 @@ const ProjectDetails = () => {
                     ))}
                 </tbody>
             </table>
+            <button className="btn btn-primary m-1" onClick={handleEditClick}>
+                <div className='flex items-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <label>ASSIGN SUPPLIERS</label>
+                </div>
+            </button>
         </div>
     ) : (
         <div className='border'>
             <div className='m-1'>
                 <label className='text-xl'>No suppliers found in this project.</label>
             </div>
-            <button className="btn btn-primary m-1" onClick={handleAddSupplierClick}>
+            <button className="btn btn-primary m-1" onClick={handleEditClick}>
                 <div className='flex items-center'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -254,28 +304,29 @@ const ProjectDetails = () => {
 
     return (
         <div className="container mt-5">
-        <div className="card">
-            <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <button onClick={() => {navigate("/EmpirePMS/project")}}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
-                        </svg>
-                    </button>
-                    <h1 className='mx-auto uppercase font-bold text-xl'>PROJECT: {projectState.project_name}</h1>
+            <div className="card">
+                <div className="card-header bg-dark text-white flex justify-between items-center">
+                        <button onClick={() => {navigate("/EmpirePMS/project")}}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
+                            </svg>
+                        </button>
+                        <h1 className='mx-auto uppercase font-bold text-xl'>PROJECT: {projectState.project_name}</h1>
+                    </div>
+                <div className="card-body">
+                    <div>
+                        <button className={`${currentTab === 'projectDetailsTab' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('projectDetailsTab')}>Details</button>
+                        <button className={`${currentTab === 'employeesTab' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('employeesTab')}>Contacts</button>
+                        <button className={`${currentTab === 'suppliersTab' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('suppliersTab')}>Suppliers</button>
+                    </div>
+                        {/* SWITCH BETWEEN COMPONENTS HERE */}
+                        {currentTab === 'projectDetailsTab' && projectDetailsTab}
+                        {currentTab === 'employeesTab' && employeesTab}
+                        {currentTab === 'suppliersTab' && suppliersTab}
                 </div>
-            <div className="card-body">
-                <div>
-                    <button className={`${currentTab === 'projectDetailsTab' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('projectDetailsTab')}>Details</button>
-                    <button className={`${currentTab === 'employeesTab' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('employeesTab')}>Employees</button>
-                    <button className={`${currentTab === 'suppliersTab' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('suppliersTab')}>Suppliers</button>
-                </div>
-                    {/* SWITCH BETWEEN COMPONENTS HERE */}
-                    {currentTab === 'projectDetailsTab' && projectDetailsTab}
-                    {currentTab === 'employeesTab' && employeesTab}
-                    {currentTab === 'suppliersTab' && suppliersTab}
             </div>
+            { archiveModal }
         </div>
-    </div>
     );
 };
 

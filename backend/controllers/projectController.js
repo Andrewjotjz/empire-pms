@@ -1,6 +1,6 @@
 //import modules
 const projectModel = require('../models/projectModel');
-const employeeModel = require('../models/employeeModel');
+const employeeModel = require('../models/EmployeeModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Projects
