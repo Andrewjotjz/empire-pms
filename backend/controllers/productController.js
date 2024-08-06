@@ -1,6 +1,7 @@
 //import modules
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
+const aliasModel = require('../models/AliasModel')
 const mongoose = require('mongoose');
 
 // Helper function to fetch products by type
@@ -123,29 +124,48 @@ const createNewProduct = async (req, res) => {
     // destructure all relevant attributes in new Product object
     const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
 
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
+        if (!mongoose.Types.ObjectId.isValid(alias)){
+            const newAlias = new aliasModel({
+                alias_name: alias
+            })
+            await newAlias.save({session});
 
-        const Product = await productModel.create({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
-            supplier, alias, price_fixed, product_isarchived });
+            const newProduct = new productModel({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+                supplier, alias: newAlias._id, price_fixed, product_isarchived })
+            await newProduct.save({session})
 
-        // Get product object id then insert Price Info into productPrice table
-        // Need to add verification when it exist product price
-        if (product_price_unit_a != null){
+            const newProductPrice = new productPriceModel({ product_id: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+                product_price_unit_b, price_fixed, product_effective_date, projects })
+            await newProductPrice.save({session})
+            
+            await session.commitTransaction();
+            session.endSession();
 
-            const product_id = Product._id;
-            const ProductPrice = await productPriceModel.create({ product_id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-                product_price_unit_b, price_fixed, product_effective_date, projects });
+            res.status(200).json({ newProduct, newProductPrice });
+        }
+        else {
+            const newProduct = new productModel({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+                supplier, alias, price_fixed, product_isarchived })
+            await newProduct.save({session})
 
-            res.status(200).json({ Product, ProductPrice });
-        }else{
-            //invoke 'res' object method: status() and json(), pass relevant data to them
-            res.status(200).json(Product);
+            const newProductPrice = new productPriceModel({ product_id: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+                product_price_unit_b, price_fixed, product_effective_date, projects })
+            await newProductPrice.save({session})
+            
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({ newProduct, newProductPrice });
         }
     }
     catch (error) {
-        //if Company creation has error, pass error object and 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
+        await session.abortTransaction();
+        session.endSession();
+
         //! DESIGN 400 PAGE
         res.status(400).json({error: error.message});
     }

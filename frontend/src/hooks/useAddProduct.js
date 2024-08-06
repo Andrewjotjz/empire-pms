@@ -51,7 +51,7 @@ export const useAddProduct = () => {
                 setIsLoadingState(false);
             }
         }
-        return postProduct();
+        postProduct();
     }
 
     return { addProduct, isLoadingState, errorState };

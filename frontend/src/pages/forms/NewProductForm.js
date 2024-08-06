@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useAddProduct } from '../../hooks/useAddProduct'; 
-import { useAddAlias } from '../../hooks/useAddAlias'; 
 import { useFetchProductsByType } from '../../hooks/useFetchProductsByType'
 import { clearAliases } from '../../redux/aliasSlice';
 import { setProjects } from '../../redux/projectSlice';
@@ -22,7 +21,6 @@ const NewProductForm = () => {
     const dispatch = useDispatch();
     const { fetchProductsByType, productTypeIsLoadingState, productTypeErrorState } = useFetchProductsByType();
     const { addProduct, productIsLoadingState, productErrorState } = useAddProduct();
-    const { addAlias, aliasIsLoadingState, aliasErrorState } = useAddAlias();
 
     // Component state
     const aliasState = useSelector((state) => state.aliasReducer.aliasState)
@@ -30,7 +28,6 @@ const NewProductForm = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [aliasFieldToggle, setAliasFieldToggle] = useState(true);
-    const [customAliasState, setCustomAliasState] = useState('')
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isInputCustomOpen, setIsInputCustomOpen] = useState(false);
     const [productDetailsState, setProductDetailsState] = useState({
@@ -56,6 +53,14 @@ const NewProductForm = () => {
 
     // Component functions and variables
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`, {state: supplierId});
+
+    const handleInputCustomToggle = () => {
+        setIsInputCustomOpen(!isInputCustomOpen)
+        setProductDetailsState((prevState) => ({
+            ...prevState,
+            alias: ''
+        }))
+    }
 
     const handleProductInputChange = (event) => {
         const { name, value } = event.target;
@@ -96,29 +101,7 @@ const NewProductForm = () => {
             return;
         }
 
-        if (isInputCustomOpen) {
-            try {
-                let newAliasID = await addAlias(customAliasState);
-                setProductDetailsState((prevState) => ({
-                    ...prevState,
-                    alias: newAliasID
-                }));
-            } catch (error) {
-                // push toast to notify successful creation
-                toast.error(error.message, {
-                    position: "bottom-right"
-                });
-                return; // exit the function if adding alias fails
-            }
-        }
-
-        try {
-            await addProduct(productDetailsState, supplierId);
-            } catch (error) {
-            toast.error(`Failed to add product: ${error.message}`, {
-                position: "bottom-right"
-            });
-        }
+        addProduct(productDetailsState, supplierId);
     };
     
 
@@ -162,11 +145,11 @@ const NewProductForm = () => {
 
 
     // Display DOM
-    if (productTypeIsLoadingState || productIsLoadingState || aliasIsLoadingState) {
+    if (productTypeIsLoadingState || productIsLoadingState) {
         return <EmployeeDetailsSkeleton />;
     }
 
-    if (productTypeErrorState || productErrorState || aliasErrorState) {
+    if (productTypeErrorState || productErrorState ) {
         if (productErrorState.includes("Session expired") || productErrorState.includes("jwt expired")) {
             return <div><SessionExpired /></div>;
         }
@@ -278,22 +261,23 @@ const NewProductForm = () => {
                                             })
                                     }
                                 </select>
-                                <label className='text-xs italic text-gray-400'>Set alias to ('na') if not available or create custom alias <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => setIsInputCustomOpen(!isInputCustomOpen)}>here</span></label>
+                                <label className='text-xs italic text-gray-400'>Set alias to ('na') if not available or create custom alias <span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleInputCustomToggle}>here</span></label>
                             </div>}
                             { isInputCustomOpen && <div>
                                 <input 
                                     type='text'
                                     className="form-control" 
                                     name="alias" 
-                                    value={customAliasState} 
-                                    onChange={(e) => setCustomAliasState(e.target.value)}
+                                    value={productDetailsState.alias} 
+                                    placeholder='custom alias...'
+                                    onChange={handleProductInputChange}
                                     onInvalid={(e) => e.target.setCustomValidity('Enter a new custom alias')}
                                     onInput={(e) => e.target.setCustomValidity('')}
                                 />
-                                <label className='text-xs italic text-gray-400'>Don't want to create custom alias? <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => setIsInputCustomOpen(!isInputCustomOpen)}>Cancel</span></label>
+                                <label className='text-xs italic text-gray-400'>Don't want to create custom alias? <span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleInputCustomToggle}>Cancel</span></label>
                             </div>}
                         </div>
-                        {/***************************** END *************************/}
+                        {/***************************** ALIAS TABLE END *************************/}
 
                         {/* PRODUCT PRICE TABLE */}
                         <div className='grid grid-cols-2 gap-32 border-4 rounded p-3 mb-1'>
@@ -402,6 +386,7 @@ const NewProductForm = () => {
                                 </div>
                             </div>
                         </div>
+                        {/* ********************************************* PRODUCT PRICE END *********************************************** */}
                         <div>
                             <div className="col-md-6 mb-3">
                                 <label className="form-label font-bold">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
@@ -418,7 +403,7 @@ const NewProductForm = () => {
                                 />
                             </div>
 
-                                {/* ****************************************************************************************************** */}
+                                {/* ********************************************* PROJECT DROPDOWN START *********************************************** */}
                             <div className="col-md-6 mb-3">
                                 <label className="block font-bold mb-2">*Project:</label>
                                 <div>
@@ -454,7 +439,7 @@ const NewProductForm = () => {
                                 </div>
                                 <p className='text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product applies to</p>
                             </div>
-                                {/* ****************************************************************************************************** */}
+                                {/* ******************************************** PROJECT DROPDOWN END ********************************************************** */}
 
 
                             <div className="col-md-6 mb-3">
@@ -479,7 +464,7 @@ const NewProductForm = () => {
                             </div>
                         </div>
 
-                        {/* END */}
+                        {/* ******************************************* END OF FORM ********************************************************** */}
                         <div className="d-flex justify-content-between mb-3">
                             <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
                             <button className="btn btn-primary" type="submit">ADD TO COMPANY</button>
