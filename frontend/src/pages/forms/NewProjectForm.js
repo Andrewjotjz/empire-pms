@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAddProject } from '../../hooks/useAddProject'; 
-import { toast } from 'react-toastify';
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import { setSupplierState } from '../../redux/supplierSlice';
@@ -168,7 +167,7 @@ const NewProjectForm = () => {
                                     </div>
                                 )}
                             </div>
-                            <p className='text-xs italic text-gray-400 mt-2'>Assign one or more projects to this new project</p>
+                            <p className='text-xs italic text-gray-400 mt-2'>Assign one or more suppliers to this new project</p>
                         </div>
                             {/* ****************************************************************************************************** */}
                         <div className="d-flex justify-content-between mb-3">

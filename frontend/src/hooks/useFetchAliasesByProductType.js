@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { setAliases } from '../redux/aliasSlice';
 
-export const useFetchProductsByType = () => {
+export const useFetchAliasesByProductType = () => {
     //Component's hook state declaration
     const [isLoadingState, setIsLoadingState] = useState(false);
     const [errorState, setErrorState] = useState(null);
@@ -12,11 +12,11 @@ export const useFetchProductsByType = () => {
     const dispatch = useDispatch();
 
     //Component's function
-    const fetchProductsByType = async (productType) => {
+    const fetchAliasesByProductType = async (productType) => {
         setIsLoadingState(true)
         setErrorState(null)
 
-        const getProductsByType = async () => {
+        const getAliasesByProductType = async () => {
             try {
                 const res = await fetch(`/api/product/type/${productType}`, {
                     method: 'GET',
@@ -30,7 +30,7 @@ export const useFetchProductsByType = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to POST new employee details')
+                    throw new Error('Failed to GET aliases by product type')
                 }
                 if (res.ok) {
                     //store filtered data to productState
@@ -41,8 +41,8 @@ export const useFetchProductsByType = () => {
                 setIsLoadingState(false);
             }
         }
-        getProductsByType();
+        getAliasesByProductType();
     }
 
-    return { fetchProductsByType, isLoadingState, errorState };
+    return { fetchAliasesByProductType, isLoadingState, errorState };
 }

@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useAddProduct } from '../../hooks/useAddProduct'; 
-import { useFetchProductsByType } from '../../hooks/useFetchProductsByType'
+import { useFetchAliasesByProductType } from '../../hooks/useFetchAliasesByProductType'
 import { clearAliases } from '../../redux/aliasSlice';
 import { setProjects } from '../../redux/projectSlice';
 import EmployeePageSkeleton from "../../pages/loaders/EmployeePageSkeleton"
@@ -19,7 +19,7 @@ const NewProductForm = () => {
 
     // Component hook
     const dispatch = useDispatch();
-    const { fetchProductsByType, productTypeIsLoadingState, productTypeErrorState } = useFetchProductsByType();
+    const { fetchAliasesByProductType, productTypeIsLoadingState, productTypeErrorState } = useFetchAliasesByProductType();
     const { addProduct, productIsLoadingState, productErrorState } = useAddProduct();
 
     // Component state
@@ -46,7 +46,7 @@ const NewProductForm = () => {
         product_number_b: '',
         product_price_unit_b: '',
         price_fixed: false,
-        product_effective_date: Date.now(),
+        product_effective_date: '',
         projects: []
 
     });
@@ -66,7 +66,7 @@ const NewProductForm = () => {
         const { name, value } = event.target;
         if (name === 'product_types'){
             if (value !== ''){
-                fetchProductsByType(value)
+                fetchAliasesByProductType(value)
                 setAliasFieldToggle(false);
             }
             else {
@@ -210,7 +210,7 @@ const NewProductForm = () => {
                         <div className="col-md-6 mb-3">
                             <label className="form-label font-bold">*Type:</label>
                             <select 
-                                className="form-control"
+                                className="form-control shadow-sm cursor-pointer"
                                 name="product_types" 
                                 value={productDetailsState.product_types} 
                                 onChange={handleProductInputChange}
@@ -245,7 +245,7 @@ const NewProductForm = () => {
                             <label className="form-label font-bold">*Alias:</label>
                             { !isInputCustomOpen && <div>
                                 <select 
-                                    className="form-control"
+                                    className="form-control shadow-sm cursor-pointer"
                                     name="alias"
                                     onChange={handleProductInputChange}
                                     disabled={aliasFieldToggle}
@@ -279,8 +279,8 @@ const NewProductForm = () => {
                         </div>
                         {/***************************** ALIAS TABLE END *************************/}
 
-                        {/* PRODUCT PRICE TABLE */}
-                        <div className='grid grid-cols-2 gap-32 border-4 rounded p-3 mb-1'>
+                        {/* ********************************************* PRODUCT PRICE TABLE *********************************************** */}
+                        <div className='grid grid-cols-3 gap-x-10 gap-y-4 border-4 rounded p-3 mb-1'>
                             <div className='border-2 rounded p-2'>
                                 <div className="mb-3">
                                     <label className="form-label font-bold">*Number-A:</label>
@@ -385,26 +385,8 @@ const NewProductForm = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {/* ********************************************* PRODUCT PRICE END *********************************************** */}
-                        <div>
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label font-bold">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
-                                <input 
-                                    type='number'
-                                    className="form-control" 
-                                    name="product_actual_size" 
-                                    value={productDetailsState.product_actual_size} 
-                                    onChange={handleProductInputChange}
-                                    step="0.001"  // Allows input with up to three decimal places
-                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                    min={1}
-                                    required
-                                />
-                            </div>
-
-                                {/* ********************************************* PROJECT DROPDOWN START *********************************************** */}
-                            <div className="col-md-6 mb-3">
+                            {/* ***** PROJECT DROPDOWN START ****** */}
+                            <div className="mb-3">
                                 <label className="block font-bold mb-2">*Project:</label>
                                 <div>
                                     <button
@@ -415,7 +397,7 @@ const NewProductForm = () => {
                                         {productDetailsState.projects.length > 0 ? `x${productDetailsState.projects.length} Projects Selected` : `Select Projects`}
                                     </button>
                                     {isDropdownOpen && (
-                                        <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                        <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto" onMouseLeave={() => setIsDropdownOpen(false)}>
                                             <ul className="py-1">
                                                 {projectState && projectState.length > 0 && projectState.map((project, index) => (
                                                     <li key={index} className="flex items-center px-4 py-2 hover:bg-gray-100">
@@ -437,10 +419,47 @@ const NewProductForm = () => {
                                         </div>
                                     )}
                                 </div>
-                                <p className='text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product applies to</p>
+                                <p className='text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product price applies to</p>
                             </div>
-                                {/* ******************************************** PROJECT DROPDOWN END ********************************************************** */}
-
+                            {/* ***** PRICE FIXED? START ****** */}
+                            <div>
+                                <label className="form-label font-bold">Price effective date:</label>
+                                <input 
+                                    type='date'
+                                    className="form-control" 
+                                    name="product_effective_date" 
+                                    value={productDetailsState.product_effective_date}
+                                    onChange={handleProductInputChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label font-bold">Price fixed(?):</label>
+                                <input 
+                                        type="checkbox"
+                                        className="form-check-input m-1" 
+                                        name="price_fixed" 
+                                        checked={productDetailsState.price_fixed} 
+                                        onChange={(e) => handleProductInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
+                                    />
+                            </div>
+                        </div>
+                        {/* ********************************************* PRODUCT PRICE END *********************************************** */}
+                        <div>
+                            <div className="col-md-6 mb-3">
+                                <label className="form-label font-bold">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control" 
+                                    name="product_actual_size" 
+                                    value={productDetailsState.product_actual_size} 
+                                    onChange={handleProductInputChange}
+                                    step="0.001"  // Allows input with up to three decimal places
+                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
+                                    min={1}
+                                    required
+                                />
+                            </div>
 
                             <div className="col-md-6 mb-3">
                                 <label className="form-label font-bold">Next available stock date:</label>
@@ -451,16 +470,6 @@ const NewProductForm = () => {
                                     value={productDetailsState.product_next_available_stock_date}
                                     onChange={handleProductInputChange}
                                 />
-                            </div>
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label font-bold">Price fixed(?):</label>
-                                <input 
-                                        type="checkbox"
-                                        className="form-check-input m-1" 
-                                        name="price_fixed" 
-                                        checked={productDetailsState.price_fixed} 
-                                        onChange={(e) => handleProductInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
-                                    />
                             </div>
                         </div>
 
