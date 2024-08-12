@@ -54,15 +54,23 @@ const UpdateProductForm = () => {
     })
 
     // Component functions and variables
-    const formatDateString = (dateString) => {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
-        const day = date.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
     const handleBackClick = () => navigate(-1);
+
+    const handleAbortNewPrice = () => {
+        setIsShowNewPriceForm(!isShowNewPriceForm)
+        setNewProductPriceState({
+            product_id: productId,
+            product_unit_a: '',
+            product_number_a: '',
+            product_price_unit_a: '',
+            product_unit_b: '',
+            product_number_b: '',
+            product_price_unit_b: '',
+            price_fixed: false,
+            product_effective_date: '',
+            projects: []
+        })
+    }
 
     const handleCreateNewPrice = () => {
         setIsShowNewPriceForm(!isShowNewPriceForm)
@@ -528,8 +536,8 @@ const UpdateProductForm = () => {
                                         type="checkbox"
                                         className="form-check-input m-1" 
                                         name="price_fixed" 
-                                        checked={productState.price_fixed} 
-                                        onChange={(e) => handleProductInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
+                                        checked={productPriceState.price_fixed} 
+                                        onChange={(e) => handlePriceInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
                                     />
                             </div>
                         </div>
@@ -676,7 +684,7 @@ const UpdateProductForm = () => {
                                 </div>
                                 <p className='text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product applies to</p>
                             </div>
-                            {/* **** PROJECT DROPDOWN END **** */}
+                            {/* **** PRICE EFFECTIVE DATE **** */}
                             <div>
                                 <label className="form-label font-bold">Price effective date:</label>
                                 <input 
@@ -687,6 +695,7 @@ const UpdateProductForm = () => {
                                     onChange={handleNewPriceInputChange}
                                 />
                             </div>
+                            {/* **** PRICE FIXED (?) **** */}
                             <div>
                                 <label className="form-label font-bold">Price fixed(?):</label>
                                 <input 
@@ -716,7 +725,7 @@ const UpdateProductForm = () => {
                         {isShowNewPriceForm &&
                             <div className='grid grid-cols-3'>
                                 <label className='col-start-2 text-center text-xs italic text-gray-400 mb-2'>
-                                    <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => setIsShowNewPriceForm(!isShowNewPriceForm)} >Abort</span> creating new price and reset to original
+                                    <span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleAbortNewPrice} >Abort</span> creating new price and reset to original
                                 </label>
                             </div>
                         }
@@ -743,7 +752,7 @@ const UpdateProductForm = () => {
                                     type='date'
                                     className="form-control" 
                                     name="product_next_available_stock_date" 
-                                    value={productState.product_next_available_stock_date}
+                                    defaultValue={productState.product_next_available_stock_date}
                                     onChange={handleProductInputChange}
                                 />
                             </div>

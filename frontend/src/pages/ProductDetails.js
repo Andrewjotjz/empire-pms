@@ -11,6 +11,7 @@ import Dropdown from "react-bootstrap/Dropdown"
 const ProductDetails = () => {
     //Component state declaration
     const productState = useSelector((state) => state.productReducer.productState)
+    const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
@@ -29,6 +30,7 @@ const ProductDetails = () => {
     const handleEditProductClick = () => {
         dispatch(setProductState(productState[0].product))
         dispatch(setProductPrice(productState[0].productPrice))
+        dispatch(setProductPrice({...productPriceState, product_effective_date: productPriceState.product_effective_date.split('T')[0]}))
         navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId });
     }
 
