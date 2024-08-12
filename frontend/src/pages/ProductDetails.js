@@ -11,7 +11,7 @@ import Dropdown from "react-bootstrap/Dropdown"
 const ProductDetails = () => {
     //Component state declaration
     const productState = useSelector((state) => state.productReducer.productState)
-    const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState)
+    // const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
@@ -28,11 +28,25 @@ const ProductDetails = () => {
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`);
 
     const handleEditProductClick = () => {
-        dispatch(setProductState(productState[0].product))
-        dispatch(setProductPrice(productState[0].productPrice))
-        dispatch(setProductPrice({...productPriceState, product_effective_date: productPriceState.product_effective_date.split('T')[0]}))
+        if (productState && productState.length > 0) {
+            const modifiedProductState = {
+                ...productState[0].product,
+                product_next_available_stock_date: productState[0].product.product_next_available_stock_date.split('T')[0]
+            }
+            dispatch(setProductState(modifiedProductState));
+        }
+    
+        if (productState[0].productPrice && productState[0].productPrice.product_effective_date) {
+            const modifiedProductPriceState = {
+                ...productState[0].productPrice,
+                product_effective_date: productState[0].productPrice.product_effective_date.split('T')[0],
+            };
+            dispatch(setProductPrice(modifiedProductPriceState));
+        }
+    
         navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId });
-    }
+    };
+    
 
     //Render component
     useEffect(() => {

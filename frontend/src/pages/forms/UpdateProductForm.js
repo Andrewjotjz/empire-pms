@@ -52,7 +52,6 @@ const UpdateProductForm = () => {
         product_effective_date: '',
         projects: []
     })
-
     // Component functions and variables
     const handleBackClick = () => navigate(-1);
 
@@ -218,7 +217,6 @@ const UpdateProductForm = () => {
             abortController.abort(); // Cleanup
         };
     }, [dispatch]);
-
 
     // Display DOM
     if (productTypeIsLoadingState || productIsLoadingState) {
