@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 
-export const useUpdateSupplier = () => {
+export const useUpdateProject = () => {
     //Component's hook state declaration
     const [isLoadingState, setIsLoadingState] = useState(false);
     const [errorState, setErrorState] = useState(null);
@@ -12,16 +12,16 @@ export const useUpdateSupplier = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const update = async (supplierState, message) => {
+    const updateProject = async (projectState, message) => {
         setIsLoadingState(true)
         setErrorState(null)
 
-        const putSupplier = async () => {
+        const putProject = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierState._id}`, {
+                const res = await fetch(`/api/project/${projectState._id}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({...supplierState})
+                    body: JSON.stringify({...projectState})
                 })
 
                 const promise = await res.json();
@@ -31,14 +31,14 @@ export const useUpdateSupplier = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to PUT supplier details')
+                    throw new Error('Failed to PUT project details')
                 }
                 if (res.ok) {
                     // navigate client to dashboard page
-                    navigate(`/EmpirePMS/supplier/${supplierState._id}`)
+                    navigate(`/EmpirePMS/project/${projectState._id}`)
                 
                     // push toast to notify successful login
-                    toast.success(message ? message: "Supplier updated successfully", {
+                    toast.success(message ? message: "Project updated successfully", {
                         position: "bottom-right"
                     });
                 
@@ -51,8 +51,8 @@ export const useUpdateSupplier = () => {
                 setIsLoadingState(false);
             }
         }
-        putSupplier();
+        putProject();
     }
 
-    return { update, isLoadingState, errorState };
+    return { updateProject, isLoadingState, errorState };
 }

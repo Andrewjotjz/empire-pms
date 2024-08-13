@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 
-export const useUpdateSupplier = () => {
+export const useUpdateProduct = () => {
     //Component's hook state declaration
     const [isLoadingState, setIsLoadingState] = useState(false);
     const [errorState, setErrorState] = useState(null);
@@ -12,16 +12,18 @@ export const useUpdateSupplier = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const update = async (supplierState, message) => {
+    const updateProduct = async (productState, productPriceState, productId, productPriceId) => {
         setIsLoadingState(true)
         setErrorState(null)
 
-        const putSupplier = async () => {
+        //! console.log("||productState: ",productState, "\n||productPriceState", productPriceState, "\n||productId", productId, "\n||productPriceId", productPriceId)
+
+        const putProduct = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierState._id}`, {
+                const res = await fetch(`/api/product/${productId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({...supplierState})
+                    body: JSON.stringify({productState, productPriceState, productPriceId})
                 })
 
                 const promise = await res.json();
@@ -31,14 +33,14 @@ export const useUpdateSupplier = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to PUT supplier details')
+                    throw new Error('Failed to PUT product details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
-                    navigate(`/EmpirePMS/supplier/${supplierState._id}`)
+                    // navigate client to supplier page
+                    navigate(-1)
                 
                     // push toast to notify successful login
-                    toast.success(message ? message: "Supplier updated successfully", {
+                    toast.success("Product updated successfully", {
                         position: "bottom-right"
                     });
                 
@@ -51,8 +53,8 @@ export const useUpdateSupplier = () => {
                 setIsLoadingState(false);
             }
         }
-        putSupplier();
+        putProduct();
     }
 
-    return { update, isLoadingState, errorState };
+    return { updateProduct, isLoadingState, errorState };
 }

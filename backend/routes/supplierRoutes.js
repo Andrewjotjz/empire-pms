@@ -14,10 +14,10 @@ router.get('/', requireAuth, getAllSuppliers)
 //GET - get a single Supplier
 router.get('/:id', requireAuth, getSingleSupplier)
 
-//GET - get all products related to a single Supplier
+//!GET - get all products related to a single Supplier
 router.get('/:id/products', requireAuth, getSingleSupplierProducts)
 
-//GET - get one product data related to a single Supplier
+//!GET - get one product data related to a single Supplier
 router.get('/:id/products/:productId', requireAuth, getSingleProductBySupplier)
 
 //POST - create a new Supplier

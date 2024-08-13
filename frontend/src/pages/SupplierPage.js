@@ -12,6 +12,7 @@ const Supplier = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [isArchive, setIsArchive] = useState(false);
 
     //Component router
     const navigate = useNavigate();
@@ -24,60 +25,6 @@ const Supplier = () => {
 
     const handleTableClick = (id) => navigate(`/EmpirePMS/supplier/${id}`, { state: id });
     
-    const supplierTable = Array.isArray(supplierState) && supplierState.length > 0 ? (
-        <div className="container">
-            <table className="table table-bordered table-hover">
-                <thead className="thead-dark">
-                    <tr className="table-primary">
-                        <th scope="col">ID</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Contacts</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Address</th>
-                        <th scope="col">Payment Term</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Material Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {supplierState.map((supplier, index) => (
-                        <tr key={supplier._id} onClick={() => handleTableClick(supplier._id)}>
-                            <th scope="row">{index + 1}</th>
-                            <td>{supplier.supplier_name}</td>
-                            <td>
-                                {supplier.supplier_contacts.map(contact => (
-                                    <div key={contact._id}>
-                                        {contact.name}
-                                    </div>
-                                ))}
-                            </td>
-                            <td>
-                                {supplier.supplier_contacts.map(contact => (
-                                    <div key={contact._id}>
-                                        {contact.email}
-                                    </div>
-                                ))}
-                            </td>
-                            <td>
-                                {supplier.supplier_contacts.map(contact => (
-                                    <div key={contact._id}>
-                                        {contact.phone}
-                                    </div>
-                                ))}
-                            </td>
-                            <td>{supplier.supplier_address}</td>
-                            <td>{supplier.supplier_payment_term}</td>
-                            <td>{supplier.supplier_type}</td>
-                            <td>{supplier.supplier_material_types}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    ) : (
-        <div>Supplier API fetched successfully, but it might be empty...</div>
-    );
 
     //Render component
     useEffect(() => {
@@ -118,6 +65,61 @@ const Supplier = () => {
     }, [dispatch]);
     
     //Display DOM
+    const supplierTable = Array.isArray(supplierState) && supplierState.length > 0 ? (
+        <div className="container">
+            <table className="table table-bordered table-hover">
+                <thead className="thead-dark">
+                    <tr className="table-primary">
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Contacts</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Payment Term</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Material Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {supplierState.filter(supplier => supplier.supplier_isarchived === isArchive).map((supplier, index) => (
+                        <tr key={supplier._id} onClick={() => handleTableClick(supplier._id)} className="cursor-pointer">
+                            <th scope="row">{index + 1}</th>
+                            <td>{supplier.supplier_name}</td>
+                            <td>
+                                {supplier.supplier_contacts.map(contact => (
+                                    <div key={contact._id}>
+                                        {contact.name}
+                                    </div>
+                                ))}
+                            </td>
+                            <td>
+                                {supplier.supplier_contacts.map(contact => (
+                                    <div key={contact._id}>
+                                        {contact.email}
+                                    </div>
+                                ))}
+                            </td>
+                            <td>
+                                {supplier.supplier_contacts.map(contact => (
+                                    <div key={contact._id}>
+                                        {contact.phone}
+                                    </div>
+                                ))}
+                            </td>
+                            <td>{supplier.supplier_address}</td>
+                            <td>{supplier.supplier_payment_term}</td>
+                            <td>{supplier.supplier_type}</td>
+                            <td>{supplier.supplier_material_types}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    ) : (
+        <div>Supplier API fetched successfully, but it might be empty...</div>
+    );
+    
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
 
     if (errorState) {
@@ -130,10 +132,10 @@ const Supplier = () => {
     return (
         <div className="container mt-5"><div className="card">
                 <div className="card-header bg-dark text-white">
-                    <h1>SUPPLIERS</h1>
+                    <h1 className='mx-auto uppercase font-bold text-xl'>SUPPLIERS</h1>
                 </div>
                 <div className="card-body">
-                    <div className="row mb-3">
+                    <div className="row mb-1">
                         <div className="col-md-6">
                             <input
                                 type="text"
@@ -143,15 +145,30 @@ const Supplier = () => {
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">
                             <button className="btn btn-primary" onClick={handleAddClick}>
-                                ADD SUPPLIER
+                                <div className='flex items-center'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    <label>ADD SUPPLIER</label>
+                                </div>
                             </button>
                         </div>
                     </div>
                     <div className="row mb-3">
-                        <div className="col-md-6">
-                            <button className="btn btn-outline-dark me-2">Current</button>
-                            <button className="btn btn-outline-dark">Archived</button>
-                        </div>
+                    <div className="col-md-6">
+                        <button 
+                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} 
+                            onClick={() => setIsArchive(false)}
+                        >
+                            Current
+                        </button>
+                        <button 
+                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50'}`} 
+                            onClick={() => setIsArchive(true)}
+                        >
+                            Archived
+                        </button>
+                    </div>
                         {supplierTable}
                     </div>
                 </div>
