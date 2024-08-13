@@ -59,7 +59,11 @@ const Project = () => {
             const query = searchQuery.toLowerCase();
             return (
                 project.project_name.toLowerCase().includes(query) ||
-                project.project_address.toLowerCase().includes(query)
+                project.project_address.toLowerCase().includes(query) ||
+                project.employees.some(employee => 
+                    employee.employee_first_name.toLowerCase().includes(query) ||
+                    employee.employee_last_name.toLowerCase().includes(query) 
+                )
             );
         });
 
