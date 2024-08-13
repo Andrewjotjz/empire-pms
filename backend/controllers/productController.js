@@ -1,7 +1,48 @@
 //import modules
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
+const aliasModel = require('../models/AliasModel')
 const mongoose = require('mongoose');
+
+// Helper function to fetch products by type
+const fetchProductsByType = async (productType) => {
+    const matchCondition = {
+        'product_types': productType
+    };
+
+    const Products = await productModel.aggregate([
+        {
+            $match: matchCondition // Match the product type
+        },
+        {
+            $lookup: {
+                from: 'aliases', // Ensure this is the correct collection name
+                localField: 'alias',
+                foreignField: '_id',
+                as: 'aliasDetails'
+            }
+        },
+        { $unwind: { path: '$aliasDetails', preserveNullAndEmptyArrays: true } },
+        {
+            $project: {
+                _id: 1,
+                product_sku: 1,
+                product_name: 1,
+                product_types: 1,
+                product_actual_size: 1,
+                product_next_available_stock_date: 1,
+                supplier: 1,
+                alias: 1,
+                alias_name: '$aliasDetails.alias_name',
+                product_isarchived: 1,
+                createdAt: 1,
+                updatedAt: 1,
+            }
+        }
+    ]);
+
+    return Products;
+};
 
 //Controller function - GET all Products
 const getAllProducts = async (req, res) => {
@@ -45,49 +86,8 @@ const getSingleProduct = async (req, res) => {
     }
 }
 
-
-// Helper function to fetch products by type
-const fetchProductsByType = async (productType) => {
-    const matchCondition = {
-        'product_types': productType
-    };
-
-    const Products = await productModel.aggregate([
-        {
-            $match: matchCondition // Match the product type
-        },
-        {
-            $lookup: {
-                from: 'aliases', // Ensure this is the correct collection name
-                localField: 'alias',
-                foreignField: '_id',
-                as: 'aliasDetails'
-            }
-        },
-        { $unwind: { path: '$aliasDetails', preserveNullAndEmptyArrays: true } },
-        {
-            $project: {
-                _id: 1,
-                product_sku: 1,
-                product_name: 1,
-                product_types: 1,
-                product_actual_size: 1,
-                product_next_available_stock_date: 1,
-                supplier: 1,
-                alias: 1,
-                alias_name: '$aliasDetails.alias_name',
-                product_isarchived: 1,
-                createdAt: 1,
-                updatedAt: 1,
-            }
-        }
-    ]);
-
-    return Products;
-};
-
-
-// Controller function - GET products by type
+//! Currently not being used in routes file.
+//Controller function - GET products by type
 const getProductsByType = async (req, res) => {
     const { type } = req.params;
     try {
@@ -98,72 +98,129 @@ const getProductsByType = async (req, res) => {
     }
 };
 
+// Controller method to get filtered products
+const getFilteredProducts = async (req, res) => {
+    const { type } = req.params;
+
+    if (!type) {
+        return res.status(400).json({ error: 'Product type is required' });
+    }
+
+    try {
+        const products = await productModel.find({ product_types: type })
+            .populate('alias')
+            .exec();
+
+        res.status(200).json(products);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 //Controller function - POST to create a new Product
 const createNewProduct = async (req, res) => {
     // retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
     // destructure all relevant attributes in new Product object
-    const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
-        supplier, alias, product_isarchived, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-        product_price_unit_b, product_effective_date, projects} = req.body;
+    const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-        //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
+        if (!mongoose.Types.ObjectId.isValid(alias)){
+            const newAlias = new aliasModel({
+                alias_name: alias
+            })
+            await newAlias.save({session});
 
-        const Product = await productModel.create({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
-            supplier, alias, product_isarchived });
+            const newProduct = new productModel({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+                supplier, alias: newAlias._id, price_fixed, product_isarchived })
+            await newProduct.save({session})
 
-        // Get product object id then insert Price Info into productPrice table
-        // Need to add verification when it exist product price
-        if (product_price_unit_a != null){
+            const newProductPrice = new productPriceModel({ product_id: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+                product_price_unit_b, price_fixed, product_effective_date, projects })
+            await newProductPrice.save({session})
+            
+            await session.commitTransaction();
+            session.endSession();
 
-            const product_id = Product._id;
-            const ProductPrice = await productPriceModel.create({ product_id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-                product_price_unit_b, product_effective_date, projects });
+            res.status(200).json({ newProduct, newProductPrice });
+        }
+        else {
+            const newProduct = new productModel({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+                supplier, alias, price_fixed, product_isarchived })
+            await newProduct.save({session})
 
-            res.status(200).json({ Product, ProductPrice });
-        }else{
-            //invoke 'res' object method: status() and json(), pass relevant data to them
-            res.status(200).json(Product);
+            const newProductPrice = new productPriceModel({ product_id: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+                product_price_unit_b, price_fixed, product_effective_date, projects })
+            await newProductPrice.save({session})
+            
+            await session.commitTransaction();
+            session.endSession();
+
+            res.status(200).json({ newProduct, newProductPrice });
         }
     }
     catch (error) {
-        //if Company creation has error, pass error object and 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
+        await session.abortTransaction();
+        session.endSession();
+
         //! DESIGN 400 PAGE
         res.status(400).json({error: error.message});
     }
 }
 
-
 //Controller function - PUT to update a single Product
-const updateSingleProduct = async (req,res) => {
-    //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
+const updateSingleProduct = async (req, res) => {
     const { id } = req.params;
-    //check if the ID object exists in mongoDB database
-    if (!mongoose.Types.ObjectId.isValid(id)){
-        //if ID doesn't exist, return error 404 details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(404).json({msg: "ID exists, however there is no such Product."});
-    }        
-    //if ID exists in mongoDB database
-    //create a new model called Company, await for database operation, which is find Company document using id (1st param), 
-    //and update with relevant data retrieved using 'req' object 'body' property (2nd param).
-    const Product = await productModel.findByIdAndUpdate({_id: id}, {...req.body});
+    const { productState, productPriceState, productPriceId } = req.body;
 
-    //check if there's 'null' or 'undefined' in 'Product'.
-    if (!Product) {
-        //if Product doesn't exist, return error 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(400).json({msg: "ID exists, however there is no such Product"});
+    // Check if the provided ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ msg: "ID exists, however there is no such Product." });
     }
-    else {
-        //if Product does exists, pass new Company object to 'res' object method
-        res.status(200).json(Product);
+
+    // Start a session and transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        // Update the Product
+        const Product = await productModel.findByIdAndUpdate(
+            { _id: id },
+            { ...productState },
+            { new: true, session }
+        );
+
+        // Update the ProductPrice
+        const ProductPrice = await productPriceModel.findByIdAndUpdate(
+            { _id: productPriceId },
+            { ...productPriceState },
+            { new: true, session }
+        );
+
+        // If either update fails, throw an error to trigger a rollback
+        if (!Product || !ProductPrice) {
+            throw new Error("Product or ProductPrice update failed");
+        }
+
+        // Commit the transaction if both updates succeed
+        await session.commitTransaction();
+        session.endSession();
+
+        // Send a successful response
+        res.status(200).json({ Product, ProductPrice });
+
+    } catch (error) {
+        // Rollback the transaction if any update fails
+        await session.abortTransaction();
+        session.endSession();
+
+        // Send an error response
+        res.status(500).json({ msg: error.message });
     }
-}
+};
 
 
 //Controller function - DELETE to delete a single Product
@@ -200,4 +257,4 @@ const deleteSingleProduct = async (req,res) => {
 }
 
 //export controller module
-module.exports = { getAllProducts, getSingleProduct, getProductsByType, createNewProduct, updateSingleProduct, deleteSingleProduct };
+module.exports = { getAllProducts, getSingleProduct, getProductsByType, getFilteredProducts, createNewProduct, updateSingleProduct, deleteSingleProduct };

@@ -25,6 +25,46 @@ const Supplier = () => {
 
     const handleTableClick = (id) => navigate(`/EmpirePMS/supplier/${id}`, { state: id });
     
+
+    //Render component
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchAllSuppliers = async () => {
+            setIsLoadingState(true);
+            try {
+                const res = await fetch('/api/supplier', { signal });
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                dispatch(setSupplierState(data));
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchAllSuppliers();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, [dispatch]);
+    
+    //Display DOM
     const supplierTable = Array.isArray(supplierState) && supplierState.length > 0 ? (
         <div className="container">
             <table className="table table-bordered table-hover">
@@ -79,46 +119,7 @@ const Supplier = () => {
     ) : (
         <div>Supplier API fetched successfully, but it might be empty...</div>
     );
-
-    //Render component
-    useEffect(() => {
-        const abortController = new AbortController();
-        const signal = abortController.signal;
-
-        const fetchAllSuppliers = async () => {
-            setIsLoadingState(true);
-            try {
-                const res = await fetch('/api/supplier', { signal });
-                if (!res.ok) {
-                    throw new Error('Failed to fetch');
-                }
-                const data = await res.json();
-
-                if (data.tokenError) {
-                    throw new Error(data.tokenError);
-                }
-                
-                setIsLoadingState(false);
-                dispatch(setSupplierState(data));
-                setErrorState(null);
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    // do nothing
-                } else {
-                    setIsLoadingState(false);
-                    setErrorState(error.message);
-                }
-            }
-        };
-
-        fetchAllSuppliers();
-
-        return () => {
-            abortController.abort(); // Cleanup
-        };
-    }, [dispatch]);
     
-    //Display DOM
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
 
     if (errorState) {

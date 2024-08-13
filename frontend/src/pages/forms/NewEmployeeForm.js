@@ -74,7 +74,7 @@ const NewEmployeeForm = () => {
                 <form className="card-body" onSubmit={handleSubmit}>
                     <div className="row">
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">First name:</label>
+                            <label className="form-label font-bold">First name:</label>
                             <input 
                                 type='text'
                                 className="form-control" 
@@ -88,7 +88,7 @@ const NewEmployeeForm = () => {
                             />
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">Last name:</label>
+                            <label className="form-label font-bold">Last name:</label>
                             <input 
                                 type='text'
                                 className="form-control" 
@@ -102,7 +102,7 @@ const NewEmployeeForm = () => {
                             />
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">Role:</label>
+                            <label className="form-label font-bold">Role:</label>
                             <select 
                                 className="form-control"
                                 name="employee_roles" 
@@ -116,7 +116,7 @@ const NewEmployeeForm = () => {
                             </select>
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">Contact:</label>
+                            <label className="form-label font-bold">Contact:</label>
                             <input 
                                 type='text'
                                 className="form-control" 
@@ -127,7 +127,7 @@ const NewEmployeeForm = () => {
                             />
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">Email:</label>
+                            <label className="form-label font-bold">Email:</label>
                             <input 
                                 type='text'
                                 className="form-control" 
@@ -141,7 +141,7 @@ const NewEmployeeForm = () => {
                             />
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">Password:</label>
+                            <label className="form-label font-bold">Password:</label>
                             <input 
                                 type='text'
                                 className="form-control" 
