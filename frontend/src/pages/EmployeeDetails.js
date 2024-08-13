@@ -19,7 +19,6 @@ const EmployeeDetails = () => {
 
     //Component router
     const { id } = useParams();
-    console.log("This employee detail page: ", id)
     const navigate = useNavigate();
 
     //Component functions and variables
@@ -58,8 +57,7 @@ const EmployeeDetails = () => {
     
     //Render component
     useEffect(() => {
-        console.log("Employee page: useEffect ran");
-
+        
         const fetchEmployee = async () => {
             try {
                 const res = await fetch(`/api/employee/${id}`);
@@ -82,6 +80,17 @@ const EmployeeDetails = () => {
 
         fetchEmployee();
     }, [id, dispatch]);
+
+    const employeeProjectsTable = ( <div className="border rounded-sm">some projects data...</div> )
+    
+    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+
+    if (errorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
+    }
 
     //Display DOM
     const employeeDetails = (
@@ -156,17 +165,6 @@ const EmployeeDetails = () => {
             </div>
         </div>
     )
-
-    const employeeProjectsTable = ( <div className="border rounded-sm">some projects data...</div> )
-    
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
-
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
-            return(<div><SessionExpired /></div>)
-        }
-        return (<div>Error: {errorState}</div>);
-    }
 
     return (
         <div className="container mt-5">

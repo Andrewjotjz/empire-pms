@@ -14,6 +14,7 @@ const UpdateSupplierForm = () => {
 
     // Component state declaration
     const supplierState = useSelector((state) => state.supplierReducer.supplierState);
+    
     const dispatch = useDispatch();
     const { update, isLoadingState, errorState } = useUpdateSupplier();
 

@@ -9,21 +9,19 @@ const mongoose = require('mongoose');
 const fetchProjectDetails = async (project_id) => {
 
     // if project_id is null, find all projects, otherwise, find single project by id
-    const projects = await projectModel.find(project_id)
-    .sort({ createdAt: -1 })
-    .populate('suppliers', 'supplier_name supplier_isarchived')  // Populate suppliers with only the supplier_name field
+    // Populate suppliers with only the supplier_name field
+    const projects = await projectModel.find(project_id).sort({ createdAt: -1 }).populate('suppliers')
 
     // Find all employees related to the projects
     const projectIds = projects.map(project => project._id);
-    const employees = await employeeModel.find({ projects: { $in: projectIds } }, 'employee_first_name employee_last_name employee_email employee_mobile_phone employee_roles projects');
+    const employees = await employeeModel.find({ projects: { $in: projectIds } });
 
     // Map employees to their corresponding projects
     const projectEmployeeMap = {};
     employees.forEach(employee => {
       employee.projects.forEach(projectId => {
-        if (!projectEmployeeMap[projectId]) {
-          projectEmployeeMap[projectId] = [];
-        }
+        if (!projectEmployeeMap[projectId]) 
+            { projectEmployeeMap[projectId] = []; }
         projectEmployeeMap[projectId].push(employee);
       });
     });

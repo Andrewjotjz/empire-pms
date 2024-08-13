@@ -13,7 +13,6 @@ import { useUpdateSupplier } from '../hooks/useUpdateSupplier';
 const SupplierDetails = () => {
     //Component router
     const { id } = useParams();
-    console.log("Supplier detail page: ",id);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -31,7 +30,6 @@ const SupplierDetails = () => {
 
     //Render component
     useEffect(() => {
-        console.log("useEffect ran");
 
         const fetchSupplierDetails = async () => {
             try {
@@ -46,7 +44,6 @@ const SupplierDetails = () => {
                 }
 
                 dispatch(setSupplierState(data));
-                console.log(data)
 
                 setIsLoadingState(false);
             } catch (err) {

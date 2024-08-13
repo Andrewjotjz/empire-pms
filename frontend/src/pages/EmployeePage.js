@@ -105,7 +105,8 @@ const Employee = () => {
     }
 
     return (
-        <div className="container mt-5"><div className="card">
+        <div className="container mt-5">
+            <div className="card">
                 <div className="card-header bg-dark text-white">
                     <h1 className='mx-auto uppercase font-bold text-xl'>EMPLOYEES</h1>
                 </div>
