@@ -172,33 +172,56 @@ const createNewProduct = async (req, res) => {
 }
 
 //Controller function - PUT to update a single Product
-const updateSingleProduct = async (req,res) => {
-    //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
+const updateSingleProduct = async (req, res) => {
     const { id } = req.params;
-    //check if the ID object exists in mongoDB database
-    if (!mongoose.Types.ObjectId.isValid(id)){
-        //if ID doesn't exist, return error 404 details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(404).json({msg: "ID exists, however there is no such Product."});
-    }        
-    //if ID exists in mongoDB database
-    //create a new model called Company, await for database operation, which is find Company document using id (1st param), 
-    //and update with relevant data retrieved using 'req' object 'body' property (2nd param).
-    const Product = await productModel.findByIdAndUpdate({_id: id}, {...req.body});
+    const { productState, productPriceState, productPriceId } = req.body;
 
-    //check if there's 'null' or 'undefined' in 'Product'.
-    if (!Product) {
-        //if Product doesn't exist, return error 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(400).json({msg: "ID exists, however there is no such Product"});
+    // Check if the provided ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ msg: "ID exists, however there is no such Product." });
     }
-    else {
-        //if Product does exists, pass new Company object to 'res' object method
-        res.status(200).json(Product);
+
+    // Start a session and transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        // Update the Product
+        const Product = await productModel.findByIdAndUpdate(
+            { _id: id },
+            { ...productState },
+            { new: true, session }
+        );
+
+        // Update the ProductPrice
+        const ProductPrice = await productPriceModel.findByIdAndUpdate(
+            { _id: productPriceId },
+            { ...productPriceState },
+            { new: true, session }
+        );
+
+        // If either update fails, throw an error to trigger a rollback
+        if (!Product || !ProductPrice) {
+            throw new Error("Product or ProductPrice update failed");
+        }
+
+        // Commit the transaction if both updates succeed
+        await session.commitTransaction();
+        session.endSession();
+
+        // Send a successful response
+        res.status(200).json({ Product, ProductPrice });
+
+    } catch (error) {
+        // Rollback the transaction if any update fails
+        await session.abortTransaction();
+        session.endSession();
+
+        // Send an error response
+        res.status(500).json({ msg: error.message });
     }
-}
+};
+
 
 //Controller function - DELETE to delete a single Product
 const deleteSingleProduct = async (req,res) => {

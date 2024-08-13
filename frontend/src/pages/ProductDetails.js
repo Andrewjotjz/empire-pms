@@ -28,24 +28,36 @@ const ProductDetails = () => {
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`);
 
     const handleEditProductClick = () => {
+        // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
         if (productState && productState.length > 0) {
+            const product = productState[0].product || {};
             const modifiedProductState = {
-                ...productState[0].product,
-                product_next_available_stock_date: productState[0].product.product_next_available_stock_date.split('T')[0]
-            }
+                ...product,
+                product_next_available_stock_date: product.product_next_available_stock_date
+                    ? product.product_next_available_stock_date.split('T')[0]
+                    : '', // or 'null' depending on your needs
+            };
             dispatch(setProductState(modifiedProductState));
         }
     
-        if (productState[0].productPrice && productState[0].productPrice.product_effective_date) {
+        // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
+        if (
+            productState &&
+            productState[0].productPrice &&
+            productState[0].productPrice.product_effective_date
+        ) {
             const modifiedProductPriceState = {
                 ...productState[0].productPrice,
-                product_effective_date: productState[0].productPrice.product_effective_date.split('T')[0],
+                product_effective_date: productState[0].productPrice.product_effective_date
+                    ? productState[0].productPrice.product_effective_date.split('T')[0]
+                    : '', // or 'null' depending on your needs
             };
             dispatch(setProductPrice(modifiedProductPriceState));
         }
     
         navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId });
     };
+    
     
 
     //Render component

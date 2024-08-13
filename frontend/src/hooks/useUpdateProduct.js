@@ -12,16 +12,18 @@ export const useUpdateProduct = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const update = async (aliasState, productState, productPriceState) => {
+    const updateProduct = async (productState, productPriceState, productId, productPriceId) => {
         setIsLoadingState(true)
         setErrorState(null)
 
+        //! console.log("||productState: ",productState, "\n||productPriceState", productPriceState, "\n||productId", productId, "\n||productPriceId", productPriceId)
+
         const putProduct = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierState._id}`, {
+                const res = await fetch(`/api/product/${productId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({...supplierState})
+                    body: JSON.stringify({productState, productPriceState, productPriceId})
                 })
 
                 const promise = await res.json();
@@ -31,14 +33,14 @@ export const useUpdateProduct = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to PUT supplier details')
+                    throw new Error('Failed to PUT product details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
-                    navigate(`/EmpirePMS/supplier/${supplierState._id}`)
+                    // navigate client to supplier page
+                    navigate(-1)
                 
                     // push toast to notify successful login
-                    toast.success(message ? message: "Supplier updated successfully", {
+                    toast.success("Product updated successfully", {
                         position: "bottom-right"
                     });
                 
@@ -54,5 +56,5 @@ export const useUpdateProduct = () => {
         putProduct();
     }
 
-    return { update, isLoadingState, errorState };
+    return { updateProduct, isLoadingState, errorState };
 }

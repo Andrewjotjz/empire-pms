@@ -29,7 +29,7 @@ const SupplierDetails = () => {
 
     //Component functions and variables
     const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
-
+    
     const handleBackClick = () => navigate(-1);
 
     const handleProductTableClick = (productId) => { 
@@ -157,7 +157,7 @@ const SupplierDetails = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {productState && productState.map((product, index) => (
+                    {productState && productState.filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).map((product, index) => (
                         <tr key={index} onClick={() => handleProductTableClick(product.product._id)} className='cursor-pointer'>
                             <th scope="row">{product.product.product_sku}</th>
                             <td>{product.product.product_name}</td>

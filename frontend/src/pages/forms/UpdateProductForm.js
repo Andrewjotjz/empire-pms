@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { useAddProduct } from '../../hooks/useAddProduct'; 
+import { useAddProductPrice } from '../../hooks/useAddProductPrice'; 
+import { useUpdateProduct } from '../../hooks/useUpdateProduct'; 
 import { useFetchAliasesByProductType } from '../../hooks/useFetchAliasesByProductType'
 import { setProjects } from '../../redux/projectSlice';
 import { setProductState } from '../../redux/productSlice';
@@ -16,12 +17,13 @@ const UpdateProductForm = () => {
     // Component router
     const navigate = useNavigate();
     const location = useLocation();
-    const {productId} = location.state;
+    const productId = location.state;
 
     // Component hook
     const dispatch = useDispatch();
     const { fetchAliasesByProductType, productTypeIsLoadingState, productTypeErrorState } = useFetchAliasesByProductType();
-    const { productIsLoadingState, productErrorState } = useAddProduct();
+    const { updateProduct, productUpdateIsLoadingState, productUpdateErrorState } = useUpdateProduct();
+    const { addPrice, isAddPriceLoadingState, addPriceErrorState } = useAddProductPrice();
 
     // Component state
     const aliasState = useSelector((state) => state.aliasReducer.aliasState)
@@ -176,7 +178,11 @@ const UpdateProductForm = () => {
             return;
         }
 
-        // updateProduct(productState, productPriceState, productId);
+        if (newProductPriceState.product_number_a !== '' && isShowNewPriceForm === true) {
+            addPrice(newProductPriceState);
+        }
+
+        updateProduct(productState, productPriceState, productId, productPriceState._id);
     };
     
 
@@ -219,15 +225,15 @@ const UpdateProductForm = () => {
     }, [dispatch]);
 
     // Display DOM
-    if (productTypeIsLoadingState || productIsLoadingState) {
+    if (productTypeIsLoadingState || productUpdateIsLoadingState || isAddPriceLoadingState) {
         return <EmployeeDetailsSkeleton />;
     }
 
-    if (productTypeErrorState || productErrorState ) {
-        if (productErrorState.includes("Session expired") || productErrorState.includes("jwt expired")) {
+    if (productTypeErrorState || productUpdateErrorState || addPriceErrorState) {
+        if (productUpdateErrorState.includes("Session expired") || productUpdateErrorState.includes("jwt expired")) {
             return <div><SessionExpired /></div>;
         }
-        return <div>Error: {productErrorState}</div>;
+        return <div>Error: {productUpdateErrorState}</div>;
     }
 
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
@@ -367,7 +373,7 @@ const UpdateProductForm = () => {
 
                         {/***************************** PRODUCT PRICE TABLE *************************/}
                                     {/* Editing Price */}
-                        <div className={`grid grid-cols-3 gap-x-10 gap-y-4 border-4 rounded p-3 mb-1 ${isProductPriceDisabled ? 'opacity-40' : ''}`}>
+                        <div className={`grid grid-cols-3 gap-x-10 gap-y-4 border-4 rounded p-3 mb-1 ${isProductPriceDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}>
                             <div className='border-2 rounded p-2'>
                                 <div className="mb-3">
                                     <label className="form-label font-bold">*Number-A:</label>
@@ -486,6 +492,7 @@ const UpdateProductForm = () => {
                                         type="button"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        disabled={isProductPriceDisabled}
                                     >
                                         {productPriceState.projects.length > 0 ? `x${productPriceState.projects.length} Projects Selected` : `Select Projects`}
                                     </button>
@@ -526,6 +533,7 @@ const UpdateProductForm = () => {
                                     value={productPriceState.product_effective_date}
                                     onChange={handlePriceInputChange}
                                     required
+                                    disabled={isProductPriceDisabled}
                                 />
                             </div>
                             <div>
@@ -536,6 +544,7 @@ const UpdateProductForm = () => {
                                         name="price_fixed" 
                                         checked={productPriceState.price_fixed} 
                                         onChange={(e) => handlePriceInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
+                                        disabled={isProductPriceDisabled}
                                     />
                             </div>
                         </div>
@@ -759,7 +768,7 @@ const UpdateProductForm = () => {
                         {/* ******************************************* END OF FORM ********************************************************** */}
                         <div className="d-flex justify-content-between mb-3">
                             <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
-                            <button className="btn btn-primary" type="submit" disabled>ADD TO COMPANY</button>
+                            <button className="btn btn-primary" type="submit">CONFIRM UPDATE</button>
                         </div>
                     </div>
                 </form>
