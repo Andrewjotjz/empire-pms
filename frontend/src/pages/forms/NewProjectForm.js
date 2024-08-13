@@ -1,10 +1,10 @@
-
 // Import modules
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAddProject } from '../../hooks/useAddProject'; 
 import SessionExpired from '../../components/SessionExpired';
 import ProjectDetailsSkeleton from "../loaders/ProjectDetailsSkeleton";
+
 
 const NewProjectForm = () => {
     // Component router
@@ -20,7 +20,6 @@ const NewProjectForm = () => {
     });
 
     // Component functions and variables
-
     const handleBackClick = () => navigate(`/EmpirePMS/project/`);
 
     const handleInputChange = (event) => {
@@ -84,10 +83,10 @@ const NewProjectForm = () => {
                                 onInput={(e) => e.target.setCustomValidity('')}
                             />
                         </div>
-
                         <div className="d-flex justify-content-between mb-3">
                             <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
                             <button className="btn btn-primary" type="submit">ADD TO PROJECT</button>
+
                         </div>
                     </div>
                 </form>
@@ -97,4 +96,3 @@ const NewProjectForm = () => {
 };
 
 export default NewProjectForm;
-

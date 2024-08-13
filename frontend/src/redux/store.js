@@ -6,8 +6,6 @@ import supplierReducer from './supplierSlice'
 import productReducer from './productSlice'
 import projectReducer from './projectSlice'
 
-
-
 export const store = configureStore({
     reducer: {
         employeeReducer: employeeReducer,

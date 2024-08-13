@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setProductState } from '../redux/productSlice';
+import { setProductPrice } from '../redux/productPriceSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import Dropdown from "react-bootstrap/Dropdown"
@@ -10,6 +11,7 @@ import Dropdown from "react-bootstrap/Dropdown"
 const ProductDetails = () => {
     //Component state declaration
     const productState = useSelector((state) => state.productReducer.productState)
+    // const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
@@ -25,7 +27,38 @@ const ProductDetails = () => {
 
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`);
 
-    const handleEditProductClick = () => navigate(`/EmpirePMS/product/${productId}`, { state: productId });
+    const handleEditProductClick = () => {
+        // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
+        if (productState && productState.length > 0) {
+            const product = productState[0].product || {};
+            const modifiedProductState = {
+                ...product,
+                product_next_available_stock_date: product.product_next_available_stock_date
+                    ? product.product_next_available_stock_date.split('T')[0]
+                    : '', // or 'null' depending on your needs
+            };
+            dispatch(setProductState(modifiedProductState));
+        }
+    
+        // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
+        if (
+            productState &&
+            productState[0].productPrice &&
+            productState[0].productPrice.product_effective_date
+        ) {
+            const modifiedProductPriceState = {
+                ...productState[0].productPrice,
+                product_effective_date: productState[0].productPrice.product_effective_date
+                    ? productState[0].productPrice.product_effective_date.split('T')[0]
+                    : '', // or 'null' depending on your needs
+            };
+            dispatch(setProductPrice(modifiedProductPriceState));
+        }
+    
+        navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId });
+    };
+    
+    
 
     //Render component
     useEffect(() => {
@@ -57,30 +90,38 @@ const ProductDetails = () => {
         <div className="container">
             <h2 className='font-bold m-2 text-xl'>Product Prices</h2>
             <table className="table table-bordered">
-                <thead className="thead-dark">
+                <thead className="thead-dark text-center">
                     <tr className="table-primary">
                         <th scope="col">ID</th>
-                        <th scope="col">Unit A</th>
-                        <th scope="col">Number A</th>
-                        <th scope="col">Price Unit A</th>
-                        <th scope="col">Unit B</th>
-                        <th scope="col">Number B</th>
-                        <th scope="col">Price Unit B</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Number</th>
+                        <th scope="col">Unit</th>
+                        <th scope="col">Price Unit</th>
                         <th scope="col">Price Fixed (?)</th>
                         <th scope="col">Effective Date</th>
                         <th scope="col">Project</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className='text-center align-middle'>
                     {productState.map((item, index) => (
                         <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
                             <th scope="row">{index + 1}</th>
-                            <td>{item.productPrice.product_unit_a}</td>
-                            <td>{item.productPrice.product_number_a}</td>
-                            <td>{item.productPrice.product_price_unit_a}</td>
-                            <td>{item.productPrice.product_unit_b}</td>
-                            <td>{item.productPrice.product_number_b}</td>
-                            <td>{item.productPrice.product_price_unit_b}</td>
+                            <td className='p-0'>
+                                <div className='border-b-2'>A</div>
+                                <div>B</div>
+                            </td>
+                            <td className='p-0'>
+                                <div className='border-b-2'>{item.productPrice.product_number_a}</div>
+                                <div>{item.productPrice.product_number_b}</div>
+                            </td>
+                            <td className='p-0'>
+                                <div className='border-b-2'>{item.productPrice.product_unit_a}</div>
+                                <div>{item.productPrice.product_unit_b}</div>
+                            </td>
+                            <td className='p-0'>
+                                <div className='border-b-2'>${item.productPrice.product_price_unit_a}</div>
+                                <div>${item.productPrice.product_price_unit_b}</div>
+                            </td>
                             <td>{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
                             <td>{item.productPrice.product_effective_date}</td>
                             <td>
@@ -117,14 +158,29 @@ const ProductDetails = () => {
                 <div className="card-body">
                     <div className="d-flex justify-content-between mb-3">
                         <button className="btn btn-secondary" onClick={handleBackClick}>BACK</button>
-                        <button className="btn btn-primary" onClick={handleEditProductClick}>EDIT PRODUCT</button>
                         <Dropdown>
                             <Dropdown.Toggle variant="success" id="dropdown-basic">
                                 ACTIONS
                             </Dropdown.Toggle>
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={() => {}}>PLACEHOLDER</Dropdown.Item>
-                                <Dropdown.Item onClick={() => {}}>PLACEHOLDER</Dropdown.Item>
+                                <Dropdown.Item onClick={handleEditProductClick}>
+                                    <div className='flex items-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                            <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                                            <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                                        </svg>
+                                        <label>EDIT PRODUCT</label>
+                                    </div>
+                                </Dropdown.Item>
+                                <Dropdown.Item onClick={() => {}}>
+                                    <div className='flex items-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                            <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                                            <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                                        </svg>
+                                        <label>PLACEHOLDER</label>
+                                    </div>
+                                </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                     </div>

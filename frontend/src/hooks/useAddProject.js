@@ -31,14 +31,14 @@ export const useAddProject = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to POST new employee details')
+                    throw new Error('Failed to POST new project details')
                 }
                 if (res.ok) {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/project/`)
                 
                     // push toast to notify successful login
-                    toast.success(`Project added successfully!`, {
+                    toast.success(`Project created successfully!`, {
                         position: "bottom-right"
                     });
                 

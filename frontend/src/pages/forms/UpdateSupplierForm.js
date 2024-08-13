@@ -165,7 +165,7 @@ const UpdateSupplierForm = () => {
                                 <label className="form-label fw-bold">Archived:</label>
                                 <input 
                                     type="checkbox"
-                                    className="form-check-input" 
+                                    className="form-check-input m-1" 
                                     name="supplier_isarchived" 
                                     checked={supplierState.supplier_isarchived} 
                                     onChange={(e) => handleInputChange({ target: { name: 'supplier_isarchived', value: e.target.checked }})}
@@ -173,7 +173,7 @@ const UpdateSupplierForm = () => {
                             </div>
                             <div className='p-2'>
                                 {supplierState.supplier_contacts && supplierState.supplier_contacts.map((contact, index) => (
-                                    <div key={index} className="col-md-12 mb-3 border-y-2">
+                                    <div key={index} className="col-md-12 mb-1 border-y-2">
                                         <h5 className='font-semibold text-lg text-decoration-line: underline'>Contact #{index + 1}</h5>
                                         <div className="row">
                                             <div className="col-md-4 mb-3">
@@ -214,7 +214,7 @@ const UpdateSupplierForm = () => {
                                                     <label className="form-label fw-bold">Primary Contact:</label>
                                                     <input 
                                                         type="checkbox"
-                                                        className="form-check-input" 
+                                                        className="form-check-input m-1" 
                                                         name="is_primary" 
                                                         checked={contact.is_primary} 
                                                         onChange={(e) => handleContactChange(index, { target: { name: 'is_primary', value: e.target.checked } })}
@@ -230,8 +230,8 @@ const UpdateSupplierForm = () => {
                                     </div>
                                 ))}
                             </div>
-                            <div className="col-md-12 mb-8">
-                                <button type="button" onClick={handleAddContact} className="btn btn-secondary">+ ADD MORE CONTACTS</button>
+                            <div className="flex justify-center mb-2">
+                                <button type="button" onClick={handleAddContact}><label className='border bg-gray-200 rounded-xl p-2 text-sm hover:bg-gray-400 hover:text-white hover:shadow-lg'>+ ADD MORE CONTACTS</label></button>
                             </div>
                         </div>
                         <div className="d-flex justify-content-between mb-3">

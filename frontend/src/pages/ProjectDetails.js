@@ -1,3 +1,4 @@
+//import modules
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
@@ -74,6 +75,7 @@ const Project_Details = () => {
     }, [id, dispatch]);  // Add id as dependency
 
     // Fetch all employees when the component mounts
+
     useEffect(() => {
         const fetchAllEmployees = async () => {
             try {
@@ -452,6 +454,12 @@ const Project_Details = () => {
                         (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
                     }
                 </div>
+            </button>
+        </div>
+    ) : (
+        <div className='border'>
+            <div className='m-1'>
+                <label className='text-xl'>No employees found in this project.</label>
             </div>
         </div>
     ) : (
@@ -553,7 +561,14 @@ const Project_Details = () => {
                         onClick={handleAddEmployeesConfirm}>
                         Confirm
                     </button>
+
                 </div>
+            </button>
+        </div>
+    ) : (
+        <div className='border'>
+            <div className='m-1'>
+                <label className='text-xl'>No suppliers found in this project.</label>
             </div>
         </div>
     );
@@ -670,6 +685,7 @@ const Project_Details = () => {
                     {isSelectSupplierListVisible && selectSuppliersPopUp}
 
 
+
                 </div>
             </div>
             { archiveModal }
@@ -678,3 +694,4 @@ const Project_Details = () => {
 };
 
 export default Project_Details;
+

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 
-export const useUpdateProject = () => {
+export const useAddProduct = () => {
     //Component's hook state declaration
     const [isLoadingState, setIsLoadingState] = useState(false);
     const [errorState, setErrorState] = useState(null);
@@ -12,33 +12,33 @@ export const useUpdateProject = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const update = async (projectState, message) => {
+    const addProduct = async (productState, supplierId) => {
         setIsLoadingState(true)
         setErrorState(null)
 
-        const putProject = async () => {
+        const postProduct = async () => {
             try {
-                const res = await fetch(`/api/project/${projectState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`/api/product/create`, {
+                    method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({...projectState})
+                    body: JSON.stringify(productState)
                 })
 
-                const promise = await res.json();
+                const data = await res.json();
 
-                if (promise.tokenError) {
-                    throw new Error(promise.tokenError)
+                if (data.tokenError) {
+                    throw new Error(data.tokenError)
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to PUT project details')
+                    throw new Error('Failed to POST new product details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
-                    navigate(`/EmpirePMS/project/${projectState._id}`)
+                    // navigate client to supplier details page
+                    navigate(`/EmpirePMS/supplier/${supplierId}`)
                 
                     // push toast to notify successful login
-                    toast.success(message ? message: "Project updated successfully", {
+                    toast.success(`Product added to supplier`, {
                         position: "bottom-right"
                     });
                 
@@ -51,7 +51,8 @@ export const useUpdateProject = () => {
                 setIsLoadingState(false);
             }
         }
-        putProject();
+        postProduct();
     }
-    return { update, isLoadingState, errorState };
+
+    return { addProduct, isLoadingState, errorState };
 }

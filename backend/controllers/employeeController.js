@@ -39,7 +39,6 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-
 const maxAge = 60 * 60; //60 minutes in seconds
 const createToken = (id) => {
     //header&payload + secret = signature
@@ -49,7 +48,6 @@ const createToken = (id) => {
     expiresIn: maxAge
   });
 };
-
 
 //Controller function - POST to login employee
 const loginEmployee = async (req,res) => {
@@ -69,7 +67,6 @@ const loginEmployee = async (req,res) => {
         res.status(400).json({errors});
     }
 }
-
 
 //Controller function - GET all employees
 const getAllEmployees = async (req, res) => {
@@ -130,7 +127,6 @@ const createNewEmployee = async (req, res) => {
         res.status(400).json({error: error.message})
     }
 }
-
 
 //Controller function - PUT to update a single employee
 const updateSingleEmployee = async (req,res) => {
@@ -215,7 +211,6 @@ const deleteSingleEmployee = async (req,res) => {
         res.status(200).json(Employee)
     }
 }
-
 
 // POST send password reset email
 const sendPasswordResetEmail = async (req, res) => {
@@ -305,7 +300,7 @@ const sendPasswordResetEmail = async (req, res) => {
                         <p style="text-align: center;"><a href="${resetUrl}" class="button">Reset Password</a></p>
                         <p>This link will expire in one hour. If you did not request a password reset, please ignore this email or contact IT support immediately.</p>
                         <p>Thank you,</p>
-                        <p>IT Administrator<br>EMPIRE COMMERCIAL BUILDINGS SOLUTIONS PTY LTD<br>20 Trade Place, Vermont 3133<br>P: 03 7043 3320</p>
+                        <p>IT Administrator<br>EMPIRE COMMERCIAL BUILDINGS SOLUTIONS PTY LTD<br>20 Trade Place, Vermont 3133<br>P: 03 7076 2666</p>
                     </div>
                     <div class="email-footer">
                         <p>&copy; ${new Date().getFullYear()} EmpirePMS. All rights reserved.</p>
@@ -353,7 +348,6 @@ const resetEmployeePassword = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 };
-
 
 //Controller function - GET to logout employee
 const logoutEmployee = (req,res) => {

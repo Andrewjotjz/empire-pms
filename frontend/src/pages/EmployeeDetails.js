@@ -22,6 +22,8 @@ const EmployeeDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
+    const handleBackClick = () => navigate(-1)
+    
     const handleEditClick = () => navigate(`/EmpirePMS/employee/${id}/edit`, { state: id });
 
     const handleChangePassword = () => navigate(`/EmpirePMS/employee/${id}/change-password`, { state: id });
@@ -57,7 +59,6 @@ const EmployeeDetails = () => {
     
     //Render component
     useEffect(() => {
-        
         const fetchEmployee = async () => {
             try {
                 const res = await fetch(`/api/employee/${id}`);
@@ -93,6 +94,15 @@ const EmployeeDetails = () => {
     }
 
     //Display DOM
+    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+
+    if (errorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
+    }
+
     const employeeDetails = (
         <div className="card-body border-1 mx-1 rounded-sm relative">
             <div className="absolute right-4">
@@ -165,12 +175,13 @@ const EmployeeDetails = () => {
             </div>
         </div>
     )
-
+const employeeProjectsTable = ( <div className="border rounded-sm">some projects data...</div> )
+                               
     return (
         <div className="container mt-5">
         <div className="card">
             <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <button onClick={() => {navigate("/EmpirePMS/employee")}}>
+                    <button onClick={handleBackClick}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
                         </svg>

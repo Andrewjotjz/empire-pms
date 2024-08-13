@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
@@ -31,6 +32,7 @@ const Project = () => {
                 const res = await fetch('/api/project');
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
+
                 }
                 const data = await res.json();
 
@@ -79,6 +81,7 @@ const Project = () => {
     if (errorState) {
         if (errorState.includes("Session expired") || errorState.includes("jwt expired")) {
             return (<div><SessionExpired /></div>);
+
         }
         return (<div>Error: {errorState}</div>);
     }
@@ -166,3 +169,4 @@ const Project = () => {
 };
 
 export default Project;
+

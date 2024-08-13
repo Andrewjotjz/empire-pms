@@ -1,5 +1,5 @@
 //import modules
-import { useParams, useNavigate, useLocation} from 'react-router-dom';
+import { useParams, useNavigate} from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSupplierState } from '../redux/supplierSlice';
@@ -14,7 +14,6 @@ const SupplierDetails = () => {
     //Component router
     const { id } = useParams();
     const navigate = useNavigate();
-    const location = useLocation();
 
     //Component state declaration
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
@@ -28,9 +27,41 @@ const SupplierDetails = () => {
     const { update } = useUpdateSupplier();
     const dispatch = useDispatch()
 
+    //Component functions and variables
+    const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
+    
+    const handleBackClick = () => navigate(-1);
+
+    const handleProductTableClick = (productId) => { 
+        dispatch(clearProductState());
+        navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
+    }
+
+    const handleArchive = () => {    
+        let updatedState;
+        if (supplierState.supplier_isarchived === true) {
+            updatedState = {
+                ...supplierState,
+                supplier_isarchived: false,
+            };
+        } else {
+            updatedState = {
+                ...supplierState,
+                supplier_isarchived: true,
+            };
+        }
+    
+        dispatch(setSupplierState(updatedState));
+
+        update(updatedState, `Supplier has been ${supplierState.supplier_isarchived ? `unarchived` : `archived`}`);
+
+        setShowModal(false);
+    };
+
+    const handleEditSupplierClick = () => navigate(`/EmpirePMS/supplier/${id}/edit`, { state: id });
+    
     //Render component
     useEffect(() => {
-
         const fetchSupplierDetails = async () => {
             try {
                 const res = await fetch(`/api/supplier/${id}`);
@@ -79,59 +110,17 @@ const SupplierDetails = () => {
         fetchSupplierProducts();
     }, [id, dispatch]);
 
+    // Display DOM
+    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
-
-    //Component functions and variables
-    const handleAddProductClick = () => { return }
-
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
-
-    const handleProductTableClick = (productId) => { 
-        dispatch(clearProductState());
-        navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
+    if (errorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
     }
 
-    const handleArchive = () => {    
-        let updatedState;
-        if (supplierState.supplier_isarchived === true) {
-            updatedState = {
-                ...supplierState,
-                supplier_isarchived: false,
-            };
-        } else {
-            updatedState = {
-                ...supplierState,
-                supplier_isarchived: true,
-            };
-        }
     
-        dispatch(setSupplierState(updatedState));
-
-        update(updatedState, `Supplier has been ${supplierState.supplier_isarchived ? `unarchived` : `archived`}`);
-
-        setShowModal(false);
-    };
-
-    const handleEditSupplierClick = () => navigate(`/EmpirePMS/supplier/${id}/edit`, { state: id });
-    
-    // Display DOM
-    const archiveModal = (
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-                <Modal.Title>{ supplierState && supplierState.supplier_isarchived ?  `Confirm Unarchive` : `Confirm Archive`}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>{ supplierState && supplierState.supplier_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}</Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
-                    Cancel
-                </Button>
-                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
-                { supplierState && supplierState.supplier_isarchived ? `Unarchive` : `Archive`}
-                </Button>
-            </Modal.Footer>
-        </Modal>
-    )
-
     const supplierProjectsTable = ( <>some projects data...</> )
 
     const supplierPurchaseOrdersTable = ( <>some purchase orders data...</> )
@@ -158,23 +147,23 @@ const SupplierDetails = () => {
                     <tr className="table-primary">
                         <th scope="col">SKU</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Unit A</th>
                         <th scope="col">Number A</th>
+                        <th scope="col">Unit A</th>
                         <th scope="col">Price A</th>
-                        <th scope="col">Size</th>
+                        <th scope="col">Actual M<span className='text-xs align-top'>2</span>/M</th>
                         <th scope="col">Type</th>
                         <th scope="col">Alias</th>
                         <th scope="col">Project Name</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {productState.map((product, index) => (
+                    {productState && productState.filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).map((product, index) => (
                         <tr key={index} onClick={() => handleProductTableClick(product.product._id)} className='cursor-pointer'>
                             <th scope="row">{product.product.product_sku}</th>
                             <td>{product.product.product_name}</td>
-                            <td>{product.productPrice.product_unit_a}</td>
                             <td>{product.productPrice.product_number_a}</td>
-                            <td>{product.productPrice.product_price_unit_a}</td>
+                            <td>{product.productPrice.product_unit_a}</td>
+                            <td>${product.productPrice.product_price_unit_a}</td>
                             <td>{product.product.product_actual_size}</td>
                             <td>{product.product.product_types}</td>
                             <td>{product.product.alias_name}</td>
@@ -205,6 +194,27 @@ const SupplierDetails = () => {
             </button>
         </div>
     );
+    
+    const archiveModal = (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { supplierState && supplierState.supplier_isarchived ? `Confirm Unarchive` : `Confirm Archive`}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { supplierState && supplierState.supplier_isarchived ? `Are you sure you want to unarchive this supplier?` : `Are you sure you want to archive this supplier?`}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Cancel
+                </Button>
+                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
+                    { supplierState && supplierState.supplier_isarchived ? `Unarchive` : `Archive`}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
 
     const supplierDetails = supplierState ? (
         <div className="card-body border-1 relative">
@@ -301,16 +311,6 @@ const SupplierDetails = () => {
     ): (
         <div className='border'>Supplier API fetched successfully, but it might be empty...</div>
     );
-
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
-
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
-            return(<div><SessionExpired /></div>)
-        }
-        return (<div>Error: {errorState}</div>);
-    }
-
 
     return (
         <div className="container mt-5">
