@@ -11,7 +11,6 @@ import Dropdown from "react-bootstrap/Dropdown"
 const ProductDetails = () => {
     //Component state declaration
     const productState = useSelector((state) => state.productReducer.productState)
-    // const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
@@ -52,14 +51,13 @@ const ProductDetails = () => {
                     ? productState[0].productPrice.product_effective_date.split('T')[0]
                     : '', // or 'null' depending on your needs
             };
+            console.log("Inside modifiedProductPriceState now:", modifiedProductPriceState)
             dispatch(setProductPrice(modifiedProductPriceState));
         }
     
         navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId });
     };
     
-    
-
     //Render component
     useEffect(() => {
         const fetchProductDetails = async () => {

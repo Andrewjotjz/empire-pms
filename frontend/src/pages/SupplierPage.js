@@ -13,11 +13,37 @@ const Supplier = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [isArchive, setIsArchive] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     //Component router
     const navigate = useNavigate();
 
     //Component functions and variables
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const filterSuppliers = () => {
+        return supplierState.filter(supplier => {
+            // Convert the search term and supplier fields to lowercase for case-insensitive search
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+
+            // Check each field for the search term
+            return (
+                supplier.supplier_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                supplier.supplier_contacts.some(contact => (
+                    contact.name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    contact.email.toLowerCase().includes(lowerCaseSearchTerm) ||
+                    contact.phone.toLowerCase().includes(lowerCaseSearchTerm)
+                )) ||
+                supplier.supplier_address.toLowerCase().includes(lowerCaseSearchTerm) ||
+                supplier.supplier_payment_term.toLowerCase().includes(lowerCaseSearchTerm) ||
+                supplier.supplier_type.toLowerCase().includes(lowerCaseSearchTerm) ||
+                supplier.supplier_material_types.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+        });
+    };
+
     const handleAddClick = () => {
         dispatch(clearSupplierState());
         navigate('/EmpirePMS/supplier/create');
@@ -82,7 +108,7 @@ const Supplier = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {supplierState.filter(supplier => supplier.supplier_isarchived === isArchive).map((supplier, index) => (
+                    {filterSuppliers().filter(supplier => supplier.supplier_isarchived === isArchive).map((supplier, index) => (
                         <tr key={supplier._id} onClick={() => handleTableClick(supplier._id)} className="cursor-pointer">
                             <th scope="row">{index + 1}</th>
                             <td>{supplier.supplier_name}</td>
@@ -141,6 +167,8 @@ const Supplier = () => {
                                 type="text"
                                 className="form-control"
                                 placeholder="Search..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
                             />
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">
