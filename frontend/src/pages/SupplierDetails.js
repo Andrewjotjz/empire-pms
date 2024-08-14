@@ -22,12 +22,37 @@ const SupplierDetails = () => {
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('supplierDetails');
+    const [searchTerm, setSearchTerm] = useState('');    
 
     //Component hooks
     const { update } = useUpdateSupplier();
     const dispatch = useDispatch()
 
     //Component functions and variables
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const filterProducts = () => {
+        return productState.filter(product => {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    
+            return (
+                product.product.product_sku.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_number_a.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
+                product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.project_names.some(projectName => 
+                    projectName.toLowerCase().includes(lowerCaseSearchTerm)
+                )
+            );
+        });
+    };
+
     const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
     
     const handleBackClick = () => navigate(-1);
@@ -133,6 +158,8 @@ const SupplierDetails = () => {
                     type="text"
                     className="form-control mb-1 w-10/12"
                     placeholder="Search..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
                 />
                 <button className="btn btn-primary mb-1" onClick={handleAddProductClick}>
                     <div className='flex items-center'>
@@ -158,7 +185,7 @@ const SupplierDetails = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {productState && productState.filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).map((product, index) => (
+                    {productState && filterProducts().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).map((product, index) => (
                         <tr key={index} onClick={() => handleProductTableClick(product.product._id)} className='cursor-pointer'>
                             <th scope="row">{product.product.product_sku}</th>
                             <td>{product.product.product_name}</td>
