@@ -1,0 +1,444 @@
+//import modules
+import { useParams, useNavigate} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setPurchaseOrderState } from '../redux/purchaseOrderSlice';
+// import { setProductState, clearProductState } from '../redux/productSlice';
+import SessionExpired from "../components/SessionExpired";
+import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import { Modal, Button } from "react-bootstrap";
+import Dropdown from "react-bootstrap/Dropdown";
+import { useUpdatePurchaseOrder } from '../hooks/useUpdatePurchaseOrder';
+
+const PurchaseOrderDetails = () => {
+    //Component router
+    const { id } = useParams();
+    const navigate = useNavigate();
+
+    //Component state declaration
+    const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
+    const [isLoadingState, setIsLoadingState] = useState(true);
+    const [errorState, setErrorState] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [currentTab, setCurrentTab] = useState('supplierDetails');
+
+    //Component hooks
+    const { updatePurchaseOrder, isUpdateLoadingState, updateErrorState } = useUpdatePurchaseOrder();
+    const dispatch = useDispatch()
+
+    //Component functions and variables    
+    const handleBackClick = () => navigate(-1);
+
+    const handleProductTableClick = (productId) => { 
+        // dispatch(clearProductState());
+        // navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
+        return
+    }
+
+    const handleEditPurchaseOrder = () => {
+        return
+    }
+
+    const handleArchive = () => {    
+        let updatedState;
+        if (purchaseOrderState.order_isarchived === true) {
+            updatedState = {
+                ...purchaseOrderState,
+                order_isarchived: false,
+            };
+        } else {
+            updatedState = {
+                ...purchaseOrderState,
+                order_isarchived: true,
+            };
+        }
+    
+        dispatch(setPurchaseOrderState(updatedState));
+
+        updatePurchaseOrder(updatedState, `Purchase Order has been ${purchaseOrderState.order_isarchived ? `unarchived` : `archived`}`);
+
+        setShowModal(false);
+    };
+
+    const totalGrossAmount = purchaseOrderState && purchaseOrderState.products
+    ? purchaseOrderState.products.reduce(
+          (total, product) => total + (product.order_product_gross_amount || 0),
+          0
+      ).toFixed(2) //change number to two decimal points
+    : 0;
+    
+    //Render component
+    useEffect(() => {
+        const fetchPurchaseOrderDetails = async () => {
+            try {
+                const res = await fetch(`/api/order/${id}`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch purchase order details');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+
+                dispatch(setPurchaseOrderState(data));
+
+                setIsLoadingState(false);
+            } catch (err) {
+                setErrorState(err.message);
+                setIsLoadingState(false);
+            }
+        };
+
+        fetchPurchaseOrderDetails();
+    }, [id, dispatch]);
+
+
+    // Display DOM
+    if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }
+
+    if (errorState || updateErrorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
+    }
+
+    
+    const purchaseOrderDetails = purchaseOrderState ? (
+        <div className="row">
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Supplier:</label>
+                <p className="form-label">{purchaseOrderState.supplier.supplier_name}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Archived (?):</label>
+                {purchaseOrderState.order_isarchived ? 
+                    (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                    (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</label>)
+                }
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Order Date:</label>
+                <p className="form-label">{purchaseOrderState.order_date}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">EST Date/Time:</label>
+                <p className="form-label">{purchaseOrderState.order_est_datetime}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Created on:</label>
+                <p className="form-label">{purchaseOrderState.createdAt}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Last Updated on:</label>
+                <p className="form-label">{purchaseOrderState.updatedAt}</p>
+            </div>
+            <div className="col-md-6 mb-3">
+                <label className="form-label fw-bold">Order Status:</label>
+                {purchaseOrderState.order_status && (
+                <label
+                    className={`text-lg font-bold m-1 p-2 rounded-xl ${
+                        purchaseOrderState.order_status === "Cancelled"
+                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                            : purchaseOrderState.order_status === "Pending"
+                            ? "border-2 bg-transparent border-yellow-100 text-yellow-600"
+                            : purchaseOrderState.order_status === "Approved"
+                            ? "border-2 bg-transparent border-green-600 text-green-600"
+                            : purchaseOrderState.order_status === "Rejected"
+                            ? "border-2 bg-transparent border-red-600 text-red-600"
+                            : purchaseOrderState.order_status === "Draft"
+                            ? "border-2 bg-transparent border-blue-600 text-blue-600"
+                            : ""
+                    }`}
+                >
+                    {purchaseOrderState.order_status}
+                </label>
+                )}
+            </div>
+        </div>
+    ) : (
+        <div className='border'>Purchase Order API fetched successfully, but it might be empty...</div>
+    );
+
+    const productsTable = purchaseOrderState.products.length > 0 ? (
+        <div className="container p-0 bg-slate-50 mb-4 shadow-md">
+            <table className="table table-bordered table-hover m-0">
+                <thead className="thead-dark text-center">
+                    <tr className="table-primary">
+                        <th scope="col">Item #</th>
+                        <th scope="col">SKU</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Location</th>
+                        <th scope="col">Qty A</th>
+                        <th scope="col">Qty B</th>
+                        <th scope="col">Price A</th>
+                        <th scope="col">Net Amount</th>
+                    </tr>
+                </thead>
+                <tbody className='text-center'>
+                    {purchaseOrderState.products && purchaseOrderState.products.map((product, index) => (
+                    <tr key={product._id} className='cursor-pointer' onClick={handleProductTableClick}>
+                        <th scope="row">{index + 1}</th>
+                        <td>{product.product_id.product_sku}</td>
+                        <td>{product.product_id.product_name}</td>
+                        <td>{product.order_product_location}</td>
+                        <td>{product.order_product_qty_a}</td>
+                        <td>{product.order_product_qty_b}</td>
+                        <td>{product.order_product_price_unit_a}</td>
+                        <td className='text-end'>$ {product.order_product_gross_amount}</td>
+                    </tr>
+                    ))}
+                </tbody>
+            </table>
+            <div className='flex justify-end'>
+                <div>
+                    <table className="table text-end font-bold border-x-2 mb-0">
+                        <tbody>
+                            <tr>
+                                <td className='pt-1'>Total Net Amount:</td>
+                                <td className='pt-1'>$ {totalGrossAmount}</td>
+                            </tr>
+                            <tr>
+                                <td>Amount Paid:</td>
+                                <td>$ ??.??</td>
+                            </tr>
+                            <tr>
+                                <td>Outstanding Amount:</td>
+                                <td>$ ??.??</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    ): (
+        <div className='border'>Purchase Order's products fetched successfully, but it might be empty...</div>
+    );
+
+    const internalComments = purchaseOrderState.order_internal_comments !== '' ? (
+        <div className='shadow-md'>
+            <p>{purchaseOrderState.order_internal_comments}</p>
+        </div>
+    ) : (
+        <div className='border shadow-sm'><p className='m-2 p-1'>There is no internal comments...</p></div>
+    )
+
+    const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
+        <>
+        <div className="container shadow-md">
+            <table className="table table-bordered table-hover">
+                <thead className="thead-dark">
+                    <tr className="table-primary">
+                        <th scope="col">Ref #</th>
+                        <th scope="col">Issued on</th>
+                        <th scope="col">Received on</th>
+                        <th scope="col">Due on</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Stand Alone(?)</th>
+                        <th scope="col">Raw Nett Amount(+gst)</th>
+                        <th scope="col">Calculated Gross Amount (+gst)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {purchaseOrderState.invoices && purchaseOrderState.invoices.map(invoice => (
+                        <tr key={invoice._id}>
+                            <th scope="row">{invoice.invoice_ref}</th>
+                            <td>{invoice.invoice_issue_date}</td>
+                            <td>{invoice.invoice_received_date}</td>
+                            <td>{invoice.invoice_due_date}</td>
+                            <td>{invoice.invoice_status}</td>
+                            <td>{invoice.invoice_is_stand_alone}</td>
+                            <td>{invoice.invoiced_raw_total_amount_incl_gst}</td>
+                            <td>{invoice.invoiced_calculated_total_amount_incl_gst}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+        <div className='flex justify-end'>
+            <table className="table table-bordered table-hover">
+                <tbody>
+                    <tr>
+                        <td>Net Amount</td>
+                        <td>$ ??.??</td>
+                    </tr>
+                    <tr>
+                        <td>Gross Amount</td>
+                        <td>$ ??.??</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </>
+    ) : (
+        <div className='border shadow-sm p-1'>Purchase Order's invoices fetched successfully, but it might be empty...</div>
+    );
+
+    const supplierDetails = purchaseOrderState.supplier ? (
+        <div className="card-body border-1 relative shadow-md">
+            <div className="row">
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Supplier Name:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_name}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Address:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_address}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Payment Term:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_payment_term}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Payment Term Description:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_term_description}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Payment Method:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_payment_method_details}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Supplier Type:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_type}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Supplier Material Type:</label>
+                    <p className="form-label">{purchaseOrderState.supplier.supplier_material_types}</p>
+                </div>
+                <div className="col-md-6 mb-3">
+                    <label className="form-label fw-bold">Supplier Status:</label>
+                    {purchaseOrderState.supplier.supplier_isarchived ? 
+                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
+                    }
+                </div>
+                
+                <div>
+                    <h2 className='font-bold text-xl m-1'>Supplier Contacts</h2>
+                    <table className="table table-bordered shadow-sm">
+                        <thead className="thead-dark">
+                            
+                            <tr className="table-primary">
+                                <th scope="col">ID</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Phone</th>
+                                <th scope="col">Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {purchaseOrderState.supplier.supplier_contacts && purchaseOrderState.supplier.supplier_contacts.map((supplier,index) => (
+                                <tr key={index}>
+                                    <th scope="row">{index + 1}</th>
+                                    <td>{`${supplier.is_primary ? `*` : ``} ${supplier.name}`}</td>
+                                    <td>{supplier.phone}</td>
+                                    <td>{supplier.email}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    ) : (
+        <div className='border'>Purchase Order's supplier fetched successfully, but it might be empty...</div>
+    );
+
+    const notesToSupplier = (
+        <div>
+            <p>{purchaseOrderState.order_notes_to_supplier}</p>
+        </div>
+    )
+    
+    const archiveModal = (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { purchaseOrderState && purchaseOrderState.order_isarchived ? `Confirm Unarchive` : `Confirm Archive`}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { purchaseOrderState && purchaseOrderState.order_isarchived ? `Are you sure you want to unarchive this purchase order?` : `Are you sure you want to archive this purchase order?`}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Cancel
+                </Button>
+                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
+                    { purchaseOrderState && purchaseOrderState.order_isarchived ? `Unarchive` : `Archive`}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
+
+    return (
+        <div className="container mt-5">
+            <div className="card">
+                <div className="card-header bg-dark text-white flex justify-between items-center">
+                    <button onClick={handleBackClick}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
+                        </svg>
+                    </button>
+                    <h1 className='mx-auto uppercase font-bold text-xl'>PURCHASE ORDER: {purchaseOrderState.order_ref}</h1>
+                </div>
+                <div className="card-body">
+                    {/* DROPDOWN ACTION */}
+                    <div className="absolute right-3">
+                        <Dropdown>
+                            <Dropdown.Toggle variant="success" id="dropdown-basic">
+                                ACTIONS
+                            </Dropdown.Toggle>
+                            <Dropdown.Menu>
+                                <Dropdown.Item onClick={handleEditPurchaseOrder}>
+                                    <div className='flex items-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                            <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                                            <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                                        </svg>
+                                        <label>EDIT ORDER</label>
+                                    </div>
+                                </Dropdown.Item>
+                                <Dropdown.Item onClick={() => setShowModal(true)}>
+                                    <div className='flex items-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                            <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3Z" />
+                                            <path fillRule="evenodd" d="M13 6H3v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6ZM8.75 7.75a.75.75 0 0 0-1.5 0v2.69L6.03 9.22a.75.75 0 0 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.06 0l2.5-2.5a.75.75 0 1 0-1.06-1.06l-1.22 1.22V7.75Z" clipRule="evenodd" />
+                                        </svg>
+                                        <label>{ purchaseOrderState.order_isarchived ? `UNARCHIVE` : `ARCHIVE`}</label>
+                                    </div>
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </div>
+                    {/* PURCHASE ORDER DETAILS */}
+                    <div>
+                        { purchaseOrderDetails }
+                    </div>
+                    {/* PRODUCTS TABLE and CALCULATION */}
+                    <div>
+                        { productsTable }
+                    </div>
+                    {/* TABS */}
+                    <div>
+                        <button className={`${currentTab === 'internalComments' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('internalComments')}>Internal Comments</button>
+                        <button className={`${currentTab === 'invoicesTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('invoicesTable')}>Invoices</button>
+                        <button className={`${currentTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierDetails')}>Supplier Details</button>
+                    </div>
+                    {/* NOTES TO SUPPLIER */}
+                    <div>
+                        { notesToSupplier }
+                    </div>
+                    {/* SWITCH BETWEEN COMPONENTS HERE */}
+                    {currentTab === 'internalComments' && internalComments}
+                    {currentTab === 'invoicesTable' && invoicesTable}
+                    {currentTab === 'supplierDetails' && supplierDetails}
+                </div>
+            </div>
+            { archiveModal }
+        </div>
+    );
+
+}
+
+export default PurchaseOrderDetails;
