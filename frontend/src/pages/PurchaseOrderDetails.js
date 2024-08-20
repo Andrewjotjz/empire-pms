@@ -3,7 +3,7 @@ import { useParams, useNavigate} from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPurchaseOrderState } from '../redux/purchaseOrderSlice';
-// import { setProductState, clearProductState } from '../redux/productSlice';
+import { clearProductState } from '../redux/productSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import { Modal, Button } from "react-bootstrap";
@@ -30,9 +30,8 @@ const PurchaseOrderDetails = () => {
     const handleBackClick = () => navigate(-1);
 
     const handleProductTableClick = (productId) => { 
-        // dispatch(clearProductState());
-        // navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
-        return
+        dispatch(clearProductState());
+        navigate(`/EmpirePMS/supplier/${purchaseOrderState.supplier._id}/products/${productId}`, {state: purchaseOrderState.supplier._id})
     }
 
     const handleEditPurchaseOrder = () => {
@@ -58,6 +57,26 @@ const PurchaseOrderDetails = () => {
         updatePurchaseOrder(updatedState, `Purchase Order has been ${purchaseOrderState.order_isarchived ? `unarchived` : `archived`}`);
 
         setShowModal(false);
+    };
+
+    const formatDate = (dateString) => {
+        if (dateString === null) {
+            return ''
+        }  else {
+            const date = new Date(dateString);
+            const options = { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', ', ');
+        }
+    };
+
+    const formatDateTime = (dateString) => {
+        if (dateString === null) {
+            return ''
+        }  else {
+            const date = new Date(dateString);
+            const options = { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', ', ');
+        }
     };
 
     const totalGrossAmount = purchaseOrderState && purchaseOrderState.products
@@ -120,19 +139,19 @@ const PurchaseOrderDetails = () => {
             </div>
             <div className="col-md-6 mb-3">
                 <label className="form-label fw-bold">Order Date:</label>
-                <p className="form-label">{purchaseOrderState.order_date}</p>
+                <p className="form-label">{formatDate(purchaseOrderState.order_date)}</p>
             </div>
             <div className="col-md-6 mb-3">
                 <label className="form-label fw-bold">EST Date/Time:</label>
-                <p className="form-label">{purchaseOrderState.order_est_datetime}</p>
+                <p className="form-label">{formatDateTime(purchaseOrderState.order_est_datetime)}</p>
             </div>
             <div className="col-md-6 mb-3">
                 <label className="form-label fw-bold">Created on:</label>
-                <p className="form-label">{purchaseOrderState.createdAt}</p>
+                <p className="form-label">{formatDateTime(purchaseOrderState.createdAt)}</p>
             </div>
             <div className="col-md-6 mb-3">
                 <label className="form-label fw-bold">Last Updated on:</label>
-                <p className="form-label">{purchaseOrderState.updatedAt}</p>
+                <p className="form-label">{formatDateTime(purchaseOrderState.updatedAt)}</p>
             </div>
             <div className="col-md-6 mb-3">
                 <label className="form-label fw-bold">Order Status:</label>
@@ -178,15 +197,15 @@ const PurchaseOrderDetails = () => {
                 </thead>
                 <tbody className='text-center'>
                     {purchaseOrderState.products && purchaseOrderState.products.map((product, index) => (
-                    <tr key={product._id} className='cursor-pointer' onClick={handleProductTableClick}>
+                    <tr key={`${product.product_id._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_id._id)}>
                         <th scope="row">{index + 1}</th>
                         <td>{product.product_id.product_sku}</td>
                         <td>{product.product_id.product_name}</td>
                         <td>{product.order_product_location}</td>
                         <td>{product.order_product_qty_a}</td>
                         <td>{product.order_product_qty_b}</td>
-                        <td>{product.order_product_price_unit_a}</td>
-                        <td className='text-end'>$ {product.order_product_gross_amount}</td>
+                        <td>$ {product.order_product_price_unit_a.toFixed(2)}</td>
+                        <td className='text-end'>$ {product.order_product_gross_amount.toFixed(2)}</td>
                     </tr>
                     ))}
                 </tbody>
@@ -221,7 +240,7 @@ const PurchaseOrderDetails = () => {
             <p>{purchaseOrderState.order_internal_comments}</p>
         </div>
     ) : (
-        <div className='border shadow-sm'><p className='m-2 p-1'>There is no internal comments...</p></div>
+        <div className='border shadow-sm'><p className='m-2 p-1'>There are no internal comments...</p></div>
     )
 
     const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
@@ -272,7 +291,7 @@ const PurchaseOrderDetails = () => {
         </div>
         </>
     ) : (
-        <div className='border shadow-sm p-1'>Purchase Order's invoices fetched successfully, but it might be empty...</div>
+        <div className='border shadow-sm'><p className='m-2 p-1'>Purchase Order's invoices fetched successfully, but it might be empty...</p></div>
     );
 
     const supplierDetails = purchaseOrderState.supplier ? (
@@ -374,6 +393,7 @@ const PurchaseOrderDetails = () => {
     return (
         <div className="container mt-5">
             <div className="card">
+                {/* CARD HEADER */}
                 <div className="card-header bg-dark text-white flex justify-between items-center">
                     <button onClick={handleBackClick}>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">

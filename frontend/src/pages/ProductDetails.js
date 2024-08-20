@@ -51,7 +51,6 @@ const ProductDetails = () => {
                     ? productState[0].productPrice.product_effective_date.split('T')[0]
                     : '', // or 'null' depending on your needs
             };
-            console.log("Inside modifiedProductPriceState now:", modifiedProductPriceState)
             dispatch(setProductPrice(modifiedProductPriceState));
         }
     

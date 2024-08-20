@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux'
 import { setPurchaseOrderState, clearPurchaseOrderState } from '../redux/purchaseOrderSlice'
+import { clearProductState } from '../redux/productSlice'
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
 
@@ -77,10 +78,9 @@ const PurchaseOrder = () => {
         });
     };
     
-    
-
     const handleAddClick = () => {
         dispatch(clearPurchaseOrderState());
+        dispatch(clearProductState())
         navigate('/EmpirePMS/order/create');
     }
 
@@ -90,7 +90,6 @@ const PurchaseOrder = () => {
         navigate(`/EmpirePMS/order/${id}`);
     }
     
-
     //Render component
     useEffect(() => {
         const abortController = new AbortController();
@@ -128,8 +127,6 @@ const PurchaseOrder = () => {
             abortController.abort(); // Cleanup
         };
     }, [dispatch]);
-
-    
     
     //Display DOM
     const purchaseOrderTable = Array.isArray(purchaseOrderState) && purchaseOrderState.length > 0 ? (
