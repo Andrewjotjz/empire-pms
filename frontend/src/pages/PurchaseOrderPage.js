@@ -79,7 +79,6 @@ const PurchaseOrder = () => {
     };
     
     const handleAddClick = () => {
-        dispatch(clearPurchaseOrderState());
         dispatch(clearProductState())
         navigate('/EmpirePMS/order/create');
     }
@@ -131,7 +130,7 @@ const PurchaseOrder = () => {
     //Display DOM
     const purchaseOrderTable = Array.isArray(purchaseOrderState) && purchaseOrderState.length > 0 ? (
         <div className="container">
-            <table className="table table-bordered table-hover">
+            <table className="table table-bordered table-hover shadow-md">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">PO</th>

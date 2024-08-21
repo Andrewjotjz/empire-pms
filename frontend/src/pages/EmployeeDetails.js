@@ -4,17 +4,22 @@ import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
 import { toast } from 'react-toastify';
+import { Modal, Button } from "react-bootstrap";
+import { useUpdateEmployee } from '../hooks/useUpdateEmployee';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import Dropdown from "react-bootstrap/Dropdown"
+
 
 const EmployeeDetails = () => {
     //Component state declaration
     const employeeState = useSelector((state) => state.employeeReducer.employeeState)
     const localUserState = useSelector((state) => state.localUserReducer.localUserState)
+    const { update } = useUpdateEmployee();
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('employeeDetails');
 
     //Component router
@@ -56,6 +61,27 @@ const EmployeeDetails = () => {
             setIsLoadingState(false);
         }
     };
+
+    const handleArchive = () => {    
+        let updatedState;
+        if (employeeState.employee_isarchived === true) {
+            updatedState = {
+                ...employeeState,
+                employee_isarchived: false,
+            };
+        } else {
+            updatedState = {
+                ...employeeState,
+                employee_isarchived: true,
+            };
+        }
+    
+        dispatch(setEmployeeDetails(updatedState));
+
+        update(updatedState, `Employee has been ${employeeState.employee_isarchived ? `unarchived` : `archived`}`);
+
+        setShowModal(false);
+    };
     
     //Render component
     useEffect(() => {
@@ -84,15 +110,27 @@ const EmployeeDetails = () => {
     }, [id, dispatch]);
 
     const employeeProjectsTable = ( <div className="border rounded-sm">some projects data...</div> )
-    
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
-            return(<div><SessionExpired /></div>)
-        }
-        return (<div>Error: {errorState}</div>);
-    }
+    const archiveModal = (
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { employeeState && employeeState.employee_isarchived ? `Confirm Unarchive` : `Confirm Archive`}
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { employeeState && employeeState.employee_isarchived ? `Are you sure you want to unarchive this employee?` : `Are you sure you want to archive this employee?`}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
+                    Cancel
+                </Button>
+                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleArchive}>
+                    { employeeState && employeeState.employee_isarchived ? `Unarchive` : `Archive`}
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    )
 
     //Display DOM
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
@@ -136,6 +174,15 @@ const EmployeeDetails = () => {
                                     <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
                                 </svg>
                                 <label>CHANGE PASSWORD</label>
+                            </div>
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => setShowModal(true)}>
+                            <div className='flex items-center'>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="size-4 mr-2">
+                                    <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3Z" />
+                                    <path fillRule="evenodd" d="M13 6H3v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6ZM8.75 7.75a.75.75 0 0 0-1.5 0v2.69L6.03 9.22a.75.75 0 0 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.06 0l2.5-2.5a.75.75 0 1 0-1.06-1.06l-1.22 1.22V7.75Z" clipRule="evenodd" />
+                                </svg>
+                                <label>{ employeeState.employee_isarchived ? `UNARCHIVE` : `ARCHIVE`}</label>
                             </div>
                         </Dropdown.Item>
                     </Dropdown.Menu>
@@ -198,6 +245,7 @@ const EmployeeDetails = () => {
                     {currentTab === 'employeeProjectsTable' && employeeProjectsTable}
             </div>
         </div>
+        { archiveModal }
     </div>
     );
 };

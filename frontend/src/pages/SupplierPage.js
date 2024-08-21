@@ -93,7 +93,7 @@ const Supplier = () => {
     //Display DOM
     const supplierTable = Array.isArray(supplierState) && supplierState.length > 0 ? (
         <div className="container">
-            <table className="table table-bordered table-hover">
+            <table className="table table-bordered table-hover shadow-md">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">ID</th>
@@ -156,7 +156,7 @@ const Supplier = () => {
     }
 
     return (
-        <div className="container mt-5"><div className="card">
+        <div className="container my-5"><div className="card">
                 <div className="card-header bg-dark text-white">
                     <h1 className='mx-auto uppercase font-bold text-xl'>SUPPLIERS</h1>
                 </div>
@@ -183,7 +183,7 @@ const Supplier = () => {
                         </div>
                     </div>
                     <div className="row mb-3">
-                    <div className="col-md-6">
+                    <div className="col-md-6 mt-2">
                         <button 
                             className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} 
                             onClick={() => setIsArchive(false)}

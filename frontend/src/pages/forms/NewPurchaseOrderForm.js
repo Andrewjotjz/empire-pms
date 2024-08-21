@@ -7,6 +7,7 @@ import { clearProductState } from '../../redux/productSlice'
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from '../loaders/EmployeeDetailsSkeleton';
 import { useSelector, useDispatch } from 'react-redux';
+import { Modal, Button } from "react-bootstrap";
 
 const NewPurchaseOrderForm = () => {
     // Component router
@@ -19,6 +20,7 @@ const NewPurchaseOrderForm = () => {
     // Component state
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
     const productState = useSelector((state) => state.productReducer.productState)
+    const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
     const [selectedSupplier, setSelectedSupplier] = useState('');
     const [isFetchSupplierLoadingState, setIsFetchSupplierLoadingState] = useState(true);
     const [fetchSupplierErrorState, setFetchSupplierErrorState] = useState(null);
@@ -27,6 +29,10 @@ const NewPurchaseOrderForm = () => {
         min_qty_b: '',
         last_qty_a: '',
         last_qty_b: ''
+    }])
+    const [ itemUOM, setItemUOM ] = useState([{
+        order_product_unit_a: '',
+        order_product_unit_b: ''
     }])
     const [orderState, setOrderState] = useState({
         supplier: '',
@@ -52,20 +58,164 @@ const NewPurchaseOrderForm = () => {
         project: '',
         order_status: 'Draft'
     })
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [newSupplier, setNewSupplier] = useState('');
+    const [pendingAction, setPendingAction] = useState(null);
+
 
     // Component functions and variables
     const handleBackClick = () => navigate(`/EmpirePMS/order/`);
-
+    
+    //! DO NOT DELETE THIS ONE
+    // const handleSupplierChange = (event) => {
+    //     const newSupplier = event.target.value;
+    
+    //     // If supplier is selected, prompt the user for confirmation
+    //     if (newSupplier !== '') {
+    //         if (selectedSupplier === '') {
+    //             setSelectedSupplier(newSupplier)
+    //             return
+    //         }
+    //         const userConfirmed = window.confirm("Are you sure you want to change the supplier? Any changes you made to current order details will be discarded.");
+    
+    //         // If user confirms, proceed with dispatch and fetching
+    //         if (userConfirmed) {
+    //             dispatch(clearProductState());
+    //             setItemSize([{
+    //                 min_qty_a: '',
+    //                 min_qty_b: '',
+    //                 last_qty_a: '',
+    //                 last_qty_b: ''
+    //             }]);
+    //             setOrderState({
+    //                 supplier: '',
+    //                 order_ref: '',
+    //                 order_date: '',
+    //                 order_est_datetime: '',
+    //                 products: [{
+    //                     product_id: '',
+    //                     order_product_location: '',
+    //                     order_product_qty_a: '',
+    //                     order_product_qty_b: '',
+    //                     order_product_price_unit_a: '',
+    //                     order_product_gross_amount: ''
+    //                 }],
+    //                 custom_products: [{
+    //                     custom_product_name: '',
+    //                     custom_product_location: '',
+    //                     custom_order_qty: ''
+    //                 }],
+    //                 order_total_amount: '',
+    //                 order_internal_comments: '',
+    //                 order_notes_to_supplier: '',
+    //                 project: '',
+    //                 order_status: 'Draft'
+    //             });
+    //             fetchProductsBySupplier(newSupplier);
+    //             setSelectedSupplier(newSupplier);
+    //         }
+    //     } else if (newSupplier === '' && selectedSupplier !== '') {
+    //         setSelectedSupplier(newSupplier);
+    //     }
+    // };
     const handleSupplierChange = (event) => {
-        if (event.target.value !== '') {
-            dispatch(clearProductState())
-            fetchProductsBySupplier(event.target.value)
-            setSelectedSupplier(event.target.value)
-        }
-        else {
-            setSelectedSupplier(event.target.value)
+        const targetSupplier = event.target.value;
+    
+        if (targetSupplier !== '') {
+            if (selectedSupplier === '') {
+                setSelectedSupplier(targetSupplier);
+                dispatch(clearProductState());
+                setItemSize([{
+                    min_qty_a: '',
+                    min_qty_b: '',
+                    last_qty_a: '',
+                    last_qty_b: ''
+                }]);
+                setOrderState({
+                    supplier: '',
+                    order_ref: '',
+                    order_date: '',
+                    order_est_datetime: '',
+                    products: [{
+                        product_id: '',
+                        order_product_location: '',
+                        order_product_qty_a: '',
+                        order_product_qty_b: '',
+                        order_product_price_unit_a: '',
+                        order_product_gross_amount: ''
+                    }],
+                    custom_products: [{
+                        custom_product_name: '',
+                        custom_product_location: '',
+                        custom_order_qty: ''
+                    }],
+                    order_total_amount: '',
+                    order_internal_comments: '',
+                    order_notes_to_supplier: '',
+                    project: '',
+                    order_status: 'Draft'
+                });
+                setItemUOM([{
+                    order_product_unit_a: '',
+                    order_product_unit_b: ''
+                }])
+                fetchProductsBySupplier(targetSupplier);
+                setSelectedSupplier(targetSupplier);
+                return;
+            }
+    
+            // Set newSupplier and show the confirmation modal
+            setNewSupplier(targetSupplier);
+            setPendingAction('changeSupplier');
+            setShowConfirmationModal(true);
+        } else if (targetSupplier === '' && selectedSupplier !== '') {
+            setSelectedSupplier(targetSupplier);
         }
     };
+
+    const handleConfirmAction = () => {
+        if (pendingAction === 'changeSupplier') {
+            dispatch(clearProductState());
+            setItemSize([{
+                min_qty_a: '',
+                min_qty_b: '',
+                last_qty_a: '',
+                last_qty_b: ''
+            }]);
+            setOrderState({
+                supplier: '',
+                order_ref: '',
+                order_date: '',
+                order_est_datetime: '',
+                products: [{
+                    product_id: '',
+                    order_product_location: '',
+                    order_product_qty_a: '',
+                    order_product_qty_b: '',
+                    order_product_price_unit_a: '',
+                    order_product_gross_amount: ''
+                }],
+                custom_products: [{
+                    custom_product_name: '',
+                    custom_product_location: '',
+                    custom_order_qty: ''
+                }],
+                order_total_amount: '',
+                order_internal_comments: '',
+                order_notes_to_supplier: '',
+                project: '',
+                order_status: 'Draft'
+            });
+            setItemUOM([{
+                order_product_unit_a: '',
+                order_product_unit_b: ''
+            }])
+            fetchProductsBySupplier(newSupplier);
+            setSelectedSupplier(newSupplier);
+        }
+        setShowConfirmationModal(false);
+        setPendingAction(null);
+    };    
 
     const handleAddItem = () => {
         if ( orderState.products.length < 30) {
@@ -80,6 +230,18 @@ const NewPurchaseOrderForm = () => {
                     order_product_gross_amount: ''
                 }]
             });
+            setItemSize([
+                ...itemSize,{
+                min_qty_a: '',
+                min_qty_b: '',
+                last_qty_a: '',
+                last_qty_b: ''
+            }])
+            setItemUOM([
+                ...itemUOM,{
+                order_product_unit_a: '',
+                order_product_unit_b: ''
+            }])
         } else {
             alert("You can add up to 30 items only.")
         }
@@ -87,10 +249,14 @@ const NewPurchaseOrderForm = () => {
 
     const handleRemoveItem = (index) => {
         const updatedItems = orderState.products.filter((_, idx) => idx !== index);
+        const updatedItemsSize = itemSize.filter((_, idx) => idx !== index)
+        const updatedItemsUOM = itemUOM.filter((_, idx) => idx !== index)
         setOrderState({
             ...orderState,
             products: updatedItems
         })
+        setItemSize(updatedItemsSize)
+        setItemUOM(updatedItemsUOM)
     }
 
     //! DO NOT DELETE THIS ONE
@@ -148,10 +314,10 @@ const NewPurchaseOrderForm = () => {
     //             }
 
     //             if (name === 'order_product_qty_a') {
-    //                 updatedProducts[index].order_product_qty_b = updatedProducts[index].order_product_qty_b + itemSize[index].min_qty_b
+    //                 updatedProducts[index].order_product_qty_b = Number(updatedProducts[index].order_product_qty_b) + itemSize[index].min_qty_b
     //             }
     //             if (name === 'order_product_qty_b') {
-    //                 updatedProducts[index].order_product_qty_a = updatedProducts[index].order_product_qty_a + itemSize[index].min_qty_a
+    //                 updatedProducts[index].order_product_qty_a = Number(updatedProducts[index].order_product_qty_a) + itemSize[index].min_qty_a
     //             }
 
     //             if (value === '') {
@@ -184,8 +350,6 @@ const NewPurchaseOrderForm = () => {
     //         };
     //     });
     // };
-    //! DO NOT DELETE THIS ONE
-
     const handleInputChange = (event, index = null, isProduct = false, isCustomProduct = false) => {
         const { name, value } = event.target;
     
@@ -214,6 +378,14 @@ const NewPurchaseOrderForm = () => {
                             };
                             return updatedItemSize;
                         });
+                        setItemUOM((prevItemState) => {
+                            const updatedItemSize = [...prevItemState];
+                            updatedItemSize[index] = {
+                                order_product_unit_a: selectedProduct.productPrice.product_unit_a,
+                                order_product_unit_b: selectedProduct.productPrice.product_unit_b,
+                            };
+                            return updatedItemSize;
+                        });
                         updatedProducts[index].order_product_qty_a = selectedProduct.productPrice.product_number_a;
                         updatedProducts[index].order_product_qty_b = selectedProduct.productPrice.product_number_b;
                     }
@@ -234,16 +406,66 @@ const NewPurchaseOrderForm = () => {
                             };
                             return updatedItemSize;
                         });
+                        setItemUOM((prevItemState) => {
+                            const updatedItemSize = [...prevItemState];
+                            updatedItemSize[index] = {
+                                order_product_unit_a: selectedProduct.productPrice.product_unit_a,
+                                order_product_unit_b: selectedProduct.productPrice.product_unit_b,
+                            };
+                            return updatedItemSize;
+                        });
                         updatedProducts[index].order_product_qty_a = selectedProduct.productPrice.product_number_a;
                         updatedProducts[index].order_product_qty_b = selectedProduct.productPrice.product_number_b;
                     }
                 }
 
                 if (name === 'order_product_qty_a') {
-                    updatedProducts[index].order_product_qty_b = updatedProducts[index].order_product_qty_b + itemSize[index].min_qty_b
+                    updatedProducts[index].order_product_qty_b = Number(updatedProducts[index].order_product_qty_b) + itemSize[index].min_qty_b
+                    setItemSize((prevItemState) => {
+                        const updatedItemSize = [...prevItemState];
+                        updatedItemSize[index] = {
+                            ...updatedItemSize[index],
+                            last_qty_a: Number(value),
+                            last_qty_b: updatedProducts[index].order_product_qty_b
+                        };
+                        return updatedItemSize;
+                    });
+                    if (Number(value) < itemSize[index].last_qty_a && itemSize[index].last_qty_a !== ''){
+                        updatedProducts[index].order_product_qty_b = itemSize[index].last_qty_b - itemSize[index].min_qty_b
+                        setItemSize((prevItemState) => {
+                            const updatedItemSize = [...prevItemState];
+                            updatedItemSize[index] = {
+                                ...updatedItemSize[index],
+                                last_qty_a: Number(value),
+                                last_qty_b: updatedProducts[index].order_product_qty_b
+                            };
+                            return updatedItemSize;
+                        });
+                    }
                 }
                 if (name === 'order_product_qty_b') {
-                    updatedProducts[index].order_product_qty_a = updatedProducts[index].order_product_qty_a + itemSize[index].min_qty_a
+                    updatedProducts[index].order_product_qty_a = Number(updatedProducts[index].order_product_qty_a) + itemSize[index].min_qty_a
+                    setItemSize((prevItemState) => {
+                        const updatedItemSize = [...prevItemState];
+                        updatedItemSize[index] = {
+                            ...updatedItemSize[index],
+                            last_qty_a: updatedProducts[index].order_product_qty_a,
+                            last_qty_b: Number(value)
+                        };
+                        return updatedItemSize;
+                    });
+                    if (Number(value) < itemSize[index].last_qty_b && itemSize[index].last_qty_b !== ''){
+                        updatedProducts[index].order_product_qty_a = itemSize[index].last_qty_a - itemSize[index].min_qty_a
+                        setItemSize((prevItemState) => {
+                            const updatedItemSize = [...prevItemState];
+                            updatedItemSize[index] = {
+                                ...updatedItemSize[index],
+                                last_qty_a: updatedProducts[index].order_product_qty_a,
+                                last_qty_b: Number(value)
+                            };
+                            return updatedItemSize;
+                        });
+                    }
                 }
 
                 if (value === '') {
@@ -274,6 +496,21 @@ const NewPurchaseOrderForm = () => {
                 ...prevState,
                 [name]: value,
             };
+        });
+    };
+
+    const handleSearchChange = (e) => {
+        setOrderState({...orderState, order_ref: e.target.value});
+    };
+
+    const filterOrders = () => {
+        return purchaseOrderState.filter(order => {
+            const lowerCaseSearchTerm = orderState.order_ref.toLowerCase();
+    
+            // Check each field for the search term
+            return (
+                order.order_ref.toLowerCase().includes(lowerCaseSearchTerm)
+            );
         });
     };
 
@@ -331,12 +568,34 @@ const NewPurchaseOrderForm = () => {
         return <div><p>Error: {fetchSupplierErrorState}</p><p>Error: {fetchProductsErrorState}</p></div>;
     }
 
+    const confirmationModal = (
+        <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { `Change Supplier` }
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { `Are you sure you want to change to another supplier? Any changes you made to current order details will be discarded.` }
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => setShowConfirmationModal(false)}>
+                    Cancel
+                </Button>
+                <Button className="bg-red-600 hover:bg-red-600" variant="primary" onClick={handleConfirmAction}>
+                    { `Change` }
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+    
+
     // console.log("Order state is now: ", orderState)
     // console.log("ItemSize state is now: ", itemSize)
     // console.log("Product state is now: ", productState)
 
     return (
-        <div className="container mt-5 pb-3"> 
+        <div className="container mt-3 mb-4 pb-3"> 
             <div className="card">
                 <div className="card-header bg-dark text-white">
                     <h1>NEW PURCHASE ORDER</h1>
@@ -345,18 +604,25 @@ const NewPurchaseOrderForm = () => {
                     {/* SELECT SUPPLIER */}
                     <div className='row'>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label font-bold">Purchase Order No.:</label>
+                            <label className="form-label font-bold">*Purchase Order No:</label>
                             <input 
                                 type='text'
                                 className="form-control" 
                                 name="order_ref" 
-                                value={orderState.order_ref} 
+                                value={orderState.order_ref}
+                                onChange={handleSearchChange}
                                 required
-                                onInvalid={(e) => e.target.setCustomValidity('Order number error. Please contact IT Support')}
+                                onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
                                 onInput={(e) => e.target.setCustomValidity('')}
-                                disabled
                             />
-                            <label className='text-xs italic text-gray-400'>This is an auto generated order reference number.</label>
+                            <label className='text-xs italic text-gray-400'>
+                                Previous 3 order reference numbers: 
+                                {purchaseOrderState.slice(0,3).map((order, index) => (<div key={index} className='inline-block ml-1 border rounded-lg px-1'>{order.order_ref}</div>))}
+                            </label>
+                            <div className='text-xs italic text-gray-400'>
+                                Based on your search:
+                                {filterOrders().filter(order => order.order_isarchived === false).slice(0,3).map((order, index) => (<div key={index} className='inline-block ml-1 border rounded-lg px-1'>{order.order_ref}</div>))}
+                            </div>
                         </div>
                         <div className='col-md-6 mb-3'>
                             <label className="form-label fw-bold">*Supplier:</label>
@@ -421,7 +687,7 @@ const NewPurchaseOrderForm = () => {
                             </thead>
                             <tbody className='text-center'>
                                 {orderState.products.map((product, index) => (
-                                <tr >
+                                <tr key={index}>
                                     <th scope="row">{index + 1}</th>
                                     <td>
                                         <select 
@@ -464,39 +730,45 @@ const NewPurchaseOrderForm = () => {
                                             name="order_product_location" 
                                             value={product.order_product_location} 
                                             onChange={(e) => handleInputChange(e, index, true)}
-                                            placeholder="Ex: Level 2 bathroom"
+                                            placeholder="Ex: Level 2"
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
                                             onInput={(e) => e.target.setCustomValidity('')}
                                         />
                                     </td>
                                     <td>
-                                        <input
-                                            type='number'
-                                            className="form-control" 
-                                            name="order_product_qty_a" 
-                                            value={product.order_product_qty_a} 
-                                            onChange={(e) => handleInputChange(e, index, true)}
-                                            min={Number(itemSize[index]?.min_qty_a) || 0}
-                                            step={Number(itemSize[index]?.min_qty_a) || 1}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter qty-A')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
+                                        <div className='grid grid-cols-3 items-center border rounded w-32'>
+                                            <input
+                                                type='number'
+                                                name="order_product_qty_a" 
+                                                value={product.order_product_qty_a} 
+                                                onChange={(e) => handleInputChange(e, index, true)}
+                                                min={Number(itemSize[index]?.min_qty_a) || 0}
+                                                step={Number(itemSize[index]?.min_qty_a) || 1}
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter qty-A')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className='px-1 py-1 ml-1 col-span-2'
+                                            />
+                                            <label className='text-sm opacity-50 col-span-1 text-nowrap'>{itemUOM[index].order_product_unit_a ? itemUOM[index].order_product_unit_a : "UNIT"}</label>
+                                        </div>
                                     </td>
                                     <td>
-                                        <input
-                                            type='number'
-                                            className="form-control" 
-                                            name="order_product_qty_b" 
-                                            value={product.order_product_qty_b} 
-                                            onChange={(e) => handleInputChange(e, index, true)}
-                                            min={Number(itemSize[index]?.min_qty_b) || 0}
-                                            step={Number(itemSize[index]?.min_qty_b) || 1}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter qty-B')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
+                                        <div className='grid grid-cols-3 items-center border rounded w-32'>
+                                            <input
+                                                type='number'
+                                                name="order_product_qty_b" 
+                                                value={product.order_product_qty_b} 
+                                                onChange={(e) => handleInputChange(e, index, true)}
+                                                min={Number(itemSize[index]?.min_qty_b) || 0}
+                                                step={Number(itemSize[index]?.min_qty_b) || 1}
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter qty-B')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                 className='px-1 py-1 ml-1 col-span-2'
+                                            />
+                                            <label className='text-sm opacity-50 col-span-1 text-nowrap'>{itemUOM[index].order_product_unit_b ? itemUOM[index].order_product_unit_b : "UNIT"}</label>
+                                        </div>
                                     </td>
                                     <td>
                                         <div className="form-control bg-gray-200">
@@ -566,7 +838,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="mb-1">
                         <label className="form-label font-bold">Notes to supplier:</label>
                         <textarea
-                            className="form-control" 
+                            className="form-control bg-yellow-200" 
                             name="order_notes_to_supplier" 
                             value={orderState.order_notes_to_supplier} 
                             onChange={handleInputChange}
@@ -576,6 +848,7 @@ const NewPurchaseOrderForm = () => {
                     </div>
                 </form>
             </div>
+            { confirmationModal }
         </div>
     );
 };

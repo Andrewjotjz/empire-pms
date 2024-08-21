@@ -84,8 +84,8 @@ const Employee = () => {
 
     //Display DOM
     const employeeTable = Array.isArray(employeeState) && employeeState.length > 0 ? (
-        <div className="border rounded-sm">
-            <table className="table table-bordered table-hover">
+        <div>
+            <table className="table table-bordered table-hover shadow-md">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">ID</th>

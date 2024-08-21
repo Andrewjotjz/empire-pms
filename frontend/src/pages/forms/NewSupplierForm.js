@@ -187,9 +187,9 @@ const NewSupplierForm = () => {
                         </div>
                         <div className='p-2'>
                             {supplierState.supplier_contacts.map((contact, index) => (
-                                <div key={index} className="col-md-12 mb-1 border-y-2">
+                                <div key={index} className="col-md-12 mb-1 border-b-2">
                                     <h5 className='font-semibold text-lg border my-1 px-1 inline-block rounded-md bg-gray-300'>Contact #{index + 1}</h5>
-                                    <div className="col-md-4 mb-3">
+                                    <div className="col-md-4 mb-1">
                                         <label className="form-label fw-bold">Primary Contact:</label>
                                         <input 
                                             type="checkbox"
@@ -248,7 +248,7 @@ const NewSupplierForm = () => {
                             ))}
                         </div>
                         <div className="flex justify-center mb-2">
-                            <button type="button" onClick={handleAddContact}><label className='border bg-gray-200 rounded-xl p-2 text-sm hover:bg-gray-400 hover:text-white hover:shadow-lg'>+ ADD MORE CONTACTS</label></button>
+                            <button type="button" onClick={handleAddContact}><label className='border bg-gray-200 rounded-xl p-2 text-sm hover:bg-blue-400 hover:text-white hover:shadow-lg'>+ ADD MORE CONTACTS</label></button>
                         </div>
                         <div className="d-flex justify-content-between mb-3">
                             <button type="button" onClick={handleBackClick} className="btn btn-secondary">BACK</button>
