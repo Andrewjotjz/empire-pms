@@ -1,5 +1,5 @@
 //import modules
-const projectModel = require('../models/projectModel');
+const projectModel = require('../models/ProjectModel');
 const employeeModel = require('../models/employeeModel');
 
 const mongoose = require('mongoose');
