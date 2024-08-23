@@ -5,7 +5,7 @@ import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySuppli
 import { useFetchSupplierByProject } from '../../hooks/useFetchSupplierByProject';
 import { clearSupplierState } from '../../redux/supplierSlice'
 import { setProjectState } from '../../redux/projectSlice'
-import { setProductState, clearProductState } from '../../redux/productSlice'
+import { clearProductState } from '../../redux/productSlice'
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from '../loaders/EmployeeDetailsSkeleton';
 import { useSelector, useDispatch } from 'react-redux';
@@ -59,9 +59,11 @@ const NewPurchaseOrderForm = () => {
         project: '',
         order_status: 'Draft'
     })
+    const alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p']
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [newSupplier, setNewSupplier] = useState('');
     const [newProject, setNewProject] = useState('');
+    const [selectedProductType, setSelectedProductType] = useState('')
     const [pendingAction, setPendingAction] = useState(null);
 
 
@@ -475,7 +477,21 @@ const NewPurchaseOrderForm = () => {
         });
     };
 
-    const alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p']
+    const filterProductsByProject = () => {
+        if (!Array.isArray(productState) || !selectedProject) {
+            return []; // Return an empty array if productState is not an array or selectedProject is not defined
+        }
+
+        return productState.filter(prod => prod.productPrice.projects.includes(selectedProject))
+
+        // .filter(item => item.product.product_types.includes(selectedProductType))
+    } 
+
+    const distinctProductTypes = [
+        // new Set(...): Converts the array into a Set which automatically removes duplicates.
+        // [...new Set(...)]: Converts the Set back into an array with only distinct values.
+        ...new Set(filterProductsByProject().map((prod) => prod.product.product_types))
+    ];
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -560,7 +576,7 @@ const NewPurchaseOrderForm = () => {
                 </div>
                 <form className="card-body" onSubmit={handleSubmit}>
                     {/* SELECT SUPPLIER */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
                         <div className="mb-3">
                             <label className="form-label font-bold">*Purchase Order No:</label>
                             <input
@@ -603,7 +619,7 @@ const NewPurchaseOrderForm = () => {
                             onChange={handleProjectChange}
                             required
                             >
-                            <option value="">Select Supplier</option>
+                            <option value="">Select Project</option>
                             {projectState &&
                                 projectState.length > 0 &&
                                 projectState
@@ -670,6 +686,22 @@ const NewPurchaseOrderForm = () => {
 
                     {/* ***** ITEM TABLE ****** */}
                     <div className="container p-0 border-2 mb-2 shadow-md bg-slate-50">
+                        <div className="m-2 justify-center">
+                            <label className="form-label font-bold">Product Type:</label>
+                            <select 
+                                className="ml-2 shadow-sm cursor-pointer rounded-md"
+                                name="product_types" 
+                                value={selectedProductType} 
+                                onChange={(e) => setSelectedProductType(e.target.value)}
+                            >
+                                <option value="">Select type</option>
+                                {distinctProductTypes.map((productType, index) => (
+                                <option key={index} value={productType}>
+                                    {productType}
+                                </option>
+                                ))}
+                            </select>
+                        </div>
                         <table className="table table-bordered m-0 mb-2">
                             <thead className="thead-dark text-center">
                                 <tr className="table-primary">
@@ -700,7 +732,7 @@ const NewPurchaseOrderForm = () => {
                                         >
                                             <option value="">Select Product SKU</option>
                                             {productState && productState.length > 0 && 
-                                                productState.map((prod, i) => {
+                                                filterProductsByProject().map((prod, i) => {
                                                     return <option key={i} value={prod.product.product_sku}>{prod.product.product_sku}</option>;
                                                 })
                                             }
@@ -717,7 +749,7 @@ const NewPurchaseOrderForm = () => {
                                         >
                                             <option value="">Select Product Name</option>
                                             {productState && productState.length > 0 && 
-                                                productState.map((prod, i) => {
+                                                filterProductsByProject().map((prod, i) => {
                                                     return <option key={i} value={prod.product.product_name}>{prod.product.product_name}</option>;
                                                 })
                                             }
@@ -850,17 +882,17 @@ const NewPurchaseOrderForm = () => {
                         </table>
                         {/* ADD MORE ITEM BUTTON */}
                         <div className="flex justify-center mb-0 border-b-2 pb-2">
-                            <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-sm cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={handleAddCustomItem}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 mr-1">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                </svg>
-                                <label className='cursor-pointer'>ADD CUSTOM ITEM</label>
-                            </div>
-                            <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-sm cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ml-4' onClick={handleAddItem}>
+                            <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-sm cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg mr-4' onClick={handleAddItem}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
                                 <label className='cursor-pointer'>ADD MORE ITEMS</label>
+                            </div>
+                            <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-sm cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={handleAddCustomItem}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 mr-1">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                </svg>
+                                <label className='cursor-pointer'>ADD CUSTOM ITEMS</label>
                             </div>
                         </div>
                         {/* ********************* ITEM CALCULATION ******************** */}
