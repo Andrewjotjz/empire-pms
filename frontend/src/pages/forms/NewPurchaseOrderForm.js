@@ -493,6 +493,59 @@ const NewPurchaseOrderForm = () => {
         ...new Set(filterProductsByProject().map((prod) => prod.product.product_types))
     ];
 
+    // const getLatestProductsByProject = () => {
+    //     if (!Array.isArray(productState) || !selectedProject) {
+    //         return []; // Return an empty array if productState is not an array or selectedProject is not defined
+    //     }
+
+    //     // Filter products by the specified project ID
+    //     const filteredProducts = productState.filter(prod =>
+    //         prod.productPrice.projects.includes(selectedProject)
+    //     );
+    
+    //     // Find the latest product effective date
+    //     const latestDate = Math.max(
+    //         ...filteredProducts.map(prod => new Date(prod.productPrice.product_effective_date))
+    //     );
+    
+    //     // Convert the latest date back to ISO string format
+    //     const latestDateISO = new Date(latestDate).toISOString();
+    
+    //     // Filter the products by the latest effective date
+    //     const latestProducts = filteredProducts.filter(
+    //         prod => new Date(prod.productPrice.product_effective_date).toISOString() === latestDateISO
+    //     );
+    
+    //     return latestProducts;
+    // }
+
+    const getLatestProductsByProject = () => {
+        if (!Array.isArray(productState) || !selectedProject) {
+                    return []; // Return an empty array if productState is not an array or selectedProject is not defined
+                }
+
+        // Filter products by the specified project ID
+        const filteredProducts = productState.filter(prod =>
+            prod.productPrice.projects.includes(selectedProject)
+        );
+    
+        // Create a map to store the latest productPrice for each product by product ID
+        const latestProductMap = new Map();
+    
+        filteredProducts.forEach(prod => {
+            const productId = prod.product._id;
+            const productEffectiveDate = new Date(prod.productPrice.product_effective_date);
+    
+            // If the product is not in the map, or the current productPrice is more recent, update the map
+            if (!latestProductMap.has(productId) || productEffectiveDate > new Date(latestProductMap.get(productId).productPrice.product_effective_date)) {
+                latestProductMap.set(productId, prod);
+            }
+        });
+    
+        // Convert the map values back to an array
+        return Array.from(latestProductMap.values());
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault();
     };
@@ -732,7 +785,7 @@ const NewPurchaseOrderForm = () => {
                                         >
                                             <option value="">Select Product SKU</option>
                                             {productState && productState.length > 0 && 
-                                                filterProductsByProject().map((prod, i) => {
+                                                getLatestProductsByProject().map((prod, i) => {
                                                     return <option key={i} value={prod.product.product_sku}>{prod.product.product_sku}</option>;
                                                 })
                                             }
@@ -749,7 +802,7 @@ const NewPurchaseOrderForm = () => {
                                         >
                                             <option value="">Select Product Name</option>
                                             {productState && productState.length > 0 && 
-                                                filterProductsByProject().map((prod, i) => {
+                                                getLatestProductsByProject().map((prod, i) => {
                                                     return <option key={i} value={prod.product.product_name}>{prod.product.product_name}</option>;
                                                 })
                                             }
