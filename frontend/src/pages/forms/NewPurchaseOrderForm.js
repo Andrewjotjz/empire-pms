@@ -27,31 +27,16 @@ const NewPurchaseOrderForm = () => {
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
     const [selectedSupplier, setSelectedSupplier] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
+    const [selectedProductType, setSelectedProductType] = useState('')
     const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
     const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
-    const [ itemSize, setItemSize ] = useState([{
-        min_qty_a: '',
-        min_qty_b: '',
-        last_qty_a: '',
-        last_qty_b: ''
-    }])
-    const [ itemUOM, setItemUOM ] = useState([{
-        order_product_unit_a: '',
-        order_product_unit_b: ''
-    }])
+    const [addedProductState, setAddedProductState] = useState([]);
     const [orderState, setOrderState] = useState({
         supplier: '',
         order_ref: '',
         order_date: '',
         order_est_datetime: '',
-        products: [{
-            product_id: '',
-            order_product_location: '',
-            order_product_qty_a: '',
-            order_product_qty_b: '',
-            order_product_price_unit_a: '',
-            order_product_gross_amount: ''
-        }],
+        products: [],
         custom_products: [],
         order_total_amount: '',
         order_internal_comments: '',
@@ -59,12 +44,31 @@ const NewPurchaseOrderForm = () => {
         project: '',
         order_status: 'Draft'
     })
-    const alphabets = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p']
+    // const [orderState, setOrderState] = useState({
+    //     supplier: '',
+    //     order_ref: '',
+    //     order_date: '',
+    //     order_est_datetime: '',
+    //     products: [{
+    //         product_id: '',
+    //         order_product_location: '',
+    //         order_product_qty_a: '',
+    //         order_product_qty_b: '',
+    //         order_product_price_unit_a: '',
+    //         order_product_gross_amount: ''
+    //     }],
+    //     custom_products: [],
+    //     order_total_amount: '',
+    //     order_internal_comments: '',
+    //     order_notes_to_supplier: '',
+    //     project: '',
+    //     order_status: 'Draft'
+    // })
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [newSupplier, setNewSupplier] = useState('');
     const [newProject, setNewProject] = useState('');
-    const [selectedProductType, setSelectedProductType] = useState('')
     const [pendingAction, setPendingAction] = useState(null);
+    const [searchProductTerm, setSearchProductTerm] = useState('');
 
 
     // Component functions and variables
@@ -77,25 +81,12 @@ const NewPurchaseOrderForm = () => {
             if (selectedProject === '') {
                 setSelectedProject(targetProject);
                 dispatch(clearProductState());
-                setItemSize([{
-                    min_qty_a: '',
-                    min_qty_b: '',
-                    last_qty_a: '',
-                    last_qty_b: ''
-                }]);
                 setOrderState({
                     supplier: '',
                     order_ref: '',
                     order_date: '',
                     order_est_datetime: '',
-                    products: [{
-                        product_id: '',
-                        order_product_location: '',
-                        order_product_qty_a: '',
-                        order_product_qty_b: '',
-                        order_product_price_unit_a: '',
-                        order_product_gross_amount: ''
-                    }],
+                    products: [],
                     custom_products: [],
                     order_total_amount: '',
                     order_internal_comments: '',
@@ -103,10 +94,6 @@ const NewPurchaseOrderForm = () => {
                     project: '',
                     order_status: 'Draft'
                 });
-                setItemUOM([{
-                    order_product_unit_a: '',
-                    order_product_unit_b: ''
-                }])
                 fetchSupplierByProject(targetProject);
                 return;
             }
@@ -128,25 +115,12 @@ const NewPurchaseOrderForm = () => {
         if (targetSupplier !== '') {
             if (selectedSupplier === '') {
                 dispatch(clearProductState());
-                setItemSize([{
-                    min_qty_a: '',
-                    min_qty_b: '',
-                    last_qty_a: '',
-                    last_qty_b: ''
-                }]);
                 setOrderState({
                     supplier: '',
                     order_ref: '',
                     order_date: '',
                     order_est_datetime: '',
-                    products: [{
-                        product_id: '',
-                        order_product_location: '',
-                        order_product_qty_a: '',
-                        order_product_qty_b: '',
-                        order_product_price_unit_a: '',
-                        order_product_gross_amount: ''
-                    }],
+                    products: [],
                     custom_products: [],
                     order_total_amount: '',
                     order_internal_comments: '',
@@ -154,10 +128,6 @@ const NewPurchaseOrderForm = () => {
                     project: '',
                     order_status: 'Draft'
                 });
-                setItemUOM([{
-                    order_product_unit_a: '',
-                    order_product_unit_b: ''
-                }])
                 fetchProductsBySupplier(targetSupplier);
                 setSelectedSupplier(targetSupplier);
                 return;
@@ -175,25 +145,12 @@ const NewPurchaseOrderForm = () => {
     const handleConfirmAction = () => {
         if (pendingAction === 'changeSupplier') {
             dispatch(clearProductState());
-            setItemSize([{
-                min_qty_a: '',
-                min_qty_b: '',
-                last_qty_a: '',
-                last_qty_b: ''
-            }]);
             setOrderState({
                 supplier: '',
                 order_ref: '',
                 order_date: '',
                 order_est_datetime: '',
-                products: [{
-                    product_id: '',
-                    order_product_location: '',
-                    order_product_qty_a: '',
-                    order_product_qty_b: '',
-                    order_product_price_unit_a: '',
-                    order_product_gross_amount: ''
-                }],
+                products: [],
                 custom_products: [],
                 order_total_amount: '',
                 order_internal_comments: '',
@@ -201,34 +158,17 @@ const NewPurchaseOrderForm = () => {
                 project: '',
                 order_status: 'Draft'
             });
-            setItemUOM([{
-                order_product_unit_a: '',
-                order_product_unit_b: ''
-            }])
             fetchProductsBySupplier(newSupplier);
             setSelectedSupplier(newSupplier);
         }
         if (pendingAction === 'changeProject') {
             dispatch(clearProductState());
-            setItemSize([{
-                min_qty_a: '',
-                min_qty_b: '',
-                last_qty_a: '',
-                last_qty_b: ''
-            }]);
             setOrderState({
                 supplier: '',
                 order_ref: '',
                 order_date: '',
                 order_est_datetime: '',
-                products: [{
-                    product_id: '',
-                    order_product_location: '',
-                    order_product_qty_a: '',
-                    order_product_qty_b: '',
-                    order_product_price_unit_a: '',
-                    order_product_gross_amount: ''
-                }],
+                products: [],
                 custom_products: [],
                 order_total_amount: '',
                 order_internal_comments: '',
@@ -236,49 +176,31 @@ const NewPurchaseOrderForm = () => {
                 project: '',
                 order_status: 'Draft'
             });
-            setItemUOM([{
-                order_product_unit_a: '',
-                order_product_unit_b: ''
-            }])
             setSelectedSupplier('')
             fetchSupplierByProject(newProject);
             setSelectedProject(newProject);
         }
         setShowConfirmationModal(false);
         setPendingAction(null);
-    };    
+    };
 
-    const handleAddItem = () => {
-        if ( orderState.products.length < 30) {
-            setOrderState({
-                ...orderState,
-                products: [...orderState.products, {
-                    product_id: '',
-                    order_product_location: '',
-                    order_product_qty_a: '',
-                    order_product_qty_b: '',
-                    order_product_price_unit_a: '',
-                    order_product_gross_amount: ''
-                }]
-            });
-            setItemSize([
-                ...itemSize,{
-                min_qty_a: '',
-                min_qty_b: '',
-                last_qty_a: '',
-                last_qty_b: ''
-            }])
-            setItemUOM([
-                ...itemUOM,{
-                order_product_unit_a: '',
-                order_product_unit_b: ''
-            }])
-        } else {
-            alert("You can add up to 30 items only.")
-        }
-    }
+    const handleAddItem = (product) => {
+        setOrderState((prevState) => ({
+            ...prevState,
+            products: [...prevState.products, {
+                product_id: product.product._id,
+                order_product_location: '',
+                order_product_qty_a: 0, // Ensure all fields are initialized properly
+                order_product_qty_b: 0,
+                order_product_price_unit_a: product.productPrice.product_price_unit_a,
+                order_product_gross_amount: 0
+            }]
+        }));
 
-    const handleAddCustomItem = (index) => {
+        setAddedProductState((prevProducts) => [...prevProducts, product])
+    };
+
+    const handleAddCustomItem = () => {
         if (orderState.custom_products.length < 15) {
             setOrderState({
                 ...orderState,
@@ -295,14 +217,14 @@ const NewPurchaseOrderForm = () => {
 
     const handleRemoveItem = (index) => {
         const updatedItems = orderState.products.filter((_, idx) => idx !== index);
-        const updatedItemsSize = itemSize.filter((_, idx) => idx !== index)
-        const updatedItemsUOM = itemUOM.filter((_, idx) => idx !== index)
+        const updatedAddedProducts = addedProductState.filter((_, idx) => idx !== index);
+
         setOrderState({
             ...orderState,
             products: updatedItems
         })
-        setItemSize(updatedItemsSize)
-        setItemUOM(updatedItemsUOM)
+
+        setAddedProductState(updatedAddedProducts)
     }
 
     const handleRemoveCustomItem = (index) => {
@@ -324,119 +246,8 @@ const NewPurchaseOrderForm = () => {
                 updatedProducts[index] = {
                     ...updatedProducts[index],
                     [name]: value,
-                };
-    
-                // If the 'product_sku' is being changed, update the corresponding 'product_name'
-                if (name === "product_sku") {
-                    const selectedProduct = productState.find(prod => prod.product.product_sku === value);
-                    if (selectedProduct) {
-                        updatedProducts[index].product_name = selectedProduct.product.product_name;
-                        updatedProducts[index].product_id = selectedProduct.product._id;
-                        updatedProducts[index].order_product_price_unit_a = selectedProduct.productPrice.product_price_unit_a;
-                        setItemSize((prevItemState) => {
-                            const updatedItemSize = [...prevItemState];
-                            updatedItemSize[index] = {
-                                min_qty_a: selectedProduct.productPrice.product_number_a,
-                                min_qty_b: selectedProduct.productPrice.product_number_b,
-                            };
-                            return updatedItemSize;
-                        });
-                        setItemUOM((prevItemState) => {
-                            const updatedItemSize = [...prevItemState];
-                            updatedItemSize[index] = {
-                                order_product_unit_a: selectedProduct.productPrice.product_unit_a,
-                                order_product_unit_b: selectedProduct.productPrice.product_unit_b,
-                            };
-                            return updatedItemSize;
-                        });
-                        updatedProducts[index].order_product_qty_a = selectedProduct.productPrice.product_number_a;
-                        updatedProducts[index].order_product_qty_b = selectedProduct.productPrice.product_number_b;
-                    }
-                }
-    
-                // If the 'product_name' is being changed, update the corresponding 'product_sku'
-                if (name === "product_name") {
-                    const selectedProduct = productState.find(prod => prod.product.product_name === value);
-                    if (selectedProduct) {
-                        updatedProducts[index].product_sku = selectedProduct.product.product_sku;
-                        updatedProducts[index].product_id = selectedProduct.product._id;
-                        updatedProducts[index].order_product_price_unit_a = selectedProduct.productPrice.product_price_unit_a;
-                        setItemSize((prevItemState) => {
-                            const updatedItemSize = [...prevItemState];
-                            updatedItemSize[index] = {
-                                min_qty_a: selectedProduct.productPrice.product_number_a,
-                                min_qty_b: selectedProduct.productPrice.product_number_b,
-                            };
-                            return updatedItemSize;
-                        });
-                        setItemUOM((prevItemState) => {
-                            const updatedItemSize = [...prevItemState];
-                            updatedItemSize[index] = {
-                                order_product_unit_a: selectedProduct.productPrice.product_unit_a,
-                                order_product_unit_b: selectedProduct.productPrice.product_unit_b,
-                            };
-                            return updatedItemSize;
-                        });
-                        updatedProducts[index].order_product_qty_a = selectedProduct.productPrice.product_number_a;
-                        updatedProducts[index].order_product_qty_b = selectedProduct.productPrice.product_number_b;
-                    }
-                }
-
-                if (name === 'order_product_qty_a') {
-                    updatedProducts[index].order_product_qty_b = Number(updatedProducts[index].order_product_qty_b) + itemSize[index].min_qty_b
-                    setItemSize((prevItemState) => {
-                        const updatedItemSize = [...prevItemState];
-                        updatedItemSize[index] = {
-                            ...updatedItemSize[index],
-                            last_qty_a: Number(value),
-                            last_qty_b: updatedProducts[index].order_product_qty_b
-                        };
-                        return updatedItemSize;
-                    });
-                    if (Number(value) < itemSize[index].last_qty_a && itemSize[index].last_qty_a !== ''){
-                        updatedProducts[index].order_product_qty_b = itemSize[index].last_qty_b - itemSize[index].min_qty_b
-                        setItemSize((prevItemState) => {
-                            const updatedItemSize = [...prevItemState];
-                            updatedItemSize[index] = {
-                                ...updatedItemSize[index],
-                                last_qty_a: Number(value),
-                                last_qty_b: updatedProducts[index].order_product_qty_b
-                            };
-                            return updatedItemSize;
-                        });
-                    }
-                }
-                if (name === 'order_product_qty_b') {
-                    updatedProducts[index].order_product_qty_a = Number(updatedProducts[index].order_product_qty_a) + itemSize[index].min_qty_a
-                    setItemSize((prevItemState) => {
-                        const updatedItemSize = [...prevItemState];
-                        updatedItemSize[index] = {
-                            ...updatedItemSize[index],
-                            last_qty_a: updatedProducts[index].order_product_qty_a,
-                            last_qty_b: Number(value)
-                        };
-                        return updatedItemSize;
-                    });
-                    if (Number(value) < itemSize[index].last_qty_b && itemSize[index].last_qty_b !== ''){
-                        updatedProducts[index].order_product_qty_a = itemSize[index].last_qty_a - itemSize[index].min_qty_a
-                        setItemSize((prevItemState) => {
-                            const updatedItemSize = [...prevItemState];
-                            updatedItemSize[index] = {
-                                ...updatedItemSize[index],
-                                last_qty_a: updatedProducts[index].order_product_qty_a,
-                                last_qty_b: Number(value)
-                            };
-                            return updatedItemSize;
-                        });
-                    }
-                }
-
-                if (value === '') {
-                    updatedProducts[index].product_sku = ''
-                    updatedProducts[index].product_name = ''
-                    updatedProducts[index].order_product_price_unit_a = ''
-                }
-    
+                };    
+                
                 return {
                     ...prevState,
                     products: updatedProducts,
@@ -461,12 +272,56 @@ const NewPurchaseOrderForm = () => {
             };
         });
     };
+    
+    const handleQtyChange = (event, index) => {
+        const { name, value } = event.target;
+    
+        setOrderState((prevState) => {
+            let updatedProducts = [...prevState.products];
+            
+            updatedProducts[index] = {
+                ...updatedProducts[index],
+                [name]: value,
+            };
+
+            if (name === 'order_product_qty_a') {
+                if (addedProductState[index].productPrice.product_number_a === 1) {
+                    updatedProducts[index].order_product_qty_b = value * addedProductState[index].productPrice.product_number_b
+                }
+                else {
+                    updatedProducts[index].order_product_qty_b = value / addedProductState[index].productPrice.product_number_a
+                }
+                updatedProducts[index].order_product_gross_amount = value * addedProductState[index].productPrice.product_price_unit_a
+            }
+            if (name === 'order_product_qty_b') {
+                if (addedProductState[index].productPrice.product_number_b === 1) {
+                    updatedProducts[index].order_product_qty_a = value * addedProductState[index].productPrice.product_number_a
+                }
+                else {
+                    updatedProducts[index].order_product_qty_a = value / addedProductState[index].productPrice.product_number_b
+                }
+                updatedProducts[index].order_product_gross_amount = value * addedProductState[index].productPrice.product_price_unit_b
+            }
+            
+            return {
+                ...prevState,
+                products: updatedProducts,
+            };
+        });
+    };
 
     const handleSearchChange = (e) => {
         setOrderState({...orderState, order_ref: e.target.value});
     };
 
-    const filterOrders = () => {
+    let distinctProductTypes = [];
+    if (Array.isArray(productState) && selectedProject) {
+        distinctProductTypes = [
+            ...new Set(productState.map((prod) => prod.product.product_types))
+        ];
+    }
+    
+    const filterPurchaseOrder = () => {
         return purchaseOrderState.filter(order => {
             const lowerCaseSearchTerm = orderState.order_ref.toLowerCase();
     
@@ -477,74 +332,31 @@ const NewPurchaseOrderForm = () => {
         });
     };
 
-    const filterProductsByProject = () => {
-        if (!Array.isArray(productState) || !selectedProject) {
-            return []; // Return an empty array if productState is not an array or selectedProject is not defined
-        }
-
-        return productState.filter(prod => prod.productPrice.projects.includes(selectedProject))
-
-        // .filter(item => item.product.product_types.includes(selectedProductType))
-    } 
-
-    const distinctProductTypes = [
-        // new Set(...): Converts the array into a Set which automatically removes duplicates.
-        // [...new Set(...)]: Converts the Set back into an array with only distinct values.
-        ...new Set(filterProductsByProject().map((prod) => prod.product.product_types))
-    ];
-
-    // const getLatestProductsByProject = () => {
-    //     if (!Array.isArray(productState) || !selectedProject) {
-    //         return []; // Return an empty array if productState is not an array or selectedProject is not defined
-    //     }
-
-    //     // Filter products by the specified project ID
-    //     const filteredProducts = productState.filter(prod =>
-    //         prod.productPrice.projects.includes(selectedProject)
-    //     );
+    const filterProductsBySearchTerm = () => {
+        const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
+        
+        return productState.filter(product => {
+            const matchesSearchTerm = (
+                product.product.product_sku.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_number_a.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
+                product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.project_names.some(projectName => 
+                    projectName.toLowerCase().includes(lowerCaseSearchTerm)
+                )
+            );
     
-    //     // Find the latest product effective date
-    //     const latestDate = Math.max(
-    //         ...filteredProducts.map(prod => new Date(prod.productPrice.product_effective_date))
-    //     );
+            const matchesProductType = selectedProductType 
+                ? product.product.product_types === selectedProductType 
+                : true; // If no product type is selected, don't filter by type
     
-    //     // Convert the latest date back to ISO string format
-    //     const latestDateISO = new Date(latestDate).toISOString();
-    
-    //     // Filter the products by the latest effective date
-    //     const latestProducts = filteredProducts.filter(
-    //         prod => new Date(prod.productPrice.product_effective_date).toISOString() === latestDateISO
-    //     );
-    
-    //     return latestProducts;
-    // }
-
-    const getLatestProductsByProject = () => {
-        if (!Array.isArray(productState) || !selectedProject) {
-                    return []; // Return an empty array if productState is not an array or selectedProject is not defined
-                }
-
-        // Filter products by the specified project ID
-        const filteredProducts = productState.filter(prod =>
-            prod.productPrice.projects.includes(selectedProject)
-        );
-    
-        // Create a map to store the latest productPrice for each product by product ID
-        const latestProductMap = new Map();
-    
-        filteredProducts.forEach(prod => {
-            const productId = prod.product._id;
-            const productEffectiveDate = new Date(prod.productPrice.product_effective_date);
-    
-            // If the product is not in the map, or the current productPrice is more recent, update the map
-            if (!latestProductMap.has(productId) || productEffectiveDate > new Date(latestProductMap.get(productId).productPrice.product_effective_date)) {
-                latestProductMap.set(productId, prod);
-            }
+            return matchesSearchTerm && matchesProductType;
         });
-    
-        // Convert the map values back to an array
-        return Array.from(latestProductMap.values());
-    }
+    };
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -621,93 +433,347 @@ const NewPurchaseOrderForm = () => {
         </Modal>
     );
 
+    // console.log("Added Product list: ", addedProductState)
+    console.log("Order list: ", orderState)
+
     return (
-        <div className="container mt-3 mb-4 pb-3"> 
-            <div className="card">
-                <div className="card-header bg-dark text-white">
-                    <h1>NEW PURCHASE ORDER</h1>
-                </div>
-                <form className="card-body" onSubmit={handleSubmit}>
-                    {/* SELECT SUPPLIER */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
-                        <div className="mb-3">
-                            <label className="form-label font-bold">*Purchase Order No:</label>
-                            <input
-                            type="text"
-                            className="form-control"
-                            name="order_ref"
-                            value={orderState.order_ref}
-                            onChange={handleSearchChange}
-                            required
-                            onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
-                            onInput={(e) => e.target.setCustomValidity('')}
-                            />
-                            <label className="text-xs italic text-gray-400">
-                            Previous 3 order reference numbers:
-                            {purchaseOrderState.slice(0, 3).map((order, index) => (
-                                <div key={index} className="inline-block ml-1 border rounded-lg px-1">
-                                {order.order_ref}
+        <>
+            <div className='mx-4 mt-4 p-1 text-center font-bold text-2xl bg-slate-800 text-white'>New Purchase Order</div>
+            <div className="grid grid-cols-2 gap-4 mx-4 mb-4">
+                <div className="border rounded-lg p-4"> 
+                    <form onSubmit={handleSubmit}>
+                        {/* SELECT SUPPLIER */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
+                            <div className="mb-1">
+                                <label className="form-label font-bold">*Purchase Order No:</label>
+                                <input
+                                type="text"
+                                className="form-control"
+                                name="order_ref"
+                                value={orderState.order_ref}
+                                onChange={handleSearchChange}
+                                required
+                                onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
+                                onInput={(e) => e.target.setCustomValidity('')}
+                                />
+                            </div>
+
+                            <div className="mb-1">
+                                <label className="form-label font-bold">*Project:</label>
+                                <select
+                                className="form-control shadow-sm cursor-pointer"
+                                name="project"
+                                value={selectedProject}
+                                onChange={handleProjectChange}
+                                required
+                                >
+                                <option value="">Select Project</option>
+                                {projectState &&
+                                    projectState.length > 0 &&
+                                    projectState
+                                    .filter((project) => project.project_isarchived === false)
+                                    .map((project, index) => (
+                                        <option key={index} value={project._id}>
+                                        {project.project_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="mb-1">
+                                <label className="form-label font-bold">*Supplier:</label>
+                                <select
+                                className="form-control shadow-sm cursor-pointer"
+                                name="supplier_name"
+                                value={selectedSupplier}
+                                onChange={handleSupplierChange}
+                                required
+                                >
+                                <option value="">Select Supplier</option>
+                                {supplierState &&
+                                    supplierState.length > 0 &&
+                                    supplierState
+                                    .filter((supplier) => supplier.supplier_isarchived === false)
+                                    .map((supplier, index) => (
+                                        <option key={index} value={supplier._id}>
+                                        {supplier.supplier_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='col-span-2 mb-3'>
+                                <label className="text-xs italic text-gray-400 mb-2">
+                                    Previous order numbers:
+                                    {purchaseOrderState.slice(0, 3).map((order, index) => (
+                                        <div key={index} className="inline-block ml-1 border rounded-lg px-1">
+                                        {order.order_ref}
+                                        </div>
+                                    ))}
+                                </label>
+                                <div className="text-xs italic text-gray-400">
+                                Based on your search:
+                                {filterPurchaseOrder()
+                                    .filter((order) => order.order_isarchived === false)
+                                    .slice(0, 3)
+                                    .map((order, index) => (
+                                    <div key={index} className="inline-block ml-1 border rounded-lg px-1">
+                                        {order.order_ref}
+                                    </div>
+                                    ))}
                                 </div>
-                            ))}
-                            </label>
-                            <div className="text-xs italic text-gray-400">
-                            Based on your search:
-                            {filterOrders()
-                                .filter((order) => order.order_isarchived === false)
-                                .slice(0, 3)
-                                .map((order, index) => (
-                                <div key={index} className="inline-block ml-1 border rounded-lg px-1">
-                                    {order.order_ref}
-                                </div>
-                                ))}
                             </div>
                         </div>
 
-                        <div className="mb-3">
-                            <label className="form-label font-bold">*Project:</label>
-                            <select
-                            className="form-control shadow-sm cursor-pointer"
-                            name="project"
-                            value={selectedProject}
-                            onChange={handleProjectChange}
-                            required
-                            >
-                            <option value="">Select Project</option>
-                            {projectState &&
-                                projectState.length > 0 &&
-                                projectState
-                                .filter((project) => project.project_isarchived === false)
-                                .map((project, index) => (
-                                    <option key={index} value={project._id}>
-                                    {project.project_name}
+                        {/* ***** SEARCH ITEM TABLE ****** */}
+                        <div className="container p-0 border-2 shadow-md bg-slate-50">
+                            <div className="grid grid-cols-3 m-2 gap-x-1">
+                                <input
+                                    type="text"
+                                    className="form-control mb-1 col-span-2"
+                                    placeholder="Search products..."
+                                    value={searchProductTerm}
+                                    onChange={(e) => setSearchProductTerm(e.target.value)}
+                                />
+                                <div>
+                                    <select
+                                    className="form-control shadow-sm cursor-pointer opacity-95"
+                                    name="product_types"
+                                    value={selectedProductType}
+                                    onChange={(e) => setSelectedProductType(e.target.value)}
+                                    required
+                                    >
+                                    <option value="">Filter by Product Type...</option>
+                                    {distinctProductTypes.map((productType, index) => (
+                                    <option key={index} value={productType}>
+                                        {productType}
                                     </option>
+                                    ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-sm">
+                                <div className='p-1'><label>SKU</label></div>
+                                <div className='p-1'><label>Name</label></div>
+                                <div className='p-1'><label>Unit A</label></div>
+                                <div className='p-1'><label>Unit B</label></div>
+                                <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
+                            </div>
+                            {productState && filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
+                                <div key={index} className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100" title='Add to order'>
+                                    <div>{product.product.product_sku}</div>
+                                    <div>{product.product.product_name}</div>
+                                    <div>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
+                                    <div>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
+                                    <div className='grid grid-cols-3 gap-2 p-1'>
+                                        <label className="col-span-2">{product.product.product_types}</label>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </form>
+                </div>
+                <div className="border rounded-lg p-4">
+                    {/* ***** ADDED ITEM TABLE ****** */}
+                    <label className="font-bold">Order Items:</label>
+                    <div className='bg-gray-100 border rounded-lg shadow-sm'>
+                        <div className="border-0 rounded-lg">
+                            <table className="table m-0 text-xs">
+                                <thead className="thead-dark text-center">
+                                <tr className="table-primary">
+                                    <th scope="col">SKU</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">Qty A</th>
+                                    <th scope="col">Qty B</th>
+                                    <th scope="col">Price A</th>
+                                    <th scope="col">Net Amount</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody className="text-center">
+                                {orderState.products && orderState.products.map((prod, index) => (
+                                    <tr key={index}>
+                                        <td>
+                                            <label>{addedProductState[index].product.product_sku}</label>
+                                        </td>
+                                        <td>
+                                            <label>{addedProductState[index].product.product_name}</label>
+                                        </td>
+                                        <td>
+                                            <input
+                                            type="text"
+                                            className="form-control px-1 py-0.5 text-xs" 
+                                            name="order_product_location" 
+                                            value={prod.order_product_location} 
+                                            onChange={(e) => handleInputChange(e, index, true)}
+                                            placeholder="Ex: Level 2"
+                                            required
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            />
+                                        </td>
+                                        <td>
+                                            <div className="grid grid-cols-3 items-center border rounded w-28">
+                                            <input
+                                                type="number"
+                                                name="order_product_qty_a" 
+                                                value={prod.order_product_qty_a} 
+                                                onChange={(e) => handleQtyChange(e, index)}
+                                                min={0}
+                                                step={1}
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter qty-A')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                            />
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_a}</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="grid grid-cols-3 items-center border rounded w-28">
+                                            <input
+                                                type="number"
+                                                name="order_product_qty_b" 
+                                                value={prod.order_product_qty_b} 
+                                                onChange={(e) => handleQtyChange(e, index)}
+                                                min={0}
+                                                step={1}
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter qty-B')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                            />
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_b}</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <label>${prod.order_product_price_unit_a}</label>
+                                        </td>
+                                        <td>
+                                            <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
+                                        </td>
+                                        <td>
+                                            <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
                                 ))}
-                            </select>
+                                {/* ***** CUSTOM ITEMS ***** */}
+                                {orderState.custom_products.map((cproduct, index) => (
+                                <tr key={index}>
+                                    <td>Custom {index + 1}</td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            className="form-control px-1 py-0.5 text-xs" 
+                                            name="custom_product_name" 
+                                            value={cproduct.custom_product_name} 
+                                            onChange={(e) => handleInputChange(e, index, false, true)}
+                                            placeholder="Custom name"
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item name')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                        />
+                                    </td>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            className="form-control px-1 py-0.5 text-xs"  
+                                            name="custom_product_location" 
+                                            value={cproduct.custom_product_location} 
+                                            onChange={(e) => handleInputChange(e, index, false, true)}
+                                            placeholder="Ex: Level 2"
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                        />
+                                    </td>
+                                    <td>
+                                        <div className="grid grid-cols-3 items-center border rounded w-28">
+                                            <input
+                                                type='number'
+                                                name="custom_order_qty" 
+                                                value={cproduct.custom_order_qty} 
+                                                onChange={(e) => handleInputChange(e, index, false, true)}
+                                                min={0}
+                                                step={1}
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter custom-qty-A')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                            />
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">UNIT</label>
+                                        </div>
+                                    </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>
+                                        <button type="button" onClick={() => handleRemoveCustomItem(index)} className="btn btn-danger p-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                            
+                            {/* ADD CUSTOM BUTTON */}
+                            <div className='bg-white border-b-2'>
+                                <div className="flex justify-center p-2">
+                                    <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-xs cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={() => handleAddCustomItem()}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 mr-1">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                        </svg>
+                                        <label className='cursor-pointer'>ADD CUSTOM ITEMS</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="mb-3">
-                            <label className="form-label font-bold">*Supplier:</label>
-                            <select
-                            className="form-control shadow-sm cursor-pointer"
-                            name="supplier_name"
-                            value={selectedSupplier}
-                            onChange={handleSupplierChange}
-                            required
-                            >
-                            <option value="">Select Supplier</option>
-                            {supplierState &&
-                                supplierState.length > 0 &&
-                                supplierState
-                                .filter((supplier) => supplier.supplier_isarchived === false)
-                                .map((supplier, index) => (
-                                    <option key={index} value={supplier._id}>
-                                    {supplier.supplier_name}
-                                    </option>
-                                ))}
-                            </select>
+                        {/* ********************* ITEM CALCULATION ******************** */}
+                        <div className="flex justify-end">
+                            <div>
+                                <table className="table text-end font-bold mb-0 text-xs">
+                                    <tbody>
+                                        <tr>
+                                            <td className='pt-1'>Total Net Amount:</td>
+                                            <td className='pt-1'>
+                                                ${orderState.products && orderState.products.length > 0 ? (
+                                                    orderState.products.reduce((total, prod) => (
+                                                        total + (Number(prod.order_product_gross_amount) || 0)
+                                                    ), 0).toFixed(2) // Use toFixed(2) for two decimal places
+                                                ) : (
+                                                    ' 0.00'
+                                                )}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className='pt-1'>Total Net Amount (incl. GST):</td>
+                                            <td className='pt-1'>
+                                                ${orderState.products && orderState.products.length > 0 ? (
+                                                    (orderState.products.reduce((total, prod) => (
+                                                        total + (Number(prod.order_product_gross_amount) || 0)
+                                                    ), 0) * 1.1).toFixed(2) // Use toFixed(2) for two decimal places
+                                                ) : (
+                                                    ' 0.00'
+                                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                    </div>
 
-                        <div className="mb-3">
+                    {/* ***** ORDER DATE ****** */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 my-2">
+                        <div>
                             <label className="form-label font-bold">*Order Date:</label>
                             <input
                             type="date"
@@ -721,7 +787,7 @@ const NewPurchaseOrderForm = () => {
                             />
                         </div>
 
-                        <div className="mb-3">
+                        <div>
                             <label className="form-label font-bold">*EST Date and Time:</label>
                             <input
                             type="datetime-local"
@@ -737,241 +803,8 @@ const NewPurchaseOrderForm = () => {
                         </div>
                     </div>
 
-                    {/* ***** ITEM TABLE ****** */}
-                    <div className="container p-0 border-2 mb-2 shadow-md bg-slate-50">
-                        <div className="m-2 justify-center">
-                            <label className="form-label font-bold">Product Type:</label>
-                            <select 
-                                className="ml-2 shadow-sm cursor-pointer rounded-md"
-                                name="product_types" 
-                                value={selectedProductType} 
-                                onChange={(e) => setSelectedProductType(e.target.value)}
-                            >
-                                <option value="">Select type</option>
-                                {distinctProductTypes.map((productType, index) => (
-                                <option key={index} value={productType}>
-                                    {productType}
-                                </option>
-                                ))}
-                            </select>
-                        </div>
-                        <table className="table table-bordered m-0 mb-2">
-                            <thead className="thead-dark text-center">
-                                <tr className="table-primary">
-                                    <th scope="col" className='text-nowrap'>Item #</th>
-                                    <th scope="col">SKU</th>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">Location</th>
-                                    <th scope="col">Qty A</th>
-                                    <th scope="col">Qty B</th>
-                                    <th scope="col">Price A</th>
-                                    <th scope="col">Net Amount</th>
-                                    <th scope="col"></th>
-                                </tr>
-                            </thead>
-                            <tbody className='text-center'>
-                                {/* ***** PRE-MADE ITEMS ***** */}
-                                {orderState.products.map((product, index) => (
-                                <tr key={index}>
-                                    <th scope="row">{index + 1}</th>
-                                    <td>
-                                        <select 
-                                            className="form-control shadow-sm cursor-pointer"
-                                            name="product_sku"
-                                            value={product.product_sku} // Bind the value to state
-                                            title={product.product_sku}
-                                            onChange={(e) => handleInputChange(e, index, true)}
-                                            required
-                                        >
-                                            <option value="">Select Product SKU</option>
-                                            {productState && productState.length > 0 && 
-                                                getLatestProductsByProject().map((prod, i) => {
-                                                    return <option key={i} value={prod.product.product_sku}>{prod.product.product_sku}</option>;
-                                                })
-                                            }
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select 
-                                            className="form-control shadow-sm cursor-pointer"
-                                            name="product_name"
-                                            value={product.product_name} // Bind the value to state
-                                            title={product.product_name}
-                                            onChange={(e) => handleInputChange(e, index, true)}
-                                            required
-                                        >
-                                            <option value="">Select Product Name</option>
-                                            {productState && productState.length > 0 && 
-                                                getLatestProductsByProject().map((prod, i) => {
-                                                    return <option key={i} value={prod.product.product_name}>{prod.product.product_name}</option>;
-                                                })
-                                            }
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control" 
-                                            name="order_product_location" 
-                                            value={product.order_product_location} 
-                                            onChange={(e) => handleInputChange(e, index, true)}
-                                            placeholder="Ex: Level 2"
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                    </td>
-                                    <td>
-                                        <div className='grid grid-cols-3 items-center border rounded w-32'>
-                                            <input
-                                                type='number'
-                                                name="order_product_qty_a" 
-                                                value={product.order_product_qty_a} 
-                                                onChange={(e) => handleInputChange(e, index, true)}
-                                                min={Number(itemSize[index]?.min_qty_a) || 0}
-                                                step={Number(itemSize[index]?.min_qty_a) || 1}
-                                                required
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter qty-A')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
-                                                className='px-1 py-1 ml-1 col-span-2'
-                                            />
-                                            <label className='text-sm opacity-50 col-span-1 text-nowrap'>{itemUOM[index].order_product_unit_a ? itemUOM[index].order_product_unit_a : "UNIT"}</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className='grid grid-cols-3 items-center border rounded w-32'>
-                                            <input
-                                                type='number'
-                                                name="order_product_qty_b" 
-                                                value={product.order_product_qty_b} 
-                                                onChange={(e) => handleInputChange(e, index, true)}
-                                                min={Number(itemSize[index]?.min_qty_b) || 0}
-                                                step={Number(itemSize[index]?.min_qty_b) || 1}
-                                                required
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter qty-B')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
-                                                 className='px-1 py-1 ml-1 col-span-2'
-                                            />
-                                            <label className='text-sm opacity-50 col-span-1 text-nowrap'>{itemUOM[index].order_product_unit_b ? itemUOM[index].order_product_unit_b : "UNIT"}</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="form-control bg-gray-200">
-                                            ${product.order_product_price_unit_a ? product.order_product_price_unit_a.toFixed(2) : "0.00"}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div className="form-control bg-gray-200">
-                                            ${(product.order_product_qty_a * (product.order_product_price_unit_a || 0)).toFixed(2)}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                        </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                ))}
-                                {/* ***** CUSTOM ITEMS ***** */}
-                                {orderState.custom_products.map((cproduct, index) => (
-                                <tr key={index}>
-                                    <th scope="row">{alphabets[index]}</th>
-                                    <td></td>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control" 
-                                            name="custom_product_name" 
-                                            value={cproduct.custom_product_name} 
-                                            onChange={(e) => handleInputChange(e, index, false, true)}
-                                            placeholder="Custom name"
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item name')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                    </td>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control" 
-                                            name="custom_product_location" 
-                                            value={cproduct.custom_product_location} 
-                                            onChange={(e) => handleInputChange(e, index, false, true)}
-                                            placeholder="Ex: Level 2"
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                    </td>
-                                    <td>
-                                        <div className='grid grid-cols-3 items-center border rounded w-32'>
-                                            <input
-                                                type='number'
-                                                name="custom_order_qty" 
-                                                value={cproduct.custom_order_qty} 
-                                                onChange={(e) => handleInputChange(e, index, false, true)}
-                                                min={0}
-                                                step={1}
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter custom-qty-A')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
-                                                className='px-1 py-1 ml-1 col-span-2'
-                                            />
-                                            <label className='text-sm opacity-50 col-span-1 text-nowrap'>{"UNIT"}</label>
-                                        </div>
-                                    </td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>
-                                        <button type="button" onClick={() => handleRemoveCustomItem(index)} className="btn btn-danger">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                        </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        {/* ADD MORE ITEM BUTTON */}
-                        <div className="flex justify-center mb-0 border-b-2 pb-2">
-                            <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-sm cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg mr-4' onClick={handleAddItem}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
-                                <label className='cursor-pointer'>ADD MORE ITEMS</label>
-                            </div>
-                            <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-sm cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={handleAddCustomItem}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 mr-1">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                </svg>
-                                <label className='cursor-pointer'>ADD CUSTOM ITEMS</label>
-                            </div>
-                        </div>
-                        {/* ********************* ITEM CALCULATION ******************** */}
-                        <div className="flex justify-end">
-                            <div>
-                                <table className="table text-end font-bold border-l-2 mb-0">
-                                    <tbody>
-                                        <tr>
-                                            <td className='pt-1'>Total Net Amount:</td>
-                                            <td className='pt-1'>$ ??.??</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Amount Paid:</td>
-                                            <td>$ ??.??</td>
-                                        </tr>
-                                        <tr className='border-b-0'>
-                                            <td>Outstanding Amount:</td>
-                                            <td>$ ??.??</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                     {/* ***** INTERNAL COMMENTS ***** */}
-                    <div className="my-3">
+                    <div className="my-2">
                         <label className="form-label font-bold">Internal comments:</label>
                         <textarea 
                             className="form-control" 
@@ -983,7 +816,7 @@ const NewPurchaseOrderForm = () => {
                         />
                     </div>
                     {/* ***** NOTES TO SUPPLIER ***** */}
-                    <div className="mb-1">
+                    <div className="my-2">
                         <label className="form-label font-bold">Notes to supplier:</label>
                         <textarea
                             className="form-control bg-yellow-200" 
@@ -994,16 +827,17 @@ const NewPurchaseOrderForm = () => {
                             rows={4}
                         />
                     </div>
-                </form>
-                {/* ***** BUTTONS ***** */}
-                <div className="flex justify-between mb-3 px-3">
-                    <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
-                    <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800">SAVE AS DRAFT</button>
-                    <button className="btn btn-primary" type="submit">SUBMIT</button>
+                        
+                    {/* ***** BUTTONS ***** */}
+                    <div className="flex justify-between mb-3">
+                        <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
+                        <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800">SAVE AS DRAFT</button>
+                        <button className="btn btn-primary" type="submit">SUBMIT</button>
+                    </div>
                 </div>
+                { confirmationModal }
             </div>
-            { confirmationModal }
-        </div>
+        </>
     );
 };
 
