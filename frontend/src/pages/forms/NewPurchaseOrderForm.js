@@ -3,13 +3,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySupplier';
 import { useFetchSupplierByProject } from '../../hooks/useFetchSupplierByProject';
+import { useAddPurchaseOrder } from '../../hooks/useAddPurchaseOrder';
 import { clearSupplierState } from '../../redux/supplierSlice'
 import { setProjectState } from '../../redux/projectSlice'
 import { clearProductState } from '../../redux/productSlice'
 import { useSelector, useDispatch } from 'react-redux';
 import { Modal, Button } from "react-bootstrap";
 import SessionExpired from '../../components/SessionExpired';
-import EmployeeDetailsSkeleton from '../loaders/EmployeeDetailsSkeleton';
+import NewPurchaseOrderSkeleton from '../loaders/NewPurchaseOrderSkeleton';
 
 const NewPurchaseOrderForm = () => {
     // Component router
@@ -19,6 +20,7 @@ const NewPurchaseOrderForm = () => {
     const dispatch = useDispatch();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     const { fetchSupplierByProject } = useFetchSupplierByProject();
+    const { addPurchaseOrder, isAddOrderLoadingState, addOrderErrorState } = useAddPurchaseOrder();
 
     // Component state
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
@@ -43,14 +45,16 @@ const NewPurchaseOrderForm = () => {
         order_est_datetime: '',
         products: [],
         custom_products: [],
-        order_total_amount: '',
+        order_total_amount: 0,
         order_internal_comments: '',
         order_notes_to_supplier: '',
+        order_isarchived: false,
+        deliveries: [],
+        invoices: [],
         project: '',
-        order_status: 'Draft'
+        order_status: 'Pending'
     })
-
-
+    
     // Component functions and variables
     const handleBackClick = () => navigate(`/EmpirePMS/order/`);
 
@@ -63,16 +67,19 @@ const NewPurchaseOrderForm = () => {
                 dispatch(clearProductState());
                 setOrderState({
                     supplier: '',
-                    order_ref: '',
+                    order_ref: orderState.order_ref,
                     order_date: '',
                     order_est_datetime: '',
                     products: [],
                     custom_products: [],
-                    order_total_amount: '',
+                    order_total_amount: 0,
                     order_internal_comments: '',
                     order_notes_to_supplier: '',
-                    project: '',
-                    order_status: 'Draft'
+                    order_isarchived: false,
+                    deliveries: [],
+                    invoices: [],
+                    project: targetProject,
+                    order_status: 'Pending'
                 });
                 setAddedProductState([]);
                 fetchSupplierByProject(targetProject);
@@ -97,17 +104,20 @@ const NewPurchaseOrderForm = () => {
             if (selectedSupplier === '') {
                 dispatch(clearProductState());
                 setOrderState({
-                    supplier: '',
-                    order_ref: '',
+                    supplier: targetSupplier,
+                    order_ref: orderState.order_ref,
                     order_date: '',
                     order_est_datetime: '',
                     products: [],
                     custom_products: [],
-                    order_total_amount: '',
+                    order_total_amount: 0,
                     order_internal_comments: '',
                     order_notes_to_supplier: '',
-                    project: '',
-                    order_status: 'Draft'
+                    order_isarchived: false,
+                    deliveries: [],
+                    invoices: [],
+                    project: selectedProject,
+                    order_status: 'Pending'
                 });
                 setAddedProductState([]);
                 fetchProductsBySupplier(targetSupplier);
@@ -128,17 +138,20 @@ const NewPurchaseOrderForm = () => {
         if (pendingAction === 'changeSupplier') {
             dispatch(clearProductState());
             setOrderState({
-                supplier: '',
-                order_ref: '',
+                supplier: newSupplier,
+                order_ref: orderState.order_ref,
                 order_date: '',
                 order_est_datetime: '',
                 products: [],
                 custom_products: [],
-                order_total_amount: '',
+                order_total_amount: 0,
                 order_internal_comments: '',
                 order_notes_to_supplier: '',
-                project: '',
-                order_status: 'Draft'
+                order_isarchived: false,
+                deliveries: [],
+                invoices: [],
+                project: selectedProject,
+                order_status: 'Pending'
             });
             setAddedProductState([]);
             fetchProductsBySupplier(newSupplier);
@@ -148,16 +161,19 @@ const NewPurchaseOrderForm = () => {
             dispatch(clearProductState());
             setOrderState({
                 supplier: '',
-                order_ref: '',
+                order_ref: orderState.order_ref,
                 order_date: '',
                 order_est_datetime: '',
                 products: [],
                 custom_products: [],
-                order_total_amount: '',
+                order_total_amount: 0,
                 order_internal_comments: '',
                 order_notes_to_supplier: '',
-                project: '',
-                order_status: 'Draft'
+                order_isarchived: false,
+                deliveries: [],
+                invoices: [],
+                project: newProject,
+                order_status: 'Pending'
             });
             setAddedProductState([]);
             setSelectedSupplier('')
@@ -191,7 +207,7 @@ const NewPurchaseOrderForm = () => {
                 custom_products: [...orderState.custom_products, {
                     custom_product_name:'', 
                     custom_product_location: '',
-                    custom_order_qty: ''
+                    custom_order_qty: 0
                 }]
             })
         } else {
@@ -241,7 +257,7 @@ const NewPurchaseOrderForm = () => {
             // Handle custom products array updates
             if (isCustomProduct && index !== null) {
                 const updatedCustomProducts = prevState.custom_products.map((product, i) => 
-                    i === index ? { ...product, [name]: value } : product
+                    i === index ? { ...product, [name]: name === "custom_order_qty" ? Number(value) : value} : product
                 );
                 return {
                     ...prevState,
@@ -265,30 +281,39 @@ const NewPurchaseOrderForm = () => {
             
             updatedProducts[index] = {
                 ...updatedProducts[index],
-                [name]: value,
+                [name]: Number(value),
             };
 
             if (name === 'order_product_qty_a') {
+                //Few criterias here:
+                // - Multiply if 1, otherwise divde.
+                // - If calculation results a non-integer, make it 4 decimal points.
                 if (addedProductState[index].productPrice.product_number_a === 1) {
-                    updatedProducts[index].order_product_qty_b = value * addedProductState[index].productPrice.product_number_b
+                    updatedProducts[index].order_product_qty_b = Number.isInteger(value * addedProductState[index].productPrice.product_number_b) ? value * addedProductState[index].productPrice.product_number_b : parseFloat(value * addedProductState[index].productPrice.product_number_b).toFixed(4)
                 }
                 else {
-                    updatedProducts[index].order_product_qty_b = value / addedProductState[index].productPrice.product_number_a
+                    updatedProducts[index].order_product_qty_b = Number.isInteger(value / addedProductState[index].productPrice.product_number_a) ? value / addedProductState[index].productPrice.product_number_a : parseFloat(value / addedProductState[index].productPrice.product_number_a).toFixed(4)
                 }
-                updatedProducts[index].order_product_gross_amount = value * addedProductState[index].productPrice.product_price_unit_a
+                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_a).toFixed(2)
             }
             if (name === 'order_product_qty_b') {
                 if (addedProductState[index].productPrice.product_number_b === 1) {
-                    updatedProducts[index].order_product_qty_a = value * addedProductState[index].productPrice.product_number_a
+                    updatedProducts[index].order_product_qty_a = Number.isInteger(value * addedProductState[index].productPrice.product_number_a) ? value * addedProductState[index].productPrice.product_number_a : parseFloat(value * addedProductState[index].productPrice.product_number_a).toFixed(4)
                 }
                 else {
-                    updatedProducts[index].order_product_qty_a = value / addedProductState[index].productPrice.product_number_b
+                    updatedProducts[index].order_product_qty_a = Number.isInteger(value / addedProductState[index].productPrice.product_number_b) ? value / addedProductState[index].productPrice.product_number_b : parseFloat(value / addedProductState[index].productPrice.product_number_b).toFixed(4)
                 }
-                updatedProducts[index].order_product_gross_amount = value * addedProductState[index].productPrice.product_price_unit_b
+                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_b).toFixed(2)
             }
+
+            // Calculate updatedTotalAmount using updatedProducts from prevState
+            let updatedTotalAmount = (updatedProducts.reduce((total, prod) => (
+                total + (Number(prod.order_product_gross_amount) || 0)
+            ), 0) * 1.1).toFixed(2);
             
             return {
                 ...prevState,
+                order_total_amount: Number(updatedTotalAmount),
                 products: updatedProducts,
             };
         });
@@ -344,8 +369,23 @@ const NewPurchaseOrderForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-    };
 
+        if (purchaseOrderState.some(order => order.order_ref.toLowerCase().includes(orderState.order_ref.toLowerCase()))) {
+            alert("Purchase Order Number already exists. Please try another.")
+            return
+        }
+    
+        if (event.nativeEvent.submitter.name === 'draft') {
+            const updatedState = {
+                ...orderState,
+                order_status: "Draft"
+            };
+            addPurchaseOrder(updatedState);
+        } else {
+            addPurchaseOrder(orderState); 
+        }
+    };
+    
     //Render component
     useEffect(() => {
         const abortController = new AbortController();
@@ -385,15 +425,21 @@ const NewPurchaseOrderForm = () => {
     }, [dispatch]);
 
     // Display DOM
-    if (isFetchProjectLoadingState || isFetchProductsLoadingState) {
-        return <EmployeeDetailsSkeleton />;
+    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState) {
+        return <NewPurchaseOrderSkeleton />;
     }
 
-    if (fetchProjectErrorState) {
+    if (fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState) {
         if (fetchProjectErrorState.includes("Session expired") ) {
             return <div><SessionExpired /></div>;
         }
-        return <div><p>Error: {fetchProjectErrorState}</p><p>Error: {fetchProductsErrorState}</p></div>;
+        return (
+        <div>
+            <p>Error: {fetchProjectErrorState}</p>
+            <p>Error: {fetchProductsErrorState}</p>
+            <p>Error: {addOrderErrorState}</p>
+        </div>
+        );
     }
 
     const confirmationModal = (
@@ -423,412 +469,414 @@ const NewPurchaseOrderForm = () => {
         <div className='mx-4 mt-4 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg'>
             NEW PURCHASE ORDER
         </div>
-        <div className="grid grid-cols-2 gap-4 mx-4 mb-4">
-            <div className="border rounded-b-lg p-4"> 
-                <form onSubmit={handleSubmit}>
-                    {/* SELECT SUPPLIER */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
-                        <div className="mb-1">
-                            <label className="form-label font-bold">*Purchase Order No:</label>
-                            <input
-                            type="text"
-                            className="form-control"
-                            name="order_ref"
-                            value={orderState.order_ref}
-                            onChange={handleSearchChange}
-                            required
-                            onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
-                            onInput={(e) => e.target.setCustomValidity('')}
-                            />
-                        </div>
-
-                        <div className="mb-1">
-                            <label className="form-label font-bold">*Project:</label>
-                            <select
-                            className="form-control shadow-sm cursor-pointer"
-                            name="project"
-                            value={selectedProject}
-                            onChange={handleProjectChange}
-                            required
-                            >
-                            <option value="">Select Project</option>
-                            {projectState &&
-                                projectState.length > 0 &&
-                                projectState
-                                .filter((project) => project.project_isarchived === false)
-                                .map((project, index) => (
-                                    <option key={index} value={project._id}>
-                                    {project.project_name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mb-1">
-                            <label className="form-label font-bold">*Supplier:</label>
-                            <select
-                            className="form-control shadow-sm cursor-pointer"
-                            name="supplier_name"
-                            value={selectedSupplier}
-                            onChange={handleSupplierChange}
-                            required
-                            >
-                            <option value="">Select Supplier</option>
-                            {supplierState &&
-                                supplierState.length > 0 &&
-                                supplierState
-                                .filter((supplier) => supplier.supplier_isarchived === false)
-                                .map((supplier, index) => (
-                                    <option key={index} value={supplier._id}>
-                                    {supplier.supplier_name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className='col-span-2 mb-3'>
-                            <label className="text-xs italic text-gray-400 mb-2">
-                                Previous order numbers:
-                                {purchaseOrderState.slice(0, 3).map((order, index) => (
-                                    <div key={index} className="inline-block ml-1 border rounded-lg px-1">
-                                    {order.order_ref}
-                                    </div>
-                                ))}
-                            </label>
-                            <div className="text-xs italic text-gray-400">
-                            Based on your search:
-                            {filterPurchaseOrder()
-                                .filter((order) => order.order_isarchived === false)
-                                .slice(0, 3)
-                                .map((order, index) => (
-                                <div key={index} className="inline-block ml-1 border rounded-lg px-1">
-                                    {order.order_ref}
-                                </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ***** SEARCH ITEM TABLE ****** */}
-                    <div className="container p-0 border-2 shadow-md bg-slate-50">
-                        <div className="grid grid-cols-3 m-2 gap-x-1">
-                            <input
+        <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 mx-4 mb-4">
+                <div className="border rounded-b-lg p-4"> 
+                    
+                        {/* SELECT SUPPLIER */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
+                            <div className="mb-1">
+                                <label className="form-label font-bold">*Purchase Order No:</label>
+                                <input
                                 type="text"
-                                className="form-control mb-1 col-span-2"
-                                placeholder="Search products..."
-                                value={searchProductTerm}
-                                onChange={(e) => setSearchProductTerm(e.target.value)}
-                            />
-                            <div>
+                                className="form-control"
+                                name="order_ref"
+                                value={orderState.order_ref}
+                                onChange={handleSearchChange}
+                                required
+                                onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
+                                onInput={(e) => e.target.setCustomValidity('')}
+                                />
+                            </div>
+
+                            <div className="mb-1">
+                                <label className="form-label font-bold">*Project:</label>
                                 <select
-                                className="form-control shadow-sm cursor-pointer opacity-95"
-                                name="product_types"
-                                value={selectedProductType}
-                                onChange={(e) => setSelectedProductType(e.target.value)}
+                                className="form-control shadow-sm cursor-pointer"
+                                name="project"
+                                value={selectedProject}
+                                onChange={handleProjectChange}
                                 required
                                 >
-                                <option value="">Filter by Product Type...</option>
-                                {distinctProductTypes.map((productType, index) => (
-                                <option key={index} value={productType}>
-                                    {productType}
-                                </option>
-                                ))}
+                                <option value="">Select Project</option>
+                                {projectState &&
+                                    projectState.length > 0 &&
+                                    projectState
+                                    .filter((project) => project.project_isarchived === false)
+                                    .map((project, index) => (
+                                        <option key={index} value={project._id}>
+                                        {project.project_name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
-                        </div>
-                        <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-sm">
-                            <div className='p-1'><label>SKU</label></div>
-                            <div className='p-1'><label>Name</label></div>
-                            <div className='p-1'><label>Unit A</label></div>
-                            <div className='p-1'><label>Unit B</label></div>
-                            <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
-                        </div>
-                        { productState ? filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
-                            <div key={index} className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100" title='Add to order'>
-                                <div>{product.product.product_sku}</div>
-                                <div>{product.product.product_name}</div>
-                                <div>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
-                                <div>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
-                                <div className='grid grid-cols-3 gap-2 p-1'>
-                                    <label className="col-span-2">{product.product.product_types}</label>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                                    </svg>
+
+                            <div className="mb-1">
+                                <label className="form-label font-bold">*Supplier:</label>
+                                <select
+                                className="form-control shadow-sm cursor-pointer"
+                                name="supplier_name"
+                                value={selectedSupplier}
+                                onChange={handleSupplierChange}
+                                required
+                                >
+                                <option value="">Select Supplier</option>
+                                {supplierState &&
+                                    supplierState.length > 0 &&
+                                    supplierState
+                                    .filter((supplier) => supplier.supplier_isarchived === false)
+                                    .map((supplier, index) => (
+                                        <option key={index} value={supplier._id}>
+                                        {supplier.supplier_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className='col-span-2 mb-3'>
+                                <label className="text-xs italic text-gray-400 mb-2">
+                                    Previous order numbers:
+                                    {purchaseOrderState.slice(0, 3).map((order, index) => (
+                                        <div key={index} className="inline-block ml-1 border rounded-lg px-1">
+                                        {order.order_ref}
+                                        </div>
+                                    ))}
+                                </label>
+                                <div className="text-xs italic text-gray-400">
+                                Based on your search:
+                                {filterPurchaseOrder()
+                                    .filter((order) => order.order_isarchived === false)
+                                    .slice(0, 3)
+                                    .map((order, index) => (
+                                    <div key={index} className="inline-block ml-1 border rounded-lg px-1">
+                                        {order.order_ref}
+                                    </div>
+                                    ))}
                                 </div>
                             </div>
-                        )) : (
-                            <div className='border shadow-sm text-center'>
-                                <p className='p-1'>Select a supplier...</p>
+                        </div>
+
+                        {/* ***** SEARCH ITEM TABLE ****** */}
+                        <div className="container p-0 border-2 shadow-md bg-slate-50">
+                            <div className="grid grid-cols-3 m-2 gap-x-1">
+                                <input
+                                    type="text"
+                                    className="form-control mb-1 col-span-2"
+                                    placeholder="Search products..."
+                                    value={searchProductTerm}
+                                    onChange={(e) => setSearchProductTerm(e.target.value)}
+                                />
+                                <div>
+                                    <select
+                                    className="form-control shadow-sm cursor-pointer opacity-95"
+                                    name="product_types"
+                                    value={selectedProductType}
+                                    onChange={(e) => setSelectedProductType(e.target.value)}
+                                    >
+                                    <option value="">Filter by Product Type...</option>
+                                    {distinctProductTypes.map((productType, index) => (
+                                    <option key={index} value={productType}>
+                                        {productType}
+                                    </option>
+                                    ))}
+                                    </select>
+                                </div>
                             </div>
-                        )}
-                    </div>
-                </form>
-            </div>
-            <div className="border rounded-b-lg p-4">
-                {/* ***** ADDED ITEM TABLE ****** */}
-                <label className="font-bold">Order Items:</label>
-                <div className='bg-gray-100 border rounded-lg shadow-sm'>
-                    <div className="border-0 rounded-lg">
-                        <table className="table m-0 text-xs">
-                            <thead className="thead-dark text-center">
-                            <tr className="table-primary">
-                                <th scope="col">SKU</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Location</th>
-                                <th scope="col">Qty A</th>
-                                <th scope="col">Qty B</th>
-                                <th scope="col">Price A</th>
-                                <th scope="col">Net Amount</th>
-                                <th scope="col"></th>
-                            </tr>
-                            </thead>
-                            <tbody className="text-center">
-                            {orderState.products && orderState.products.map((prod, index) => (
+                            <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-sm">
+                                <div className='p-1'><label>SKU</label></div>
+                                <div className='p-1'><label>Name</label></div>
+                                <div className='p-1'><label>Unit A</label></div>
+                                <div className='p-1'><label>Unit B</label></div>
+                                <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
+                            </div>
+                            { productState ? filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
+                                <div key={index} className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100" title='Add to order'>
+                                    <div>{product.product.product_sku}</div>
+                                    <div>{product.product.product_name}</div>
+                                    <div>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
+                                    <div>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
+                                    <div className='grid grid-cols-3 gap-2 p-1'>
+                                        <label className="col-span-2">{product.product.product_types}</label>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className='border shadow-sm text-center'>
+                                    <p className='p-1'>Select a supplier...</p>
+                                </div>
+                            )}
+                        </div>
+                    
+                </div>
+                <div className="border rounded-b-lg p-4">
+                    {/* ***** ADDED ITEM TABLE ****** */}
+                    <label className="font-bold">Order Items:</label>
+                    <div className='bg-gray-100 border rounded-lg shadow-sm'>
+                        <div className="border-0 rounded-lg">
+                            <table className="table m-0 text-xs">
+                                <thead className="thead-dark text-center">
+                                <tr className="table-primary">
+                                    <th scope="col">SKU</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Location</th>
+                                    <th scope="col">Qty A</th>
+                                    <th scope="col">Qty B</th>
+                                    <th scope="col">Price A</th>
+                                    <th scope="col">Net Amount</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody className="text-center">
+                                {orderState.products && orderState.products.map((prod, index) => (
+                                    <tr key={index}>
+                                        <td>
+                                            <label>{addedProductState[index].product.product_sku}</label>
+                                        </td>
+                                        <td>
+                                            <label>{addedProductState[index].product.product_name}</label>
+                                        </td>
+                                        <td>
+                                            <input
+                                            type="text"
+                                            className="form-control px-1 py-0.5 text-xs" 
+                                            name="order_product_location" 
+                                            value={prod.order_product_location} 
+                                            onChange={(e) => handleInputChange(e, index, true)}
+                                            placeholder="Ex: Level 2"
+                                            required
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            />
+                                        </td>
+                                        <td>
+                                            <div className="grid grid-cols-3 items-center border rounded w-28">
+                                            <input
+                                                type="number"
+                                                name="order_product_qty_a" 
+                                                value={prod.order_product_qty_a} 
+                                                onChange={(e) => handleQtyChange(e, index)}
+                                                min={0}
+                                                step={0.0001}
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Please check the value in qty-A')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                            />
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_a}</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div className="grid grid-cols-3 items-center border rounded w-28">
+                                            <input
+                                                type="number"
+                                                name="order_product_qty_b" 
+                                                value={prod.order_product_qty_b} 
+                                                onChange={(e) => handleQtyChange(e, index)}
+                                                min={0}
+                                                step={0.0001}
+                                                required
+                                                onInvalid={(e) => e.target.setCustomValidity('Please check the value in qty-B')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                            />
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_b}</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <label>${prod.order_product_price_unit_a}</label>
+                                        </td>
+                                        <td>
+                                            <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
+                                        </td>
+                                        <td>
+                                            <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {/* ***** CUSTOM ITEMS ***** */}
+                                {orderState.custom_products.map((cproduct, index) => (
                                 <tr key={index}>
+                                    <td>Custom {index + 1}</td>
                                     <td>
-                                        <label>{addedProductState[index].product.product_sku}</label>
-                                    </td>
-                                    <td>
-                                        <label>{addedProductState[index].product.product_name}</label>
+                                        <input
+                                            type="text"
+                                            className="form-control px-1 py-0.5 text-xs" 
+                                            name="custom_product_name" 
+                                            value={cproduct.custom_product_name} 
+                                            onChange={(e) => handleInputChange(e, index, false, true)}
+                                            placeholder="Custom name"
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item name')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            required
+                                        />
                                     </td>
                                     <td>
                                         <input
-                                        type="text"
-                                        className="form-control px-1 py-0.5 text-xs" 
-                                        name="order_product_location" 
-                                        value={prod.order_product_location} 
-                                        onChange={(e) => handleInputChange(e, index, true)}
-                                        placeholder="Ex: Level 2"
-                                        required
-                                        onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
-                                        onInput={(e) => e.target.setCustomValidity('')}
+                                            type="text"
+                                            className="form-control px-1 py-0.5 text-xs"  
+                                            name="custom_product_location" 
+                                            value={cproduct.custom_product_location} 
+                                            onChange={(e) => handleInputChange(e, index, false, true)}
+                                            placeholder="Ex: Level 2"
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
                                         />
                                     </td>
                                     <td>
                                         <div className="grid grid-cols-3 items-center border rounded w-28">
-                                        <input
-                                            type="number"
-                                            name="order_product_qty_a" 
-                                            value={prod.order_product_qty_a} 
-                                            onChange={(e) => handleQtyChange(e, index)}
-                                            min={0}
-                                            step={1}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter qty-A')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                            className="px-1 py-0.5 ml-1 col-span-2 text-xs"
-                                        />
-                                        <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_a}</label>
+                                            <input
+                                                type='number'
+                                                name="custom_order_qty" 
+                                                value={cproduct.custom_order_qty} 
+                                                onChange={(e) => handleInputChange(e, index, false, true)}
+                                                min={0}
+                                                step={1}
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter custom-qty-A')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                            />
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">UNIT</label>
                                         </div>
                                     </td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
                                     <td>
-                                        <div className="grid grid-cols-3 items-center border rounded w-28">
-                                        <input
-                                            type="number"
-                                            name="order_product_qty_b" 
-                                            value={prod.order_product_qty_b} 
-                                            onChange={(e) => handleQtyChange(e, index)}
-                                            min={0}
-                                            step={1}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter qty-B')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                            className="px-1 py-0.5 ml-1 col-span-2 text-xs"
-                                        />
-                                        <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_b}</label>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <label>${prod.order_product_price_unit_a}</label>
-                                    </td>
-                                    <td>
-                                        <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
-                                    </td>
-                                    <td>
-                                        <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">
+                                        <button type="button" onClick={() => handleRemoveCustomItem(index)} className="btn btn-danger p-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                         </svg>
                                         </button>
                                     </td>
                                 </tr>
-                            ))}
-                            {/* ***** CUSTOM ITEMS ***** */}
-                            {orderState.custom_products.map((cproduct, index) => (
-                            <tr key={index}>
-                                <td>Custom {index + 1}</td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        className="form-control px-1 py-0.5 text-xs" 
-                                        name="custom_product_name" 
-                                        value={cproduct.custom_product_name} 
-                                        onChange={(e) => handleInputChange(e, index, false, true)}
-                                        placeholder="Custom name"
-                                        onInvalid={(e) => e.target.setCustomValidity('Enter custom item name')}
-                                        onInput={(e) => e.target.setCustomValidity('')}
-                                    />
-                                </td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        className="form-control px-1 py-0.5 text-xs"  
-                                        name="custom_product_location" 
-                                        value={cproduct.custom_product_location} 
-                                        onChange={(e) => handleInputChange(e, index, false, true)}
-                                        placeholder="Ex: Level 2"
-                                        onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
-                                        onInput={(e) => e.target.setCustomValidity('')}
-                                    />
-                                </td>
-                                <td>
-                                    <div className="grid grid-cols-3 items-center border rounded w-28">
-                                        <input
-                                            type='number'
-                                            name="custom_order_qty" 
-                                            value={cproduct.custom_order_qty} 
-                                            onChange={(e) => handleInputChange(e, index, false, true)}
-                                            min={0}
-                                            step={1}
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom-qty-A')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                            className="px-1 py-0.5 ml-1 col-span-2 text-xs"
-                                        />
-                                        <label className="text-xs opacity-50 col-span-1 text-nowrap">UNIT</label>
+                                ))}
+                                </tbody>
+                            </table>
+                            
+                            {/* ADD CUSTOM BUTTON */}
+                            <div className='bg-white border-b-2'>
+                                <div className="flex justify-center p-2">
+                                    <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-xs cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={() => handleAddCustomItem()}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 mr-1">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                        </svg>
+                                        <label className='cursor-pointer'>ADD CUSTOM ITEMS</label>
                                     </div>
-                                </td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>
-                                    <button type="button" onClick={() => handleRemoveCustomItem(index)} className="btn btn-danger p-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                    </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                        
-                        {/* ADD CUSTOM BUTTON */}
-                        <div className='bg-white border-b-2'>
-                            <div className="flex justify-center p-2">
-                                <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-xs cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={() => handleAddCustomItem()}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 mr-1">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                    </svg>
-                                    <label className='cursor-pointer'>ADD CUSTOM ITEMS</label>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* ********************* ITEM CALCULATION ******************** */}
+                        <div className="flex justify-end">
+                            <div>
+                                <table className="table text-end font-bold mb-0 text-xs">
+                                    <tbody>
+                                        <tr>
+                                            <td className='pt-1'>Total Items:</td>
+                                            <td className='pt-1'>{orderState.products.length + orderState.custom_products.length} </td>
+                                        </tr>
+                                        <tr>
+                                            <td className='pt-1'>Total Net Amount:</td>
+                                            <td className='pt-1'>
+                                                ${orderState.products && orderState.products.length > 0 ? (
+                                                    orderState.products.reduce((total, prod) => (
+                                                        total + (Number(prod.order_product_gross_amount) || 0)
+                                                    ), 0).toFixed(2) // Use toFixed(2) for two decimal places
+                                                ) : (
+                                                    ' 0.00'
+                                                )}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className='pt-1'>Total Net Amount (incl. GST):</td>
+                                            <td className='pt-1'>
+                                                ${orderState.products && orderState.products.length > 0 ? (
+                                                    (orderState.products.reduce((total, prod) => (
+                                                        total + (Number(prod.order_product_gross_amount) || 0)
+                                                    ), 0) * 1.1).toFixed(2) // Use toFixed(2) for two decimal places
+                                                ) : (
+                                                    ' 0.00'
+                                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
 
-                    {/* ********************* ITEM CALCULATION ******************** */}
-                    <div className="flex justify-end">
+                    {/* ***** ORDER DATE ****** */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 my-2">
                         <div>
-                            <table className="table text-end font-bold mb-0 text-xs">
-                                <tbody>
-                                    <tr>
-                                        <td className='pt-1'>Total Items:</td>
-                                        <td className='pt-1'>{orderState.products.length + orderState.custom_products.length} </td>
-                                    </tr>
-                                    <tr>
-                                        <td className='pt-1'>Total Net Amount:</td>
-                                        <td className='pt-1'>
-                                            ${orderState.products && orderState.products.length > 0 ? (
-                                                orderState.products.reduce((total, prod) => (
-                                                    total + (Number(prod.order_product_gross_amount) || 0)
-                                                ), 0).toFixed(2) // Use toFixed(2) for two decimal places
-                                            ) : (
-                                                ' 0.00'
-                                            )}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td className='pt-1'>Total Net Amount (incl. GST):</td>
-                                        <td className='pt-1'>
-                                            ${orderState.products && orderState.products.length > 0 ? (
-                                                (orderState.products.reduce((total, prod) => (
-                                                    total + (Number(prod.order_product_gross_amount) || 0)
-                                                ), 0) * 1.1).toFixed(2) // Use toFixed(2) for two decimal places
-                                            ) : (
-                                                ' 0.00'
-                                            )}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <label className="form-label font-bold">*Order Date:</label>
+                            <input
+                            type="date"
+                            className="form-control"
+                            name="order_date"
+                            value={orderState.order_date}
+                            onChange={handleInputChange}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity('Enter Order Date')}
+                            onInput={(e) => e.target.setCustomValidity('')}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="form-label font-bold">*EST Date and Time:</label>
+                            <input
+                            type="datetime-local"
+                            className="form-control"
+                            name="order_est_datetime"
+                            value={orderState.order_est_datetime}
+                            onChange={handleInputChange}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity('Enter EST Date and Time')}
+                            onInput={(e) => e.target.setCustomValidity('')}
+                            />
+                            <label className="text-xs italic text-gray-400">(EST) - Delivery estimate time of arrival</label>
                         </div>
                     </div>
-                </div>
 
-                {/* ***** ORDER DATE ****** */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 my-2">
-                    <div>
-                        <label className="form-label font-bold">*Order Date:</label>
-                        <input
-                        type="date"
-                        className="form-control"
-                        name="order_date"
-                        value={orderState.order_date}
-                        onChange={handleInputChange}
-                        required
-                        onInvalid={(e) => e.target.setCustomValidity('Enter Order Date')}
-                        onInput={(e) => e.target.setCustomValidity('')}
+                    {/* ***** INTERNAL COMMENTS ***** */}
+                    <div className="my-2">
+                        <label className="form-label font-bold">Internal comments:</label>
+                        <textarea 
+                            className="form-control" 
+                            name="order_internal_comments" 
+                            value={orderState.order_internal_comments} 
+                            onChange={handleInputChange}
+                            placeholder='Enter order related internal comments...'
+                            rows={2}
                         />
                     </div>
-
-                    <div>
-                        <label className="form-label font-bold">*EST Date and Time:</label>
-                        <input
-                        type="datetime-local"
-                        className="form-control"
-                        name="order_est_datetime"
-                        value={orderState.order_est_datetime}
-                        onChange={handleInputChange}
-                        required
-                        onInvalid={(e) => e.target.setCustomValidity('Enter EST Date and Time')}
-                        onInput={(e) => e.target.setCustomValidity('')}
+                    {/* ***** NOTES TO SUPPLIER ***** */}
+                    <div className="my-2">
+                        <label className="form-label font-bold">Notes to supplier:</label>
+                        <textarea
+                            className="form-control bg-yellow-200" 
+                            name="order_notes_to_supplier" 
+                            value={orderState.order_notes_to_supplier} 
+                            onChange={handleInputChange}
+                            placeholder='Enter some notes to supplier...'
+                            rows={4}
                         />
-                        <label className="text-xs italic text-gray-400">(EST) - Delivery estimate time of arrival</label>
+                    </div>
+                        
+                    {/* ***** BUTTONS ***** */}
+                    <div className="flex justify-between mb-3">
+                        <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
+                        <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800" type="submit" name="draft">SAVE AS DRAFT</button>
+                        <button className="btn btn-primary" type='submit' name='submit'>SUBMIT</button>
                     </div>
                 </div>
-
-                {/* ***** INTERNAL COMMENTS ***** */}
-                <div className="my-2">
-                    <label className="form-label font-bold">Internal comments:</label>
-                    <textarea 
-                        className="form-control" 
-                        name="order_internal_comments" 
-                        value={orderState.order_internal_comments} 
-                        onChange={handleInputChange}
-                        placeholder='Enter order related internal comments...'
-                        rows={2}
-                    />
-                </div>
-                {/* ***** NOTES TO SUPPLIER ***** */}
-                <div className="my-2">
-                    <label className="form-label font-bold">Notes to supplier:</label>
-                    <textarea
-                        className="form-control bg-yellow-200" 
-                        name="order_notes_to_supplier" 
-                        value={orderState.order_notes_to_supplier} 
-                        onChange={handleInputChange}
-                        placeholder='Enter some notes to supplier...'
-                        rows={4}
-                    />
-                </div>
-                    
-                {/* ***** BUTTONS ***** */}
-                <div className="flex justify-between mb-3">
-                    <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
-                    <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800">SAVE AS DRAFT</button>
-                    <button className="btn btn-primary" type="submit">SUBMIT</button>
-                </div>
+                { confirmationModal }
             </div>
-            { confirmationModal }
-        </div>
+        </form>
         </>
     );
 };

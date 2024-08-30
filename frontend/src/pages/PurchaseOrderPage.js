@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux'
 import { setPurchaseOrderState, clearPurchaseOrderState } from '../redux/purchaseOrderSlice'
 import { clearProductState } from '../redux/productSlice'
+import { clearSupplierState } from '../redux/supplierSlice'
+import { clearProjectState } from '../redux/projectSlice'
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
 
@@ -80,6 +82,8 @@ const PurchaseOrder = () => {
     
     const handleAddClick = () => {
         dispatch(clearProductState())
+        dispatch(clearSupplierState())
+        dispatch(clearProjectState())
         navigate('/EmpirePMS/order/create');
     }
 
@@ -131,7 +135,7 @@ const PurchaseOrder = () => {
     const purchaseOrderTable = Array.isArray(purchaseOrderState) && purchaseOrderState.length > 0 ? (
         <div className="container">
             <table className="table table-bordered table-hover shadow-md">
-                <thead className="thead-dark">
+                <thead className="thead-dark text-center">
                     <tr className="table-primary">
                         <th scope="col">PO</th>
                         <th scope="col">Order Date</th>
@@ -146,15 +150,35 @@ const PurchaseOrder = () => {
                 </thead>
                 <tbody>
                     {filterBySelectedDate(filterOrders().filter(order => order.order_isarchived === isArchive)).map((order, index) => (
-                        <tr key={order._id} onClick={() => handleTableClick(order._id)} className="cursor-pointer">
+                        <tr key={order._id} onClick={() => handleTableClick(order._id)} className="cursor-pointer text-center">
                             <th scope="row">{order.order_ref}</th>
                             <td>{formatDate(order.order_date)}</td>
                             <td>{formatDateTime(order.order_est_datetime)}</td>
                             <td>{order.project.project_name}</td>
                             <td>{order.supplier.supplier_name}</td>
-                            <td>{order.products.length} products</td>
-                            <td>${Math.round(order.order_total_amount)}</td>
-                            <td>{order.order_status}</td>
+                            <td>{order.products.length + order.custom_products.length} products</td>
+                            <td>${(order.order_total_amount).toFixed(2)}</td>
+                            <td>
+                                {order.order_status && (
+                                <label
+                                    className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
+                                        order.order_status === "Cancelled"
+                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                            : order.order_status === "Pending"
+                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                            : order.order_status === "Approved"
+                                            ? "border-2 bg-transparent border-green-600 text-green-600"
+                                            : order.order_status === "Rejected"
+                                            ? "border-2 bg-transparent border-red-600 text-red-600"
+                                            : order.order_status === "Draft"
+                                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                                            : ""
+                                    }`}
+                                >
+                                    {order.order_status}
+                                </label>
+                                )}
+                            </td>
                             {/* <td>To be developed using HISTORY table......</td> */}
                         </tr>
                     ))}

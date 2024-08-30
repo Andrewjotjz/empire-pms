@@ -1,6 +1,6 @@
 //import modules
 import { useParams, useNavigate} from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setPurchaseOrderState } from '../redux/purchaseOrderSlice';
 import { clearProductState } from '../redux/productSlice';
@@ -20,11 +20,18 @@ const PurchaseOrderDetails = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [currentTab, setCurrentTab] = useState('supplierDetails');
+    const [currentLeftTab, setCurrentLeftTab] = useState('supplierDetails');
+    const [currentRightTab, setCurrentRightTab] = useState('internalComments');
+    const [showLastDiv, setShowLastDiv] = useState(false);
+    const [targetRef, setTargetRef] = useState(null);
 
     //Component hooks
     const { updatePurchaseOrder, isUpdateLoadingState, updateErrorState } = useUpdatePurchaseOrder();
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const notesToSupplierRef = useRef(null);
+    const internalCommentsRef = useRef(null);
+    const supplierDetailsRef = useRef(null);
+    const invoicesTableRef = useRef(null);
 
     //Component functions and variables    
     const handleBackClick = () => navigate(-1);
@@ -35,7 +42,7 @@ const PurchaseOrderDetails = () => {
     }
 
     const handleEditPurchaseOrder = () => {
-        return
+        navigate(`/EmpirePMS/test/`)
     }
 
     const handleArchive = () => {    
@@ -85,6 +92,17 @@ const PurchaseOrderDetails = () => {
           0
       ).toFixed(2) //change number to two decimal points
     : 0;
+
+    const scrollToDiv = (ref) => {
+        if (ref.current) {
+          ref.current.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'center' });
+        } else {
+          // Store the target ref if it is not rendered yet
+          setTargetRef(ref);
+          // Trigger rendering of the last div if needed
+          setShowLastDiv(true);
+        }
+      };
     
     //Render component
     useEffect(() => {
@@ -112,6 +130,13 @@ const PurchaseOrderDetails = () => {
         fetchPurchaseOrderDetails();
     }, [id, dispatch]);
 
+    useEffect(() => {
+        // If a targetRef is stored and it is now rendered, scroll to it
+        if (targetRef && targetRef.current) {
+          targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'center' });
+          setTargetRef(null); // Clear the targetRef once scrolled
+        }
+      }, [showLastDiv, targetRef]);
 
     // Display DOM
     if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }
@@ -157,17 +182,17 @@ const PurchaseOrderDetails = () => {
                 <label className="form-label fw-bold">Order Status:</label>
                 {purchaseOrderState.order_status && (
                 <label
-                    className={`text-lg font-bold m-1 p-2 rounded-xl ${
+                    className={`text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
                         purchaseOrderState.order_status === "Cancelled"
-                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
                             : purchaseOrderState.order_status === "Pending"
-                            ? "border-2 bg-transparent border-yellow-100 text-yellow-600"
+                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
                             : purchaseOrderState.order_status === "Approved"
                             ? "border-2 bg-transparent border-green-600 text-green-600"
                             : purchaseOrderState.order_status === "Rejected"
                             ? "border-2 bg-transparent border-red-600 text-red-600"
                             : purchaseOrderState.order_status === "Draft"
-                            ? "border-2 bg-transparent border-blue-600 text-blue-600"
+                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
                             : ""
                     }`}
                 >
@@ -180,12 +205,11 @@ const PurchaseOrderDetails = () => {
         <div className='border'>Purchase Order API fetched successfully, but it might be empty...</div>
     );
 
-    const productsTable = purchaseOrderState.products.length > 0 ? (
-        <div className="container p-0 bg-slate-50 mb-4 shadow-md">
+    const productsTable = purchaseOrderState.products.length > 0 || purchaseOrderState.custom_products.length > 0 ? (
+        <div className="container p-0 bg-slate-50 mb-4 shadow-md text-sm">
             <table className="table table-bordered table-hover m-0">
                 <thead className="thead-dark text-center">
                     <tr className="table-primary">
-                        <th scope="col">Item #</th>
                         <th scope="col">SKU</th>
                         <th scope="col">Name</th>
                         <th scope="col">Location</th>
@@ -198,14 +222,32 @@ const PurchaseOrderDetails = () => {
                 <tbody className='text-center'>
                     {purchaseOrderState.products && purchaseOrderState.products.map((product, index) => (
                     <tr key={`${product.product_id._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_id._id)}>
-                        <th scope="row">{index + 1}</th>
                         <td>{product.product_id.product_sku}</td>
                         <td>{product.product_id.product_name}</td>
                         <td>{product.order_product_location}</td>
-                        <td>{product.order_product_qty_a}</td>
-                        <td>{product.order_product_qty_b}</td>
+                        <td>
+                            {Number.isInteger(product.order_product_qty_a)
+                                ? product.order_product_qty_a
+                                : parseFloat(product.order_product_qty_a).toFixed(4)}
+                        </td>
+                        <td>
+                            {Number.isInteger(product.order_product_qty_b)
+                                ? product.order_product_qty_b
+                                : parseFloat(product.order_product_qty_b).toFixed(4)}
+                        </td>
                         <td>$ {product.order_product_price_unit_a.toFixed(2)}</td>
                         <td className='text-end'>$ {product.order_product_gross_amount.toFixed(2)}</td>
+                    </tr>
+                    ))}
+                    {purchaseOrderState.custom_products && purchaseOrderState.custom_products.map((cusProduct, index) => (
+                    <tr key={index} className='cursor-default'>
+                        <td>CUSTOM {index + 1}</td>
+                        <td>{cusProduct.custom_product_name}</td>
+                        <td>{cusProduct.custom_product_location}</td>
+                        <td>{cusProduct.custom_order_qty}</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
                     </tr>
                     ))}
                 </tbody>
@@ -215,8 +257,12 @@ const PurchaseOrderDetails = () => {
                     <table className="table text-end font-bold border-x-2 mb-0">
                         <tbody>
                             <tr>
-                                <td className='pt-1'>Total Net Amount:</td>
+                                <td className='pt-1'>Total Gross Amount:</td>
                                 <td className='pt-1'>$ {totalGrossAmount}</td>
+                            </tr>
+                            <tr>
+                                <td className='pt-1'>Total Gross Amount (incl GST):</td>
+                                <td className='pt-1'>$ {purchaseOrderState.order_total_amount}</td>
                             </tr>
                             <tr>
                                 <td>Amount Paid:</td>
@@ -236,8 +282,10 @@ const PurchaseOrderDetails = () => {
     );
 
     const internalComments = purchaseOrderState.order_internal_comments !== '' ? (
-        <div className='shadow-md'>
-            <p>{purchaseOrderState.order_internal_comments}</p>
+        <div className="card-body border-1 relative shadow-md p-2" ref={internalCommentsRef}>
+            <div className='border rounded-md bg-blue-100 p-2 h-20 md:h-32 lg:h-48'>
+                <p>{purchaseOrderState.order_internal_comments}</p>
+            </div>
         </div>
     ) : (
         <div className='border shadow-sm'><p className='m-2 p-1'>There are no internal comments...</p></div>
@@ -245,7 +293,7 @@ const PurchaseOrderDetails = () => {
 
     const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
         <>
-        <div className="container shadow-md">
+        <div className="container shadow-md" ref={invoicesTableRef}>
             <table className="table table-bordered table-hover">
                 <thead className="thead-dark">
                     <tr className="table-primary">
@@ -295,7 +343,7 @@ const PurchaseOrderDetails = () => {
     );
 
     const supplierDetails = purchaseOrderState.supplier ? (
-        <div className="card-body border-1 relative shadow-md">
+        <div className="card-body border-1 relative shadow-md" ref={supplierDetailsRef}>
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Supplier Name:</label>
@@ -339,8 +387,8 @@ const PurchaseOrderDetails = () => {
                         <thead className="thead-dark">
                             
                             <tr className="table-primary">
-                                <th scope="col">ID</th>
-                                <th scope="col">Name</th>
+                                <th scope="col" className='text-center'>ID</th>
+                                <th scope="col" className='text-center'>Name</th>
                                 <th scope="col">Phone</th>
                                 <th scope="col">Email</th>
                             </tr>
@@ -348,8 +396,8 @@ const PurchaseOrderDetails = () => {
                         <tbody>
                             {purchaseOrderState.supplier.supplier_contacts && purchaseOrderState.supplier.supplier_contacts.map((supplier,index) => (
                                 <tr key={index}>
-                                    <th scope="row">{index + 1}</th>
-                                    <td>{`${supplier.is_primary ? `*` : ``} ${supplier.name}`}</td>
+                                    <th scope="row" className='text-center'>{index + 1}</th>
+                                    <td className='text-center'>{`${supplier.is_primary ? `*` : ``} ${supplier.name}`}</td>
                                     <td>{supplier.phone}</td>
                                     <td>{supplier.email}</td>
                                 </tr>
@@ -363,10 +411,14 @@ const PurchaseOrderDetails = () => {
         <div className='border'>Purchase Order's supplier fetched successfully, but it might be empty...</div>
     );
 
-    const notesToSupplier = (
-        <div>
-            <p>{purchaseOrderState.order_notes_to_supplier}</p>
+    const notesToSupplier = purchaseOrderState.order_notes_to_supplier !== '' ? (
+        <div className="card-body border-1 relative shadow-md p-2" ref={notesToSupplierRef}>
+            <div className='border rounded-md bg-yellow-200 p-2 h-20 md:h-32 lg:h-48'>
+                <p>{purchaseOrderState.order_notes_to_supplier}</p>
+            </div>
         </div>
+    ) : (
+        <div className='border shadow-sm'><p className='m-2 p-1'>There are no notes to supplier...</p></div>
     )
     
     const archiveModal = (
@@ -440,19 +492,26 @@ const PurchaseOrderDetails = () => {
                         { productsTable }
                     </div>
                     {/* TABS */}
-                    <div>
-                        <button className={`${currentTab === 'internalComments' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('internalComments')}>Internal Comments</button>
-                        <button className={`${currentTab === 'invoicesTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('invoicesTable')}>Invoices</button>
-                        <button className={`${currentTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierDetails')}>Supplier Details</button>
+                    <div className='grid grid-cols-3 gap-x-3'>
+                        <div className='col-span-2'>
+                            <div>
+                                <button className={`${currentLeftTab === 'invoicesTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentLeftTab('invoicesTable'); scrollToDiv(invoicesTableRef);}}>Invoices</button>
+                                <button className={`${currentLeftTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentLeftTab('supplierDetails'); scrollToDiv(supplierDetailsRef);}}>Supplier Details</button>
+                            </div>
+                            {/* SWITCH BETWEEN COMPONENTS HERE */}
+                            {currentLeftTab === 'invoicesTable' && invoicesTable}
+                            {currentLeftTab === 'supplierDetails' && supplierDetails}
+                        </div>
+                        <div className='col-span-1'>
+                            <div>
+                                <button className={`${currentRightTab === 'internalComments' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentRightTab('internalComments'); scrollToDiv(internalCommentsRef);}}>Internal Comments</button>
+                                <button className={`${currentRightTab === 'notesToSupplier' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentRightTab('notesToSupplier'); scrollToDiv(notesToSupplierRef);}}>Notes to Supplier</button>
+                            </div>
+                            {/* NOTES TO SUPPLIER */}
+                            {currentRightTab === 'internalComments' && internalComments}
+                            {currentRightTab === 'notesToSupplier' && notesToSupplier}
+                        </div>
                     </div>
-                    {/* NOTES TO SUPPLIER */}
-                    <div>
-                        { notesToSupplier }
-                    </div>
-                    {/* SWITCH BETWEEN COMPONENTS HERE */}
-                    {currentTab === 'internalComments' && internalComments}
-                    {currentTab === 'invoicesTable' && invoicesTable}
-                    {currentTab === 'supplierDetails' && supplierDetails}
                 </div>
             </div>
             { archiveModal }
