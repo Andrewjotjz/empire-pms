@@ -58,13 +58,13 @@ const ChangePasswordForm = () => {
                     <form className="card-body" onSubmit={handleSubmit}>
                         <div className="row">
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Email:</label>
+                                <label className="form-label font-bold">Email:</label>
                                 <p className="form-label">{employeeState.employee_email}</p>
                             </div>
                         <div/>
                         <div className="row">
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">New Password:</label>
+                                <label className="form-label font-bold">New Password:</label>
                                 <input 
                                     className="form-control" 
                                     name="employee_password" 
@@ -79,7 +79,7 @@ const ChangePasswordForm = () => {
                         </div>
                         <div className="row">
                             <div className="col-md-6 mb-3">
-                                <label className="form-label">Confirm Password:</label>
+                                <label className="form-label font-bold">Confirm Password:</label>
                                 <input 
                                     className="form-control" 
                                     name="confirm_password" 

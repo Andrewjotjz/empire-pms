@@ -6,12 +6,37 @@ const mongoose = require('mongoose');
 
 //Controller function - GET all Suppliers
 const getAllSuppliers = async (req, res) => {
-    //'req' object not in used
-    //create a new model called Suppliers, await, and assign it with all Supplier documents in the Supplier collection, sort created date in descending order
-    const Suppliers = await supplierModel.find({}).sort({createdAt: -1})
-    //invoke 'res' object method: status() and json(), pass relevant data to them
-    res.status(200).json(Suppliers);
+    try {
+        // Fetch all supplier documents, sorted by updatedAt in descending order
+        const Suppliers = await supplierModel.find({}).sort({ updatedAt: -1 });
+
+        // Define the custom order for supplier types
+        const supplierTypeOrder = {
+            'Main': 1,
+            'Special': 2,
+            'Others': 3,
+            'Inactive': 4
+        };
+
+        // Sort suppliers by supplier_type first, then by updatedAt
+        Suppliers.sort((a, b) => {
+            const orderA = supplierTypeOrder[a.supplier_type] || 5;
+            const orderB = supplierTypeOrder[b.supplier_type] || 5;
+
+            if (orderA < orderB) return -1;
+            if (orderA > orderB) return 1;
+
+            // If supplier_type is the same, sort by updatedAt
+            return b.updatedAt - a.updatedAt;
+        });
+
+        // Return the sorted suppliers as a JSON response
+        res.status(200).json(Suppliers);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving suppliers", error });
+    }
 }
+
 
 //Controller function - GET single Supplier
 const getSingleSupplier = async (req, res) => {
@@ -113,6 +138,11 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     createdAt: '$createdAt',
                     updatedAt: '$updatedAt',
                 }
+            }
+        },
+        {
+            $sort: {
+                'productPrice.createdAt': -1 // Sort by productPrice's createdAt in descending order
             }
         }
     ]);

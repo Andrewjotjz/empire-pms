@@ -117,7 +117,7 @@ const orderSchema = new Schema({
 
 // Mongoose Pre-save hook to check if there's at least one product
 orderSchema.pre('save', function(next) {
-    if (this.products.length === 0 || this.custom_products.length ===0) {
+    if (this.products.length === 0 && this.custom_products.length === 0) {
         const err = new Error("An order must have at least one product.");
         return next(err);
     }

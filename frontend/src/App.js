@@ -25,6 +25,10 @@ import NewSupplierForm from "./pages/forms/NewSupplierForm";
 import ProductDetails from "./pages/ProductDetails";
 import NewProductForm from "./pages/forms/NewProductForm";
 import UpdateProductForm from "./pages/forms/UpdateProductForm";
+import PurchaseOrder from "./pages/PurchaseOrderPage";
+import TestPage from "./pages/TestPage";
+import PurchaseOrderDetails from "./pages/PurchaseOrderDetails";
+import NewPurchaseOrderForm from "./pages/forms/NewPurchaseOrderForm";
 
 function App() {
   //App state declaration
@@ -40,12 +44,16 @@ function App() {
             <Route path="/EmpirePMS/" element={<Navigate to="/EmpirePMS/dashboard" /> } />
             <Route path="/EmpirePMS/login" element={!localUser ? <Login /> : <Navigate to="/EmpirePMS/dashboard" />} />
             <Route path="/EmpirePMS/dashboard" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <Dashboard />} />
+            <Route path="/EmpirePMS/order" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PurchaseOrder />} />
+            <Route path="/EmpirePMS/order/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PurchaseOrderDetails />} />
+            <Route path="/EmpirePMS/order/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewPurchaseOrderForm />} />
             <Route path="/EmpirePMS/employee" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <EmployeePage />} />
             <Route path="/EmpirePMS/invoice" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <InvoicePage />} />
             <Route path="/EmpirePMS/order" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <OrderPage />} />
             <Route path="/EmpirePMS/payment" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PaymentPage />} />
             <Route path="/EmpirePMS/project" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectPage />} />
             <Route path="/EmpirePMS/account" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <AccountPage />} />
+            <Route path="/EmpirePMS/test" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <TestPage />} />
             <Route path="/EmpirePMS/project/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectDetails />} />
             <Route path="/EmpirePMS/project/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewProjectForm />} />
             <Route path="/EmpirePMS/project/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateProjectForm />} />

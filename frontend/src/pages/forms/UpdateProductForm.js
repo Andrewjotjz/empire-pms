@@ -245,9 +245,6 @@ const UpdateProductForm = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-    // console.log("Inside productState now:", productState)
-    // console.log("Inside productPriceState now:", productPriceState)
-
     return (
         <div className="container mt-5"> 
             <div className="card">

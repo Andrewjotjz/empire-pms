@@ -6,50 +6,79 @@ const mongoose = require('mongoose');
 const getAllOrders = async (req, res) => {
     //'req' object not in used
     //create a new model called Orders, await, and assign it with all Order documents in the Order collection, sort created date in descending order
-    const Orders = await orderModel.find({}).sort({createdAt: -1})
-    //invoke 'res' object method: status() and json(), pass relevant data to them
-    res.status(200).json(Orders);
+    try {
+        // Find all Order documents, populate Project, Supplier, and Products, and sort by created date in descending order
+        const Orders = await orderModel
+            .find({})
+            .populate('project') // Populate the 'project' field
+            .populate('supplier') // Populate the 'supplier' field
+            .populate({
+                path: 'products.product_id', // Populate the 'product_id' inside 'products' array
+                select: 'product_name product_sku product_number_a product_unit_a', // Specify the fields to include
+            })
+            .sort({ createdAt: -1 });
+
+        // Respond with the retrieved Orders
+        // invoke 'res' object method: status() and json(), pass relevant data to them
+        res.status(200).json(Orders);
+    } catch (error) {
+        // Handle any errors that occur during the query
+        res.status(500).json({ message: "Error retrieving orders", error });
+    }
 }
 
-//Controller function - GET single Order
+// Controller function - GET single Order
 const getSingleOrder = async (req, res) => {
-    //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
+    // Retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
     const { id } = req.params;
-    //check if the id is a valid id in database
+    // Check if the id is a valid id in the database
     if (!mongoose.Types.ObjectId.isValid(id)) {
-        //if ID doesn't exist, return error 404 details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
+        // If ID doesn't exist, return error 404 details
+        // Invoke 'res' object method: status() and json(), pass relevant data to them
         //! DESIGN 404 PAGE
-        res.status(404).json({msg: "Request Order ID does not exist in database."})
+        return res.status(404).json({ msg: "Request Order ID does not exist in database." });
+        // ^^^ Add return here to prevent further execution
     }
 
-    //if ID exists in mongoDB database
-    //create a new model called Order, await, and assign it with the Order document, which can be found in the Order collection, find using ID
-    const Order = await orderModel.findById(id)
+    try {
+        // If ID exists in the MongoDB database
+        // Create a new model called Order, await, and assign it with the Order document, which can be found in the Order collection, find using ID
+        const Order = await orderModel
+            .findById(id)
+            .populate('supplier')
+            .populate({
+                path: 'products.product_id', // Populate the 'product_id' inside 'products' array
+                select: 'product_name product_sku product_number_a product_unit_a', // Specify the fields to include
+            })
+            .populate('project')
+            .populate({
+                path: 'deliveries.delivery_id', // Populate the 'delivery_id' inside 'deliveries' array
+            })
+            .populate({
+                path: 'invoices.invoice_id', // Populate the 'invoice_id' inside 'invoices' array
+            })
+            .populate('project');
 
-    //check if there's 'null' or 'undefined' in 'Order'.
-    if (!Order) {
-        //if Order doesn't exist, return error 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(400).json({msg: "ID exists, however there is no such Order"})
+        // Respond with the retrieved Order
+        // Invoke 'res' object method: status() and json(), pass relevant data to them
+        res.status(200).json(Order);
+    } catch (error) {
+        // Handle any errors that occur during the query
+        res.status(500).json({ message: "Error retrieving order", error });
     }
-    else {
-        //if Order does exists, pass relevant data to 'res' object method
-        res.status(200).json(Order)
-    }
-}
+};
+
 
 //Controller function - POST to create a new Order
 const createNewOrder = async (req, res) => {
     //retrieve incoming request (along with new Order object) by using 'req' object property 'body', which stores new Order object.
     //destructure all relevant attributes in new Order object
-    const { supplier, order_ref, order_date, order_est_date, order_est_time, products, order_total_amount, order_internal_comments,
+    const { supplier, order_ref, order_date, order_est_datetime, products, custom_products, order_total_amount, order_internal_comments,
         order_notes_to_supplier, order_isarchived, deliveries, invoices, project, order_status } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Order = await orderModel.create({ supplier, order_ref, order_date, order_est_date, order_est_time, products, order_total_amount, order_internal_comments,
+        const Order = await orderModel.create({ supplier, order_ref, order_date, order_est_datetime, products, custom_products, order_total_amount, order_internal_comments,
             order_notes_to_supplier, order_isarchived, deliveries, invoices, project, order_status })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Order)
@@ -59,6 +88,7 @@ const createNewOrder = async (req, res) => {
         //invoke 'res' object method: status() and json(), pass relevant data to them
         //! DESIGN 400 PAGE
         res.status(400).json({error: error.message})
+        console.log(error.message)
     }
 }
 
