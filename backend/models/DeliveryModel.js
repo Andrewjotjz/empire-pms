@@ -13,6 +13,7 @@ const deliverySchema = new Schema({
     },
     delivery_evidence_reference: {
         type: String,
+        unique: true,
         required: true
     },
     products: [{
@@ -21,24 +22,21 @@ const deliverySchema = new Schema({
             ref: 'Product',
             required: true
         },
+        // ** Only need to store delivery/invoice qty 
         delivered_qty_a: {
             type: Number,
             required: true,
             min: 0
-        },
-        delivered_qty_b: {
-            type: Number,
-            required: true,
-            min: 0
-        },
+        }
     }],
     delivery_receiving_date: {
         type: Date,
         required: true
     },
-    status: {   //NEEDS TO BE REVIEWED
-        type: Schema.Types.ObjectId,
-        ref: 'Status'
+    delivery_status: {
+        type: String,
+        required: true,
+        enum: ["Partially delivered", "Delivered"]
     },
     order: {
         type: Schema.Types.ObjectId,
@@ -49,7 +47,7 @@ const deliverySchema = new Schema({
         ref: 'Supplier'
     },
 
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Delivery', deliverySchema);

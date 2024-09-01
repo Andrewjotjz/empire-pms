@@ -36,7 +36,7 @@ const statusSchema = new Schema({
     status_internal_comment: {
         type: String
     }
-});
+}, { timestamps: true });
 
 //export the model
 module.exports = mongoose.model('Status', statusSchema);

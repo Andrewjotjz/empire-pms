@@ -1,17 +1,10 @@
 //import modules
 const mongoose = require('mongoose');
+const fs = require('fs');
 
 //create mongoose's schema
 const Schema = mongoose.Schema;
 
-
-//create a new Schema object and define Supplier's material-type schema/properties in its parameter.
-const supplierMaterialTypeSchema = new Schema({
-    type_name: {
-        type: String,
-        required: true,
-    }
-}, { timestamps: true })
 
 //create a new Schema object and define Supplier's contact schema/properties in its parameter.
 const supplierContactSchema = new Schema({
@@ -21,7 +14,7 @@ const supplierContactSchema = new Schema({
     },
     phone: {
         type: String,
-        match: [/^\+?[1-9]\d{1,14}$/, 'Please fill a valid phone number'] // E.164 format
+        match: [/^[0-9\s+]\d{7,15}$/, 'Please fill a valid phone number'] // E.164 format
     },
     email: {
         type: String,
@@ -66,24 +59,8 @@ const supplierSchema = new Schema({
         default: false
     },
     supplier_material_types: {
-        type: [supplierMaterialTypeSchema]
-    },
-    projects: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Project'
-    }],
-    products: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Product'
-    }],
-    orders: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Order'
-    }],
-    invoices: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Invoice'
-    }]
+        type: String
+    }
 }, { timestamps: true });
 
 // Custom validation function for array limit
@@ -91,5 +68,6 @@ function arrayLimit(val) {
     return val.length <= 5;
 }
 
-//export the model
-module.exports = mongoose.model('Supplier', supplierSchema);
+// Export the model
+const Supplier = mongoose.model('Supplier', supplierSchema);
+module.exports = Supplier;

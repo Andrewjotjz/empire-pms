@@ -1,15 +1,21 @@
-//import modules
+// Import modules
 const mongoose = require('mongoose');
+// Import email validator module
+const { isEmail } = require('validator');
+// Import bcrypt (password hash) module
+const bcrypt = require('bcrypt');
 
-//create mongoose's schema
+// Create mongoose's schema
 const Schema = mongoose.Schema;
 
-//create a new Schema object, and define Employee's schema/properties in its parameter.
+// Create a new Schema object and define Employee's schema/properties in its parameter.
 const employeeSchema = new Schema({
     employee_email: {
         type: String,
+        required: [true, 'Please enter an email'],
         unique: true,
-        match: /.+\@.+\..+/
+        lowercase: true,
+        validate: [isEmail, 'Please enter a valid email']
     },
     employee_first_name: {
         type: String,
@@ -20,40 +26,37 @@ const employeeSchema = new Schema({
         required: true
     },
     employee_external_id: {
-        type: String,
-        unique: true,
-        sparse: true
+        type: String
     },
     employee_business_phone: {
         type: String,
-        match: /^[0-9]{10,15}$/
+        match: [/^[0-9\s+]\d{7,15}$/, 'Please fill a valid phone number'] // E.164 format
     },
     employee_mobile_phone: {
         type: String,
-        match: /^[0-9]{10,15}$/
+        match: [/^[0-9\s+]\d{7,15}$/, 'Please fill a valid phone number'] // E.164 format
     },
     employee_password: {
         type: String,
-        required: true
-    },
-    employee_password_token: {
-        type: String
+        required: [true, 'Please enter a password'],
+        minlength: [6, 'Minimum password length is 6 characters'],
     },
     employee_roles: {
         type: String,
         required: true,
         enum: ['Admin', 'Foreman', 'Manager', 'Purchaser', 'Employee'],
-        default: ['Employee']
+        default: 'Employee'
     },
-    //not mandatory but default is 'false'
+    // Not mandatory but default is 'false'
     employee_isarchived: {
         type: Boolean,
         default: false
     },
     companies: {
-        type: Schema.Types.ObjectId,
         required: true,
-        ref: 'Company'
+        type: Schema.Types.ObjectId,
+        ref: 'Company',
+        default: '6682523ac777f1c67a29f5ae' // '_id' for Empire CBS 
     },
     projects: [{
         type: Schema.Types.ObjectId,
@@ -62,8 +65,39 @@ const employeeSchema = new Schema({
     payments: [{
         type: Schema.Types.ObjectId,
         ref: 'Payment'
-    }]
+    }],
+    employee_password_token: {
+        type: String,
+        required: false
+    },
+    employee_reset_token_expires: {
+        type: Date,
+        required: false
+    }
 }, { timestamps: true });
 
-//export the model
-module.exports = mongoose.model('Employee', employeeSchema);
+// Fire a function before doc saved to db
+employeeSchema.pre('save', async function(next) {
+    if (this.isModified('employee_password')) {
+        const salt = await bcrypt.genSalt();
+        this.employee_password = await bcrypt.hash(this.employee_password, salt);
+    }
+    next();
+});
+
+// Static method to login user
+employeeSchema.statics.login = async function(email, password) {
+    const Employee = await this.findOne({ employee_email: email });
+    if (Employee) {
+        const auth = await bcrypt.compare(password, Employee.employee_password);
+        if (auth) {
+            return Employee;
+        }
+        throw Error('incorrect password');
+    }
+    throw Error('incorrect email');
+};
+
+// Export the model
+const Employee = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
+module.exports = Employee;

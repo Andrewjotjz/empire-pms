@@ -1,6 +1,7 @@
 //import modules
 const mongoose = require('mongoose');
 
+
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
@@ -8,15 +9,15 @@ const Schema = mongoose.Schema;
 const aliasSchema = new Schema({
     alias_name: {
         type: String,
+        unique: true,
         required: true
-    },
-    alias_type: {
-        type: String,
-        required: true,
-        enum: ['Plasterboard', 'Metal', 'Compound']
     }
 }, { timestamps: true })
 
 
 //export the model
-module.exports = mongoose.model('Alias', aliasSchema);
+// const Alias = mongoose.model('Alias', aliasSchema);
+
+// check if the model already exists before creating it
+const Alias = mongoose.models.Alias || mongoose.model('Alias', aliasSchema);
+module.exports = Alias;

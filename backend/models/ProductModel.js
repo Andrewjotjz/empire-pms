@@ -4,83 +4,64 @@ const mongoose = require('mongoose');
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
-const productTypeSchema = new Schema({
-    type_name: {
-        type: String,
-        required: true
-    },
-    type_description: {
-        type: String
-    }
-}, { timestamps: true });
-
 const productSchema = new Schema({
     product_sku: {
         type: String,
+        trim: true,
         required: true
     },
     product_name: {
         type: String,
-        required: true
-    },
-    product_number_a: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_unit_a: {
-        type: String,
-        required: true
-    },
-    product_price_unit_a: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_number_b: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_unit_b: {
-        type: String,
-        required: true
-    },
-    product_price_unit_b: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    product_effective_date: {
-        type: Date,
+        trim: true,
         required: true
     },
     product_types: {
-        type: productTypeSchema,
+        type: String,
+        enum: ["Compound",
+            "Access Panel",
+            "Framing Ceiling",
+            "Framing Wall",
+            "Batt Insulation",
+            "Rigid Insulation",
+            "Plasterboard",
+            "External Cladding",
+            "SpeedPanel",
+            "Timber",
+            "Others",
+            "Tools",
+            "Plastering(Fixings/Screws)",
+            "Framing Ceiling(Accessories)",
+            "Rigid Insulation(Accessories)",
+            "Plasterboard(Accessories)",
+            "External Cladding(Accessories)",
+            "SpeedPanel(Accessories)"],
         required: true
     },
-    product_next_available_stock_date: {
-        type: Date
+    product_actual_size: {
+        type: Number,
+        required: true,
+        min: 0
     },
-    product_isarchived: {
-        type: Boolean,
-        default: false
+    product_next_available_stock_date: {
+        type: Date, 
+        default: null
     },
     supplier: {
         type: Schema.Types.ObjectId,
         ref: 'Supplier',
         required: true
     },
-    project: {
-        type: Schema.Types.ObjectId,
-        ref: 'Project',
-        required: true
-    },
     alias: {
         type: Schema.Types.ObjectId,
         ref: 'Alias'
+    },
+    product_isarchived: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
-//export the model
-module.exports = mongoose.model('Product', productSchema);
+
+// check if the model already exists before creating it
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+module.exports = Product;
