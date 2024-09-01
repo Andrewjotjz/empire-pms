@@ -1,0 +1,113 @@
+[
+    {
+      "project_name": "SCAPE",
+      "project_address": "130 Leicester Street, Carlton, 3053, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8365",
+        "6686386b6c2e88d394ae62d9",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "MEL05",
+      "project_address": "385 Francis Street, Brooklyn, 3012, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686386b6c2e88d394ae62d8",
+        "6686311b755b6e8592ca8365",
+        "6686386b6c2e88d394ae62d9",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "QUEENSBRIDGE",
+      "project_address": "88 Queensbridge Street, Southbank, 3006, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8367",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "GREYSTAR-SY",
+      "project_address": "14-16 Yarra St, South Yarra, 3141, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8368",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "GREYSTAR-CL",
+      "project_address": "48 Claremont Street, South Yarra, 3141, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8368",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "ALPHINGTON",
+      "project_address": "917 / 626 Heidelberg Road, Alphington, 3078, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6685e944e250349c8f3006bd",
+        "6684dc2c7ef2eb771620318e"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "WAREHOUSE",
+      "project_address": "20 Trade Place, Vermont, 3133, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "FLINDERST",
+      "project_address": "549 Flinders St, Melbourne, 3000, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8368",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "KINGST",
+      "project_address": "31 King St, Melbourne, 3000, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8368",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    },
+    {
+      "project_name": "SUBCONTRACTOR",
+      "project_address": "20 Trade Place, Vermont, 3133, VIC",
+      "project_isarchived": false,
+      "employees": [
+        "6686311b755b6e8592ca8363",
+        "6684dc2c7ef2eb771620318e",
+        "6685e944e250349c8f3006bd"
+      ],
+      "suppliers": []
+    }
+  ]

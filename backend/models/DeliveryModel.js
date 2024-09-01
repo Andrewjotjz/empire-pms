@@ -22,16 +22,12 @@ const deliverySchema = new Schema({
             ref: 'Product',
             required: true
         },
+        // ** Only need to store delivery/invoice qty 
         delivered_qty_a: {
             type: Number,
             required: true,
             min: 0
-        },
-        delivered_qty_b: {
-            type: Number,
-            required: true,
-            min: 0
-        },
+        }
     }],
     delivery_receiving_date: {
         type: Date,

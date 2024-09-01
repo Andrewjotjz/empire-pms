@@ -1,25 +1,30 @@
 //import modules
 const express = require('express');
-const { getAllProducts, getSingleProduct, createNewProduct, updateSingleProduct, deleteSingleProduct } = require('../controllers/productController')
+const { getAllProducts, getSingleProduct, getProductsByType, getFilteredProducts, createNewProduct, updateSingleProduct, deleteSingleProduct } = require('../controllers/productController')
+//import function from middlewares folder
+const { requireAuth } = require('../middlewares/authMiddleware');
 
 //create express' router
 const router = express.Router();
 
 
 //GET - get all Products
-router.get('/', getAllProducts)
+router.get('/', requireAuth, getAllProducts)
 
-//GET - get a single Product
-router.get('/:id', getSingleProduct)
+//GET - get a single Product by id
+router.get('/:id', requireAuth, getSingleProduct)
+
+//!GET - get products by Type
+router.get('/type/:type', requireAuth, getFilteredProducts)
 
 //POST - create a new Product
-router.post('/create', createNewProduct)
+router.post('/create', requireAuth, createNewProduct)
 
 //PUT - update a single Product
-router.put('/:id', updateSingleProduct)
+router.put('/:id', requireAuth, updateSingleProduct)
 
 //DELETE - delete a single Product
-router.delete('/:id', deleteSingleProduct)
+router.delete('/:id', requireAuth, deleteSingleProduct)
 
 
 //export router module that handles all Product routes
