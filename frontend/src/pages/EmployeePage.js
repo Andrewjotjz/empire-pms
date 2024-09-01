@@ -12,8 +12,7 @@ const Employee = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
-    const [isArchive, setIsArchive] = useState(false);
-    
+    const [isArchive, setIsArchive] = useState(false);    
 
     //Component router
     const navigate = useNavigate();
@@ -23,6 +22,7 @@ const Employee = () => {
         dispatch(clearEmployeeDetails());
         navigate('/EmpirePMS/employee/create');
     }
+
     const handleTableClick = (id) => navigate(`/EmpirePMS/employee/${id}`, { state: id });
 
     //Render component
@@ -85,7 +85,10 @@ const Employee = () => {
                             <td>{employee.employee_email}</td>
                             <td>{employee.employee_mobile_phone}</td>
                             <td>{employee.employee_roles}</td>
-                            <td>project data...</td>
+                            <td>{employee.projects
+                                .map((project, index) => (
+                                    <div key={index}> {project.project_name}</div>
+                                ))}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -116,7 +119,7 @@ const Employee = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search..."
+                                placeholder="Search by employee name, email, phone number, role and project..."
                             />
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setProjectState} from '../redux/projectSlice';
+import { setEmployeeDetails } from '../redux/employeeSlice';
+import { setSupplierState } from '../redux/supplierSlice';
 import { useUpdateProject } from '../hooks/useUpdateProject';
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -21,10 +23,13 @@ const Project_Details = () => {
 
     //Component state declaration
     const projectState = useSelector((state) => state.projectReducer.projectState);
+    const employeeState = useSelector((state) => state.employeeReducer.employeeState); 
+    const supplierState = useSelector((state) => state.supplierReducer.supplierState); 
 
-    const [allEmployees, setAllEmployees] = useState([]);
-    const [allSuppliers, setAllSuppliers] = useState([]);
-    const numberOfSupplierColumns = Math.ceil(allSuppliers.length / 10)
+
+    const numberOfEmployeeColumns = Math.ceil(employeeState?.length / 10)
+    const numberOfSupplierColumns = Math.ceil(supplierState?.length / 10)
+
 
     const [selectedEmployees, setSelectedEmployees] = useState(new Set());  // set select employees to add
     const [employeesToRemove, setEmployeesToRemove] = useState(new Set());  // set select employees to remove
@@ -72,7 +77,7 @@ const Project_Details = () => {
 
     useEffect(() => {
         fetchProjectDetails();
-    }, [id, dispatch]);  // Add id as dependency
+    }, [fetchProjectDetails]);  // Add id as dependency
 
     // Fetch all employees when the component mounts
     useEffect(() => {
@@ -83,7 +88,7 @@ const Project_Details = () => {
                     throw new Error('Network response was not ok employees data');
                 }
                 const employeesData = await res.json();
-                setAllEmployees(employeesData);
+                dispatch(setEmployeeDetails(employeesData));
                 setIsLoadingState(false);
 
             } catch (error) {
@@ -109,7 +114,19 @@ const Project_Details = () => {
                 // Filter out archived suppliers
                 suppliersData = suppliersData.filter(supplier => !supplier.supplier_isarchived);
 
-                setAllSuppliers(suppliersData);
+                // Sort by supplier_type and then by supplier_name
+                suppliersData.sort((a, b) => {
+                    // First, compare by supplier_type
+                    const typeComparison = a.supplier_type.localeCompare(b.supplier_type);
+                    // If types are the same, compare by supplier_name, in a alphabetical order
+                    if (typeComparison === 0) {
+                        return a.supplier_name.localeCompare(b.supplier_name);
+                    }
+                    return typeComparison;
+                });
+
+                //setAllSuppliers(suppliersData);
+                dispatch(setSupplierState(suppliersData));
                 setIsLoadingState(false);
 
             } catch (error) {
@@ -191,7 +208,6 @@ const Project_Details = () => {
         handleRelatedSuppliers();
         setSelectSupplierListVisible(true);
     };
-
 
     const handleSupplierCheckbox = (supplierId) => {
 
@@ -281,7 +297,7 @@ const Project_Details = () => {
 
     const handleRemoveEmployeesConfirm = async () => {
 
-        const employeesToRemoveArray = Array.from(employeesToRemove);
+        const employeesToRemoveArray = Array.from(employeesToRemove || []);
         
         try {
             // Update each employee to remove the current project from their projects array
@@ -295,7 +311,8 @@ const Project_Details = () => {
                 const employeeData = await employeeRes.json();
     
                 // Filter out the current project ID from the employee's projects array
-                const updatedProjects = employeeData.projects.filter(projectId => projectId !== id);
+                const updatedProjects = employeeData.projects.filter(project => project._id !== id);
+
     
                 // Update the employee's projects array
                 const updateRes = await fetch(`/api/employee/${empId}`, {
@@ -315,7 +332,7 @@ const Project_Details = () => {
             setRemoveEmployeeListVisible(false);
     
            // Fetch the updated project details to refresh the UI
-           await fetchProjectDetails();
+            await fetchProjectDetails();
 
             // Reset employeesToRemove array to empty
             setEmployeesToRemove(); 
@@ -464,7 +481,7 @@ const Project_Details = () => {
             {selectEmployeesBtn}
         
             {projectState && projectState.employees && projectState.employees.length > 0 ? (
-            <table className="table table-bordered">
+            <table className="table table-bordered table-hover">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">Id</th>
@@ -476,8 +493,8 @@ const Project_Details = () => {
                 </thead>
                 <tbody>
                     {projectState.employees.map((employee, index) => (
-                            <tr key={`projectEmployeesTab-${employee._id}`} onClick={() => handleTableClick('employee', employee._id)}>
-                                <th>{index + 1}</th>
+                            <tr className="cursor-pointer" key={`projectEmployeesTab-${employee._id}`} onClick={() => handleTableClick('employee', employee._id)}>
+                                <th scope="row">{index + 1}</th>
                                 <td>{employee.employee_first_name} {employee.employee_last_name}</td>
                                 <td>{employee.employee_mobile_phone}</td>
                                 <td>{employee.employee_email}</td>
@@ -497,7 +514,7 @@ const Project_Details = () => {
             {selectSuppliersBtn}
 
             {projectState && projectState.suppliers && projectState.suppliers.length > 0 ? (
-                <table className="table table-bordered">
+                <table className="table table-bordered table-hover">
                     <thead className="thead-dark">
                         <tr className="table-primary">
                             <th scope="col">Id</th>
@@ -510,7 +527,7 @@ const Project_Details = () => {
                     </thead>
                     <tbody>
                     {projectState.suppliers.map((supplier, index) => (
-                        <tr key={`projectSuppliersTabKey-${supplier._id}`} onClick={() => handleTableClick('supplier', supplier._id)}>
+                        <tr className="cursor-pointer" key={`projectSuppliersTabKey-${supplier._id}`} onClick={() => handleTableClick('supplier', supplier._id)}>
                                 <th scope="row">{index + 1}</th>
                                 <td>{supplier.supplier_name}</td>
                                 <td>{supplier.supplier_address}</td>
@@ -529,15 +546,17 @@ const Project_Details = () => {
 
     const addEmployeesPopUp = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg w-[600px]">
-                <h4 className="font-bold mb-4">SELECT EMPLOYEES FOR THE {projectState.project_name} PROJECT</h4>
-                <div>
-                    {allEmployees.filter(employee => employee.employee_isarchived === false).map(employee => (
+            <div className="bg-white p-5 rounded-lg shadow-lg">
+                <h4 className="font-bold mb-4">SELECT EMPLOYEES FOR THE {projectState?.project_name || 'UNKNOWN'} PROJECT</h4>
+                <div style={{ gridTemplateColumns: `repeat(${numberOfEmployeeColumns}, minmax(0, 1fr))` }} className="grid gap-4">
+                    {Array.isArray(employeeState) && employeeState
+                    // .filter(employee => employee.employee_isarchived === false)
+                    .map(employee => (
                             <div key={`addEmployeesPopUp-${employee._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
                                 <input className="form-checkbox h-5 w-5 text-blue-600"
                                     type="checkbox" checked={selectedEmployees.has(employee._id)}
                                     onChange={() => handleEmployeeCheckbox(employee._id, true)}
-                                    disabled={employee.projects.includes(projectState._id)}/>
+                                    disabled={projectState?.employees?.some(e => e._id === employee._id)}/>
                                 <label className="flex-1 text-gray-800">
                                     <span className="font-semibold">{employee.employee_first_name} {employee.employee_last_name}</span>
                                     <span className="ml-2 text-sm text-gray-600">{employee.employee_roles}</span>
@@ -561,25 +580,28 @@ const Project_Details = () => {
 
     const removeEmployeesPopUp = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg w-[600px]">
-                <h4 className="font-bold mb-4">SELECT EMPLOYEES TO <span className="text-red-500">REMOVE</span> FROM THE {projectState.project_name} PROJECT</h4>
-                <div>
-                    {   
-                        projectState.employees && projectState.employees.length > 0 ? (
-                            projectState.employees.map(employee => (
-                                <div key={`removeEmployeesPopUp-${employee._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
-                                    <input className="form-checkbox h-5 w-5 text-blue-600"
-                                        type="checkbox" onChange={() => handleEmployeeCheckbox(employee._id, false)}/>
-                                    <label className="flex-1 text-gray-800">
-                                        <span className="font-semibold">{employee.employee_first_name} {employee.employee_last_name}</span>
-                                        <span className="ml-2 text-sm text-gray-600">{employee.employee_roles}</span>
-                                    </label>
-                                </div>
-                        ))
+            <div className="bg-white p-5 rounded-lg shadow-lg">
+                <h4 className="font-bold mb-4">SELECT EMPLOYEES TO <span className="text-red-500">REMOVE</span> FROM THE{projectState?.project_name} PROJECT</h4>
+                {
+                    projectState && projectState.employees && projectState.employees.length > 0 ? (
+                        <div style={{ gridTemplateColumns: `repeat(${Math.ceil(projectState.employees.length / 10)}, minmax(0, 1fr))`,}} className="grid gap-4">
+                        {projectState.employees.map((employee) => (
+                            <div key={`removeEmployeesPopUp-${employee._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                                <input
+                                    className="form-checkbox h-5 w-5 text-blue-600"
+                                    type="checkbox"
+                                    onChange={() => handleEmployeeCheckbox(employee._id, false)}
+                                />
+                                <label className="flex-1 text-gray-800">
+                                    <span className="font-semibold"> {employee.employee_first_name} {employee.employee_last_name} </span>
+                                    <span className="ml-2 text-sm text-gray-600">{employee.employee_roles}</span>
+                                </label>
+                            </div>
+                        ))}
+                        </div>
                     ) : (
-                        <div className='border'>No related Employee to Remove</div>
+                        <div className="border">No related Employee to Remove</div>
                     )}
-                </div>
                 <div id = "removeEmployeesConfirmMessage"></div>
                 <div className="flex justify-end mt-5">
                     <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
@@ -597,12 +619,11 @@ const Project_Details = () => {
 
     const selectSuppliersPopUp = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg w-[1500px]">
+            <div className="bg-white p-5 rounded-lg shadow-lg">
                 <h4 className="font-bold mb-4">SELECT SUPPLIERS : </h4>
                 <div style={{ gridTemplateColumns: `repeat(${numberOfSupplierColumns}, minmax(0, 1fr))` }} className="grid gap-4">
-                {
-                        allSuppliers
-                        .sort((a, b) => a.supplier_type.localeCompare(b.supplier_type) || a.supplier_name.localeCompare(b.supplier_name)  )
+                {   Array.isArray(supplierState) && supplierState
+                        // .sort((a, b) => a.supplier_type.localeCompare(b.supplier_type) || a.supplier_name.localeCompare(b.supplier_name)  )
                         .map(supplier => (
                         <div key={`selectSuppliersPopUp-${supplier._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
                             <input 
