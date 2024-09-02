@@ -1,5 +1,5 @@
 //import modules
-const employeeModel = require('../models/EmployeeModel');
+const employeeModel = require('../models/employeeModel');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto')
@@ -72,7 +72,7 @@ const loginEmployee = async (req,res) => {
 const getAllEmployees = async (req, res) => {
     //'req' object not in used
     //create a new model called Employees, await, and assign it with all employee documents in the employee collection, sort created date in descending order
-    const Employees = await employeeModel.find({}).sort({createdAt: -1})
+    const Employees = await employeeModel.find({}).populate('projects').sort({createdAt: -1})
     //invoke 'res' object method: status() and json(), pass relevant data to them
     res.status(200).json(Employees);
 }
@@ -91,7 +91,7 @@ const getSingleEmployee = async (req, res) => {
 
     //if ID exists in mongoDB database
     //create a new model called Employee, await, and assign it with the employee document, which can be found in the employee collection, find using ID
-    const Employee = await employeeModel.findById(id)
+    const Employee = await employeeModel.findById(id).populate('projects').populate('companies')
 
     //check if there's 'null' or 'undefined' in 'Employee'.
     if (!Employee) {

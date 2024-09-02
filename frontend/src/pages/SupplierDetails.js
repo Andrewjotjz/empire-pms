@@ -1,8 +1,9 @@
 //import modules
 import { useParams, useNavigate} from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSupplierState } from '../redux/supplierSlice';
+import { setProjectState } from '../redux/projectSlice';
 import { setProductState, clearProductState } from '../redux/productSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
@@ -16,13 +17,21 @@ const SupplierDetails = () => {
     const navigate = useNavigate();
 
     //Component state declaration
-    const supplierState = useSelector((state) => state.supplierReducer.supplierState)
-    const productState = useSelector((state) => state.productReducer.productState)
+    const supplierState = useSelector((state) => state.supplierReducer.supplierState);
+    const productState = useSelector((state) => state.productReducer.productState);
+    const projectState = useSelector((state) => state.projectReducer.projectState);
+    const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
+
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('supplierDetails');
     const [searchTerm, setSearchTerm] = useState('');    
+
+    const [selectedProjects, setSelectedProjects] = useState(new Set());  // set select projects to add
+    const [projectsToRemove, setProjectsToRemove] = useState(new Set());  // set select projects to remove
+    const [isAddProjectListVisible, setAddProjectListVisible] = useState(false);
+    const [isRemoveProjectListVisible, setRemoveProjectListVisible] = useState(false);
 
     //Component hooks
     const { update } = useUpdateSupplier();
@@ -54,6 +63,10 @@ const SupplierDetails = () => {
     };
 
     const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
+
+    const handleTableClick = (page,varID) => {
+        navigate(`/EmpirePMS/${page}/${varID}`, { state: varID });
+    }
     
     const handleBackClick = () => navigate(-1);
 
@@ -61,6 +74,147 @@ const SupplierDetails = () => {
         dispatch(clearProductState());
         navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
     }
+
+    const handleRelatedProjects = () => {
+        if (supplierState && supplierState.projects) {
+            const relatedProjectIds = new Set(supplierState.projects.map(project => project._id));
+            setSelectedProjects(relatedProjectIds);
+        }
+    };
+
+    const handleAddProjectClick = () => {
+        handleRelatedProjects();
+        setAddProjectListVisible(true);
+    };
+
+    const handleRemoveProjectClick = () => {
+        setRemoveProjectListVisible(true);
+    };
+
+    const handleProjectCheckbox = (projectId, isAdding) => {
+
+        if (isAdding) {
+            const updatedSelecteProjects = new Set(selectedProjects);
+            if (updatedSelecteProjects.has(projectId)) {
+                updatedSelecteProjects.delete(projectId);
+            } else {
+                updatedSelecteProjects.add(projectId);
+            }
+            setSelectedProjects(updatedSelecteProjects);
+
+        } else {
+            const updatedProjectsToRemove = new Set(projectsToRemove);
+            if (updatedProjectsToRemove.has(projectId)) {
+                updatedProjectsToRemove.delete(projectId);
+            } else {
+                updatedProjectsToRemove.add(projectId);
+            }
+            setProjectsToRemove(updatedProjectsToRemove);
+        }
+    };
+
+
+    const handleAddProjectConfirm = async () => {
+        const selectedProjectArray = Array.from(selectedProjects);
+    
+        // Get the current project IDs from supplier details
+        const currentProjectIds = new Set(supplierState.projects.map(project => project._id));
+    
+        // Filter the selected projects to only include new ones
+        const newProjects = selectedProjectArray.filter(projectId => !currentProjectIds.has(projectId));
+    
+        if (newProjects.length > 0) {
+            try {
+                // Update each new project to add the current supplier to its suppliers array
+                await Promise.all(newProjects.map(async projectId => {
+                    // Fetch the current project data to get its suppliers array
+                    const projectRes = await fetch(`/api/project/${projectId}`);
+                    if (!projectRes.ok) {
+                        throw new Error(`Failed to fetch project ${projectId}`);
+                    }
+                    const projectData = await projectRes.json();
+    
+                    // Add the current supplier ID to the project's suppliers array if it's not already present
+                    const updatedSuppliers = new Set(projectData.suppliers);
+                    updatedSuppliers.add(id);
+    
+                    // Update the project's suppliers array
+                    const updateRes = await fetch(`/api/project/${projectId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ suppliers: Array.from(updatedSuppliers) })
+                    });
+    
+                    if (!updateRes.ok) {
+                        throw new Error(`Failed to update project ${projectId}`);
+                    }
+                }));
+        
+                // Close the addProjects Popup
+                setAddProjectListVisible(false);
+                
+                // Fetch the updated supplier details to refresh the UI
+                await fetchSupplierDetails();
+    
+            } catch (error) {
+                console.error('Error updating projects:', error);
+            }
+        }
+    };
+
+    const handleRemoveEmployeesConfirm = async () => {
+        
+
+        const projectsToRemoveArray = Array.from(projectsToRemove);
+
+        
+        try {
+
+            if (projectsToRemoveArray.length > 0) {
+
+                await Promise.all(projectsToRemoveArray.map(async projectID =>{
+
+                    const projectRes = await fetch(`/api/project/${projectID}`);
+
+                    if(!projectRes.ok){
+                        throw new Error(`Failed to fetch project ${projectID}`); 
+                    }
+
+                    const projectData = await projectRes.json();
+
+
+                    // Filter out the current supplier ID from project's suppliers array 
+                    const updatedSuppliers = projectData[0].suppliers.filter(supplier => supplier._id !== id);
+
+                    const updateRes = await fetch(`/api/project/${projectID}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ suppliers: updatedSuppliers })
+
+                    })
+                    if (!updateRes.ok) {
+                        throw new Error(`Failed to update project ${projectID}`);
+                    }
+                }));
+            }
+                // Close the addEmployees Propup
+                setRemoveProjectListVisible(false);
+
+                // Fetch the updated project details to refresh the UI
+                await fetchSupplierDetails();
+
+                // Reset employeesToRemove array to empty
+                setProjectsToRemove([]); 
+
+            }catch(error){
+                console.error('Error removing projects:', error);
+            }
+
+    };
 
     const handleArchive = () => {    
         let updatedState;
@@ -85,32 +239,32 @@ const SupplierDetails = () => {
 
     const handleEditSupplierClick = () => navigate(`/EmpirePMS/supplier/${id}/edit`, { state: id });
     
+
     //Render component
-    useEffect(() => {
-
-        const fetchSupplierDetails = async () => {
-            try {
-                const res = await fetch(`/api/supplier/${id}`);
-                if (!res.ok) {
-                    throw new Error('Failed to fetch supplier details');
-                }
-                const data = await res.json();
-
-                if (data.tokenError) {
-                    throw new Error(data.tokenError);
-                }
-
-                dispatch(setSupplierState(data));
-
-                setIsLoadingState(false);
-            } catch (err) {
-                setErrorState(err.message);
-                setIsLoadingState(false);
+    const fetchSupplierDetails = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/supplier/${id}`);
+            if (!res.ok) {
+                throw new Error('Failed to fetch supplier details');
             }
-        };
+            const data = await res.json();
 
-        fetchSupplierDetails();
+            if (data.tokenError) {
+                throw new Error(data.tokenError);
+            }
+
+            dispatch(setSupplierState(data));
+
+            setIsLoadingState(false);
+        } catch (err) {
+            setErrorState(err.message);
+            setIsLoadingState(false);
+        }
     }, [id, dispatch]);
+
+    useEffect(() => {
+        fetchSupplierDetails();
+    }, [fetchSupplierDetails]);
 
     useEffect(() => {
         const fetchSupplierProducts = async () => {
@@ -136,18 +290,189 @@ const SupplierDetails = () => {
         fetchSupplierProducts();
     }, [id, dispatch]);
 
-    // Display DOM
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+    // Fetch all projects when the component mounts
+    useEffect(() => {
+        const fetchAllProjects = async () => {
+            try {
+                const res = await fetch(`/api/project`);
+                if (!res.ok) {
+                    throw new Error('Network response was not ok employees data');
+                }
+                let projectsData = await res.json();
 
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
-            return(<div><SessionExpired /></div>)
-        }
-        return (<div>Error: {errorState}</div>);
-    }
+                // Sort projects by project_isarchived
+                projectsData.sort((a, b) => a.project_isarchived - b.project_isarchived);
 
-    
-    const supplierProjectsTable = ( <>some projects data...</> )
+                // projectsData = projectsData.filter(project => !project.project_isarchived);
+
+                dispatch(setProjectState(projectsData));
+                setIsLoadingState(false);
+
+            } catch (error) {
+                setErrorState(error.message);
+
+            } finally {
+                setIsLoadingState(false);
+            }
+        };
+        fetchAllProjects();
+    }, [id, dispatch]);
+
+
+    const selectProjectsBtn = (
+        <div className='d-flex m-1 justify-content-end'>
+            <Dropdown>
+                    <Dropdown.Toggle variant="success" id="dropdown-basic">
+                        ACTIONS
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={handleAddProjectClick}>
+                            <div className='flex items-center'>
+                                <svg  className="size-6 mr-1" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" aria-labelledby="checkboxIconTitle" stroke="#000000" 
+                                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" color="#000000">
+                                     <rect x="21" y="3" width="18" height="18" rx="1" transform="rotate(90 21 3)"/> 
+                                     <path d="M6.66666 12.6667L9.99999 16L17.3333 8.66669"/> 
+                                     </svg>
+                                <label>Add Projects</label>
+                            </div>
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={handleRemoveProjectClick}>
+                            <div className='flex items-center'>
+                                <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 28 28" className="size-6 mr-1"
+                                    strokeWidth={1.5} stroke="#000000" strokeLinecap="round" strokeLinejoin="round" fill="none" color="#000000">
+                                    <rect x="21" y="3" width="18" height="18" rx="1" transform="rotate(90 21 3)"/> 
+                                    <path d="M16 12H8"/> 
+                                </svg>
+                                <label>Remove Projects</label>
+                            </div>
+                        </Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
+        </div>
+    );
+
+    const supplierProjectsTable = (
+        <div className="card-body border-1 relative">
+            {selectProjectsBtn}
+        
+            {supplierState && supplierState.projects && supplierState.projects.length > 0 ? (
+            <table className="table table-bordered table-hover">
+                <thead className="thead-dark">
+                    <tr className="table-primary">
+                        <th scope="col">Id</th>
+                        <th scope="col">Project Name</th>
+                        <th scope="col">Project Address</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {supplierState.projects.map((project, index) => (
+                            <tr className="cursor-pointer" key={`projectEmployeesTab-${project._id}`} onClick={() => handleTableClick('project', project._id)}>
+                                <th>{index + 1}</th>
+                                <td>{project.project_name} </td>
+                                <td>{project.project_address}</td>
+                                <td>{project.project_isarchived ? `Archived` : `Active`}</td>
+                            </tr>
+                            ))}
+                </tbody>
+            </table>
+    ) : (
+        <div className='border'>No related Project</div>
+    )}
+    </div>
+    );
+
+    const addProjectsPopUp = (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-5 rounded-lg shadow-lg">
+                <h4 className="font-bold mb-4">SELECT PROJECTS FOR THE {supplierState?.supplier_name?.toUpperCase() } SUPPLIER</h4>
+                <div style={{ gridTemplateColumns: `repeat(${numberOfProjectColumns}, minmax(0, 1fr))` }} className="grid gap-4">
+                    {
+                        Array.isArray(projectState) && projectState.map(project => (
+                            <div key={`addProjectsPopUp-${project._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                                <input className="form-checkbox h-5 w-5 text-blue-600"
+                                    type="checkbox" 
+                                    checked={selectedProjects.has(project._id)}
+                                    onChange={() => handleProjectCheckbox(project._id, true)}
+                                    disabled={supplierState.projects?.some(p => p._id === project._id)}
+                                    />
+                                <label className="flex-1 text-gray-800">
+                                    <span className="font-semibold">{project.project_name}</span>
+                                    <span className="ml-2 text-sm">
+                                        {project.project_isarchived ? 
+                                            (<label className="text-red-500">Archived</label>) : 
+                                            (<label className="text-green-600">Active</label>)
+                                            }
+                                    </span>
+                                    <span className="block text-sm text-gray-600">{project.project_address}</span>
+                            </label>
+                            </div>
+                        ))}
+                </div>
+                <div className="flex justify-end mt-5">
+                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                        onClick={() => setAddProjectListVisible(false)}
+                        >
+                        Cancel
+                    </button>
+                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                        onClick={handleAddProjectConfirm}
+                        >
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    const removeProjectPopUp = (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-5 rounded-lg shadow-lg">
+                <h4 className="font-bold mb-4">SELECT PROJECT TO <span className="text-red-500">REMOVE</span> FROM THE {supplierState?.supplier_name?.toUpperCase() } SUPPLIER</h4>
+                {
+                    supplierState?.projects && supplierState.projects.length > 0 ? (
+                        <div style={{ gridTemplateColumns: `repeat(${Math.ceil(supplierState.projects.length / 5)}, minmax(0, 1fr))`, }} className="grid gap-4">
+                        {   
+                            supplierState.projects.map((project) => (
+                            <div key={`removeProjectPopUp-${project._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                                <input
+                                    className="form-checkbox h-5 w-5 text-blue-600"
+                                    type="checkbox"
+                                    onChange={() => handleProjectCheckbox(project._id, false)}
+                                />
+                                <label className="flex-1 text-gray-800">
+                                    <span className="font-semibold">{project.project_name}</span>
+                                    <span className="ml-2 text-sm">
+                                    {   project.project_isarchived ? (
+                                        <label className="text-red-500">Archived</label>
+                                    ) : (
+                                        <label className="text-green-600">Active</label>
+                                    )}
+                                    </span>
+                                    <span className="block text-sm text-gray-600">{project.project_address}</span>
+                                </label>
+                            </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="border">No related Project to Remove</div>
+                    )
+                    }
+                
+                <div className="flex justify-end mt-5">
+                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                        onClick={() => setRemoveProjectListVisible(false)}>
+                        Cancel
+                    </button>
+                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                        onClick={handleRemoveEmployeesConfirm }>
+                            Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
 
     const supplierPurchaseOrdersTable = ( <>some purchase orders data...</> )
 
@@ -340,6 +665,17 @@ const SupplierDetails = () => {
         <div className='border'>Supplier API fetched successfully, but it might be empty...</div>
     );
 
+    // Display DOM
+    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+
+    if (errorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {errorState}</div>);
+    }
+
+
     return (
         <div className="container mt-5">
             <div className="card">
@@ -363,12 +699,16 @@ const SupplierDetails = () => {
                     {currentTab === 'supplierProductsTable' && supplierProductsTable}
                     {currentTab === 'supplierPurchaseOrdersTable' && supplierPurchaseOrdersTable}
                     {currentTab === 'supplierProjectsTable' && supplierProjectsTable}
+
+                    
+                    {isAddProjectListVisible && addProjectsPopUp}
+                    {isRemoveProjectListVisible && removeProjectPopUp}
+
                 </div>
             </div>
             { archiveModal }
         </div>
     );
-
 }
 
 export default SupplierDetails;

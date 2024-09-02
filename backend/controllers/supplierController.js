@@ -1,8 +1,67 @@
 //import modules
 const supplierModel = require('../models/supplierModel');
+const projectModel = require('../models/ProjectModel');
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
 const mongoose = require('mongoose');
+
+// const fetchSupplierwithProject = async (supplier_id) => {
+
+//     // if project_id is null, find all projects, otherwise, find single project by id
+//     const suppliers = await supplierModel.find(supplier_id).sort({ createdAt: -1 })
+
+//     // Find all employees related to the projects
+//     const suppliersIds = suppliers.map(supplier => supplier._id);
+//     const projects = await projectModel.find({ suppliers: { $in: suppliersIds } });
+
+//     // Map suppliers to their corresponding projects
+//     const supplierProjectMap = {};
+//     projects.forEach(project => {
+//         project.suppliers.forEach(supplierID => {
+//         if (!supplierProjectMap[supplierID]) 
+//             { supplierProjectMap[supplierID] = []; }
+//         supplierProjectMap[supplierID].push(project);
+//       });
+//     });
+
+//     // Attach supplier to their corresponding projects
+//     const supplierWithProjects = projects.map(project => {
+//       return {
+//         ...project.toObject(),
+//         projects: supplierProjectMap[project._id] || []
+//       };
+//     });
+
+//     return supplierWithProjects; 
+
+// };
+
+const fetchSupplierWithProjects = async (supplier_id) => {
+    try {
+        // Find the supplier by ID (assumed that supplier_id is not null)
+        const supplier = await supplierModel.findById(supplier_id);
+        if (!supplier) {
+            throw new Error('Supplier not found');
+        }
+
+        // Find all projects related to the supplier
+        const projects = await projectModel.find({ suppliers: supplier_id })
+            .select('project_name project_address project_isarchived')
+            .exec();
+
+        // Attach the projects to the supplier
+        const supplierWithProjects = {
+            ...supplier.toObject(), // Convert the supplier document to a plain object
+            projects: projects.map(project => project.toObject()) // Convert projects to plain objects
+        };
+
+        return supplierWithProjects;
+    } catch (error) {
+        console.error('Error fetching supplier with projects:', error);
+        throw error; // Handle or rethrow the error as needed
+    }
+};
+
 
 //Controller function - GET all Suppliers
 const getAllSuppliers = async (req, res) => {
@@ -52,7 +111,8 @@ const getSingleSupplier = async (req, res) => {
 
     //if ID exists in mongoDB database
     //create a new model called Supplier, await, and assign it with the Supplier document, which can be found in the Supplier collection, find using ID
-    const Supplier = await supplierModel.findById(id)
+    // const Supplier = await supplierModel.findById(id)
+    const Supplier = await fetchSupplierWithProjects({ _id: id });
 
     //check if there's 'null' or 'undefined' in 'Supplier'.
     if (!Supplier) {
