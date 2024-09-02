@@ -110,7 +110,7 @@ const SupplierDetails = () => {
                     const projectData = await projectRes.json();
     
                     // Add the current supplier ID to the project's suppliers array if it's not already present
-                    const updatedSuppliers = new Set(projectData.suppliers);
+                    const updatedSuppliers = new Set(projectData[0].suppliers);
                     updatedSuppliers.add(id);
     
                     // Update the project's suppliers array
