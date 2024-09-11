@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 
 
 const productPriceSchema = new Schema({
-    product_id: {
+    product_obj_ref: {
         type: Schema.Types.ObjectId,
         ref: 'Product',
         required: true

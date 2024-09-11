@@ -13,6 +13,7 @@ import AccountPage from './pages/AccountPage';
 import ProjectDetails from './pages/ProjectDetails';
 import NewProjectForm from './pages/forms/NewProjectForm';
 import UpdateProjectForm from "./pages/forms/UpdateProjectForm";
+import UpdatePurchaseOrderForm from "./pages/forms/UpdatePurchaseOrderForm";
 import SupplierPage from './pages/SupplierPage';
 import EmployeeDetails from './pages/EmployeeDetails';
 import UpdateEmployeeForm from "./pages/forms/UpdateEmployeeForm";
@@ -46,6 +47,7 @@ function App() {
             <Route path="/EmpirePMS/dashboard" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <Dashboard />} />
             <Route path="/EmpirePMS/order" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PurchaseOrder />} />
             <Route path="/EmpirePMS/order/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PurchaseOrderDetails />} />
+            <Route path="/EmpirePMS/order/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdatePurchaseOrderForm />} />
             <Route path="/EmpirePMS/order/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewPurchaseOrderForm />} />
             <Route path="/EmpirePMS/employee" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <EmployeePage />} />
             <Route path="/EmpirePMS/invoice" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <InvoicePage />} />

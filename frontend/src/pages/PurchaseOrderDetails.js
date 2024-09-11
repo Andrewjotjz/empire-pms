@@ -2,13 +2,19 @@
 import { useParams, useNavigate} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
 import { setPurchaseOrderState } from '../redux/purchaseOrderSlice';
 import { clearProductState } from '../redux/productSlice';
+
+import { useUpdatePurchaseOrder } from '../hooks/useUpdatePurchaseOrder';
+import { useFetchSupplierByProject } from '../hooks/useFetchSupplierByProject';
+import { useFetchProductsBySupplier } from '../hooks/useFetchProductsBySupplier';
+
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import NewPurchaseOrderSkeleton from './loaders/NewPurchaseOrderSkeleton';
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-import { useUpdatePurchaseOrder } from '../hooks/useUpdatePurchaseOrder';
 
 const PurchaseOrderDetails = () => {
     //Component router
@@ -17,6 +23,9 @@ const PurchaseOrderDetails = () => {
 
     //Component state declaration
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
+    const { fetchSupplierByProject, isFetchSupplierLoading, fetchSupplierError } = useFetchSupplierByProject();
+    const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
+    const productState = useSelector((state) => state.productReducer.productState)
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -42,7 +51,7 @@ const PurchaseOrderDetails = () => {
     }
 
     const handleEditPurchaseOrder = () => {
-        navigate(`/EmpirePMS/test/`)
+        navigate(`/EmpirePMS/order/${id}/edit`)
     }
 
     const handleArchive = () => {    
@@ -71,8 +80,8 @@ const PurchaseOrderDetails = () => {
             return ''
         }  else {
             const date = new Date(dateString);
-            const options = { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' };
-            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', ', ');
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+            return date.toLocaleDateString('en-AU', options).toUpperCase()
         }
     };
 
@@ -81,16 +90,16 @@ const PurchaseOrderDetails = () => {
             return ''
         }  else {
             const date = new Date(dateString);
-            const options = { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', ', ');
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            return date.toLocaleDateString('en-AU', options).toUpperCase()
         }
     };
 
     const totalGrossAmount = purchaseOrderState && purchaseOrderState.products
-    ? purchaseOrderState.products.reduce(
+    ? parseFloat(purchaseOrderState.products.reduce(
           (total, product) => total + (product.order_product_gross_amount || 0),
           0
-      ).toFixed(2) //change number to two decimal points
+      )).toFixed(2) //change number to two decimal points
     : 0;
 
     const scrollToDiv = (ref) => {
@@ -118,6 +127,8 @@ const PurchaseOrderDetails = () => {
                     throw new Error(data.tokenError);
                 }
 
+                fetchSupplierByProject(data.project._id)
+                fetchProductsBySupplier(data.supplier._id)
                 dispatch(setPurchaseOrderState(data));
 
                 setIsLoadingState(false);
@@ -141,14 +152,30 @@ const PurchaseOrderDetails = () => {
     // Display DOM
     if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
+    if (isFetchSupplierLoading || isFetchProductsLoadingState) { return (<NewPurchaseOrderSkeleton />); }
+
     if (errorState || updateErrorState) {
         if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
             return(<div><SessionExpired /></div>)
         }
-        return (<div>Error: {errorState}</div>);
+        return (
+            <div>
+                Error: {errorState || updateErrorState}
+            </div>
+        );
+    }
+    
+    if (fetchSupplierError || fetchProductsErrorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (
+            <div>
+                Error: {fetchSupplierError || fetchProductsErrorState}
+            </div>
+        );
     }
 
-    
     const purchaseOrderDetails = purchaseOrderState ? (
         <div className="row">
             <div className="col-md-6 mb-3">
@@ -170,11 +197,11 @@ const PurchaseOrderDetails = () => {
                 <label className="form-label fw-bold">EST Date/Time:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.order_est_datetime)}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 mb-3 text-sm opacity-50">
                 <label className="form-label fw-bold">Created on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.createdAt)}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 mb-3 text-sm opacity-50">
                 <label className="form-label fw-bold">Last Updated on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.updatedAt)}</p>
             </div>
@@ -221,9 +248,9 @@ const PurchaseOrderDetails = () => {
                 </thead>
                 <tbody className='text-center'>
                     {purchaseOrderState.products && purchaseOrderState.products.map((product, index) => (
-                    <tr key={`${product.product_id._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_id._id)}>
-                        <td>{product.product_id.product_sku}</td>
-                        <td>{product.product_id.product_name}</td>
+                    <tr key={`${product.product_obj_ref._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_obj_ref._id)}>
+                        <td>{product.product_obj_ref.product_sku}</td>
+                        <td>{product.product_obj_ref.product_name}</td>
                         <td>{product.order_product_location}</td>
                         <td>
                             {Number.isInteger(product.order_product_qty_a)
@@ -441,7 +468,7 @@ const PurchaseOrderDetails = () => {
             </Modal.Footer>
         </Modal>
     )
-
+    
     return (
         <div className="container mt-5">
             <div className="card">
@@ -456,6 +483,7 @@ const PurchaseOrderDetails = () => {
                 </div>
                 <div className="card-body">
                     {/* DROPDOWN ACTION */}
+                    { new Date(purchaseOrderState.createdAt) > new Date("2024-07-20T00:00:00.000Z") &&
                     <div className="absolute right-3">
                         <Dropdown>
                             <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -482,7 +510,7 @@ const PurchaseOrderDetails = () => {
                                 </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                    </div>
+                    </div>}
                     {/* PURCHASE ORDER DETAILS */}
                     <div>
                         { purchaseOrderDetails }

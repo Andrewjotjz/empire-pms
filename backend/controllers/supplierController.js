@@ -140,7 +140,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
         {
             $lookup: {
                 from: 'products', // Ensure this is the correct collection name
-                localField: 'product_id',
+                localField: 'product_obj_ref',
                 foreignField: '_id',
                 as: 'product'
             }
@@ -184,7 +184,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                 },
                 productPrice: {
                     _id: '$_id',
-                    product_id: '$product_id',
+                    product_obj_ref: '$product_obj_ref',
                     product_unit_a: '$product_unit_a',
                     product_number_a: '$product_number_a',
                     product_price_unit_a: '$product_price_unit_a',
