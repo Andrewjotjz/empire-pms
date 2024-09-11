@@ -43,7 +43,7 @@ const UpdatePurchaseOrderForm = () => {
     const [searchProductTerm, setSearchProductTerm] = useState('');    
     // const [addedProductState, setAddedProductState] = useState( productState ? 
     //     productState
-    //         .filter(product => purchaseOrderState.products.some(prod => prod.product_id._id === product.product._id))
+    //         .filter(product => purchaseOrderState.products.some(prod => prod.product_obj_ref._id === product.product._id))
     //         .filter(product => product.productPrice.projects.includes(selectedProject))
     //         .filter(product => purchaseOrderState.order_date >= product.productPrice.product_effective_date)
     //         .filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id))
@@ -148,12 +148,12 @@ const UpdatePurchaseOrderForm = () => {
     const handleAddItem = (product) => {
         // Create the updated products array
         const updatedProducts = [...purchaseOrderState.products, {
-            product_id: {
+            product_obj_ref: {
                 _id: product.product._id,
                 product_name: product.product.product_name,
                 product_sku: product.product.product_sku
             },
-            productprice_id: product.productPrice,
+            productprice_obj_ref: product.productPrice,
             order_product_location: '',
             order_product_qty_a: 0, // Ensure all fields are initialized properly
             order_product_qty_b: 0,
@@ -186,10 +186,18 @@ const UpdatePurchaseOrderForm = () => {
     const handleRemoveItem = (index) => {
         const updatedItems = purchaseOrderState.products.filter((_, idx) => idx !== index);
 
-        dispatch(setPurchaseOrderState({
-            ...purchaseOrderState,
-            products: updatedItems
-        }))
+        if (updatedItems.length === 0) {
+            dispatch(setPurchaseOrderState({
+                ...purchaseOrderState,
+                order_total_amount: 0,
+                products: updatedItems
+            }))
+        } else {
+            dispatch(setPurchaseOrderState({
+                ...purchaseOrderState,
+                products: updatedItems
+            }))
+        }        
     }
 
     const handleRemoveCustomItem = (index) => {
@@ -259,30 +267,30 @@ const UpdatePurchaseOrderForm = () => {
     
         // Handle `order_product_qty_a` changes
         if (name === 'order_product_qty_a') {
-            if (purchaseOrderState.products[index].productprice_id._id === 1) {
-                updatedProducts[index].order_product_qty_b = Number.isInteger(value * purchaseOrderState.products[index].productprice_id.product_number_b)
-                    ? value * purchaseOrderState.products[index].productprice_id.product_number_b
-                    : parseFloat(value * purchaseOrderState.products[index].productprice_id.product_number_b).toFixed(4);
+            if (purchaseOrderState.products[index].productprice_obj_ref._id === 1) {
+                updatedProducts[index].order_product_qty_b = Number.isInteger(value * purchaseOrderState.products[index].productprice_obj_ref.product_number_b)
+                    ? value * purchaseOrderState.products[index].productprice_obj_ref.product_number_b
+                    : parseFloat(value * purchaseOrderState.products[index].productprice_obj_ref.product_number_b).toFixed(4);
             } else {
-                updatedProducts[index].order_product_qty_b = Number.isInteger(value / purchaseOrderState.products[index].productprice_id.product_number_a)
-                    ? value / purchaseOrderState.products[index].productprice_id.product_number_a
-                    : parseFloat(value / purchaseOrderState.products[index].productprice_id.product_number_a).toFixed(4);
+                updatedProducts[index].order_product_qty_b = Number.isInteger(value / purchaseOrderState.products[index].productprice_obj_ref.product_number_a)
+                    ? value / purchaseOrderState.products[index].productprice_obj_ref.product_number_a
+                    : parseFloat(value / purchaseOrderState.products[index].productprice_obj_ref.product_number_a).toFixed(4);
             }
-            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_id.product_price_unit_a).toFixed(2);
+            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_obj_ref.product_price_unit_a).toFixed(2);
         }
     
         // Handle `order_product_qty_b` changes
         if (name === 'order_product_qty_b') {
-            if (purchaseOrderState.products[index].productprice_id.product_number_b === 1) {
-                updatedProducts[index].order_product_qty_a = Number.isInteger(value * purchaseOrderState.products[index].productprice_id.product_number_a)
-                    ? value * purchaseOrderState.products[index].productprice_id.product_number_a
-                    : parseFloat(value * purchaseOrderState.products[index].productprice_id.product_number_a).toFixed(4);
+            if (purchaseOrderState.products[index].productprice_obj_ref.product_number_b === 1) {
+                updatedProducts[index].order_product_qty_a = Number.isInteger(value * purchaseOrderState.products[index].productprice_obj_ref.product_number_a)
+                    ? value * purchaseOrderState.products[index].productprice_obj_ref.product_number_a
+                    : parseFloat(value * purchaseOrderState.products[index].productprice_obj_ref.product_number_a).toFixed(4);
             } else {
-                updatedProducts[index].order_product_qty_a = Number.isInteger(value / purchaseOrderState.products[index].productprice_id.product_number_b)
-                    ? value / purchaseOrderState.products[index].productprice_id.product_number_b
-                    : parseFloat(value / purchaseOrderState.products[index].productprice_id.product_number_b).toFixed(4);
+                updatedProducts[index].order_product_qty_a = Number.isInteger(value / purchaseOrderState.products[index].productprice_obj_ref.product_number_b)
+                    ? value / purchaseOrderState.products[index].productprice_obj_ref.product_number_b
+                    : parseFloat(value / purchaseOrderState.products[index].productprice_obj_ref.product_number_b).toFixed(4);
             }
-            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_id.product_price_unit_b).toFixed(2);
+            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_obj_ref.product_price_unit_b).toFixed(2);
         }
     
         // Calculate updatedTotalAmount using updatedProducts
@@ -335,6 +343,11 @@ const UpdatePurchaseOrderForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+
+        if (purchaseOrderState.products.length === 0 && purchaseOrderState.custom_products.length === 0) {
+            alert("You must have at least one product to submit a new order.")
+            return
+        }
     
         if (event.nativeEvent.submitter.name === 'draft') {
             const updatedState = {
@@ -427,11 +440,6 @@ const UpdatePurchaseOrderForm = () => {
             </Modal.Footer>
         </Modal>
     );
-
-    console.log("Purchase Order State: ", purchaseOrderState)
-    console.log("Supplier state:", supplierState)
-    console.log("Product State: ", productState)
-    console.log("Project State: ", projectState)
 
     return (
         <>
@@ -576,8 +584,8 @@ const UpdatePurchaseOrderForm = () => {
                                 <tbody className="text-center">
                                 {purchaseOrderState.products && purchaseOrderState.products.map((prod, index) => (
                                     <tr key={index}>
-                                        <td>{prod.product_id.product_sku}</td>
-                                        <td>{prod.product_id.product_name}</td>
+                                        <td>{prod.product_obj_ref.product_sku}</td>
+                                        <td>{prod.product_obj_ref.product_name}</td>
                                         {/* <td>
                                             {addedProductState && addedProductState[index] && addedProductState[index].product && (
                                                 <label>{addedProductState[index].product.product_sku}</label>
@@ -616,7 +624,7 @@ const UpdatePurchaseOrderForm = () => {
                                                 className="px-1 py-0.5 ml-1 col-span-2 text-xs"
                                             />
                                             <label className="text-xs opacity-50 col-span-1 text-nowrap">
-                                                {prod.productprice_id.product_unit_a}
+                                                {prod.productprice_obj_ref.product_unit_a}
                                             </label>
                                             {/* <label className="text-xs opacity-50 col-span-1 text-nowrap">
                                                 {addedProductState && 
@@ -641,7 +649,7 @@ const UpdatePurchaseOrderForm = () => {
                                                 className="px-1 py-0.5 ml-1 col-span-2 text-xs"
                                             />
                                             <label className="text-xs opacity-50 col-span-1 text-nowrap">
-                                                {prod.productprice_id.product_unit_b}
+                                                {prod.productprice_obj_ref.product_unit_b}
                                             </label>
                                             {/* <label className="text-xs opacity-50 col-span-1 text-nowrap">
                                                 {addedProductState && 

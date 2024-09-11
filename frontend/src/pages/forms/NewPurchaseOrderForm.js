@@ -196,8 +196,8 @@ const NewPurchaseOrderForm = () => {
         setOrderState((prevState) => ({
             ...prevState,
             products: [...prevState.products, {
-                product_id: product.product._id,
-                productprice_id: product.productPrice._id,
+                product_obj_ref: product.product._id,
+                productprice_obj_ref: product.productPrice._id,
                 order_product_location: '',
                 order_product_qty_a: 0, // Ensure all fields are initialized properly
                 order_product_qty_b: 0,
@@ -228,12 +228,21 @@ const NewPurchaseOrderForm = () => {
         const updatedItems = orderState.products.filter((_, idx) => idx !== index);
         const updatedAddedProducts = addedProductState.filter((_, idx) => idx !== index);
 
-        setOrderState({
-            ...orderState,
-            products: updatedItems
-        })
+        if (updatedItems.length === 0) {
+            setOrderState({
+                ...orderState,
+                order_total_amount: 0,
+                products: updatedItems
+            })
+        } else {
+            setOrderState({
+                ...orderState,
+                products: updatedItems
+            })
+        }
 
         setAddedProductState(updatedAddedProducts)
+
     }
 
     const handleRemoveCustomItem = (index) => {
@@ -378,6 +387,11 @@ const NewPurchaseOrderForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        
+        if (orderState.products.length === 0 && orderState.custom_products.length === 0) {
+            alert("You must have at least one product to submit a new order.")
+            return
+        }
 
         if (purchaseOrderState.some(order => order.order_ref.toLowerCase().includes(orderState.order_ref.toLowerCase()))) {
             alert("Purchase Order Number already exists. Please try another.")
@@ -469,13 +483,6 @@ const NewPurchaseOrderForm = () => {
             </Modal.Footer>
         </Modal>
     );
-
-    console.log("==================Purchase Order State", purchaseOrderState)
-    console.log("==================Project State", projectState)
-    console.log("==================Supplier State", supplierState)
-    console.log("==================Product State", productState)
-    console.log("==================Added product State", addedProductState)
-    console.log("==================Order State", orderState)
 
     return (
         <>

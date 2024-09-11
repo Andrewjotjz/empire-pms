@@ -30,12 +30,12 @@ const orderSchema = new Schema({
         type: Date
     },
     products: [{
-        product_id: {   //this will point at product_id, product_name, product_sku, product_number_a, product_unit_a, etc....
+        product_obj_ref: {   //this will point at product_obj_ref, product_name, product_sku, product_number_a, product_unit_a, etc....
             type: Schema.Types.ObjectId,
             ref: 'Product',
             required: true
         },
-        productprice_id: { 
+        productprice_obj_ref: { 
             type: Schema.Types.ObjectId,
             ref: 'ProductPrice',
             required: true
@@ -90,19 +90,19 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     },
-    //One order can be created without delivery. But if there's delivery, there must be a delivery_ID and delivery_status
+    //One order can be created without delivery. But if there's delivery, there must be a delivery_obj_ref and delivery_status
     deliveries: [{
         _id: false,
-        delivery_id: {
+        delivery_obj_ref: {
             type: Schema.Types.ObjectId,
             ref: 'Delivery',
             required: true
         }
     }],
-    //One order can be created without invoice. But if there's invoice, there must be an invoice_ID and invoice_status
+    //One order can be created without invoice. But if there's invoice, there must be an invoice_obj_ref and invoice_status
     invoices: [{
         _id: false,
-        invoice_id: {
+        invoice_obj_ref: {
             type: Schema.Types.ObjectId,
             ref: 'Invoice',
             required: true

@@ -43,7 +43,7 @@ const UpdateProductForm = () => {
     const [defaultAlias, setDefaultAlias] = useState('');
     const [defaultProductPrice, setDefaultProductPrice] = useState({})
     const [newProductPriceState, setNewProductPriceState] = useState({
-        product_id: productId,
+        product_obj_ref: productId,
         product_unit_a: '',
         product_number_a: '',
         product_price_unit_a: '',
@@ -60,7 +60,7 @@ const UpdateProductForm = () => {
     const handleAbortNewPrice = () => {
         setIsShowNewPriceForm(!isShowNewPriceForm)
         setNewProductPriceState({
-            product_id: productId,
+            product_obj_ref: productId,
             product_unit_a: '',
             product_number_a: '',
             product_price_unit_a: '',

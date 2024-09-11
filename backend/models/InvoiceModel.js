@@ -35,7 +35,7 @@ const invoiceSchema = new Schema({
         required: true
     },
     products: [{    //THIS Array is exactly the same as 'Order model' because we want to pull the data from order.
-        product_id: {   //this will point at product_id, product_name, product_sku, product_number_a, product_unit_a, etc....
+        product_obj_ref: {   //this will point at product_obj_ref, product_name, product_sku, product_number_a, product_unit_a, etc....
             type: Schema.Types.ObjectId,
             ref: 'Product',
             required: true
@@ -110,7 +110,7 @@ const invoiceSchema = new Schema({
         default: false
     },
     payment: {
-        payment_id: {
+        payment_obj_ref: {
             type: Schema.Types.ObjectId,
             ref: 'Payment'
         }

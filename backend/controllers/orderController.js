@@ -13,7 +13,7 @@ const getAllOrders = async (req, res) => {
             .populate('project') // Populate the 'project' field
             .populate('supplier') // Populate the 'supplier' field
             .populate({
-                path: 'products.product_id', // Populate the 'product_id' inside 'products' array
+                path: 'products.product_obj_ref', // Populate the 'product_obj_ref' inside 'products' array
                 select: 'product_name product_sku product_number_a product_unit_a', // Specify the fields to include
             })
             .sort({ createdAt: -1 });
@@ -47,17 +47,17 @@ const getSingleOrder = async (req, res) => {
             .findById(id)
             .populate('supplier')
             .populate({
-                path: 'products.product_id' // Populate the 'product_id' inside 'products' array
+                path: 'products.product_obj_ref' // Populate the 'product_obj_ref' inside 'products' array
             })
             .populate({
-                path: 'products.productprice_id' // Populate the 'productprice_id' inside 'products' array
+                path: 'products.productprice_obj_ref' // Populate the 'productprice_obj_ref' inside 'products' array
             })
             .populate('project')
             .populate({
-                path: 'deliveries.delivery_id', // Populate the 'delivery_id' inside 'deliveries' array
+                path: 'deliveries.delivery_obj_ref', // Populate the 'delivery_obj_ref' inside 'deliveries' array
             })
             .populate({
-                path: 'invoices.invoice_id', // Populate the 'invoice_id' inside 'invoices' array
+                path: 'invoices.invoice_obj_ref', // Populate the 'invoice_obj_ref' inside 'invoices' array
             })
             .populate('project');
 
