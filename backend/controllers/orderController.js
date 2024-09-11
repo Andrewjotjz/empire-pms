@@ -47,8 +47,10 @@ const getSingleOrder = async (req, res) => {
             .findById(id)
             .populate('supplier')
             .populate({
-                path: 'products.product_id', // Populate the 'product_id' inside 'products' array
-                select: 'product_name product_sku product_number_a product_unit_a', // Specify the fields to include
+                path: 'products.product_id' // Populate the 'product_id' inside 'products' array
+            })
+            .populate({
+                path: 'products.productprice_id' // Populate the 'productprice_id' inside 'products' array
             })
             .populate('project')
             .populate({

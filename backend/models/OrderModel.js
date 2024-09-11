@@ -35,6 +35,11 @@ const orderSchema = new Schema({
             ref: 'Product',
             required: true
         },
+        productprice_id: { 
+            type: Schema.Types.ObjectId,
+            ref: 'ProductPrice',
+            required: true
+        },
         order_product_location: {     //these are not in PRODUCT model, but additional information relating to a particular product
             type: String,
             required: true

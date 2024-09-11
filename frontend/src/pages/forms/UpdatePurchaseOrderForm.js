@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySupplier';
+import { useUpdatePurchaseOrder } from '../../hooks/useUpdatePurchaseOrder';
 import { useFetchSupplierByProject } from '../../hooks/useFetchSupplierByProject';
-import { useAddPurchaseOrder } from '../../hooks/useAddPurchaseOrder';
+import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySupplier';
 
+import { setPurchaseOrderState } from '../../redux/purchaseOrderSlice'
 import { setProjectState } from '../../redux/projectSlice'
 import { clearSupplierState } from '../../redux/supplierSlice'
 import { clearProductState } from '../../redux/productSlice'
@@ -15,7 +16,7 @@ import { Modal, Button } from "react-bootstrap";
 import SessionExpired from '../../components/SessionExpired';
 import NewPurchaseOrderSkeleton from '../loaders/NewPurchaseOrderSkeleton';
 
-const NewPurchaseOrderForm = () => {
+const UpdatePurchaseOrderForm = () => {
     // Component router
     const navigate = useNavigate();
 
@@ -23,45 +24,32 @@ const NewPurchaseOrderForm = () => {
     const dispatch = useDispatch();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     const { fetchSupplierByProject, isFetchSupplierLoading, fetchSupplierError } = useFetchSupplierByProject();
-    const { addPurchaseOrder, isAddOrderLoadingState, addOrderErrorState } = useAddPurchaseOrder();
+    const { updatePurchaseOrder, isUpdateLoadingState, updateErrorState } = useUpdatePurchaseOrder();
 
     // Component state
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
     const productState = useSelector((state) => state.productReducer.productState)
     const projectState = useSelector((state) => state.projectReducer.projectState)
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
+    const [selectedSupplier, setSelectedSupplier] = useState(purchaseOrderState.supplier._id);
+    const [selectedProject, setSelectedProject] = useState(purchaseOrderState.project._id);
+    const [selectedProductType, setSelectedProductType] = useState('')
     const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
     const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
-    const [selectedSupplier, setSelectedSupplier] = useState('');
-    const [selectedProject, setSelectedProject] = useState('');
-    const [selectedProductType, setSelectedProductType] = useState('')
-    const [addedProductState, setAddedProductState] = useState([]);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [newSupplier, setNewSupplier] = useState('');
     const [newProject, setNewProject] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
-    const [searchProductTerm, setSearchProductTerm] = useState('');
-    const getCurrentDate = () => {
-        const today = new Date();
-        // Format the date as YYYY-MM-DD
-        return today.toISOString().split('T')[0];
-    };
-    const [orderState, setOrderState] = useState({
-        supplier: '',
-        order_ref: '',
-        order_date:  getCurrentDate(),
-        order_est_datetime: '',
-        products: [],
-        custom_products: [],
-        order_total_amount: 0,
-        order_internal_comments: '',
-        order_notes_to_supplier: '',
-        order_isarchived: false,
-        deliveries: [],
-        invoices: [],
-        project: '',
-        order_status: 'Pending'
-    })
+    const [searchProductTerm, setSearchProductTerm] = useState('');    
+    // const [addedProductState, setAddedProductState] = useState( productState ? 
+    //     productState
+    //         .filter(product => purchaseOrderState.products.some(prod => prod.product_id._id === product.product._id))
+    //         .filter(product => product.productPrice.projects.includes(selectedProject))
+    //         .filter(product => purchaseOrderState.order_date >= product.productPrice.product_effective_date)
+    //         .filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id))
+    //     :
+    //     null
+    //     );
     
     // Component functions and variables
     const handleBackClick = () => navigate(`/EmpirePMS/order/`);
@@ -73,23 +61,14 @@ const NewPurchaseOrderForm = () => {
             if (selectedProject === '') {
                 setSelectedProject(targetProject);
                 dispatch(clearProductState());
-                setOrderState({
-                    supplier: '',
-                    order_ref: orderState.order_ref,
-                    order_date:  getCurrentDate(),
-                    order_est_datetime: '',
+                dispatch(setPurchaseOrderState({
+                    ...purchaseOrderState,
                     products: [],
                     custom_products: [],
                     order_total_amount: 0,
-                    order_internal_comments: '',
-                    order_notes_to_supplier: '',
-                    order_isarchived: false,
-                    deliveries: [],
-                    invoices: [],
                     project: targetProject,
-                    order_status: 'Pending'
-                });
-                setAddedProductState([]);
+                }))
+                
                 fetchSupplierByProject(targetProject);
                 return;
             }
@@ -111,23 +90,15 @@ const NewPurchaseOrderForm = () => {
         if (targetSupplier !== '') {
             if (selectedSupplier === '') {
                 dispatch(clearProductState());
-                setOrderState({
+                dispatch(setPurchaseOrderState({
+                    ...purchaseOrderState,
                     supplier: targetSupplier,
-                    order_ref: orderState.order_ref,
-                    order_date:  getCurrentDate(),
-                    order_est_datetime: '',
                     products: [],
                     custom_products: [],
                     order_total_amount: 0,
-                    order_internal_comments: '',
-                    order_notes_to_supplier: '',
-                    order_isarchived: false,
-                    deliveries: [],
-                    invoices: [],
                     project: selectedProject,
-                    order_status: 'Pending'
-                });
-                setAddedProductState([]);
+                }))
+                
                 fetchProductsBySupplier(targetSupplier);
                 setSelectedSupplier(targetSupplier);
                 return;
@@ -145,45 +116,27 @@ const NewPurchaseOrderForm = () => {
     const handleConfirmAction = () => {
         if (pendingAction === 'changeSupplier') {
             dispatch(clearProductState());
-            setOrderState({
-                supplier: newSupplier,
-                order_ref: orderState.order_ref,
-                order_date:  getCurrentDate(),
-                order_est_datetime: '',
-                products: [],
-                custom_products: [],
-                order_total_amount: 0,
-                order_internal_comments: '',
-                order_notes_to_supplier: '',
-                order_isarchived: false,
-                deliveries: [],
-                invoices: [],
-                project: selectedProject,
-                order_status: 'Pending'
-            });
-            setAddedProductState([]);
+            dispatch(setPurchaseOrderState({
+                    ...purchaseOrderState,
+                    products: [],
+                    custom_products: [],
+                    order_total_amount: 0,
+                    supplier: newSupplier,
+                }))
+            
             fetchProductsBySupplier(newSupplier);
             setSelectedSupplier(newSupplier);
         }
         if (pendingAction === 'changeProject') {
             dispatch(clearProductState());
-            setOrderState({
-                supplier: '',
-                order_ref: orderState.order_ref,
-                order_date:  getCurrentDate(),
-                order_est_datetime: '',
+            dispatch(setPurchaseOrderState({
+                ...purchaseOrderState,
                 products: [],
                 custom_products: [],
                 order_total_amount: 0,
-                order_internal_comments: '',
-                order_notes_to_supplier: '',
-                order_isarchived: false,
-                deliveries: [],
-                invoices: [],
                 project: newProject,
-                order_status: 'Pending'
-            });
-            setAddedProductState([]);
+            }))
+            
             setSelectedSupplier('')
             fetchSupplierByProject(newProject);
             setSelectedProject(newProject);
@@ -193,144 +146,158 @@ const NewPurchaseOrderForm = () => {
     };
 
     const handleAddItem = (product) => {
-        setOrderState((prevState) => ({
-            ...prevState,
-            products: [...prevState.products, {
-                product_id: product.product._id,
-                productprice_id: product.productPrice._id,
-                order_product_location: '',
-                order_product_qty_a: 0, // Ensure all fields are initialized properly
-                order_product_qty_b: 0,
-                order_product_price_unit_a: product.productPrice.product_price_unit_a,
-                order_product_gross_amount: 0
-            }]
+        // Create the updated products array
+        const updatedProducts = [...purchaseOrderState.products, {
+            product_id: {
+                _id: product.product._id,
+                product_name: product.product.product_name,
+                product_sku: product.product.product_sku
+            },
+            productprice_id: product.productPrice,
+            order_product_location: '',
+            order_product_qty_a: 0, // Ensure all fields are initialized properly
+            order_product_qty_b: 0,
+            order_product_price_unit_a: product.productPrice.product_price_unit_a,
+            order_product_gross_amount: 0
+        }];
+        
+        // Dispatch the action with a plain object payload
+        dispatch(setPurchaseOrderState({
+            ...purchaseOrderState,
+            products: updatedProducts
         }));
-
-        setAddedProductState((prevProducts) => [...prevProducts, product])
     };
 
     const handleAddCustomItem = () => {
-        if (orderState.custom_products.length < 15) {
-            setOrderState({
-                ...orderState,
-                custom_products: [...orderState.custom_products, {
+        if (purchaseOrderState.custom_products.length < 15) {
+            dispatch(setPurchaseOrderState({
+                ...purchaseOrderState,
+                custom_products: [...purchaseOrderState.custom_products, {
                     custom_product_name:'', 
                     custom_product_location: '',
                     custom_order_qty: 0
                 }]
-            })
+            }))
         } else {
             alert("You can add up to 15 custom items only.")
         }
     }
 
     const handleRemoveItem = (index) => {
-        const updatedItems = orderState.products.filter((_, idx) => idx !== index);
-        const updatedAddedProducts = addedProductState.filter((_, idx) => idx !== index);
+        const updatedItems = purchaseOrderState.products.filter((_, idx) => idx !== index);
 
-        setOrderState({
-            ...orderState,
+        dispatch(setPurchaseOrderState({
+            ...purchaseOrderState,
             products: updatedItems
-        })
-
-        setAddedProductState(updatedAddedProducts)
+        }))
     }
 
     const handleRemoveCustomItem = (index) => {
-        const updatedCustomItems = orderState.custom_products.filter((_, idx) => idx !== index);
-        setOrderState({
-            ...orderState,
-            custom_products: updatedCustomItems
-        })
+        const updatedCustomItems = purchaseOrderState.custom_products.filter((_, idx) => idx !== index);
+        dispatch(setPurchaseOrderState({
+            ...purchaseOrderState,
+            custom_products: updatedCustomItems,
+        }))
     }
 
     const handleInputChange = (event, index = null, isProduct = false, isCustomProduct = false) => {
         const { name, value } = event.target;
     
-        setOrderState((prevState) => {
-            // Handle product array updates
-            if (isProduct && index !== null) {
-                let updatedProducts = [...prevState.products];
-                
-                updatedProducts[index] = {
-                    ...updatedProducts[index],
-                    [name]: value,
-                };    
-                
-                return {
-                    ...prevState,
-                    products: updatedProducts,
-                };
-            }
+        // Get the current state
+        const currentState = purchaseOrderState; // assuming purchaseOrderState is the correct slice
     
-            // Handle custom products array updates
-            if (isCustomProduct && index !== null) {
-                const updatedCustomProducts = prevState.custom_products.map((product, i) => 
-                    i === index ? { ...product, [name]: name === "custom_order_qty" ? Number(value) : value} : product
-                );
-                return {
-                    ...prevState,
-                    custom_products: updatedCustomProducts,
-                };
-            }
+        let updatedState = { ...currentState };
     
-            // Handle other updates
-            return {
-                ...prevState,
-                [name]: value,
-            };
-        });
-    };
-    
-    const handleQtyChange = (event, index) => {
-        const { name, value } = event.target;
-    
-        setOrderState((prevState) => {
-            let updatedProducts = [...prevState.products];
+        // Handle product array updates
+        if (isProduct && index !== null) {
+            let updatedProducts = [...currentState.products];
             
             updatedProducts[index] = {
                 ...updatedProducts[index],
-                [name]: Number(value),
+                [name]: value,
             };
-
-            if (name === 'order_product_qty_a') {
-                //Few criterias here:
-                // - Multiply if 1, otherwise divde.
-                // - If calculation results a non-integer, make it 4 decimal points.
-                if (addedProductState[index].productPrice.product_number_a === 1) {
-                    updatedProducts[index].order_product_qty_b = Number.isInteger(value * addedProductState[index].productPrice.product_number_b) ? value * addedProductState[index].productPrice.product_number_b : parseFloat(value * addedProductState[index].productPrice.product_number_b).toFixed(4)
-                }
-                else {
-                    updatedProducts[index].order_product_qty_b = Number.isInteger(value / addedProductState[index].productPrice.product_number_a) ? value / addedProductState[index].productPrice.product_number_a : parseFloat(value / addedProductState[index].productPrice.product_number_a).toFixed(4)
-                }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_a).toFixed(2)
-            }
-            if (name === 'order_product_qty_b') {
-                if (addedProductState[index].productPrice.product_number_b === 1) {
-                    updatedProducts[index].order_product_qty_a = Number.isInteger(value * addedProductState[index].productPrice.product_number_a) ? value * addedProductState[index].productPrice.product_number_a : parseFloat(value * addedProductState[index].productPrice.product_number_a).toFixed(4)
-                }
-                else {
-                    updatedProducts[index].order_product_qty_a = Number.isInteger(value / addedProductState[index].productPrice.product_number_b) ? value / addedProductState[index].productPrice.product_number_b : parseFloat(value / addedProductState[index].productPrice.product_number_b).toFixed(4)
-                }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_b).toFixed(2)
-            }
-
-            // Calculate updatedTotalAmount using updatedProducts from prevState
-            let updatedTotalAmount = (updatedProducts.reduce((total, prod) => (
-                total + (Number(prod.order_product_gross_amount) || 0)
-            ), 0) * 1.1).toFixed(2);
             
-            return {
-                ...prevState,
-                order_total_amount: Number(updatedTotalAmount),
+            updatedState = {
+                ...currentState,
                 products: updatedProducts,
             };
-        });
+        }
+        // Handle custom products array updates
+        else if (isCustomProduct && index !== null) {
+            const updatedCustomProducts = currentState.custom_products.map((product, i) => 
+                i === index ? { ...product, [name]: name === "custom_order_qty" ? Number(value) : value } : product
+            );
+    
+            updatedState = {
+                ...currentState,
+                custom_products: updatedCustomProducts,
+            };
+        }
+        // Handle other updates
+        else {
+            updatedState = {
+                ...currentState,
+                [name]: value,
+            };
+        }
+    
+        // Dispatch the action with the updated state
+        dispatch(setPurchaseOrderState(updatedState));
     };
-
-    const handleSearchChange = (e) => {
-        setOrderState({...orderState, order_ref: e.target.value});
+    
+    //! FIX THIS
+    const handleQtyChange = (event, index) => {
+        const { name, value } = event.target;
+    
+        // Create a copy of the current state outside of the dispatch
+        let updatedProducts = [...purchaseOrderState.products];
+    
+        updatedProducts[index] = {
+            ...updatedProducts[index],
+            [name]: Number(value),
+        };
+    
+        // Handle `order_product_qty_a` changes
+        if (name === 'order_product_qty_a') {
+            if (purchaseOrderState.products[index].productprice_id._id === 1) {
+                updatedProducts[index].order_product_qty_b = Number.isInteger(value * purchaseOrderState.products[index].productprice_id.product_number_b)
+                    ? value * purchaseOrderState.products[index].productprice_id.product_number_b
+                    : parseFloat(value * purchaseOrderState.products[index].productprice_id.product_number_b).toFixed(4);
+            } else {
+                updatedProducts[index].order_product_qty_b = Number.isInteger(value / purchaseOrderState.products[index].productprice_id.product_number_a)
+                    ? value / purchaseOrderState.products[index].productprice_id.product_number_a
+                    : parseFloat(value / purchaseOrderState.products[index].productprice_id.product_number_a).toFixed(4);
+            }
+            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_id.product_price_unit_a).toFixed(2);
+        }
+    
+        // Handle `order_product_qty_b` changes
+        if (name === 'order_product_qty_b') {
+            if (purchaseOrderState.products[index].productprice_id.product_number_b === 1) {
+                updatedProducts[index].order_product_qty_a = Number.isInteger(value * purchaseOrderState.products[index].productprice_id.product_number_a)
+                    ? value * purchaseOrderState.products[index].productprice_id.product_number_a
+                    : parseFloat(value * purchaseOrderState.products[index].productprice_id.product_number_a).toFixed(4);
+            } else {
+                updatedProducts[index].order_product_qty_a = Number.isInteger(value / purchaseOrderState.products[index].productprice_id.product_number_b)
+                    ? value / purchaseOrderState.products[index].productprice_id.product_number_b
+                    : parseFloat(value / purchaseOrderState.products[index].productprice_id.product_number_b).toFixed(4);
+            }
+            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_id.product_price_unit_b).toFixed(2);
+        }
+    
+        // Calculate updatedTotalAmount using updatedProducts
+        let updatedTotalAmount = (updatedProducts.reduce((total, prod) => (
+            total + (Number(prod.order_product_gross_amount) || 0)
+        ), 0) * 1.1).toFixed(2);
+    
+        // Dispatch the updated state with a plain object
+        dispatch(setPurchaseOrderState({
+            ...purchaseOrderState,
+            order_total_amount: Number(updatedTotalAmount),
+            products: updatedProducts,
+        }));
     };
+    
 
     let distinctProductTypes = [];
     if (Array.isArray(productState) && selectedProject) {
@@ -339,16 +306,6 @@ const NewPurchaseOrderForm = () => {
         ];
     }
     
-    const filterPurchaseOrderNumber = () => {
-        return purchaseOrderState.filter(order => {
-            const lowerCaseSearchTerm = orderState.order_ref.toLowerCase();
-    
-            // Check each field for the search term
-            return (
-                order.order_ref.toLowerCase().includes(lowerCaseSearchTerm)
-            );
-        });
-    };
 
     const filterProductsBySearchTerm = () => {
         const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
@@ -362,10 +319,10 @@ const NewPurchaseOrderForm = () => {
                 product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
                 product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.alias_name.toString().includes(lowerCaseSearchTerm) 
-                // || product.productPrice.project_names.some(projectName => 
-                //     projectName.toLowerCase().includes(lowerCaseSearchTerm)
-                // )
+                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.project_names.some(projectName => 
+                    projectName.toLowerCase().includes(lowerCaseSearchTerm)
+                )
             );
     
             const matchesProductType = selectedProductType 
@@ -378,20 +335,21 @@ const NewPurchaseOrderForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-
-        if (purchaseOrderState.some(order => order.order_ref.toLowerCase().includes(orderState.order_ref.toLowerCase()))) {
-            alert("Purchase Order Number already exists. Please try another.")
-            return
-        }
     
         if (event.nativeEvent.submitter.name === 'draft') {
             const updatedState = {
-                ...orderState,
+                ...purchaseOrderState,
                 order_status: "Draft"
             };
-            addPurchaseOrder(updatedState);
+            updatePurchaseOrder(updatedState);
+        } else if (event.nativeEvent.submitter.name === 'approve') {
+            const updatedState = {
+                ...purchaseOrderState,
+                order_status: "Approved"
+            };
+            updatePurchaseOrder(updatedState);
         } else {
-            addPurchaseOrder(orderState); 
+            updatePurchaseOrder(purchaseOrderState); 
         }
     };
     
@@ -434,17 +392,17 @@ const NewPurchaseOrderForm = () => {
     }, [dispatch]);
 
     // Display DOM
-    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading) {
+    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isUpdateLoadingState || isFetchSupplierLoading) {
         return <NewPurchaseOrderSkeleton />;
     }
 
-    if (fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError) {
-        if (fetchProjectErrorState.includes("Session expired") ) {
+    if (fetchProjectErrorState || fetchProductsErrorState || updateErrorState || fetchSupplierError) {
+        if (fetchProjectErrorState && fetchProjectErrorState.includes("Session expired") ) {
             return <div><SessionExpired /></div>;
         }
         return (
         <div>
-            <p>Error: {fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError}</p>
+            <p>Error: {fetchProjectErrorState || fetchProductsErrorState || updateErrorState || fetchSupplierError}</p>
         </div>
         );
     }
@@ -470,18 +428,16 @@ const NewPurchaseOrderForm = () => {
         </Modal>
     );
 
-    console.log("==================Purchase Order State", purchaseOrderState)
-    console.log("==================Project State", projectState)
-    console.log("==================Supplier State", supplierState)
-    console.log("==================Product State", productState)
-    console.log("==================Added product State", addedProductState)
-    console.log("==================Order State", orderState)
+    console.log("Purchase Order State: ", purchaseOrderState)
+    console.log("Supplier state:", supplierState)
+    console.log("Product State: ", productState)
+    console.log("Project State: ", projectState)
 
     return (
         <>
         {/* PAGE HEADER */}
         <div className='mx-4 mt-4 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg'>
-            NEW PURCHASE ORDER
+            EDIT PURCHASE ORDER
         </div>
         <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 mx-4 mb-4">
@@ -495,11 +451,8 @@ const NewPurchaseOrderForm = () => {
                                 type="text"
                                 className="form-control"
                                 name="order_ref"
-                                value={orderState.order_ref}
-                                onChange={handleSearchChange}
-                                required
-                                onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
-                                onInput={(e) => e.target.setCustomValidity('')}
+                                value={purchaseOrderState.order_ref}
+                                disabled
                                 />
                             </div>
 
@@ -546,27 +499,6 @@ const NewPurchaseOrderForm = () => {
                                     ))}
                                 </select>
                             </div>
-                            <div className='col-span-2 mb-3'>
-                                <label className="text-xs italic text-gray-400 mb-2">
-                                    Previous order numbers:
-                                    {purchaseOrderState.slice(0, 3).map((order, index) => (
-                                        <div key={index} className="inline-block ml-1 border rounded-lg px-1">
-                                        {order.order_ref}
-                                        </div>
-                                    ))}
-                                </label>
-                                <div className="text-xs italic text-gray-400">
-                                Based on your search:
-                                {filterPurchaseOrderNumber()
-                                    .filter((order) => order.order_isarchived === false)
-                                    .slice(0, 3)
-                                    .map((order, index) => (
-                                    <div key={index} className="inline-block ml-1 border rounded-lg px-1">
-                                        {order.order_ref}
-                                    </div>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
 
                         {/* ***** SEARCH ITEM TABLE ****** */}
@@ -602,7 +534,7 @@ const NewPurchaseOrderForm = () => {
                                 <div className='p-1'><label>Unit B</label></div>
                                 <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
                             </div>
-                            { productState ? filterProductsBySearchTerm().filter(product => product.productPrice.projects.includes(selectedProject)).filter(product => orderState.order_date >= product.productPrice.product_effective_date).filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
+                            { productState ? filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
                                 <div key={index} className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100" title='Add to order'>
                                     <div>{product.product.product_sku}</div>
                                     <div>{product.product.product_name}</div>
@@ -642,14 +574,20 @@ const NewPurchaseOrderForm = () => {
                                 </tr>
                                 </thead>
                                 <tbody className="text-center">
-                                {orderState.products && orderState.products.map((prod, index) => (
+                                {purchaseOrderState.products && purchaseOrderState.products.map((prod, index) => (
                                     <tr key={index}>
-                                        <td>
-                                            <label>{addedProductState[index].product.product_sku}</label>
+                                        <td>{prod.product_id.product_sku}</td>
+                                        <td>{prod.product_id.product_name}</td>
+                                        {/* <td>
+                                            {addedProductState && addedProductState[index] && addedProductState[index].product && (
+                                                <label>{addedProductState[index].product.product_sku}</label>
+                                            )}
                                         </td>
                                         <td>
-                                            <label>{addedProductState[index].product.product_name}</label>
-                                        </td>
+                                            {addedProductState && addedProductState[index] && addedProductState[index].product && (
+                                                <label>{addedProductState[index].product.product_name}</label>
+                                            )}
+                                        </td> */}
                                         <td>
                                             <input
                                             type="text"
@@ -677,7 +615,15 @@ const NewPurchaseOrderForm = () => {
                                                 onInput={(e) => e.target.setCustomValidity('')}
                                                 className="px-1 py-0.5 ml-1 col-span-2 text-xs"
                                             />
-                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_a}</label>
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">
+                                                {prod.productprice_id.product_unit_a}
+                                            </label>
+                                            {/* <label className="text-xs opacity-50 col-span-1 text-nowrap">
+                                                {addedProductState && 
+                                                addedProductState[index] && 
+                                                addedProductState[index].productPrice && 
+                                                addedProductState[index].productPrice.product_unit_a}
+                                            </label> */}
                                             </div>
                                         </td>
                                         <td>
@@ -694,7 +640,15 @@ const NewPurchaseOrderForm = () => {
                                                 onInput={(e) => e.target.setCustomValidity('')}
                                                 className="px-1 py-0.5 ml-1 col-span-2 text-xs"
                                             />
-                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">{addedProductState[index].productPrice.product_unit_b}</label>
+                                            <label className="text-xs opacity-50 col-span-1 text-nowrap">
+                                                {prod.productprice_id.product_unit_b}
+                                            </label>
+                                            {/* <label className="text-xs opacity-50 col-span-1 text-nowrap">
+                                                {addedProductState && 
+                                                addedProductState[index] && 
+                                                addedProductState[index].productPrice && 
+                                                addedProductState[index].productPrice.product_unit_b}
+                                            </label> */}
                                             </div>
                                         </td>
                                         <td>
@@ -713,7 +667,7 @@ const NewPurchaseOrderForm = () => {
                                     </tr>
                                 ))}
                                 {/* ***** CUSTOM ITEMS ***** */}
-                                {orderState.custom_products.map((cproduct, index) => (
+                                {purchaseOrderState.custom_products.map((cproduct, index) => (
                                 <tr key={index}>
                                     <td>Custom {index + 1}</td>
                                     <td>
@@ -792,13 +746,13 @@ const NewPurchaseOrderForm = () => {
                                     <tbody>
                                         <tr>
                                             <td className='pt-1'>Total Items:</td>
-                                            <td className='pt-1'>{orderState.products.length + orderState.custom_products.length} </td>
+                                            <td className='pt-1'>{purchaseOrderState.products.length + purchaseOrderState.custom_products.length} </td>
                                         </tr>
                                         <tr>
                                             <td className='pt-1'>Total Net Amount:</td>
                                             <td className='pt-1'>
-                                                ${orderState.products && orderState.products.length > 0 ? (
-                                                    orderState.products.reduce((total, prod) => (
+                                                ${purchaseOrderState.products && purchaseOrderState.products.length > 0 ? (
+                                                    purchaseOrderState.products.reduce((total, prod) => (
                                                         total + (Number(prod.order_product_gross_amount) || 0)
                                                     ), 0).toFixed(2) // Use toFixed(2) for two decimal places
                                                 ) : (
@@ -809,8 +763,8 @@ const NewPurchaseOrderForm = () => {
                                         <tr>
                                             <td className='pt-1'>Total Net Amount (incl. GST):</td>
                                             <td className='pt-1'>
-                                                ${orderState.products && orderState.products.length > 0 ? (
-                                                    (orderState.products.reduce((total, prod) => (
+                                                ${purchaseOrderState.products && purchaseOrderState.products.length > 0 ? (
+                                                    (purchaseOrderState.products.reduce((total, prod) => (
                                                         total + (Number(prod.order_product_gross_amount) || 0)
                                                     ), 0) * 1.1).toFixed(2) // Use toFixed(2) for two decimal places
                                                 ) : (
@@ -832,7 +786,7 @@ const NewPurchaseOrderForm = () => {
                             type="date"
                             className="form-control"
                             name="order_date"
-                            value={orderState.order_date}
+                            value={purchaseOrderState.order_date.split('T')[0]}
                             onChange={handleInputChange}
                             required
                             onInvalid={(e) => e.target.setCustomValidity('Enter Order Date')}
@@ -846,7 +800,7 @@ const NewPurchaseOrderForm = () => {
                             type="datetime-local"
                             className="form-control"
                             name="order_est_datetime"
-                            value={orderState.order_est_datetime}
+                            value={purchaseOrderState.order_est_datetime.slice(0,16)}
                             onChange={handleInputChange}
                             required
                             onInvalid={(e) => e.target.setCustomValidity('Enter EST Date and Time')}
@@ -862,7 +816,7 @@ const NewPurchaseOrderForm = () => {
                         <textarea 
                             className="form-control" 
                             name="order_internal_comments" 
-                            value={orderState.order_internal_comments} 
+                            value={purchaseOrderState.order_internal_comments} 
                             onChange={handleInputChange}
                             placeholder='Enter order related internal comments...'
                             rows={2}
@@ -874,7 +828,7 @@ const NewPurchaseOrderForm = () => {
                         <textarea
                             className="form-control bg-yellow-200" 
                             name="order_notes_to_supplier" 
-                            value={orderState.order_notes_to_supplier} 
+                            value={purchaseOrderState.order_notes_to_supplier} 
                             onChange={handleInputChange}
                             placeholder='Enter some notes to supplier...'
                             rows={4}
@@ -885,7 +839,8 @@ const NewPurchaseOrderForm = () => {
                     <div className="flex justify-between mb-3">
                         <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
                         <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800" type="submit" name="draft">SAVE AS DRAFT</button>
-                        <button className="btn btn-primary" type='submit' name='submit'>SUBMIT</button>
+                        <button className="btn border rounded bg-green-700 text-white hover:bg-green-800" type="submit" name="approve">APPROVE</button>
+                        <button className="btn btn-primary" type='submit' name='submit'>UPDATE</button>
                     </div>
                 </div>
                 { confirmationModal }
@@ -895,4 +850,4 @@ const NewPurchaseOrderForm = () => {
     );
 };
 
-export default NewPurchaseOrderForm;
+export default UpdatePurchaseOrderForm;
