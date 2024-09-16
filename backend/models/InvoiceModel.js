@@ -110,10 +110,8 @@ const invoiceSchema = new Schema({
         default: false
     },
     payment: {
-        payment_obj_ref: {
-            type: Schema.Types.ObjectId,
-            ref: 'Payment'
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Payment'
     },
     invoice_status: {
         type: String,

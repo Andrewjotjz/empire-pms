@@ -6,7 +6,15 @@ const mongoose = require('mongoose');
 const getAllInvoices = async (req, res) => {
     //'req' object not in used
     //create a new model called Invoices, await, and assign it with all Invoice documents in the Invoice collection, sort created date in descending order
-    const Invoices = await invoiceModel.find({}).sort({createdAt: -1})
+    const Invoices = await invoiceModel
+    .find({})
+    .populate('supplier')
+    .populate('order')
+    .populate({
+        path: 'products.product_obj_ref', // Populate the 'product_obj_ref' inside 'products' array
+    })
+    .populate('payment')
+    .sort({createdAt: -1})
     //invoke 'res' object method: status() and json(), pass relevant data to them
     res.status(200).json(Invoices);
 }
@@ -25,7 +33,14 @@ const getSingleInvoice = async (req, res) => {
 
     //if ID exists in mongoDB database
     //create a new model called Invoice, await, and assign it with the Invoice document, which can be found in the Invoice collection, find using ID
-    const Invoice = await invoiceModel.findById(id)
+    const Invoice = await invoiceModel
+    .findById(id)
+    .populate('supplier')
+    .populate('order')
+    .populate({
+        path: 'products.product_obj_ref', // Populate the 'product_obj_ref' inside 'products' array
+    })
+    .populate('payment')
 
     //check if there's 'null' or 'undefined' in 'Invoice'.
     if (!Invoice) {
@@ -44,7 +59,7 @@ const getSingleInvoice = async (req, res) => {
 const createNewInvoice = async (req, res) => {
     //retrieve incoming request (along with new Invoice object) by using 'req' object property 'body', which stores new Invoice object.
     //destructure all relevant attributes in new Invoice object
-    const { invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, order, products,
+    const { invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, order, products, custom_products,
         invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
         invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
         invoice_isarchived, payment, invoice_status } = req.body;
@@ -52,7 +67,7 @@ const createNewInvoice = async (req, res) => {
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
         const Invoice = await invoiceModel.create({ invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, 
-            order, products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
+            order, products, custom_products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
             invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
             invoice_isarchived, payment, invoice_status })
         //invoke 'res' object method: status() and json(), pass relevant data to them

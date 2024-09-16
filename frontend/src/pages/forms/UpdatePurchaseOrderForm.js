@@ -267,7 +267,7 @@ const UpdatePurchaseOrderForm = () => {
     
         // Handle `order_product_qty_a` changes
         if (name === 'order_product_qty_a') {
-            if (purchaseOrderState.products[index].productprice_obj_ref._id === 1) {
+            if (purchaseOrderState.products[index].productprice_obj_ref.product_number_a === 1) {
                 updatedProducts[index].order_product_qty_b = Number.isInteger(value * purchaseOrderState.products[index].productprice_obj_ref.product_number_b)
                     ? value * purchaseOrderState.products[index].productprice_obj_ref.product_number_b
                     : parseFloat(value * purchaseOrderState.products[index].productprice_obj_ref.product_number_b).toFixed(4);
@@ -276,7 +276,9 @@ const UpdatePurchaseOrderForm = () => {
                     ? value / purchaseOrderState.products[index].productprice_obj_ref.product_number_a
                     : parseFloat(value / purchaseOrderState.products[index].productprice_obj_ref.product_number_a).toFixed(4);
             }
-            updatedProducts[index].order_product_gross_amount = (value * purchaseOrderState.products[index].productprice_obj_ref.product_price_unit_a).toFixed(2);
+            updatedProducts[index].order_product_gross_amount = (purchaseOrderState.products[index].productprice_obj_ref.product_price_unit_a === 1
+            ? (value * purchaseOrderState.products[index].productprice_obj_ref.product_price_unit_a * purchaseOrderState.products[index].productprice_obj_ref.product_number_a) : value * purchaseOrderState.products[index].productprice_obj_ref.product_price_unit_a
+            ).toFixed(2);
         }
     
         // Handle `order_product_qty_b` changes
@@ -663,7 +665,13 @@ const UpdatePurchaseOrderForm = () => {
                                             <label>${prod.order_product_price_unit_a}</label>
                                         </td>
                                         <td>
-                                            <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
+                                            <label>
+                                            ${(
+                                                prod.productprice_obj_ref.product_number_a === 1 
+                                                ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * prod.productprice_obj_ref.product_number_a) 
+                                                : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
+                                            ).toFixed(2)}
+                                            </label>
                                         </td>
                                         <td>
                                             <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">

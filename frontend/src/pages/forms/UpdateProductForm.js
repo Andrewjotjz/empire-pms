@@ -312,6 +312,7 @@ const UpdateProductForm = () => {
                                 <option value="Tools">Tools</option>
                                 <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
                                 <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
+                                <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
                                 <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
                                 <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
                                 <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>

@@ -4,6 +4,26 @@ const mongoose = require('mongoose');
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
+const validProductTypes = ["Compound",
+    "Access Panel",
+    "Framing Ceiling",
+    "Framing Wall",
+    "Batt Insulation",
+    "Rigid Insulation",
+    "Plasterboard",
+    "External Cladding",
+    "SpeedPanel",
+    "Timber",
+    "Others",
+    "Tools",
+    "Plastering(Fixings/Screws)",
+    "Framing Ceiling(Accessories)",
+    "Framing Wall(Accessories)",
+    "Rigid Insulation(Accessories)",
+    "Plasterboard(Accessories)",
+    "External Cladding(Accessories)",
+    "SpeedPanel(Accessories)"];
+
 const productSchema = new Schema({
     product_sku: {
         type: String,
@@ -17,24 +37,7 @@ const productSchema = new Schema({
     },
     product_types: {
         type: String,
-        enum: ["Compound",
-            "Access Panel",
-            "Framing Ceiling",
-            "Framing Wall",
-            "Batt Insulation",
-            "Rigid Insulation",
-            "Plasterboard",
-            "External Cladding",
-            "SpeedPanel",
-            "Timber",
-            "Others",
-            "Tools",
-            "Plastering(Fixings/Screws)",
-            "Framing Ceiling(Accessories)",
-            "Rigid Insulation(Accessories)",
-            "Plasterboard(Accessories)",
-            "External Cladding(Accessories)",
-            "SpeedPanel(Accessories)"],
+        enum: validProductTypes,
         required: true
     },
     product_actual_size: {
@@ -60,6 +63,12 @@ const productSchema = new Schema({
         default: false
     }
 }, { timestamps: true });
+
+
+// Add custom validation using the path method
+productSchema.path('product_types').validate(function(value) {
+    return validProductTypes.includes(value); // Reuse the centralized array here
+}, 'Invalid product type');
 
 
 // check if the model already exists before creating it

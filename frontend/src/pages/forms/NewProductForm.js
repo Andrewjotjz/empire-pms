@@ -153,7 +153,7 @@ const NewProductForm = () => {
         if (productErrorState.includes("Session expired") || productErrorState.includes("jwt expired")) {
             return <div><SessionExpired /></div>;
         }
-        return <div>Error: {productErrorState}</div>;
+        return <div>Error: {productErrorState || productTypeErrorState}</div>;
     }
 
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
@@ -231,6 +231,7 @@ const NewProductForm = () => {
                                 <option value="Tools">Tools</option>
                                 <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
                                 <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
+                                <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
                                 <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
                                 <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
                                 <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>
@@ -486,38 +487,3 @@ const NewProductForm = () => {
 };
 
 export default NewProductForm;
-
-
-/* <div className="col-md-6 mb-3">
-        <label className="form-label font-bold">*Alias:</label>
-        <select 
-            className="form-control"
-            name="alias"
-            onChange={handleProductInputChange}
-            disabled={aliasFieldToggle}
-            required
-        >
-            <option value="">Select Alias</option>
-            {aliasState && aliasState.length > 0 && aliasState.map((product, index) => (
-                product.alias && <option key={index} value={product.alias._id}>{product.alias.alias_name}</option>
-            ))}
-        </select>
-        <label className='text-xs italic'>Set alias to ('na') if not available</label>
-    </div> */
-
-
-/* <div className="col-md-6 mb-3">
-    <label className="form-label font-bold">*Project:</label>
-    <select 
-    className="form-control"
-    name="projects"
-    onChange={handleProductInputChange}
-    required
-    >
-        <option value="">Select Project</option>
-        {projectState && projectState.length > 0 && projectState.map((project, index) => (
-            <option key={index} value={project._id}>{project.project_name}</option>
-        ))}
-    </select>
-    <label className='text-xs italic text-gray-400'>Select one or more projects</label>
-</div> */

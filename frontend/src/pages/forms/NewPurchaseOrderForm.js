@@ -304,7 +304,7 @@ const NewPurchaseOrderForm = () => {
 
             if (name === 'order_product_qty_a') {
                 //Few criterias here:
-                // - Multiply if 1, otherwise divde.
+                // - Multiply if 1, otherwise divide.
                 // - If calculation results a non-integer, make it 4 decimal points.
                 if (addedProductState[index].productPrice.product_number_a === 1) {
                     updatedProducts[index].order_product_qty_b = Number.isInteger(value * addedProductState[index].productPrice.product_number_b) ? value * addedProductState[index].productPrice.product_number_b : parseFloat(value * addedProductState[index].productPrice.product_number_b).toFixed(4)
@@ -312,7 +312,12 @@ const NewPurchaseOrderForm = () => {
                 else {
                     updatedProducts[index].order_product_qty_b = Number.isInteger(value / addedProductState[index].productPrice.product_number_a) ? value / addedProductState[index].productPrice.product_number_a : parseFloat(value / addedProductState[index].productPrice.product_number_a).toFixed(4)
                 }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_a).toFixed(2)
+
+                updatedProducts[index].order_product_gross_amount = (addedProductState[index].productPrice.product_number_a === 1 
+                    ? (value * addedProductState[index].productPrice.product_price_unit_a * addedProductState[index].productPrice.product_number_a) 
+                    : value * addedProductState[index].productPrice.product_price_unit_a
+                  ).toFixed(2);
+                  
             }
             if (name === 'order_product_qty_b') {
                 if (addedProductState[index].productPrice.product_number_b === 1) {
@@ -483,6 +488,9 @@ const NewPurchaseOrderForm = () => {
             </Modal.Footer>
         </Modal>
     );
+
+    console.log("Order State: ", orderState)
+    console.log("Added Products State: ", addedProductState)
 
     return (
         <>
@@ -708,7 +716,13 @@ const NewPurchaseOrderForm = () => {
                                             <label>${prod.order_product_price_unit_a}</label>
                                         </td>
                                         <td>
-                                            <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
+                                            <label>
+                                            ${(
+                                                addedProductState[index].productPrice.product_number_a === 1 
+                                                ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
+                                                : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
+                                            ).toFixed(2)}
+                                            </label>
                                         </td>
                                         <td>
                                             <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">

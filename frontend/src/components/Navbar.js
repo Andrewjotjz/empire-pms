@@ -44,23 +44,35 @@ const Navbar = () => {
   return (
     localUser && Object.keys(localUser).length > 0 ? (
       <header>
-        <nav className="bg-gray-900 p-2">
-          <div className="container mx-auto flex justify-between items-center">
-            <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">EmpirePMS</Link>
+        <nav className="bg-gray-900 p-2 w-screen">
+          <div className="flex justify-between items-center">
+            <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">
+              EmpirePMS
+            </Link>
             <div className="flex items-center space-x-4">
               {localUser && (
-                <span className="text-white cursor-pointer" onClick={handleAccountClick}>{localUser.employee_email}</span>
+                <span className="text-white cursor-pointer" onClick={handleAccountClick}>
+                  {localUser.employee_email}
+                </span>
               )}
               {localUser && (
-                <button className="bg-gray-900 text-white border border-white px-4 py-2 rounded hover:bg-red-700 hover:scale-95 ease-out duration-75 hover:font-bold" onClick={handleLogOutClick}>Logout</button>
+                <button
+                  className="bg-gray-900 text-white border border-white px-4 py-2 rounded hover:bg-red-700 hover:scale-95 ease-out duration-75 hover:font-bold"
+                  onClick={handleLogOutClick}
+                >
+                  Logout
+                </button>
               )}
               {!localUser && (
-                <Link className="text-white" to="/EmpirePMS/login">Sign In</Link>
+                <Link className="text-white" to="/EmpirePMS/login">
+                  Sign In
+                </Link>
               )}
             </div>
           </div>
         </nav>
-      </header>) : ( <NavbarSkeleton /> )
+      </header>
+    ) : ( <NavbarSkeleton /> )
   );
 }
 

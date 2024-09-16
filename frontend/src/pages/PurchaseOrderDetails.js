@@ -12,7 +12,6 @@ import { useFetchProductsBySupplier } from '../hooks/useFetchProductsBySupplier'
 
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
-import NewPurchaseOrderSkeleton from './loaders/NewPurchaseOrderSkeleton';
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
@@ -25,7 +24,6 @@ const PurchaseOrderDetails = () => {
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
     const { fetchSupplierByProject, isFetchSupplierLoading, fetchSupplierError } = useFetchSupplierByProject();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
-    const productState = useSelector((state) => state.productReducer.productState)
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -150,9 +148,7 @@ const PurchaseOrderDetails = () => {
       }, [showLastDiv, targetRef]);
 
     // Display DOM
-    if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }
-
-    if (isFetchSupplierLoading || isFetchProductsLoadingState) { return (<NewPurchaseOrderSkeleton />); }
+    if (isLoadingState || isUpdateLoadingState || isFetchSupplierLoading || isFetchProductsLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState || updateErrorState) {
         if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
