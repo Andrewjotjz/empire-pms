@@ -104,7 +104,6 @@ const NewProductForm = () => {
         addProduct(productDetailsState, supplierId);
     };
     
-
     //Render component
     useEffect(() => {
         const abortController = new AbortController();
@@ -477,7 +476,7 @@ const NewProductForm = () => {
                         {/* ******************************************* END OF FORM ********************************************************** */}
                         <div className="d-flex justify-content-between mb-3">
                             <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
-                            <button className="btn btn-primary" type="submit">ADD TO COMPANY</button>
+                            <button className="btn btn-primary" type="submit">ADD TO SUPPLIER</button>
                         </div>
                     </div>
                 </form>
