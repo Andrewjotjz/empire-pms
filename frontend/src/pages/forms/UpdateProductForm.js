@@ -177,6 +177,13 @@ const UpdateProductForm = () => {
             });
             return;
         }
+        if (!newProductPriceState.projects.length > 0 && isShowNewPriceForm === true){
+            // push toast to notify successful creation
+            toast.error(`You must select one or more projects that this new product applies to`, {
+                position: "bottom-right"
+            });
+            return;
+        }
 
         if (newProductPriceState.product_number_a !== '' && isShowNewPriceForm === true) {
             addPrice(newProductPriceState);
@@ -698,6 +705,7 @@ const UpdateProductForm = () => {
                                     name="product_effective_date" 
                                     value={newProductPriceState.product_effective_date}
                                     onChange={handleNewPriceInputChange}
+                                    required
                                 />
                             </div>
                             {/* **** PRICE FIXED (?) **** */}

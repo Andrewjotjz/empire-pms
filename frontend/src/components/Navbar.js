@@ -44,7 +44,7 @@ const Navbar = () => {
   return (
     localUser && Object.keys(localUser).length > 0 ? (
       <header>
-        <nav className="bg-gray-900 p-2 w-screen">
+        <nav className="bg-gray-900 p-2 w-screen px-4">
           <div className="flex justify-between items-center">
             <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">
               EmpirePMS

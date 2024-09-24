@@ -16,7 +16,7 @@ export const useUpdateProduct = () => {
         setIsLoadingState(true)
         setErrorState(null)
 
-        //! console.log("||productState: ",productState, "\n||productPriceState", productPriceState, "\n||productId", productId, "\n||productPriceId", productPriceId)
+        // console.log("||productState: ",productState, "\n||productPriceState", productPriceState, "\n||productId", productId, "\n||productPriceId", productPriceId)
 
         const putProduct = async () => {
             try {

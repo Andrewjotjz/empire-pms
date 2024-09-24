@@ -329,17 +329,18 @@ const UpdatePurchaseOrderForm = () => {
                 product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
                 product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
-                product.productPrice.project_names.some(projectName => 
-                    projectName.toLowerCase().includes(lowerCaseSearchTerm)
-                )
+                product.product.alias_name.toString().includes(lowerCaseSearchTerm)
             );
     
             const matchesProductType = selectedProductType 
                 ? product.product.product_types === selectedProductType 
                 : true; // If no product type is selected, don't filter by type
+
+            const matchesProjectId = product.productPrice.projects.some(projectId => 
+                projectId.includes(selectedProject)
+            );
     
-            return matchesSearchTerm && matchesProductType;
+            return matchesSearchTerm && matchesProductType && matchesProjectId;
         });
     };
 
