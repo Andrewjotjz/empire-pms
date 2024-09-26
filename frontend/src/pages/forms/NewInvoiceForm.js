@@ -5,23 +5,29 @@ import { toast } from 'react-toastify';
 
 import { setSupplierState } from "../../redux/supplierSlice";
 import { setPurchaseOrderState } from "../../redux/purchaseOrderSlice";
-import { setProductState } from "../../redux/productSlice";
+import { setProductPrice } from "../../redux/productPriceSlice";
 import { setProjectState } from "../../redux/projectSlice";
+import { setProductState } from "../../redux/productSlice";
 
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
+import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
-import SessionExpired from "../../components/SessionExpired";
+import SessionExpired from "../../components/SessionExpired"
 
 const NewInvoiceForm = () => {
     //Component's hook
     const dispatch = useDispatch();
     const { addPrice, isAddPriceLoadingState, addPriceErrorState } = useAddProductPrice();
+    const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     
     //Component's state declaration
     const [searchOrderTerm, setSearchOrderTerm] = useState('');
+    const [searchProductTerm, setSearchProductTerm] = useState('');
+    const [selectedProductType, setSelectedProductType] = useState('')
     const [selectedOrder, setSelectedOrder] = useState('');
     const [currentOrder, setCurrentOrder] = useState(null);
+    const [updatedOrder, setUpdatedOrder] = useState(null);
     const [newSupplier, setNewSupplier] = useState('');
 
     const [isToggled, setIsToggled] = useState(false);
@@ -44,8 +50,9 @@ const NewInvoiceForm = () => {
 
     const supplierState = useSelector((state) => state.supplierReducer.supplierState);
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState);
-    const productState = useSelector((state) => state.productReducer.productState);
+    const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState);
     const projectState = useSelector((state) => state.projectReducer.projectState);
+    const productState = useSelector((state) => state.productReducer.productState);
 
     const [newInvoice, setNewInvoice] = useState({
         invoice_ref: "",
@@ -76,7 +83,7 @@ const NewInvoiceForm = () => {
         price_fixed: false,
         product_effective_date: '',
         projects: []
-    })
+    });
   
     //Component's function and variables
     const formatDate = (dateString) => {
@@ -110,8 +117,10 @@ const NewInvoiceForm = () => {
                 }
     
                 if (res.ok) {
-                    // Store data to productState
+                    // Store data to productPriceState
                     setCurrentOrder(data);
+                    setUpdatedOrder(data);
+                    fetchProductsBySupplier(data.supplier._id)
     
                     // Ensure products and custom_products exist before mapping
                     const formattedProducts = data.products?.map((product) => ({
@@ -160,7 +169,7 @@ const NewInvoiceForm = () => {
                 throw new Error(data.tokenError);
             }
 
-            dispatch(setProductState(data));
+            dispatch(setProductPrice(data));
             setIsFetchProductDetailsLoading(false);
         } catch (err) {
             setFetchProductDetailsError(err.message);
@@ -213,6 +222,52 @@ const NewInvoiceForm = () => {
         });
         setCurrentOrder(null);
     }
+    const resetNewProductPrice = () => {
+        setNewProductPrice({
+            product_obj_ref: '',
+            product_unit_a: '',
+            product_number_a: '',
+            product_price_unit_a: '',
+            product_unit_b: '',
+            product_number_b: '',
+            product_price_unit_b: '',
+            price_fixed: false,
+            product_effective_date: '',
+            projects: []
+        })
+    }
+    let distinctProductTypes = [];
+    if (Array.isArray(productState) && (currentOrder?.project._id || false)) {
+        distinctProductTypes = [
+            ...new Set(productState.map((prod) => prod.product.product_types))
+        ];
+    }
+    const filterProductsBySearchTerm = () => {
+        const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
+        
+        return productState.filter(product => {
+            const matchesSearchTerm = (
+                product.product.product_sku.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_number_a.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
+                product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.alias_name.toString().includes(lowerCaseSearchTerm)
+            );
+    
+            const matchesProductType = selectedProductType 
+                ? product.product.product_types === selectedProductType 
+                : true; // If no product type is selected, don't filter by type
+
+            const matchesProjectId = product.productPrice.projects.some(projectId => 
+                projectId.includes(currentOrder.project._id)
+            );
+    
+            return matchesSearchTerm && matchesProductType && matchesProjectId;
+        });
+    };
 
     const handleToggle = () => setIsToggled(!isToggled);
     const handleToggleSelectionModal = () => setShowSelectionModal(!showSelectionModal);
@@ -337,7 +392,6 @@ const NewInvoiceForm = () => {
         handleToggleSelectionModal(false);
     };
     const handleCreateNewPrice = () => {
-        setNewProductPrice({...newProductPrice, product_obj_ref: productState[0].product._id})
         fetchProjects();
         handleToggleCreatePriceModal();
         handleTogglePriceModal()
@@ -374,10 +428,167 @@ const NewInvoiceForm = () => {
 
         if (newProductPrice.product_number_a !== '' && showCreatePriceModal === true) {
             addPrice(newProductPrice);
+            setShowCreatePriceModal(false);
+            setShowProductPriceModal(true);
+            fetchProductDetails(updatedOrder.supplier._id, newProductPrice.product_obj_ref);
+            resetNewProductPrice();
+            fetchProductsBySupplier(updatedOrder.supplier._id)
         }
 
-
     };
+    const handleAddItem = (product) => {
+        // Create the updated products array
+        const updatedProducts = [...updatedOrder.products, {
+            product_obj_ref: {
+                _id: product.product._id,
+                product_name: product.product.product_name,
+                product_sku: product.product.product_sku
+            },
+            productprice_obj_ref: product.productPrice,
+            order_product_location: '',
+            order_product_qty_a: 0, // Ensure all fields are initialized properly
+            order_product_qty_b: 0,
+            order_product_price_unit_a: product.productPrice.product_price_unit_a,
+            order_product_gross_amount: 0
+        }];
+        
+        // Dispatch the action with a plain object payload
+        setUpdatedOrder({
+            ...updatedOrder,
+            products: updatedProducts
+        });
+    };
+    const handleEditInputChange = (event, index = null) => {
+        const { name, value } = event.target;
+    
+        // Get the current state
+        const currentState = updatedOrder; // assuming purchaseOrderState is the correct slice
+    
+        let updatedState = { ...currentState };
+        let isProduct = true;
+        let isCustomProduct = true;
+    
+        // Handle product array updates
+        if (isProduct && index !== null) {
+            let updatedProducts = [...currentState.products];
+            
+            updatedProducts[index] = {
+                ...updatedProducts[index],
+                [name]: value,
+            };
+            
+            updatedState = {
+                ...currentState,
+                products: updatedProducts,
+            };
+        }
+        // Handle custom products array updates
+        else if (isCustomProduct && index !== null) {
+            const updatedCustomProducts = currentState.custom_products.map((product, i) => 
+                i === index ? { ...product, [name]: name === "custom_order_qty" ? Number(value) : value } : product
+            );
+    
+            updatedState = {
+                ...currentState,
+                custom_products: updatedCustomProducts,
+            };
+        }
+        // Handle other updates
+        else {
+            updatedState = {
+                ...currentState,
+                [name]: value,
+            };
+        }
+    
+        // Dispatch the action with the updated state
+        setUpdatedOrder(updatedState);
+    };
+    const handleQtyChange = (event, index) => {
+        const { name, value } = event.target;
+    
+        // Create a copy of the current state outside of the dispatch
+        let updatedProducts = [...updatedOrder.products];
+    
+        updatedProducts[index] = {
+            ...updatedProducts[index],
+            [name]: Number(value),
+        };
+    
+        // Handle `order_product_qty_a` changes
+        if (name === 'order_product_qty_a') {
+            if (updatedOrder.products[index].productprice_obj_ref.product_number_a === 1) {
+                updatedProducts[index].order_product_qty_b = Number.isInteger(value * updatedOrder.products[index].productprice_obj_ref.product_number_b)
+                    ? value * updatedOrder.products[index].productprice_obj_ref.product_number_b
+                    : parseFloat(value * updatedOrder.products[index].productprice_obj_ref.product_number_b).toFixed(4);
+            } else {
+                updatedProducts[index].order_product_qty_b = Number.isInteger(value / updatedOrder.products[index].productprice_obj_ref.product_number_a)
+                    ? value / updatedOrder.products[index].productprice_obj_ref.product_number_a
+                    : parseFloat(value / updatedOrder.products[index].productprice_obj_ref.product_number_a).toFixed(4);
+            }
+            updatedProducts[index].order_product_gross_amount = (updatedOrder.products[index].productprice_obj_ref.product_price_unit_a === 1
+            ? (value * updatedOrder.products[index].productprice_obj_ref.product_price_unit_a * updatedOrder.products[index].productprice_obj_ref.product_number_a) : value * updatedOrder.products[index].productprice_obj_ref.product_price_unit_a
+            ).toFixed(2);
+        }
+    
+        // Handle `order_product_qty_b` changes
+        if (name === 'order_product_qty_b') {
+            if (updatedOrder.products[index].productprice_obj_ref.product_number_b === 1) {
+                updatedProducts[index].order_product_qty_a = Number.isInteger(value * updatedOrder.products[index].productprice_obj_ref.product_number_a)
+                    ? value * updatedOrder.products[index].productprice_obj_ref.product_number_a
+                    : parseFloat(value * updatedOrder.products[index].productprice_obj_ref.product_number_a).toFixed(4);
+            } else {
+                updatedProducts[index].order_product_qty_a = Number.isInteger(value / updatedOrder.products[index].productprice_obj_ref.product_number_b)
+                    ? value / updatedOrder.products[index].productprice_obj_ref.product_number_b
+                    : parseFloat(value / updatedOrder.products[index].productprice_obj_ref.product_number_b).toFixed(4);
+            }
+            updatedProducts[index].order_product_gross_amount = (value * updatedOrder.products[index].productprice_obj_ref.product_price_unit_b).toFixed(2);
+        }
+    
+        // Calculate updatedTotalAmount using updatedProducts
+        let updatedTotalAmount = (updatedProducts.reduce((total, prod) => (
+            total + (Number(prod.order_product_gross_amount) || 0)
+        ), 0) * 1.1).toFixed(2);
+    
+        // Dispatch the updated state with a plain object
+        setUpdatedOrder({
+            ...updatedOrder,
+            order_total_amount: Number(updatedTotalAmount),
+            products: updatedProducts,
+        });
+    };
+    const handleRemoveItem = (index) => {
+        const updatedItems = updatedOrder.products.filter((_, idx) => idx !== index);
+
+        if (updatedItems.length === 0) {
+            setUpdatedOrder({
+                ...updatedOrder,
+                order_total_amount: 0,
+                products: updatedItems
+            })
+        } else {
+            setUpdatedOrder({
+                ...updatedOrder,
+                products: updatedItems
+            })
+        }        
+    }
+    const handleViewPriceVersion = (supplierId, targetProductId) => {
+        setNewProductPrice({
+            product_obj_ref: targetProductId,
+            product_unit_a: '',
+            product_number_a: '',
+            product_price_unit_a: '',
+            product_unit_b: '',
+            product_number_b: '',
+            product_price_unit_b: '',
+            price_fixed: false,
+            product_effective_date: updatedOrder.order_date.split('T')[0], // Immediately set the new value
+            projects: [updatedOrder.project._id]
+        });
+        handleTogglePriceModal();
+        fetchProductDetails(supplierId, targetProductId);
+    }
 
     //Component's render    
     useEffect(() => {
@@ -460,7 +671,7 @@ const NewInvoiceForm = () => {
         {/* Modal overlay */}
         {showSelectionModal && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white w-3/4 h-3/4 rounded-lg shadow-lg relative">
+                <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
                     
                     {/* Modal Header */}
                     <div className="flex justify-between items-center p-3 border-b bg-slate-100">
@@ -476,7 +687,7 @@ const NewInvoiceForm = () => {
                     </div>
 
                     {/* Modal Body */}
-                    <div className="p-3">
+                    <div className="p-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
                         <div className="flex justify-between">
                             <input
                                 type="text"
@@ -518,11 +729,11 @@ const NewInvoiceForm = () => {
                                 { purchaseOrderState && purchaseOrderState.filter(order => 
                                     order.order_ref.toLowerCase().includes(searchOrderTerm) && 
                                     order.supplier._id === newInvoice.supplier
-                                ).slice(0, 10).length > 0 ? (
+                                ).length > 0 ? (
                                     purchaseOrderState.filter(order => 
                                         order.order_ref.toLowerCase().includes(searchOrderTerm) &&
                                         order.supplier._id === newInvoice.supplier
-                                    ).slice(0, 10).map((order, index) => (
+                                    ).map((order, index) => (
                                         <tr key={index}>
                                             <td className="border border-gray-300 p-2">
                                                 <input 
@@ -553,7 +764,7 @@ const NewInvoiceForm = () => {
                     </div>
 
                     {/* Modal Buttons */}
-                    <div className="flex justify-end p-3 absolute bottom-0 right-0">
+                    <div className="flex justify-end p-3">
                         <button
                             onClick={handleToggleSelectionModal}
                             className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
@@ -578,7 +789,7 @@ const NewInvoiceForm = () => {
     <div>
         {showProductPriceModal && (
             <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-                <div className="bg-white w-auto rounded-lg shadow-lg">
+                <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
                     {/* Modal Header */}
                     <div className="flex justify-between items-center p-3 border-b bg-slate-100">
                         <h2 className="text-xl font-bold">Product Prices</h2>
@@ -593,11 +804,14 @@ const NewInvoiceForm = () => {
                     </div>
 
                     {/* Modal Body */}
-                    <div className="p-3">
+                    <div className="p-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
                     { isFetchProductDetailsLoading ? (<div>Loading...</div>) : 
-                     Array.isArray(productState) && productState.length > 0 ? (
+                     Array.isArray(productPriceState) && productPriceState.length > 0 ? (
                         <>
-                        <h2 className="text-sm mb-1">Selected: {productState[0].product.product_name} [SKU: {productState[0].product.product_sku}]</h2>
+                        <h2 className="text-lg font-semibold mb-3 bg-indigo-50 px-2 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+                            <span>{productPriceState[0].product.product_name}</span> 
+                            <span className="text-xs text-gray-500 ml-2">[SKU: {productPriceState[0].product.product_sku}]</span>
+                        </h2>
                         <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
                             <thead className="bg-indigo-200 text-center">
                                 <tr>
@@ -609,7 +823,7 @@ const NewInvoiceForm = () => {
                                 </tr>
                             </thead>
                             <tbody className='text-center'>
-                            {productState.map((item, index) => (
+                            {productPriceState.map((item, index) => (
                                 <tr key={index}>
                                     <td className="border border-gray-300 px-2 py-1">{formatDate(item.productPrice.product_effective_date)}</td>
                                     <td className="border border-gray-300 px-2 py-1">
@@ -640,7 +854,7 @@ const NewInvoiceForm = () => {
                     }
                     </div>
                     {/* Modal Buttons */}
-                    <div className="flex justify-end p-3 border-t">
+                    <div className="flex justify-end p-3">
                         <button
                             onClick={handleTogglePriceModal}
                             className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
@@ -995,10 +1209,10 @@ const NewInvoiceForm = () => {
     <div>
     {showEditOrderModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-5">
-            <div className="bg-white w-auto rounded-lg shadow-lg">
+            <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-                    <h2 className="text-xl font-bold">EDIT PURCHASE ORDER: 3017</h2>
+                    <h2 className="text-xl font-bold">EDIT PURCHASE ORDER: {updatedOrder.order_ref}</h2>
                     <button
                         onClick={handleToggleEditOrderModal}
                         className="text-gray-500 hover:text-gray-800"
@@ -1011,12 +1225,12 @@ const NewInvoiceForm = () => {
 
                 {/* Modal Body */}
                 <div className="p-2 grid grid-cols-2">
-                    <div className="p-2">
+                    <div className="p-2 max-h-[70vh] overflow-y-auto thin-scrollbar">
                         {/* disabled details */}
                         <div className="grid grid-cols-3 text-sm">
-                            <div><span className="font-bold">Purchase Order No:</span> 3017</div>
-                            <div><span className="font-bold">Project:</span> QUEENSBRIDGE</div>
-                            <div><span className="font-bold">Supplier:</span> Bell Plaster</div>
+                            <div><span className="font-bold">Purchase Order No:</span> {updatedOrder.order_ref}</div>
+                            <div><span className="font-bold">Project:</span> {updatedOrder.project.project_name}</div>
+                            <div><span className="font-bold">Supplier:</span> {updatedOrder.supplier.supplier_name}</div>
                         </div>
                         {/* products selection */}
                         <div className="container p-0 border-2 shadow-md bg-slate-50">
@@ -1025,42 +1239,53 @@ const NewInvoiceForm = () => {
                                     type="text"
                                     className="form-control text-xs mb-1 col-span-2"
                                     placeholder="Search products..."
-                                    value={``}
-                                    onChange={() => {}}
+                                    value={searchProductTerm}
+                                    onChange={(e) => setSearchProductTerm(e.target.value)}
                                 />
                                 <div>
                                     <select
                                     className="form-control text-xs shadow-sm cursor-pointer opacity-95"
                                     name="product_types"
-                                    value={`selectedProductType`}
-                                    onChange={() => {}}
+                                    value={selectedProductType}
+                                    onChange={(e) => setSelectedProductType(e.target.value)}
                                     >
                                     <option value="">Filter by Product Type...</option>
+                                    {distinctProductTypes.map((productType, index) => (
+                                    <option key={index} value={productType}>
+                                        {productType}
+                                    </option>
+                                    ))}
                                     </select>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-sm">
+                            <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-xs">
                                 <div className='p-1'><label>SKU</label></div>
                                 <div className='p-1'><label>Name</label></div>
                                 <div className='p-1'><label>Unit A</label></div>
                                 <div className='p-1'><label>Unit B</label></div>
                                 <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
                             </div>
-                            <div className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100" title='Add to order'>
-                                <div>{`data`}</div>
-                                <div>{`data`}</div>
-                                <div>{`data`}<span className='ml-2 opacity-50'>{`data`}</span></div>
-                                <div>{`data`}<span className='ml-2 opacity-50'>{`data`}</span></div>
+                            { productState ? filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).map((product, index) => (
+                            <div className="grid grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100" title='Add to order'>
+                                <div>{product.product.product_sku}</div>
+                                <div>{product.product.product_name}</div>
+                                <div>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
+                                <div>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
                                 <div className='grid grid-cols-3 gap-2 p-1'>
-                                    <label className="col-span-2">{`data`}</label>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => {}}>
+                                    <label className="col-span-2">{product.product.product_types}</label>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                     </svg>
                                 </div>
                             </div>
+                            )) : (
+                                <div className='border shadow-sm text-center'>
+                                    <p className='p-1'>Select a supplier...</p>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="p-2 mt-3">
+                    <div className="p-2 mt-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
                         {/* added products */}
                         <div className='bg-gray-100 border rounded-lg shadow-sm'>
                             <div className="border-0 rounded-lg">
@@ -1078,16 +1303,17 @@ const NewInvoiceForm = () => {
                                     </tr>
                                     </thead>
                                     <tbody className="text-center">
+                                        {updatedOrder.products && updatedOrder.products.map((prod, index) => (
                                         <tr>
-                                            <td>{`data`}</td>
-                                            <td>{`data`}</td>
+                                            <td>{prod.product_obj_ref.product_sku}</td>
+                                            <td>{prod.product_obj_ref.product_name}</td>
                                             <td>
                                                 <input
                                                 type="text"
                                                 className="form-control text-xs px-1 py-0.5" 
                                                 name="order_product_location" 
-                                                value={`data`} 
-                                                onChange={() => {}}
+                                                value={prod.order_product_location} 
+                                                onChange={(e) => handleEditInputChange(e, index, true)}
                                                 placeholder="Ex: Level 2"
                                                 required
                                                 onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
@@ -1099,8 +1325,8 @@ const NewInvoiceForm = () => {
                                                 <input
                                                     type="number"
                                                     name="order_product_qty_a" 
-                                                    value={`data`} 
-                                                    onChange={() => {}}
+                                                    value={prod.order_product_qty_a} 
+                                                    onChange={(e) => handleQtyChange(e, index)}
                                                     min={0}
                                                     step={0.0001}
                                                     required
@@ -1109,7 +1335,7 @@ const NewInvoiceForm = () => {
                                                     className="px-1 py-0.5 ml-1 col-span-2 text-xs"
                                                 />
                                                 <label className="text-xs opacity-50 col-span-1 text-nowrap">
-                                                    {`data`}
+                                                {prod.productprice_obj_ref.product_unit_a}
                                                 </label>
                                                 </div>
                                             </td>
@@ -1118,8 +1344,8 @@ const NewInvoiceForm = () => {
                                                 <input
                                                     type="number"
                                                     name="order_product_qty_b" 
-                                                    value={`data`} 
-                                                    onChange={() => {}}
+                                                    value={prod.order_product_qty_b} 
+                                                    onChange={(e) => handleQtyChange(e, index)}
                                                     min={0}
                                                     step={0.0001}
                                                     required
@@ -1128,26 +1354,35 @@ const NewInvoiceForm = () => {
                                                     className="px-1 py-0.5 ml-1 col-span-2 text-xs"
                                                 />
                                                 <label className="text-xs opacity-50 col-span-1 text-nowrap">
-                                                    {`data`}
+                                                    {prod.productprice_obj_ref.product_unit_b}
                                                 </label>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <label>${`data`}</label>
+                                            <td className="relative">
+                                                <label>${prod.order_product_price_unit_a}</label>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3 cursor-pointer absolute top-0 right-0" onClick={() => {handleViewPriceVersion(updatedOrder.supplier._id, prod.product_obj_ref._id)}}>
+                                                    <title>View product price version</title>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                </svg>
                                             </td>
                                             <td>
                                                 <label>
-                                                ${`data`}
+                                                ${(
+                                                    prod.productprice_obj_ref.product_number_a === 1 
+                                                    ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * prod.productprice_obj_ref.product_number_a) 
+                                                    : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
+                                                ).toFixed(2)}
                                                 </label>
                                             </td>
                                             <td>
-                                                <button type="button" onClick={() => {}} className="btn btn-danger p-1">
+                                                <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                                 </svg>
                                                 </button>
                                             </td>
                                         </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
@@ -1178,6 +1413,7 @@ const NewInvoiceForm = () => {
             </div>
         </div>
     )}
+    { productPriceModal }
     </div>
     );
 
@@ -1199,15 +1435,19 @@ const NewInvoiceForm = () => {
                         </button>
                     </div>
                     {/* Modal Body */}
+                    { updatedOrder.products.filter(prod => prod.product_obj_ref._id === newProductPrice.product_obj_ref).map(prod => (
                     <div className="p-2">
-                        <h2 className="text-sm px-3 pt-1">Selected: {productState[0].product.product_name}  [SKU: {productState[0].product.product_sku}]</h2>
+                        <h2 className="text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+                            <span>{prod.product_obj_ref.product_name}</span> 
+                            <span className="text-xs text-gray-500 ml-2">[SKU: {prod.product_obj_ref.product_sku}]</span>
+                        </h2>
                         <div className='grid grid-cols-3 gap-x-10 gap-y-4 p-3 mb-1'>
                             <div className='border-2 rounded p-2'>
                                 <div className="mb-3">
                                     <label className="form-label font-bold">*Number-A:</label>
                                     <input 
                                         type='number'
-                                        className="form-control" 
+                                        className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                         name="product_number_a" 
                                         value={newProductPrice.product_number_a} 
                                         onChange={handleNewProductPriceInput}
@@ -1217,19 +1457,21 @@ const NewInvoiceForm = () => {
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Enter number-A')}
                                         onInput={(e) => e.target.setCustomValidity('')}
+                                        placeholder={prod.productprice_obj_ref.product_number_a}
                                     />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label font-bold">*Unit-A:</label>
                                     <input 
                                         type='text'
-                                        className="form-control" 
+                                        className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                         name="product_unit_a" 
                                         value={newProductPrice.product_unit_a} 
                                         onChange={handleNewProductPriceInput}
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Enter unit-A')}
                                         onInput={(e) => e.target.setCustomValidity('')}
+                                        placeholder={prod.productprice_obj_ref.product_unit_a}
                                     />
                                     <label className='text-xs italic text-gray-400'>Ex: Box, Pack, Carton</label>
                                 </div>
@@ -1241,7 +1483,7 @@ const NewInvoiceForm = () => {
                                         </svg>
                                         <input 
                                             type='number'
-                                            className="form-control flex-1 pl-2 border-0" 
+                                            className="form-control placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0" 
                                             name="product_price_unit_a" 
                                             value={newProductPrice.product_price_unit_a} 
                                             onChange={handleNewProductPriceInput}
@@ -1250,6 +1492,7 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Enter unit-A price')}
                                             onInput={(e) => e.target.setCustomValidity('')}
+                                            placeholder={prod.productprice_obj_ref.product_price_unit_a}
                                         />
                                     </div>
                                 </div>
@@ -1259,7 +1502,7 @@ const NewInvoiceForm = () => {
                                     <label className="form-label font-bold">*Number-B:</label>
                                     <input 
                                         type='number'
-                                        className="form-control" 
+                                        className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                         name="product_number_b" 
                                         value={newProductPrice.product_number_b} 
                                         onChange={handleNewProductPriceInput}
@@ -1269,19 +1512,21 @@ const NewInvoiceForm = () => {
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Enter number-B')}
                                         onInput={(e) => e.target.setCustomValidity('')}
+                                        placeholder={prod.productprice_obj_ref.product_number_b}
                                     />
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label font-bold">*Unit-B:</label>
                                     <input 
                                         type='text'
-                                        className="form-control" 
+                                        className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                         name="product_unit_b" 
                                         value={newProductPrice.product_unit_b} 
                                         onChange={handleNewProductPriceInput}
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Enter unit-B')}
                                         onInput={(e) => e.target.setCustomValidity('')}
+                                        placeholder={prod.productprice_obj_ref.product_unit_b}
                                     />
                                     <label className='text-xs italic text-gray-400'>Ex: units, length, each, sheet</label>
                                 </div>
@@ -1293,7 +1538,7 @@ const NewInvoiceForm = () => {
                                         </svg>
                                         <input 
                                             type='number'
-                                            className="form-control flex-1 pl-2 border-0" 
+                                            className="form-control placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0" 
                                             name="product_price_unit_b" 
                                             value={newProductPrice.product_price_unit_b} 
                                             onChange={handleNewProductPriceInput}
@@ -1302,6 +1547,7 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Enter unit-B price')}
                                             onInput={(e) => e.target.setCustomValidity('')}
+                                            placeholder={prod.productprice_obj_ref.product_price_unit_b}
                                         />
                                     </div>
                                 </div>
@@ -1318,7 +1564,7 @@ const NewInvoiceForm = () => {
                                         {newProductPrice.projects.length > 0 ? `x${newProductPrice.projects.length} Projects Selected` : `Select Projects`}
                                     </button>
                                     {isToggleProjectDropdown && (
-                                        <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto">
+                                        <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar">
                                             <ul className="py-1">
                                                 {projectState && projectState.length > 0 && projectState.map((project,index) => (
                                                     <li key={index} className="flex items-center px-4 py-2 hover:bg-gray-100">
@@ -1341,7 +1587,7 @@ const NewInvoiceForm = () => {
                             </div>
                             {/* **** PRICE EFFECTIVE DATE **** */}
                             <div>
-                                <label className="form-label font-bold">Price effective date:</label>
+                                <label className="form-label font-bold">*Price effective date:</label>
                                 <input 
                                     type='date'
                                     className="form-control" 
@@ -1350,6 +1596,7 @@ const NewInvoiceForm = () => {
                                     onChange={handleNewProductPriceInput}
                                     required
                                 />
+                                <p className='text-xs italic text-gray-400 mt-2'>Product price will take effect before order date: {formatDate(newProductPrice.product_effective_date)}</p>
                             </div>
                             {/* **** PRICE FIXED (?) **** */}
                             <div>
@@ -1364,6 +1611,7 @@ const NewInvoiceForm = () => {
                             </div>
                         </div>
                     </div>
+                    ))}
                     {/* Modal Buttons */}
                     <div className="flex justify-end p-3 border-t">
                         <button
@@ -1410,22 +1658,59 @@ const NewInvoiceForm = () => {
         return <EmployeeDetailsSkeleton />
     }
 
-    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError) {
-        if (fetchSupplierError.includes("Session expired") || fetchOrderError.includes("Session expired") || fetchProductDetailsError.includes("Session expired")) {
-            return <div><SessionExpired /></div>;
-        }
+    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState) {
+
+        const errorMessages = [
+            fetchSupplierError,
+            fetchOrderError,
+            fetchProductDetailsError,
+            addPriceErrorState,
+            fetchProjectError,
+            fetchProductsErrorState,
+        ];
+        
+        const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
+          
+        if (isSessionExpired) {
         return (
-        <div>
-            <p>Error: { fetchSupplierError || fetchOrderError}</p>
-        </div>
+            <div>
+            <SessionExpired />
+            </div>
         );
+        }
+
+        else {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
+                    <div className="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                        </svg>
+                        <h2 className="text-2xl font-bold">Ooops...Something went wrong!</h2>
+                    </div>
+                    <p className="mt-4 text-lg text-center">
+                        Error: { fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState }
+                    </p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            );
+        }
     }
+    
 
     console.log("currentOrder:", currentOrder)
+    console.log("productPriceState:", productPriceState)
+    console.log("updatedOrder:", updatedOrder)
+    console.log("newProductPrice:", newProductPrice)
 
     return (
         <div>
-            <div className="w-screen h-[90vh] overflow-hidden bg-neutral-50 items-center justify-center">
+            <div className="w-screen h-screen bg-neutral-50 items-center justify-center">
                 {/* HEADER */}
                 <div className='mx-3 mt-3 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg'>
                     <label>NEW INVOICE</label>
@@ -1537,7 +1822,7 @@ const NewInvoiceForm = () => {
                             <div className="font-bold flex justify-center">
                                 <label>Purchase Order: {currentOrder ? currentOrder.order_ref : `not selected`}</label>
                                 { currentOrder && 
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="ml-2 size-4 cursor-pointer" onClick={handleToggleEditOrderModal}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="ml-2 size-4 cursor-pointer" onClick={() => {handleToggleEditOrderModal(); setUpdatedOrder(currentOrder);}}>
                                     <title>Edit purchase order</title>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
@@ -1590,12 +1875,8 @@ const NewInvoiceForm = () => {
                                             />
                                             <label className="ml-2 text-xs opacity-50 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2 relative">
+                                    <td className="border border-gray-300 px-3 py-2">
                                         <label>$ {prod.productprice_obj_ref.product_price_unit_a}</label>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 cursor-pointer absolute top-0 right-0" onClick={() => {handleTogglePriceModal(); fetchProductDetails(currentOrder.supplier._id, prod.product_obj_ref._id);}}>
-                                            <title>View product price version</title>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                        </svg>
                                     </td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {(prod.order_product_qty_a * prod.productprice_obj_ref.product_price_unit_a).toFixed(2)}</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoice.products[index].invoice_product_gross_amount_a}</td>
@@ -1921,7 +2202,6 @@ const NewInvoiceForm = () => {
                     <div></div>
                 </form>
                 { orderSelectionModal }
-                { productPriceModal }
                 { createProductModal }
                 { editOrderModal }
                 { createPriceModal }

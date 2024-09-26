@@ -266,7 +266,7 @@ const NewProductForm = () => {
                             { isInputCustomOpen && <div>
                                 <input 
                                     type='text'
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="alias" 
                                     value={productDetailsState.alias} 
                                     placeholder='custom alias...'

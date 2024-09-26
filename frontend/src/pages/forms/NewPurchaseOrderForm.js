@@ -589,7 +589,7 @@ const NewPurchaseOrderForm = () => {
                             <div className="grid grid-cols-3 m-2 gap-x-1">
                                 <input
                                     type="text"
-                                    className="form-control mb-1 col-span-2"
+                                    className="form-control mb-1 col-span-2 placeholder-gray-400 placeholder-opacity-50"
                                     placeholder="Search products..."
                                     value={searchProductTerm}
                                     onChange={(e) => setSearchProductTerm(e.target.value)}
@@ -668,7 +668,7 @@ const NewPurchaseOrderForm = () => {
                                         <td>
                                             <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs" 
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
                                             name="order_product_location" 
                                             value={prod.order_product_location} 
                                             onChange={(e) => handleInputChange(e, index, true)}
@@ -740,7 +740,7 @@ const NewPurchaseOrderForm = () => {
                                     <td>
                                         <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs" 
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
                                             name="custom_product_name" 
                                             value={cproduct.custom_product_name} 
                                             onChange={(e) => handleInputChange(e, index, false, true)}
@@ -753,7 +753,7 @@ const NewPurchaseOrderForm = () => {
                                     <td>
                                         <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs"  
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50"  
                                             name="custom_product_location" 
                                             value={cproduct.custom_product_location} 
                                             onChange={(e) => handleInputChange(e, index, false, true)}
@@ -881,7 +881,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="my-2">
                         <label className="form-label font-bold">Internal comments:</label>
                         <textarea 
-                            className="form-control" 
+                            className="form-control placeholder-gray-400 placeholder-opacity-50" 
                             name="order_internal_comments" 
                             value={orderState.order_internal_comments} 
                             onChange={handleInputChange}
@@ -893,7 +893,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="my-2">
                         <label className="form-label font-bold">Notes to supplier:</label>
                         <textarea
-                            className="form-control bg-yellow-200" 
+                            className="form-control bg-yellow-200 placeholder-gray-500 placeholder-opacity-50" 
                             name="order_notes_to_supplier" 
                             value={orderState.order_notes_to_supplier} 
                             onChange={handleInputChange}

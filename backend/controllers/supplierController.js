@@ -202,8 +202,8 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
         },
         {
             $sort: {
+                'productPrice.product_effective_date': -1, // Sort by productPrice's product_effective_date in descending order
                 'productPrice.createdAt': -1, // Sort by productPrice's createdAt in descending order
-                'productPrice.product_effective_date': -1 // Sort by productPrice's product_effective_date in descending order
             }
         }
     ]);

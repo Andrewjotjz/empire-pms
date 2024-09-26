@@ -585,7 +585,7 @@ const UpdatePurchaseOrderForm = () => {
                                 </tr>
                                 </thead>
                                 <tbody className="text-center">
-                                {purchaseOrderState.products && purchaseOrderState.products.map((prod, index) => (
+                                    {purchaseOrderState.products && purchaseOrderState.products.map((prod, index) => (
                                     <tr key={index}>
                                         <td>{prod.product_obj_ref.product_sku}</td>
                                         <td>{prod.product_obj_ref.product_name}</td>
