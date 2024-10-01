@@ -11,6 +11,7 @@ import { setProductState } from "../../redux/productSlice";
 
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
 import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
+import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 import SessionExpired from "../../components/SessionExpired"
@@ -20,6 +21,7 @@ const NewInvoiceForm = () => {
     const dispatch = useDispatch();
     const { addPrice, isAddPriceLoadingState, addPriceErrorState } = useAddProductPrice();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
+    const { updatePurchaseOrder, isUpdateLoadingState, updateOrderErrorState } = useUpdatePurchaseOrder();
     
     //Component's state declaration
     const [searchOrderTerm, setSearchOrderTerm] = useState('');
@@ -38,6 +40,7 @@ const NewInvoiceForm = () => {
     const [showEditOrderModal, setShowEditOrderModal] = useState(false);
     const [showCreatePriceModal, setShowCreatePriceModal] = useState(false);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+    const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
 
     const [isFetchSupplierLoading, setIsFetchSupplierLoading] = useState(true);
     const [fetchSupplierError, setFetchSupplierError] = useState(null);
@@ -389,7 +392,7 @@ const NewInvoiceForm = () => {
             return
         }
         fetchSelectedPurchaseOrder(selectedOrder)
-        handleToggleSelectionModal(false);
+        setShowSelectionModal(false);
     };
     const handleCreateNewPrice = () => {
         fetchProjects();
@@ -415,6 +418,7 @@ const NewInvoiceForm = () => {
             return { ...prevState, projects: updatedProjects };
         });
     };
+    //! submit new price
     const handleSubmitNewPrice = async (event) => {
         event.preventDefault();
 
@@ -428,14 +432,13 @@ const NewInvoiceForm = () => {
 
         if (newProductPrice.product_number_a !== '' && showCreatePriceModal === true) {
             addPrice(newProductPrice);
-            setShowCreatePriceModal(false);
-            setShowProductPriceModal(true);
             fetchProductDetails(updatedOrder.supplier._id, newProductPrice.product_obj_ref);
-            resetNewProductPrice();
             fetchProductsBySupplier(updatedOrder.supplier._id)
+            setShowUpdateConfirmationModal(true);
         }
 
     };
+    //! add item
     const handleAddItem = (product) => {
         // Create the updated products array
         const updatedProducts = [...updatedOrder.products, {
@@ -557,6 +560,7 @@ const NewInvoiceForm = () => {
             products: updatedProducts,
         });
     };
+    //! remove item
     const handleRemoveItem = (index) => {
         const updatedItems = updatedOrder.products.filter((_, idx) => idx !== index);
 
@@ -573,6 +577,7 @@ const NewInvoiceForm = () => {
             })
         }        
     }
+    //! view item price
     const handleViewPriceVersion = (supplierId, targetProductId) => {
         setNewProductPrice({
             product_obj_ref: targetProductId,
@@ -589,8 +594,83 @@ const NewInvoiceForm = () => {
         handleTogglePriceModal();
         fetchProductDetails(supplierId, targetProductId);
     }
+    // const handleAutomation = (updatedProductId) => {
+    //     //remove item from the list
+    //     const updatedItems = updatedOrder.products.filter((item) => item.product_obj_ref._id !== updatedProductId);
+    //     setUpdatedOrder({
+    //         ...updatedOrder,
+    //         products: updatedItems
+    //     })
+
+    //     //add item back to the list
+    //     const product = filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).find(product => product.product._id === updatedProductId)
+    //     console.log("product", product);
+
+    //     const updatedProducts = [...updatedOrder.products, {
+    //         product_obj_ref: {
+    //             _id: product.product._id,
+    //             product_name: product.product.product_name,
+    //             product_sku: product.product.product_sku
+    //         },
+    //         productprice_obj_ref: product.productPrice,
+    //         order_product_location: '',
+    //         order_product_qty_a: 0, // Ensure all fields are initialized properly
+    //         order_product_qty_b: 0,
+    //         order_product_price_unit_a: product.productPrice.product_price_unit_a,
+    //         order_product_gross_amount: 0
+    //     }];
+    //     console.log("updatedProductss:", updatedProducts)
+
+    //     setUpdatedOrder({
+    //         ...updatedOrder,
+    //         products: [...updatedOrder.products, updatedProducts]
+    //     });
+    // }
 
     //Component's render    
+    
+    const handleAutomation = (updatedProductId) => {
+        // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
+        const updatedItems = updatedOrder.products.filter(
+            (item) => item.product_obj_ref._id !== updatedProductId
+        );
+    
+        // Step 2: Find the product that needs to be re-added (optimized filtering)
+        const product = filterProductsBySearchTerm()
+            .find(product => product.product._id === updatedProductId);
+        
+        if (!product) {
+            console.log("Product not found!");
+            return;
+        }
+    
+        console.log("product", product);
+    
+        // Step 3: Create the new product object with required details
+        const newProduct = {
+            product_obj_ref: {
+                _id: product.product._id,
+                product_name: product.product.product_name,
+                product_sku: product.product.product_sku
+            },
+            productprice_obj_ref: product.productPrice,
+            order_product_location: '',
+            order_product_qty_a: 0,
+            order_product_qty_b: 0,
+            order_product_price_unit_a: product.productPrice.product_price_unit_a,
+            order_product_gross_amount: 0
+        };
+    
+        // Step 4: Update the products list with the new product
+        const updatedProducts = [...updatedItems, newProduct];
+        console.log("updatedProducts:", updatedProducts);
+    
+        setUpdatedOrder({
+            ...updatedOrder,
+            products: updatedProducts
+        });
+    };    
+    
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -1209,7 +1289,7 @@ const NewInvoiceForm = () => {
     <div>
     {showEditOrderModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-5">
-            <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
+            <form className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg" onSubmit={() => {updatePurchaseOrder(updatedOrder); handleToggleEditOrderModal(); handleAddToInvoice();}}>
                 {/* Modal Header */}
                 <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
                     <h2 className="text-xl font-bold">EDIT PURCHASE ORDER: {updatedOrder.order_ref}</h2>
@@ -1304,20 +1384,20 @@ const NewInvoiceForm = () => {
                                     </thead>
                                     <tbody className="text-center">
                                         {updatedOrder.products && updatedOrder.products.map((prod, index) => (
-                                        <tr>
+                                        <tr className={prod.product_obj_ref._id === newProductPrice.product_obj_ref ? "table-info" : ""}>
                                             <td>{prod.product_obj_ref.product_sku}</td>
                                             <td>{prod.product_obj_ref.product_name}</td>
                                             <td>
                                                 <input
-                                                type="text"
-                                                className="form-control text-xs px-1 py-0.5" 
-                                                name="order_product_location" 
-                                                value={prod.order_product_location} 
-                                                onChange={(e) => handleEditInputChange(e, index, true)}
-                                                placeholder="Ex: Level 2"
-                                                required
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
+                                                    type="text"
+                                                    className="form-control text-xs px-1 py-0.5" 
+                                                    name="order_product_location" 
+                                                    value={prod.order_product_location} 
+                                                    onChange={(e) => handleEditInputChange(e, index, true)}
+                                                    placeholder="Ex: Level 2"
+                                                    required
+                                                    onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
+                                                    onInput={(e) => e.target.setCustomValidity('')}
                                                 />
                                             </td>
                                             <td>
@@ -1387,6 +1467,7 @@ const NewInvoiceForm = () => {
                                 </table>
                             </div>
                         </div>
+
                         {/* more disabled details */}
                         <div className="grid grid-cols-2 text-sm mt-1">
                             <div><span className="font-bold">Internal Comments:</span></div>
@@ -1404,13 +1485,13 @@ const NewInvoiceForm = () => {
                         CANCEL
                     </button>
                     <button
-                        onClick={() => {}}
+                        type="submit"
                         className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
                     >
                         UPDATE
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     )}
     { productPriceModal }
@@ -1653,12 +1734,32 @@ const NewInvoiceForm = () => {
             </Modal.Footer>
         </Modal>
     );
+    const updateConfirmationModal = (
+        <Modal show={showUpdateConfirmationModal} onHide={() => {setShowCreatePriceModal(false);}}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { `Update order with new price` }
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { `Do you want to update the order with this new price? Any changes you made can't be reverted.` }
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => {setShowCreatePriceModal(false); setShowUpdateConfirmationModal(false); setShowProductPriceModal(true); resetNewProductPrice();}}>
+                    Update manually
+                </Button>
+                <Button className="bg-blue-600 hover:bg-blue-600" variant="primary" onClick={(() => {handleAutomation(newProductPrice.product_obj_ref); resetNewProductPrice(); setShowCreatePriceModal(false); setShowUpdateConfirmationModal(false); setShowProductPriceModal(false);})}>
+                    { `Update automatically now` }
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
 
     if (isFetchSupplierLoading) {
         return <EmployeeDetailsSkeleton />
     }
 
-    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState) {
+    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState) {
 
         const errorMessages = [
             fetchSupplierError,
@@ -1667,6 +1768,7 @@ const NewInvoiceForm = () => {
             addPriceErrorState,
             fetchProjectError,
             fetchProductsErrorState,
+            updateOrderErrorState
         ];
         
         const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
@@ -1704,9 +1806,12 @@ const NewInvoiceForm = () => {
     
 
     console.log("currentOrder:", currentOrder)
-    console.log("productPriceState:", productPriceState)
+    // console.log("productPriceState:", productPriceState)
     console.log("updatedOrder:", updatedOrder)
-    console.log("newProductPrice:", newProductPrice)
+    // console.log("newProductPrice:", newProductPrice)
+    // if (productState) {
+    // console.log("Filtered products:", filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)))
+    // }
 
     return (
         <div>
@@ -2206,6 +2311,7 @@ const NewInvoiceForm = () => {
                 { editOrderModal }
                 { createPriceModal }
                 { confirmationModal }
+                { updateConfirmationModal }
             </div>
         </div>
     );

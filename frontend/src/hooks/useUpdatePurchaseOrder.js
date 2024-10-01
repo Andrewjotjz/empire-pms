@@ -33,10 +33,7 @@ export const useUpdatePurchaseOrder = () => {
                 if (!res.ok) {
                     throw new Error('Failed to PUT purchase order details')
                 }
-                if (res.ok) {
-                    // navigate client to order details page
-                    navigate(`/EmpirePMS/order/${purchaseOrderState._id}`)
-                
+                if (res.ok) {                
                     // push toast to notify successful login
                     toast.success("Purchase Order updated successfully", {
                         position: "bottom-right"
