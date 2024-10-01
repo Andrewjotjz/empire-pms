@@ -15,6 +15,7 @@ import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 import SessionExpired from "../../components/SessionExpired"
+import NewProductForm from "./NewProductForm";
 
 const NewInvoiceForm = () => {
     //Component's hook
@@ -461,15 +462,15 @@ const NewInvoiceForm = () => {
             products: updatedProducts
         });
     };
-    const handleEditInputChange = (event, index = null) => {
+    const handleEditInputChange = (event, index = null, isCustom = false) => {
         const { name, value } = event.target;
     
         // Get the current state
         const currentState = updatedOrder; // assuming purchaseOrderState is the correct slice
     
         let updatedState = { ...currentState };
-        let isProduct = true;
-        let isCustomProduct = true;
+        let isProduct = !isCustom;
+        let isCustomProduct = isCustom;
     
         // Handle product array updates
         if (isProduct && index !== null) {
@@ -594,41 +595,6 @@ const NewInvoiceForm = () => {
         handleTogglePriceModal();
         fetchProductDetails(supplierId, targetProductId);
     }
-    // const handleAutomation = (updatedProductId) => {
-    //     //remove item from the list
-    //     const updatedItems = updatedOrder.products.filter((item) => item.product_obj_ref._id !== updatedProductId);
-    //     setUpdatedOrder({
-    //         ...updatedOrder,
-    //         products: updatedItems
-    //     })
-
-    //     //add item back to the list
-    //     const product = filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).find(product => product.product._id === updatedProductId)
-    //     console.log("product", product);
-
-    //     const updatedProducts = [...updatedOrder.products, {
-    //         product_obj_ref: {
-    //             _id: product.product._id,
-    //             product_name: product.product.product_name,
-    //             product_sku: product.product.product_sku
-    //         },
-    //         productprice_obj_ref: product.productPrice,
-    //         order_product_location: '',
-    //         order_product_qty_a: 0, // Ensure all fields are initialized properly
-    //         order_product_qty_b: 0,
-    //         order_product_price_unit_a: product.productPrice.product_price_unit_a,
-    //         order_product_gross_amount: 0
-    //     }];
-    //     console.log("updatedProductss:", updatedProducts)
-
-    //     setUpdatedOrder({
-    //         ...updatedOrder,
-    //         products: [...updatedOrder.products, updatedProducts]
-    //     });
-    // }
-
-    //Component's render    
-    
     const handleAutomation = (updatedProductId) => {
         // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
         const updatedItems = updatedOrder.products.filter(
@@ -1383,6 +1349,7 @@ const NewInvoiceForm = () => {
                                     </tr>
                                     </thead>
                                     <tbody className="text-center">
+                                        {/* ***** REGISTERED ITEMS ***** */}
                                         {updatedOrder.products && updatedOrder.products.map((prod, index) => (
                                         <tr className={prod.product_obj_ref._id === newProductPrice.product_obj_ref ? "table-info" : ""}>
                                             <td>{prod.product_obj_ref.product_sku}</td>
@@ -1460,6 +1427,62 @@ const NewInvoiceForm = () => {
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                                 </svg>
                                                 </button>
+                                            </td>
+                                        </tr>
+                                        ))}
+                                        {/* ***** CUSTOM ITEMS ***** */}
+                                        {updatedOrder.custom_products.map((cproduct, index) => (
+                                        <tr key={index}>
+                                            <td>Custom {index + 1}</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    className="form-control px-1 py-0.5 text-xs" 
+                                                    name="custom_product_name" 
+                                                    value={cproduct.custom_product_name} 
+                                                    onChange={(e) => handleEditInputChange(e,index,true)}
+                                                    placeholder="Custom name"
+                                                    onInvalid={(e) => e.target.setCustomValidity('Enter custom item name')}
+                                                    onInput={(e) => e.target.setCustomValidity('')}
+                                                    required
+                                                />
+                                            </td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    className="form-control px-1 py-0.5 text-xs"  
+                                                    name="custom_product_location" 
+                                                    value={cproduct.custom_product_location} 
+                                                    onChange={(e) => handleEditInputChange(e,index,true)}
+                                                    placeholder="Ex: Level 2"
+                                                    onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
+                                                    onInput={(e) => e.target.setCustomValidity('')}
+                                                />
+                                            </td>
+                                            <td>
+                                                <div className="grid grid-cols-3 items-center border rounded w-28">
+                                                    <input
+                                                        type='number'
+                                                        name="custom_order_qty" 
+                                                        value={cproduct.custom_order_qty} 
+                                                        onChange={(e) => handleEditInputChange(e,index,true)}
+                                                        min={0}
+                                                        step={1}
+                                                        onInvalid={(e) => e.target.setCustomValidity('Enter custom-qty-A')}
+                                                        onInput={(e) => e.target.setCustomValidity('')}
+                                                        className="px-1 py-0.5 ml-1 col-span-2 text-xs"
+                                                    />
+                                                    <label className="text-xs opacity-50 col-span-1 text-nowrap">UNIT</label>
+                                                </div>
+                                            </td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={handleToggleCreateProductModal}>
+                                                    <title>Register custom as New Product</title>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                                </svg>
                                             </td>
                                         </tr>
                                         ))}
@@ -1939,7 +1962,6 @@ const NewInvoiceForm = () => {
                         <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
                             <thead className="bg-indigo-200 text-center">
                                 <tr>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Actions</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-14">SKU</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-64">Name</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Location</th>
@@ -1955,10 +1977,6 @@ const NewInvoiceForm = () => {
                                 {/* registered products */}
                                 { currentOrder.products && currentOrder.products.map((prod,index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 px-3 py-2">
-                                        <div className="flex justify-center">
-                                        </div>
-                                    </td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_sku}</td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_name}</td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.order_product_location}</td>
@@ -1990,14 +2008,6 @@ const NewInvoiceForm = () => {
                                 {/* custom products */}
                                 { currentOrder.custom_products && currentOrder.custom_products.map((cusprod,index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 px-3 py-2">
-                                        <div className="flex justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={handleToggleCreateProductModal}>
-                                                <title>Register custom as New Product</title>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                                            </svg>
-                                        </div>
-                                    </td>
                                     <td className="border border-gray-300 px-3 py-2">-</td>
                                     <td className="border border-gray-300 px-3 py-2">{cusprod.custom_product_name}</td>
                                     <td className="border border-gray-300 px-3 py-2">{cusprod.custom_product_location}</td>
@@ -2026,7 +2036,7 @@ const NewInvoiceForm = () => {
                                 ))}
                                 {/* calculation table */}
                                 <tr>
-                                    <td colSpan={6}></td>
+                                    <td colSpan={5}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Delivery fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -2044,7 +2054,7 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
+                                    <td colSpan={5}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Strapping/Pallet/Cutting fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -2062,7 +2072,7 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
+                                    <td colSpan={5}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Credit:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -2079,7 +2089,7 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
+                                    <td colSpan={5}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {
                                         (newInvoice.products.reduce((total, prod) => (
@@ -2092,7 +2102,7 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {(newInvoice.invoiced_calculated_total_amount_incl_gst/1.1).toFixed(2)}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
+                                    <td colSpan={5}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount (incl GST):</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {
                                         ((newInvoice.products.reduce((total, prod) => (
@@ -2106,7 +2116,7 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoice.invoiced_calculated_total_amount_incl_gst}</td>
                                 </tr>
                                 <tr className="bg-indigo-100">
-                                    <td colSpan={6}></td>
+                                    <td colSpan={5}></td>
                                     <td className="px-2 py-2 font-bold text-end border border-gray-400">Total Raw Amount (incl GST):</td>
                                     <td className="px-3 py-2 text-center" colSpan={2}>$
                                         <input
