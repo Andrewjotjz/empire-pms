@@ -686,9 +686,6 @@ const NewInvoiceForm = () => {
 
         // Step 5: Remove custom product from list
         handleRemoveCustomItem(targetIndex);
-
-        handleToggleEditOrderModal();
-        handleToggleEditOrderModal();
     }
     
     useEffect(() => {
@@ -1184,7 +1181,12 @@ const NewInvoiceForm = () => {
                                         {updatedOrder.custom_products.map((cproduct, index) => (
                                         <tr key={index}>
                                             <td>
-                                                Custom {index + 1}
+                                                <div className="flex justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={() => {handleToggleCreateProductModal(); setTargetIndex(index);}}>
+                                                        <title>Register custom as New Product</title>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                                    </svg>
+                                                </div>
                                             </td>
                                             <td>
                                                 <input
@@ -1229,14 +1231,7 @@ const NewInvoiceForm = () => {
                                             </td>
                                             <td>-</td>
                                             <td>-</td>
-                                            <td>
-                                                <div className="flex justify-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={() => {handleToggleCreateProductModal(); setTargetIndex(index);}}>
-                                                        <title>Register custom as New Product</title>
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                                                    </svg>
-                                                </div>
-                                            </td>
+                                            <td>-</td>
                                             <td>
                                                 <button type="button" onClick={() => handleRemoveCustomItem(index)} className="btn btn-danger p-1">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
@@ -1254,8 +1249,8 @@ const NewInvoiceForm = () => {
                         {/* more disabled details */}
                         <div className="grid grid-cols-2 text-sm mt-1">
                             <div><span className="font-bold">Internal Comments:</span></div>
-                            <div className="mb-1 text-end italic"><span className="font-bold">Order Date:</span> 11/9/2024</div>
-                            <div className="col-span-2 border rounded-md p-1 mb-1 bg-gray-200">Lorem ipsum dolor sit amet. Rem nisi vero ut consequatur quia ut laudantium mollitia in sunt rerum eos vitae modi id modi quod ut minima voluptatem. Aut ipsa excepturi est quia exercitationem ea alias commodi.</div>
+                            <div className="mb-1 text-end italic"><span className="font-bold">Order Date:</span> {formatDate(updatedOrder.order_date)}</div>
+                            <div className="col-span-2 border rounded-md p-1 mb-1 bg-gray-200">{updatedOrder.order_internal_comments}</div>
                         </div>
                     </div>
                 </div>

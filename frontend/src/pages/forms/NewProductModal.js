@@ -94,10 +94,17 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
             return;
         }
 
+        // API call to create New Product
         const id = await addProduct(productDetailsState, supplierId);
         setNewProductId(id);
+
+        // So that 'productState' is updated with new product
         fetchProductsBySupplier(supplierId);
+
+        // To confirm automatic or manual
         setShowRegisterConfirmationModal(true);
+
+        //close this modal
         handleToggleCreateProductModal();
     };
     
