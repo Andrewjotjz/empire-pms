@@ -1,6 +1,5 @@
 // Import modules
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { useAddProduct } from '../../hooks/useAddProduct'; 
@@ -11,11 +10,7 @@ import EmployeePageSkeleton from "../../pages/loaders/EmployeePageSkeleton"
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import SessionExpired from '../../components/SessionExpired';
 
-const NewProductForm = () => {
-    // Component router
-    const navigate = useNavigate();
-    const location = useLocation();
-    const {supplierId, supplierName}  = location.state;
+const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProductId, setShowRegisterConfirmationModal, fetchProductsBySupplier}) => {
 
     // Component hook
     const dispatch = useDispatch();
@@ -52,8 +47,6 @@ const NewProductForm = () => {
     });
 
     // Component functions and variables
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`, {state: supplierId});
-
     const handleInputCustomToggle = () => {
         setIsInputCustomOpen(!isInputCustomOpen)
         setProductDetailsState((prevState) => ({
@@ -101,8 +94,11 @@ const NewProductForm = () => {
             return;
         }
 
-        addProduct(productDetailsState, supplierId);
-        navigate(`/EmpirePMS/supplier/${supplierId}`);
+        const id = await addProduct(productDetailsState, supplierId);
+        setNewProductId(id);
+        fetchProductsBySupplier(supplierId);
+        setShowRegisterConfirmationModal(true);
+        handleToggleCreateProductModal();
     };
     
     //Render component
@@ -166,16 +162,8 @@ const NewProductForm = () => {
     }
 
     return (
-        <div className="container mt-5"> 
-            <div className="card">
-                <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <button onClick={handleBackClick}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
-                        </svg>
-                    </button>
-                    <h1 className='mx-auto uppercase font-bold text-base'>{supplierName}: NEW PRODUCT</h1>
-                </div>
+        <div className="container"> 
+            <div className="text-xs">
                 <form className="card-body" onSubmit={handleSubmit}>
                     <div className="row">
                         {/* PRODUCT TABLE */}
@@ -239,7 +227,6 @@ const NewProductForm = () => {
                             </select>
                             <label className='text-xs italic text-gray-400'>Alias is based on the product type you select</label>
                         </div>
-                        
 
                         {/***************************** ALIAS TABLE *************************/}
                         <div className="col-md-6 mb-3">
@@ -278,7 +265,6 @@ const NewProductForm = () => {
                                 <label className='text-xs italic text-gray-400'>Don't want to create custom alias? <span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleInputCustomToggle}>Cancel</span></label>
                             </div>}
                         </div>
-                        {/***************************** ALIAS TABLE END *************************/}
 
                         {/* ********************************************* PRODUCT PRICE TABLE *********************************************** */}
                         <div className='grid grid-cols-3 gap-x-10 gap-y-4 border-4 rounded p-3 mb-1'>
@@ -475,8 +461,7 @@ const NewProductForm = () => {
                         </div>
 
                         {/* ******************************************* END OF FORM ********************************************************** */}
-                        <div className="d-flex justify-content-between mb-3">
-                            <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
+                        <div className="d-flex justify-content-end mb-3">
                             <button className="btn btn-primary" type="submit">ADD TO SUPPLIER</button>
                         </div>
                     </div>
@@ -486,4 +471,4 @@ const NewProductForm = () => {
     );
 };
 
-export default NewProductForm;
+export default NewProductModal;

@@ -358,14 +358,17 @@ const UpdatePurchaseOrderForm = () => {
                 order_status: "Draft"
             };
             updatePurchaseOrder(updatedState);
+            navigate(`/EmpirePMS/order/${purchaseOrderState._id}`);
         } else if (event.nativeEvent.submitter.name === 'approve') {
             const updatedState = {
                 ...purchaseOrderState,
                 order_status: "Approved"
             };
             updatePurchaseOrder(updatedState);
+            navigate(`/EmpirePMS/order/${purchaseOrderState._id}`);
         } else {
             updatePurchaseOrder(purchaseOrderState); 
+            navigate(`/EmpirePMS/order/${purchaseOrderState._id}`);
         }
     };
     

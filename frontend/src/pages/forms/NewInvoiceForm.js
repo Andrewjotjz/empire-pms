@@ -15,7 +15,7 @@ import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 import SessionExpired from "../../components/SessionExpired"
-import NewProductForm from "./NewProductForm";
+import NewProductModal from "./NewProductModal";
 
 const NewInvoiceForm = () => {
     //Component's hook
@@ -32,6 +32,8 @@ const NewInvoiceForm = () => {
     const [currentOrder, setCurrentOrder] = useState(null);
     const [updatedOrder, setUpdatedOrder] = useState(null);
     const [newSupplier, setNewSupplier] = useState('');
+    const [newProductId, setNewProductId] = useState('');
+    const [targetIndex, setTargetIndex] = useState(null);
 
     const [isToggled, setIsToggled] = useState(false);
     const [isToggleProjectDropdown, setIsToggleProjectDropdown] = useState(false);
@@ -42,6 +44,7 @@ const NewInvoiceForm = () => {
     const [showCreatePriceModal, setShowCreatePriceModal] = useState(false);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
+    const [showRegisterConfirmationModal, setShowRegisterConfirmationModal] = useState(false);
 
     const [isFetchSupplierLoading, setIsFetchSupplierLoading] = useState(true);
     const [fetchSupplierError, setFetchSupplierError] = useState(null);
@@ -419,7 +422,6 @@ const NewInvoiceForm = () => {
             return { ...prevState, projects: updatedProjects };
         });
     };
-    //! submit new price
     const handleSubmitNewPrice = async (event) => {
         event.preventDefault();
 
@@ -439,7 +441,6 @@ const NewInvoiceForm = () => {
         }
 
     };
-    //! add item
     const handleAddItem = (product) => {
         // Create the updated products array
         const updatedProducts = [...updatedOrder.products, {
@@ -561,7 +562,6 @@ const NewInvoiceForm = () => {
             products: updatedProducts,
         });
     };
-    //! remove item
     const handleRemoveItem = (index) => {
         const updatedItems = updatedOrder.products.filter((_, idx) => idx !== index);
 
@@ -578,7 +578,13 @@ const NewInvoiceForm = () => {
             })
         }        
     }
-    //! view item price
+    const handleRemoveCustomItem = (index) => {
+        const updatedCustomItems = updatedOrder.custom_products.filter((_, idx) => idx !== index);
+        setUpdatedOrder({
+            ...updatedOrder,
+            custom_products: updatedCustomItems,
+        })
+    }
     const handleViewPriceVersion = (supplierId, targetProductId) => {
         setNewProductPrice({
             product_obj_ref: targetProductId,
@@ -596,6 +602,7 @@ const NewInvoiceForm = () => {
         fetchProductDetails(supplierId, targetProductId);
     }
     const handleAutomation = (updatedProductId) => {
+
         // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
         const updatedItems = updatedOrder.products.filter(
             (item) => item.product_obj_ref._id !== updatedProductId
@@ -609,8 +616,6 @@ const NewInvoiceForm = () => {
             console.log("Product not found!");
             return;
         }
-    
-        console.log("product", product);
     
         // Step 3: Create the new product object with required details
         const newProduct = {
@@ -629,13 +634,62 @@ const NewInvoiceForm = () => {
     
         // Step 4: Update the products list with the new product
         const updatedProducts = [...updatedItems, newProduct];
-        console.log("updatedProducts:", updatedProducts);
     
         setUpdatedOrder({
             ...updatedOrder,
             products: updatedProducts
         });
-    };    
+    };
+    const handleRegisterAutomation = () => {
+        // Step 1: take existing items from the products list
+        const updatedItems = updatedOrder.products;
+
+        // Step 2: Find the product that needs to be re-added (optimized filtering)
+        const product = filterProductsBySearchTerm()
+            .find(product => product.product._id === newProductId);
+
+        if (!product) {
+            console.log("Product not found!");
+            return;
+        }
+    
+        // Step 3: Create the new product object with required details
+        const newProduct = {
+            product_obj_ref: {
+                _id: product.product._id,
+                product_name: product.product.product_name,
+                product_sku: product.product.product_sku
+            },
+            productprice_obj_ref: product.productPrice,
+            order_product_location: '',
+            order_product_qty_a: 0,
+            order_product_qty_b: 0,
+            order_product_price_unit_a: product.productPrice.product_price_unit_a,
+            order_product_gross_amount: 0
+        };
+    
+        // Step 4: Update the products list with the new product
+        const updatedProducts = [...updatedItems, newProduct];
+
+        console.log("updatedItems", updatedItems);
+        console.log("product", product);
+        console.log("newProduct", newProduct);
+        console.log("updatedProducts", updatedProducts);
+        console.log("1st updatedOrder", updatedOrder);
+    
+        setUpdatedOrder( prevUpdatedOrder => ({
+            ...prevUpdatedOrder,
+            products: updatedProducts
+        }));
+
+        console.log("2nd updatedOrder", updatedOrder);
+
+        // Step 5: Remove custom product from list
+        handleRemoveCustomItem(targetIndex);
+
+        handleToggleEditOrderModal();
+        handleToggleEditOrderModal();
+    }
     
     useEffect(() => {
         const abortController = new AbortController();
@@ -922,12 +976,12 @@ const NewInvoiceForm = () => {
 
     const createProductModal = (
     <div>
-    {showCreateProductModal && (
+    {showCreateProductModal && (        
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white w-auto rounded-lg shadow-lg">
+            <div className="bg-white max-w-[90vh] max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-                    <h2 className="text-xl font-bold">SUPPLIER: New Product</h2>
+                    <h2 className="text-xl font-bold">{updatedOrder.supplier.supplier_name}: NEW PRODUCT</h2>
                     <button
                         onClick={handleToggleCreateProductModal}
                         className="text-gray-500 hover:text-gray-800"
@@ -937,313 +991,9 @@ const NewInvoiceForm = () => {
                     </svg>
                     </button>
                 </div>
-
                 {/* Modal Body */}
-                <div className="p-2">
-                    <form onSubmit={() => {}} className="text-sm">
-                        <div className="mx-3 p-2 grid grid-cols-3 gap-x-4 gap-y-2">
-                            {/* PRODUCT TABLE */}
-                            <div>
-                                <label className="form-label font-bold">*Product SKU:</label>
-                                <input 
-                                    type='text'
-                                    className="form-control text-sm" 
-                                    name="product_sku" 
-                                    value={`productDetailsState.product_sku`} 
-                                    onChange={`handleProductInputChange`}
-                                    required
-                                    onInvalid={(e) => e.target.setCustomValidity('Enter SKU')}
-                                    onInput={(e) => e.target.setCustomValidity('')}
-                                />
-                                <label className='text-xs italic text-gray-400'>Ex: 13RE1236</label>
-                            </div>
-                            <div>
-                                <label className="form-label font-bold">*Name:</label>
-                                <input 
-                                    type='text'
-                                    className="form-control text-sm" 
-                                    name="product_name" 
-                                    value={`productDetailsState.product_name`} 
-                                    onChange={`handleProductInputChange`}
-                                    required
-                                    onInvalid={(e) => e.target.setCustomValidity('Enter product name')}
-                                    onInput={(e) => e.target.setCustomValidity('')}
-                                />
-                                <label className='text-xs italic text-gray-400'>Ex: 16mm SHEETROCK 1200mm x 3600mm</label>
-                            </div>
-                            <div>
-                                <label className="form-label font-bold">*Type:</label>
-                                <select 
-                                    className="form-control text-sm shadow-sm cursor-pointer"
-                                    name="product_types" 
-                                    value={`productDetailsState.product_types`} 
-                                    onChange={`handleProductInputChange`}
-                                    required
-                                >                                
-                                    <option value="">Select Product Type</option>
-                                    <option value="Compound">Compound</option>
-                                    <option value="Access Panel">Access Panel</option>
-                                    <option value="Framing Ceiling">Framing Ceiling</option>
-                                    <option value="Framing Wall">Framing Wall</option>
-                                    <option value="Batt Insulation">Batt Insulation</option>
-                                    <option value="Rigid Insulation">Rigid Insulation</option>
-                                    <option value="Plasterboard">Plasterboard</option>
-                                    <option value="External Cladding">External Cladding</option>
-                                    <option value="SpeedPanel">SpeedPanel</option>
-                                    <option value="Timber">Timber</option>
-                                    <option value="Others">Others</option>
-                                    <option value="Tools">Tools</option>
-                                    <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
-                                    <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
-                                    <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
-                                    <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
-                                    <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
-                                    <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>
-                                    <option value="SpeedPanel(Accessories)">SpeedPanel(Accessories)</option>
-                                </select>
-                                <label className='text-xs italic text-gray-400'>Alias is based on the product type you select</label>
-                            </div>
-                            {/***************************** ALIAS TABLE *************************/}
-                            <div className="col-span-3">
-                                <label className="form-label font-bold">*Alias:</label>
-                                { true && <div>
-                                    <select 
-                                        className="form-control text-sm shadow-sm cursor-pointer w-1/3"
-                                        name="alias"
-                                        onChange={`handleProductInputChange`}
-                                        disabled={`aliasFieldToggle`}
-                                        required
-                                    >
-                                        <option value="">Select Alias</option>
-                                        {/* {aliasState && aliasState.length > 0 && 
-                                            Array.from(new Set(aliasState.map(product => product.alias ? product.alias._id : null)))
-                                                .filter(aliasId => aliasId !== null)
-                                                .map((aliasId, index) => {
-                                                    const alias = aliasState.find(product => product.alias && product.alias._id === aliasId).alias;
-                                                    return <option key={index} value={aliasId}>{alias.alias_name}</option>;
-                                                })
-                                        } */}
-                                    </select>
-                                    <label className='text-xs italic text-gray-400'>Set alias to ('na') if not available or create custom alias <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => {}}>here</span></label>
-                                </div>}
-                                { true && <div>
-                                    <input 
-                                        type='text'
-                                        className="form-control text-sm w-1/3" 
-                                        name="alias" 
-                                        value={`productDetailsState.alias`} 
-                                        placeholder='custom alias...'
-                                        onChange={`handleProductInputChange`}
-                                        onInvalid={(e) => e.target.setCustomValidity('Enter a new custom alias')}
-                                        onInput={(e) => e.target.setCustomValidity('')}
-                                    />
-                                    <label className='text-xs italic text-gray-400'>Don't want to create custom alias? <span className="text-blue-600 size-5 cursor-pointer underline" onClick={() => {}}>Cancel</span></label>
-                                </div>}
-                            </div>
-                            {/* ********************************************* PRODUCT PRICE TABLE *********************************************** */}
-                            <div className='grid grid-cols-3 gap-x-10 gap-y-4 border-1 shadow-sm rounded p-3 mb-1 col-span-3'>
-                                <div className='border-1 rounded p-2 shadow-sm'>
-                                    <div>
-                                        <label className="form-label font-bold">*Number-A:</label>
-                                        <input 
-                                            type='number'
-                                            className="form-control text-sm" 
-                                            name="product_number_a" 
-                                            value={`productDetailsState.product_number_a`} 
-                                            onChange={`handleProductInputChange`}
-                                            min={1}
-                                            step="0.001"  // Allows input with up to three decimal places
-                                            pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter number-A')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="form-label font-bold">*Unit-A:</label>
-                                        <input 
-                                            type='text'
-                                            className="form-control text-sm" 
-                                            name="product_unit_a" 
-                                            value={`productDetailsState.product_unit_a`} 
-                                            onChange={`handleProductInputChange`}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter unit-A')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                        <label className='text-xs italic text-gray-400'>Ex: Box, Pack, Carton</label>
-                                    </div>
-                                    <div>
-                                        <label className="form-label font-bold">*Unit-A Price:</label>
-                                        <div className='flex items-center border rounded'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 ml-2">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                            </svg>
-                                            <input 
-                                                type='number'
-                                                className="form-control text-sm flex-1 pl-2 border-0" 
-                                                name="product_price_unit_a" 
-                                                value={`productDetailsState.product_price_unit_a`} 
-                                                onChange={`handleProductInputChange`}
-                                                step="0.001"  // Allows input with up to three decimal places
-                                                min={1}
-                                                required
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter unit-A price')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className='border-1 rounded p-2 shadow-sm'>
-                                    <div>
-                                        <label className="form-label font-bold">*Number-B:</label>
-                                        <input 
-                                            type='number'
-                                            className="form-control text-sm" 
-                                            name="product_number_b" 
-                                            value={`productDetailsState.product_number_b`} 
-                                            onChange={`handleProductInputChange`}
-                                            step="0.001"  // Allows input with up to three decimal places
-                                            pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                            min={1}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter number-B')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="form-label font-bold">*Unit-B:</label>
-                                        <input 
-                                            type='text'
-                                            className="form-control text-sm" 
-                                            name="product_unit_b" 
-                                            value={`productDetailsState.product_unit_b`} 
-                                            onChange={`handleProductInputChange`}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter unit-B')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
-                                        <label className='text-xs italic text-gray-400'>Ex: units, length, each, sheet</label>
-                                    </div>
-                                    <div>
-                                        <label className="form-label font-bold">*Unit-B Price:</label>
-                                        <div className='flex items-center border rounded'>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 ml-2">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                            </svg>
-                                            <input 
-                                                type='number'
-                                                className="form-control text-sm flex-1 pl-2 border-0" 
-                                                name="product_price_unit_b" 
-                                                value={`productDetailsState.product_price_unit_b`} 
-                                                onChange={`handleProductInputChange`}
-                                                step="0.001"  // Allows input with up to three decimal places
-                                                min={1}
-                                                required
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter unit-B price')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* ***** PROJECT DROPDOWN START ****** */}
-                                <div>
-                                    <label className="block font-bold mb-2">*Project:</label>
-                                    <div>
-                                        <button
-                                            type="button"
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            onClick={() => {}}
-                                        >
-                                            {`Select Projects`}
-                                        </button>
-                                        {true && (
-                                            <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto" onMouseLeave={() => {}}>
-                                                <ul className="py-1">
-                                                        <li className="flex items-center px-4 py-2 hover:bg-gray-100">
-                                                            <input
-                                                                type="checkbox"
-                                                                id={`project-_id`}
-                                                                value={`project._id`}
-                                                                checked={true}
-                                                                onChange={`handleCheckboxChange`}
-                                                                className="mr-2"
-                                                                required
-                                                                onInvalid={(e) => e.target.setCustomValidity('You must select one or more project applied to this product')}
-                                                                onInput={(e) => e.target.setCustomValidity('')}
-                                                            />
-                                                            <label htmlFor={`project-_id`} className="text-gray-900">{`project.project_name`}</label>
-                                                        </li>
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className='text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product price applies to</p>
-                                </div>
-                                {/* ***** PRICE FIXED? START ****** */}
-                                <div>
-                                    <label className="form-label font-bold">Price effective date:</label>
-                                    <input 
-                                        type='date'
-                                        className="form-control text-sm" 
-                                        name="product_effective_date" 
-                                        value={`productDetailsState.product_effective_date`}
-                                        onChange={`handleProductInputChange`}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="form-label font-bold">Price fixed(?):</label>
-                                    <input 
-                                            type="checkbox"
-                                            className="form-check-input m-1" 
-                                            name="price_fixed" 
-                                            checked={`productDetailsState.price_fixed`}
-                                        />
-                                </div>
-                            </div>
-                            {/* ********************************************* PRODUCT PRICE END *********************************************** */}
-                            <div>
-                                <label className="form-label font-bold">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
-                                <input 
-                                    type='number'
-                                    className="form-control text-sm" 
-                                    name="product_actual_size" 
-                                    value={`productDetailsState.product_actual_size`} 
-                                    onChange={() => {}}
-                                    step="0.001"  // Allows input with up to three decimal places
-                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                    min={1}
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="form-label font-bold">Next available stock date:</label>
-                                <input 
-                                    type='date'
-                                    className="form-control text-sm" 
-                                    name="product_next_available_stock_date" 
-                                    value={`productDetailsState.product_next_available_stock_date`}
-                                    onChange={() => {}}
-                                />
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                {/* Modal Buttons */}
-                <div className="flex justify-end p-3 border-t">
-                    <button
-                        onClick={handleToggleCreateProductModal}
-                        className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
-                    >
-                        CANCEL
-                    </button>
-                    <button
-                        onClick={() => {}}
-                        className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
-                    >
-                        REGISTER NEW PRODUCT
-                    </button>
+                <div className="max-h-[70vh] overflow-y-auto thin-scrollbar p-3">
+                    <NewProductModal supplierId={newInvoice.supplier} handleToggleCreateProductModal={handleToggleCreateProductModal} setNewProductId={setNewProductId} setShowRegisterConfirmationModal={setShowRegisterConfirmationModal} fetchProductsBySupplier={fetchProductsBySupplier}/>
                 </div>
             </div>
         </div>
@@ -1360,7 +1110,7 @@ const NewInvoiceForm = () => {
                                                     className="form-control text-xs px-1 py-0.5" 
                                                     name="order_product_location" 
                                                     value={prod.order_product_location} 
-                                                    onChange={(e) => handleEditInputChange(e, index, true)}
+                                                    onChange={(e) => handleEditInputChange(e, index)}
                                                     placeholder="Ex: Level 2"
                                                     required
                                                     onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
@@ -1433,7 +1183,9 @@ const NewInvoiceForm = () => {
                                         {/* ***** CUSTOM ITEMS ***** */}
                                         {updatedOrder.custom_products.map((cproduct, index) => (
                                         <tr key={index}>
-                                            <td>Custom {index + 1}</td>
+                                            <td>
+                                                Custom {index + 1}
+                                            </td>
                                             <td>
                                                 <input
                                                     type="text"
@@ -1477,12 +1229,20 @@ const NewInvoiceForm = () => {
                                             </td>
                                             <td>-</td>
                                             <td>-</td>
-                                            <td>-</td>
                                             <td>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={handleToggleCreateProductModal}>
-                                                    <title>Register custom as New Product</title>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                                <div className="flex justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={() => {handleToggleCreateProductModal(); setTargetIndex(index);}}>
+                                                        <title>Register custom as New Product</title>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                                                    </svg>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" onClick={() => handleRemoveCustomItem(index)} className="btn btn-danger p-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                                 </svg>
+                                                </button>
                                             </td>
                                         </tr>
                                         ))}
@@ -1518,6 +1278,7 @@ const NewInvoiceForm = () => {
         </div>
     )}
     { productPriceModal }
+    { createProductModal }
     </div>
     );
 
@@ -1777,6 +1538,28 @@ const NewInvoiceForm = () => {
             </Modal.Footer>
         </Modal>
     );
+    const registerConfirmationModal = (
+        <Modal show={showRegisterConfirmationModal} onHide={() => {setShowRegisterConfirmationModal(false); fetchProductsBySupplier(updatedOrder.supplier._id)}}>
+            <Modal.Header closeButton>
+                <Modal.Title>
+                    { `Register as new product` }
+                </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                { `Do you want to update the order by replacing custom with this new product? Any changes you made can't be reverted.` }
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={() => {setShowRegisterConfirmationModal(false); fetchProductsBySupplier(updatedOrder.supplier._id)}}>
+                    Update manually
+                </Button>
+                <Button className="bg-blue-600 hover:bg-blue-600" variant="primary" onClick={(() => {setShowRegisterConfirmationModal(false); handleRegisterAutomation();})}>
+                    Replace custom
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    );
+
+    
 
     if (isFetchSupplierLoading) {
         return <EmployeeDetailsSkeleton />
@@ -1828,9 +1611,9 @@ const NewInvoiceForm = () => {
     }
     
 
-    console.log("currentOrder:", currentOrder)
+    // console.log("currentOrder:", currentOrder)
     // console.log("productPriceState:", productPriceState)
-    console.log("updatedOrder:", updatedOrder)
+    console.log("3rd updatedOrder", updatedOrder);
     // console.log("newProductPrice:", newProductPrice)
     // if (productState) {
     // console.log("Filtered products:", filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)))
@@ -2317,11 +2100,11 @@ const NewInvoiceForm = () => {
                     <div></div>
                 </form>
                 { orderSelectionModal }
-                { createProductModal }
                 { editOrderModal }
                 { createPriceModal }
                 { confirmationModal }
                 { updateConfirmationModal }
+                { registerConfirmationModal }
             </div>
         </div>
     );
