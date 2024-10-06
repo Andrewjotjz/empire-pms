@@ -185,22 +185,22 @@ const InvoicePage = () => {
                                 )}
                             </td>
                             <td>
-                                {invoice.payment.payment_status && (
-                                <label
-                                    className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
-                                        invoice.payment.payment_status === "Draft"
-                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
-                                            : invoice.payment.payment_status === "Partially Settled"
-                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
-                                            : invoice.payment.payment_status === "Fully Settled"
-                                            ? "border-2 bg-transparent border-green-600 text-green-600"
-                                            : invoice.payment.payment_status === "Reviewed"
-                                            ? "border-2 bg-transparent border-blue-400 text-blue-400"
-                                            : ""
-                                    }`}
-                                >
-                                    {invoice.payment.payment_status}
-                                </label>
+                                {invoice?.payment?.payment_status && (
+                                    <label
+                                        className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
+                                            invoice.payment.payment_status === "Draft"
+                                                ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                                : invoice.payment.payment_status === "Partially Settled"
+                                                ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                                : invoice.payment.payment_status === "Fully Settled"
+                                                ? "border-2 bg-transparent border-green-600 text-green-600"
+                                                : invoice.payment.payment_status === "Reviewed"
+                                                ? "border-2 bg-transparent border-blue-400 text-blue-400"
+                                                : ""
+                                        }`}
+                                    >
+                                        {invoice.payment.payment_status}
+                                    </label>
                                 )}
                             </td>
                         </tr>

@@ -12,15 +12,18 @@ import { setProductState } from "../../redux/productSlice";
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
 import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
 import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
+import { useAddInvoice } from "../../hooks/useAddInvoice";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 import SessionExpired from "../../components/SessionExpired"
 import NewProductModal from "./NewProductModal";
+import { current } from "@reduxjs/toolkit";
 
 const NewInvoiceForm = () => {
     //Component's hook
     const dispatch = useDispatch();
     const { addPrice, isAddPriceLoadingState, addPriceErrorState } = useAddProductPrice();
+    const { addInvoice, addInvoiceLoading, addInvoiceError } = useAddInvoice();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     const { updatePurchaseOrder, isUpdateLoadingState, updateOrderErrorState } = useUpdatePurchaseOrder();
     
@@ -77,7 +80,8 @@ const NewInvoiceForm = () => {
         invoiced_calculated_total_amount_incl_gst: 0,
         invoice_is_stand_alone: false,
         invoice_internal_comments: "",
-        invoice_status: ""
+        invoice_status: "",
+        payment: ""
     });
     const [newProductPrice, setNewProductPrice] = useState({
         product_obj_ref: '',
@@ -579,10 +583,26 @@ const NewInvoiceForm = () => {
         }        
     }
     const handleRemoveCustomItem = (index) => {
+
         const updatedCustomItems = updatedOrder.custom_products.filter((_, idx) => idx !== index);
+        
         setUpdatedOrder({
             ...updatedOrder,
             custom_products: updatedCustomItems,
+        })
+    }
+    const handleRemoveInvoiceItem = (index) => {
+        const updatedInvoiceItems = newInvoice.products.filter((_,idx) => idx !== index);
+        const updatedOrderItems = currentOrder.products.filter((_,idx) => idx !== index);
+
+        setNewInvoice({
+            ...newInvoice,
+            products: updatedInvoiceItems
+        })
+
+        setCurrentOrder({
+            ...currentOrder,
+            products: updatedOrderItems
         })
     }
     const handleViewPriceVersion = (supplierId, targetProductId) => {
@@ -607,13 +627,17 @@ const NewInvoiceForm = () => {
         const updatedItems = updatedOrder.products.filter(
             (item) => item.product_obj_ref._id !== updatedProductId
         );
+
+        const getItem = updatedOrder.products.filter(
+            (item) => item.product_obj_ref._id === updatedProductId
+        );
     
         // Step 2: Find the product that needs to be re-added (optimized filtering)
         const product = filterProductsBySearchTerm()
             .find(product => product.product._id === updatedProductId);
         
         if (!product) {
-            console.log("Product not found!");
+            alert('Automation failed. Please contact IT support')
             return;
         }
     
@@ -625,11 +649,11 @@ const NewInvoiceForm = () => {
                 product_sku: product.product.product_sku
             },
             productprice_obj_ref: product.productPrice,
-            order_product_location: '',
-            order_product_qty_a: 0,
-            order_product_qty_b: 0,
+            order_product_location: getItem[0].order_product_location,
+            order_product_qty_a: getItem[0].order_product_qty_a,
+            order_product_qty_b: getItem[0].order_product_qty_b,
             order_product_price_unit_a: product.productPrice.product_price_unit_a,
-            order_product_gross_amount: 0
+            order_product_gross_amount: getItem[0].order_product_qty_a * product.productPrice.product_price_unit_a
         };
     
         // Step 4: Update the products list with the new product
@@ -641,51 +665,34 @@ const NewInvoiceForm = () => {
         });
     };
     const handleRegisterAutomation = () => {
-        // Step 1: take existing items from the products list
-        const updatedItems = updatedOrder.products;
-
-        // Step 2: Find the product that needs to be re-added (optimized filtering)
+        // Step 1: Find the product that needs to be re-added (optimized filtering)
         const product = filterProductsBySearchTerm()
             .find(product => product.product._id === newProductId);
 
         if (!product) {
-            console.log("Product not found!");
+            alert('Automation failed. Please contact IT support')
             return;
         }
-    
-        // Step 3: Create the new product object with required details
-        const newProduct = {
-            product_obj_ref: {
-                _id: product.product._id,
-                product_name: product.product.product_name,
-                product_sku: product.product.product_sku
-            },
-            productprice_obj_ref: product.productPrice,
-            order_product_location: '',
-            order_product_qty_a: 0,
-            order_product_qty_b: 0,
-            order_product_price_unit_a: product.productPrice.product_price_unit_a,
-            order_product_gross_amount: 0
-        };
-    
-        // Step 4: Update the products list with the new product
-        const updatedProducts = [...updatedItems, newProduct];
 
-        console.log("updatedItems", updatedItems);
-        console.log("product", product);
-        console.log("newProduct", newProduct);
-        console.log("updatedProducts", updatedProducts);
-        console.log("1st updatedOrder", updatedOrder);
-    
-        setUpdatedOrder( prevUpdatedOrder => ({
-            ...prevUpdatedOrder,
-            products: updatedProducts
-        }));
+        // Step 2: filter product list to show new product
+        setSearchProductTerm(product.product.product_name);
 
-        console.log("2nd updatedOrder", updatedOrder);
-
-        // Step 5: Remove custom product from list
+        // Step 3: Remove custom product from list
         handleRemoveCustomItem(targetIndex);
+    }
+    const handleSubmitInvoice = (event) => {
+        event.preventDefault();
+        
+        if (newInvoice.invoice_status === '') {
+            // push toast to notify successful login
+            toast.error(`Please select invoice status`, {
+                position: "bottom-right"
+            });
+            return;
+        }
+
+        addInvoice(newInvoice);
+
     }
     
     useEffect(() => {
@@ -1059,7 +1066,7 @@ const NewInvoiceForm = () => {
                                 <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
                             </div>
                             { productState ? filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).map((product, index) => (
-                            <div className="grid grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100" title='Add to order'>
+                            <div key={index} className="grid grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100" title='Add to order'>
                                 <div>{product.product.product_sku}</div>
                                 <div>{product.product.product_name}</div>
                                 <div>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
@@ -1154,7 +1161,7 @@ const NewInvoiceForm = () => {
                                             </td>
                                             <td className="relative">
                                                 <label>${prod.order_product_price_unit_a}</label>
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3 cursor-pointer absolute top-0 right-0" onClick={() => {handleViewPriceVersion(updatedOrder.supplier._id, prod.product_obj_ref._id)}}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3 cursor-pointer absolute top-0 right-0" onClick={() => {handleViewPriceVersion(updatedOrder.supplier._id, prod.product_obj_ref._id);}}>
                                                     <title>View product price version</title>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                                 </svg>
@@ -1182,7 +1189,7 @@ const NewInvoiceForm = () => {
                                         <tr key={index}>
                                             <td>
                                                 <div className="flex justify-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={() => {handleToggleCreateProductModal(); setTargetIndex(index);}}>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer" onClick={() => {handleToggleCreateProductModal(); setTargetIndex(index); setSearchProductTerm('');}}>
                                                         <title>Register custom as New Product</title>
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                                                     </svg>
@@ -1560,7 +1567,7 @@ const NewInvoiceForm = () => {
         return <EmployeeDetailsSkeleton />
     }
 
-    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState) {
+    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError) {
 
         const errorMessages = [
             fetchSupplierError,
@@ -1569,7 +1576,8 @@ const NewInvoiceForm = () => {
             addPriceErrorState,
             fetchProjectError,
             fetchProductsErrorState,
-            updateOrderErrorState
+            updateOrderErrorState,
+            addInvoiceError
         ];
         
         const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
@@ -1606,13 +1614,8 @@ const NewInvoiceForm = () => {
     }
     
 
-    // console.log("currentOrder:", currentOrder)
-    // console.log("productPriceState:", productPriceState)
-    console.log("3rd updatedOrder", updatedOrder);
-    // console.log("newProductPrice:", newProductPrice)
-    // if (productState) {
-    // console.log("Filtered products:", filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)))
-    // }
+    console.log("currentOrder:", currentOrder)
+    console.log("newInvoice to submit:", newInvoice)
 
     return (
         <div>
@@ -1622,7 +1625,7 @@ const NewInvoiceForm = () => {
                     <label>NEW INVOICE</label>
                 </div>
                 {/* BODY */}
-                <form>
+                <form onSubmit={handleSubmitInvoice}>
                     {/* Invoice Details */}
                     <div className="mx-3 p-2 grid grid-cols-4 gap-x-4 gap-y-2 border-2">
                         <div>
@@ -1740,6 +1743,7 @@ const NewInvoiceForm = () => {
                         <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
                             <thead className="bg-indigo-200 text-center">
                                 <tr>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-14"></th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-14">SKU</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-64">Name</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Location</th>
@@ -1755,6 +1759,13 @@ const NewInvoiceForm = () => {
                                 {/* registered products */}
                                 { currentOrder.products && currentOrder.products.map((prod,index) => (
                                 <tr key={index}>
+                                    <td className="border border-gray-300 px-3 py-2">
+                                        <button type="button" onClick={() => handleRemoveInvoiceItem(index)} className="btn btn-danger p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_sku}</td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_name}</td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.order_product_location}</td>
@@ -1787,6 +1798,7 @@ const NewInvoiceForm = () => {
                                 { currentOrder.custom_products && currentOrder.custom_products.map((cusprod,index) => (
                                 <tr key={index}>
                                     <td className="border border-gray-300 px-3 py-2">-</td>
+                                    <td className="border border-gray-300 px-3 py-2">-</td>
                                     <td className="border border-gray-300 px-3 py-2">{cusprod.custom_product_name}</td>
                                     <td className="border border-gray-300 px-3 py-2">{cusprod.custom_product_location}</td>
                                     <td className="border border-gray-300 px-3 py-2">
@@ -1814,7 +1826,7 @@ const NewInvoiceForm = () => {
                                 ))}
                                 {/* calculation table */}
                                 <tr>
-                                    <td colSpan={5}></td>
+                                    <td colSpan={6}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Delivery fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -1832,7 +1844,7 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={5}></td>
+                                    <td colSpan={6}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Strapping/Pallet/Cutting fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -1850,7 +1862,7 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={5}></td>
+                                    <td colSpan={6}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Credit:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -1867,7 +1879,7 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={5}></td>
+                                    <td colSpan={6}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {
                                         (newInvoice.products.reduce((total, prod) => (
@@ -1880,7 +1892,7 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {(newInvoice.invoiced_calculated_total_amount_incl_gst/1.1).toFixed(2)}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={5}></td>
+                                    <td colSpan={6}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount (incl GST):</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {
                                         ((newInvoice.products.reduce((total, prod) => (
@@ -1894,7 +1906,7 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoice.invoiced_calculated_total_amount_incl_gst}</td>
                                 </tr>
                                 <tr className="bg-indigo-100">
-                                    <td colSpan={5}></td>
+                                    <td colSpan={6}></td>
                                     <td className="px-2 py-2 font-bold text-end border border-gray-400">Total Raw Amount (incl GST):</td>
                                     <td className="px-3 py-2 text-center" colSpan={2}>$
                                         <input
@@ -1931,6 +1943,7 @@ const NewInvoiceForm = () => {
                         </div>
                     </div>
                     ) : (
+                    // INVOICE WITHOUT PO ************************
                     <div className="mx-3 p-2 border-2">
                         {/* header */}
                         <div className="flex justify-between">
@@ -2085,11 +2098,29 @@ const NewInvoiceForm = () => {
                     </div>
                     )}
                     {/* Invoice Details */}
-                    <div className="mx-3 p-2 border-2">
-                        <label>Invoice status:</label>
-                        <button className="ml-2 bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded">
-                            SUBMIT INVOICE
-                        </button>
+                    <div className="mx-3 p-2 border-2 flex justify-between">
+                        <div>
+                            <label className="font-bold">*Invoice status:</label>
+                            <select
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                                name="invoice_status"
+                                value={newInvoice.invoice_status}
+                                onChange={handleInputChange}
+                                required
+                                >
+                                <option value="">Select status</option>
+                                <option value="To review">To review</option>
+                                <option value="To reconcile">To reconcile</option>
+                                <option value="Reviewed">Reviewed</option>
+                                <option value="Cancelled">Cancelled</option>
+                                <option value="Settled">Settled</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" className="ml-2 bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded">
+                                SUBMIT INVOICE
+                            </button>
+                        </div>
                     </div>
                     {/* Invoice File Upload */}
                     <div></div>
