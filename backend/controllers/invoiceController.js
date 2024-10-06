@@ -1,5 +1,6 @@
 //import modules
-const invoiceModel = require('../models/invoiceModel');
+const invoiceModel = require('../models/InvoiceModel');
+const orderModel = require('../models/OrderModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Invoices
@@ -57,29 +58,45 @@ const getSingleInvoice = async (req, res) => {
 
 //Controller function - POST to create a new Invoice
 const createNewInvoice = async (req, res) => {
-    //retrieve incoming request (along with new Invoice object) by using 'req' object property 'body', which stores new Invoice object.
-    //destructure all relevant attributes in new Invoice object
-    const { invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, order, products, custom_products,
-        invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
-        invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
-        invoice_isarchived, payment, invoice_status } = req.body;
+    const {
+        invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date,
+        order, products, custom_products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit,
+        invoiced_raw_total_amount_incl_gst, invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone,
+        invoice_internal_comments, invoice_isarchived, payment, invoice_status
+    } = req.body;
 
     try {
-        //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Invoice = await invoiceModel.create({ invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date, 
-            order, products, custom_products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit, invoiced_raw_total_amount_incl_gst, 
-            invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone, invoice_internal_comments, 
-            invoice_isarchived, payment, invoice_status })
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        res.status(200).json(Invoice)
+        // Step 1: Create the new invoice
+        const newInvoice = await invoiceModel.create({
+            invoice_ref, supplier, invoice_issue_date, invoice_received_date, invoice_due_date,
+            order, products, custom_products, invoiced_delivery_fee, invoiced_other_fee, invoiced_credit,
+            invoiced_raw_total_amount_incl_gst, invoiced_calculated_total_amount_incl_gst, invoice_is_stand_alone,
+            invoice_internal_comments, invoice_isarchived, payment, invoice_status
+        });
+
+        // Step 2: Check if there is an associated order and update it with the new invoice ID
+        if (order) {
+
+            const updatedOrder = await orderModel.findByIdAndUpdate(
+                order, 
+                { $push: { invoices: { invoice_obj_ref: newInvoice._id } } }, // Push the new invoice's _id into the 'invoice_obj_ref'
+                { new: true }
+            );            
+
+            if (!updatedOrder) {
+                return res.status(404).json({ error: "Order not found" });
+            }
+        }
+
+        // Step 3: Return the newly created invoice as a response
+        res.status(200).json(newInvoice);
     }
     catch (error) {
-        //if Company creation has error, pass error object and 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(400).json({error: error.message})
+        // Handle any errors during the invoice creation or order update process
+        res.status(400).json({ error: error.message });
     }
-}
+};
+
 
 
 //Controller function - PUT to update a single Invoice
