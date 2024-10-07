@@ -1630,7 +1630,7 @@ const NewInvoiceForm = () => {
 
     return (
         <div>
-            <div className="w-screen h-screen bg-neutral-50 items-center justify-center">
+            <div className="w-screen bg-neutral-50 items-center justify-center">
                 {/* HEADER */}
                 <div className='mx-3 mt-3 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg'>
                     <label>NEW INVOICE</label>
@@ -1754,15 +1754,15 @@ const NewInvoiceForm = () => {
                         <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
                             <thead className="bg-indigo-200 text-center">
                                 <tr>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-14">SKU</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-64">Name</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Location</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Qty Ordered</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Invoice Qty</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-14">Previously invoiced</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Unit Price</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-24">Expected Amount</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-24">Invoiced Amount</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-12">SKU</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-96">Name</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-40">Location</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-20">Previously invoiced</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-16">Qty Ordered</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-16">Current Invoice Qty</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-16">Unit Price</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-16">Expected Amount</th>
+                                    <th scope="col" className="border border-gray-300 px-1 py-2 w-16">Current Invoice Amount</th>
                                 </tr>
                             </thead>
                             { currentOrder ? (
@@ -1770,14 +1770,21 @@ const NewInvoiceForm = () => {
                                 {/* registered products */}
                                 { currentOrder.products && currentOrder.products.map((prod,index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_sku}</td>
-                                    <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_name}</td>
-                                    <td className="border border-gray-300 px-3 py-2">{prod.order_product_location}</td>
-                                    <td className="border border-gray-300 px-3 py-2">
+                                    <td className="border border-gray-300 px-1 py-2">{prod.product_obj_ref.product_sku}</td>
+                                    <td className="border border-gray-300 px-1 py-2">{prod.product_obj_ref.product_name}</td>
+                                    <td className="border border-gray-300 px-1 py-2">{prod.order_product_location}</td>
+                                    {/* Based on previous invoice */}
+                                    <td className="border border-gray-300 px-1 py-2 bg-gray-100">
+                                        <label>{(currentOrder?.invoices?.reduce((total, invoice) => (
+                                                total + (Number(invoice?.products[index]?.invoice_product_qty_a) || 0)
+                                            ), 0)).toFixed(2)}</label>
+                                        <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
+                                    </td>
+                                    <td className="border border-gray-300 px-1 py-2">
                                         <label>{prod.order_product_qty_a}</label>
                                         <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2 items-center">
+                                    <td className="border border-gray-300 px-1 py-2 items-center">
                                             <input
                                             type="number"
                                             name="invoice_product_qty_a"
@@ -1787,36 +1794,33 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Enter invoice quantity')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="px-1 py-0.5 text-xs border rounded-md"
+                                            className="px-1 py-0.5 text-xs border rounded-md w-20"
                                             />
                                             <label className="ml-2 text-xs opacity-50 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2">
-                                        <label>{(currentOrder?.invoices?.reduce((total, invoice) => (
-                                                total + (Number(invoice?.products[index]?.invoice_product_qty_a) || 0)
-                                            ), 0)).toFixed(2)}</label>
-                                        <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
-                                    </td>
-                                    <td className="border border-gray-300 px-3 py-2">
+                                    <td className="border border-gray-300 px-1 py-2">
                                         <label>$ {prod.productprice_obj_ref.product_price_unit_a}</label>
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ {(prod.order_product_qty_a * prod.productprice_obj_ref.product_price_unit_a).toFixed(2)}</td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoice.products[index].invoice_product_gross_amount_a}</td>
+                                    <td className="border border-gray-300 px-1 py-2 text-end">$ {(prod.order_product_qty_a * prod.productprice_obj_ref.product_price_unit_a).toFixed(2)}</td>
+                                    <td className="border border-gray-300 px-1 py-2 text-end">$ {newInvoice.products[index].invoice_product_gross_amount_a}</td>
                                 </tr>
                                 ))}
                                 {/* custom products */}
                                 { currentOrder.custom_products && currentOrder.custom_products.map((cusprod,index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 px-3 py-2">-</td>
-                                    <td className="border border-gray-300 px-3 py-2">-</td>
-                                    <td className="border border-gray-300 px-3 py-2">{cusprod.custom_product_name}</td>
-                                    <td className="border border-gray-300 px-3 py-2">{cusprod.custom_product_location}</td>
-                                    <td className="border border-gray-300 px-3 py-2">
+                                    <td className="border border-gray-300 px-1 py-2">-</td>
+                                    <td className="border border-gray-300 px-1 py-2">{cusprod.custom_product_name}</td>
+                                    <td className="border border-gray-300 px-1 py-2">{cusprod.custom_product_location}</td>
+                                    {/* Based on previous invoice */}
+                                    <td className="border border-gray-300 px-1 py-2 bg-gray-100">$ {(currentOrder?.invoices?.reduce((total, invoice) => (
+                                        total + (Number(invoice?.custom_products[index]?.custom_order_price) || 0)
+                                    ),0)).toFixed(2)}</td>
+                                    <td className="border border-gray-300 px-1 py-2">
                                         <label>{cusprod.custom_order_qty}</label>
                                         <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">unit</label>
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2">-</td>
-                                    <td className="border border-gray-300 px-3 py-2">
+                                    <td className="border border-gray-300 px-1 py-2">-</td>
+                                    <td className="border border-gray-300 px-1 py-2">
                                         $
                                         <input
                                             type="number"
@@ -1827,17 +1831,17 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Enter custom price')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="px-1 py-0.5 text-xs border rounded-md"
+                                            className="px-1 py-0.5 text-xs border rounded-md w-20"
                                         />
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ --.--</td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoice.custom_products[index].custom_order_gross_amount}</td>
+                                    <td className="border border-gray-300 px-1 py-2 text-end">$ --.--</td>
+                                    <td className="border border-gray-300 px-1 py-2 text-end">$ {newInvoice.custom_products[index].custom_order_gross_amount}</td>
                                 </tr>
                                 ))}
                                 {/* calculation table */}
                                 <tr>
-                                    <td colSpan={6}></td>
-                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">Delivery fee:</td>
+                                    <td colSpan={5}></td>
+                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end" colSpan={2}>Delivery fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
                                             type="number"
@@ -1854,8 +1858,8 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
-                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">Strapping/Pallet/Cutting fee:</td>
+                                    <td colSpan={5}></td>
+                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end" colSpan={2}>Strapping/Pallet/Cutting fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
                                             type="number"
@@ -1872,8 +1876,8 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
-                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">Credit:</td>
+                                    <td colSpan={5}></td>
+                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end" colSpan={2}>Credit:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-center" colSpan={2}>$
                                         <input
                                             type="number"
@@ -1889,8 +1893,8 @@ const NewInvoiceForm = () => {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
-                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount:</td>
+                                    <td colSpan={5}></td>
+                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end" colSpan={2}>Total Gross Amount:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {
                                         (newInvoice.products.reduce((total, prod) => (
                                                 total + (Number(prod.invoice_product_gross_amount_a) || 0)
@@ -1902,8 +1906,8 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {(newInvoice.invoiced_calculated_total_amount_incl_gst/1.1).toFixed(2)}</td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={6}></td>
-                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount (incl GST):</td>
+                                    <td colSpan={5}></td>
+                                    <td className="border border-gray-300 px-2 py-2 font-bold text-end" colSpan={2}>Total Gross Amount (incl GST):</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {
                                         ((newInvoice.products.reduce((total, prod) => (
                                                 total + (Number(prod.invoice_product_gross_amount_a) || 0)
@@ -1916,8 +1920,8 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoice.invoiced_calculated_total_amount_incl_gst}</td>
                                 </tr>
                                 <tr className="bg-indigo-100">
-                                    <td colSpan={6}></td>
-                                    <td className="px-2 py-2 font-bold text-end border border-gray-400">Total Raw Amount (incl GST):</td>
+                                    <td colSpan={5}></td>
+                                    <td className="px-2 py-2 font-bold text-end border border-gray-400" colSpan={2}>Total Raw Amount (incl GST):</td>
                                     <td className="px-3 py-2 text-center" colSpan={2}>$
                                         <input
                                             type="number"
