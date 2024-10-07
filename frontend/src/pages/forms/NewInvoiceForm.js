@@ -134,10 +134,10 @@ const NewInvoiceForm = () => {
                     fetchProductsBySupplier(data.supplier._id)
     
                     // Ensure products and custom_products exist before mapping
-                    const formattedProducts = data.products?.map((product) => ({
+                    const formattedProducts = data.products?.map((product,index) => ({
                         product_obj_ref: product.product_obj_ref._id,
                         invoice_product_location: product.order_product_location,
-                        invoice_product_qty_a: 0,
+                        invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
                         invoice_product_price_unit: product.order_product_price_unit_a,
                         invoice_product_gross_amount_a: product.order_product_gross_amount,
                     })) || [];
@@ -591,19 +591,19 @@ const NewInvoiceForm = () => {
             custom_products: updatedCustomItems,
         })
     }
-    const handleRemoveInvoiceItem = (index) => {
-        const updatedInvoiceItems = newInvoice.products.filter((_,idx) => idx !== index);
-        const updatedOrderItems = currentOrder.products.filter((_,idx) => idx !== index);
-
-        setNewInvoice({
-            ...newInvoice,
-            products: updatedInvoiceItems
-        })
-
-        setCurrentOrder({
-            ...currentOrder,
-            products: updatedOrderItems
-        })
+    const handleAddCustomItem = () => {
+        if (updatedOrder.custom_products.length < 15) {
+            setUpdatedOrder({
+                ...updatedOrder,
+                custom_products: [...updatedOrder.custom_products, {
+                    custom_product_name:'', 
+                    custom_product_location: '',
+                    custom_order_qty: 0
+                }]
+            })
+        } else {
+            alert("You can add up to 15 custom items only.")
+        }
     }
     const handleViewPriceVersion = (supplierId, targetProductId) => {
         setNewProductPrice({
@@ -1250,6 +1250,17 @@ const NewInvoiceForm = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                                {/* ADD CUSTOM BUTTON */}
+                                <div className='bg-white border-b-2'>
+                                    <div className="flex justify-center p-2">
+                                        <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-xs cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={() => handleAddCustomItem()}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 mr-1">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
+                                            </svg>
+                                            <label className='cursor-pointer'>ADD CUSTOM ITEMS</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1629,19 +1640,6 @@ const NewInvoiceForm = () => {
                     {/* Invoice Details */}
                     <div className="mx-3 p-2 grid grid-cols-4 gap-x-4 gap-y-2 border-2">
                         <div>
-                            <label className="font-bold">*Invoice Ref:</label>
-                            <input
-                                type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                name="invoice_ref"
-                                value={newInvoice.invoice_ref}
-                                onChange={handleInputChange}
-                                required
-                                onInvalid={(e) => e.target.setCustomValidity('Enter invoice reference number')}
-                                onInput={(e) => e.target.setCustomValidity('')}
-                            />
-                        </div>
-                        <div>
                             <label className="font-bold">*Supplier:</label>
                             <select
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
@@ -1661,6 +1659,19 @@ const NewInvoiceForm = () => {
                                         </option>
                                 ))}
                             </select>
+                        </div>
+                        <div>
+                            <label className="font-bold">*Invoice Ref:</label>
+                            <input
+                                type="text"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                name="invoice_ref"
+                                value={newInvoice.invoice_ref}
+                                onChange={handleInputChange}
+                                required
+                                onInvalid={(e) => e.target.setCustomValidity('Enter invoice reference number')}
+                                onInput={(e) => e.target.setCustomValidity('')}
+                            />
                         </div>
                         <div>
                             <label className="font-bold">*Invoice Issue Date:</label>
@@ -1743,12 +1754,12 @@ const NewInvoiceForm = () => {
                         <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
                             <thead className="bg-indigo-200 text-center">
                                 <tr>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-14"></th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-14">SKU</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-64">Name</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Location</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Qty Ordered</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Invoice Qty</th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-14">Previously invoiced</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Unit Price</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-24">Expected Amount</th>
                                     <th scope="col" className="border border-gray-300 px-3 py-2 w-24">Invoiced Amount</th>
@@ -1759,12 +1770,6 @@ const NewInvoiceForm = () => {
                                 {/* registered products */}
                                 { currentOrder.products && currentOrder.products.map((prod,index) => (
                                 <tr key={index}>
-                                    <td className="border border-gray-300 px-3 py-2">
-                                        <label>{currentOrder?.invoices?.reduce((total, invoice) => (
-                                                total + (Number(invoice?.products[index]?.invoice_product_qty_a) || 0)
-                                            ), 0)}</label>
-                                        <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
-                                    </td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_sku}</td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.product_obj_ref.product_name}</td>
                                     <td className="border border-gray-300 px-3 py-2">{prod.order_product_location}</td>
@@ -1785,6 +1790,12 @@ const NewInvoiceForm = () => {
                                             className="px-1 py-0.5 text-xs border rounded-md"
                                             />
                                             <label className="ml-2 text-xs opacity-50 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
+                                    </td>
+                                    <td className="border border-gray-300 px-3 py-2">
+                                        <label>{(currentOrder?.invoices?.reduce((total, invoice) => (
+                                                total + (Number(invoice?.products[index]?.invoice_product_qty_a) || 0)
+                                            ), 0)).toFixed(2)}</label>
+                                        <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
                                     </td>
                                     <td className="border border-gray-300 px-3 py-2">
                                         <label>$ {prod.productprice_obj_ref.product_price_unit_a}</label>
