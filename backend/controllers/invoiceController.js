@@ -79,7 +79,7 @@ const createNewInvoice = async (req, res) => {
 
             const updatedOrder = await orderModel.findByIdAndUpdate(
                 order, 
-                { $push: { invoices: { invoice_obj_ref: newInvoice._id } } }, // Push the new invoice's _id into the 'invoice_obj_ref'
+                { $push: { invoices: newInvoice._id } }, // Push the new invoice's _id into the 'invoice_obj_ref'
                 { new: true }
             );            
 
