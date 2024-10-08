@@ -7,7 +7,6 @@ import { setSupplierState } from "../../redux/supplierSlice";
 import { setPurchaseOrderState } from "../../redux/purchaseOrderSlice";
 import { setProductPrice } from "../../redux/productPriceSlice";
 import { setProjectState } from "../../redux/projectSlice";
-import { setProductState } from "../../redux/productSlice";
 
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
 import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
@@ -17,15 +16,14 @@ import { useAddInvoice } from "../../hooks/useAddInvoice";
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 import SessionExpired from "../../components/SessionExpired"
 import NewProductModal from "./NewProductModal";
-import { current } from "@reduxjs/toolkit";
 
 const NewInvoiceForm = () => {
     //Component's hook
     const dispatch = useDispatch();
-    const { addPrice, isAddPriceLoadingState, addPriceErrorState } = useAddProductPrice();
-    const { addInvoice, addInvoiceLoading, addInvoiceError } = useAddInvoice();
-    const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
-    const { updatePurchaseOrder, isUpdateLoadingState, updateOrderErrorState } = useUpdatePurchaseOrder();
+    const { addPrice, addPriceErrorState } = useAddProductPrice();
+    const { addInvoice, addInvoiceError } = useAddInvoice();
+    const { fetchProductsBySupplier, fetchProductsErrorState } = useFetchProductsBySupplier();
+    const { updatePurchaseOrder, updateOrderErrorState } = useUpdatePurchaseOrder();
     
     //Component's state declaration
     const [searchOrderTerm, setSearchOrderTerm] = useState('');
@@ -82,6 +80,32 @@ const NewInvoiceForm = () => {
         invoice_internal_comments: "",
         invoice_status: "",
         payment: ""
+    });
+    const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({
+        invoice_ref: "",
+        supplier: "",
+        invoice_issue_date: "",
+        invoice_received_date: new Date().toISOString().split('T')[0],
+        invoice_due_date: "",
+        order: null,
+        products: [],
+        custom_products: [{
+            custom_product_name: "",
+            custom_product_location: "",
+            custom_order_qty: 0,
+            custom_order_price: 0,
+            custom_order_gross_amount: 0
+        }],
+        invoiced_delivery_fee: 0,
+        invoiced_other_fee: 0,
+        invoiced_credit: 0,
+        invoiced_raw_total_amount_incl_gst: 0,
+        invoiced_calculated_total_amount_incl_gst: 0,
+        invoice_is_stand_alone: true,
+        invoice_internal_comments: "",
+        invoice_status: "",
+        invoice_isarchived: false,
+        payment: null
     });
     const [newProductPrice, setNewProductPrice] = useState({
         product_obj_ref: '',
@@ -394,6 +418,108 @@ const NewInvoiceForm = () => {
         // Set state with the updated state
         setNewInvoice(updatedState);
     };
+    const handleInputChangeNoPO = (event, index = null) => {
+        const { name, value } = event.target;
+    
+        // Get the current state
+        const currentState = newInvoiceWithoutPO;
+    
+        // Copy current state to updatedState variable for changes
+        let updatedState = { ...currentState };
+    
+        // Create separate variables for products and custom_products so they can be updated independently
+        let updatedCustomProducts = [...currentState.custom_products];
+    
+        // Handle order items details input using index
+        if (index !== null) {  
+            if (name === "custom_order_qty") {
+                updatedCustomProducts[index] = {
+                    ...updatedCustomProducts[index],
+                    [name]: Number(value), // Convert to number here
+                    custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(2)) || 0,
+                };
+            } else if (name === "custom_order_price") {
+                updatedCustomProducts[index] = {
+                    ...updatedCustomProducts[index],
+                    [name]: Number(value), // Convert to number here
+                    custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(2)) || 0,
+                };
+            }
+            else {
+                updatedCustomProducts[index] = {
+                    ...updatedCustomProducts[index],
+                    [name]: value,
+                };
+            }
+    
+            updatedState = {
+                ...currentState,
+                custom_products: updatedCustomProducts,
+            };
+        } else {
+            // Update for invoiced fees and other fields
+            updatedState = {
+                ...currentState,
+                [name]: ["invoiced_delivery_fee", "invoiced_other_fee", "invoiced_credit", "invoiced_raw_total_amount_incl_gst"].includes(name)
+                    ? Number(value)
+                    : value,
+            };
+        }
+    
+        // Calculate updatedTotalAmount using updatedProducts and updatedCustomProducts
+        let updatedInvoicedTotalAmount = (
+            (updatedCustomProducts.reduce((total, cprod) => (
+                total + (Number(cprod.custom_order_gross_amount) || 0)
+            ), 0) +
+            (Number(updatedState.invoiced_delivery_fee) || 0) +
+            (Number(updatedState.invoiced_other_fee) || 0) +
+            (Number(updatedState.invoiced_credit) || 0)) * 1.1
+        ).toFixed(2);
+    
+        // Final update to the state with recalculated total amount
+        updatedState = {
+            ...updatedState,
+            invoiced_calculated_total_amount_incl_gst: Number(updatedInvoicedTotalAmount),
+        };
+    
+        // Set state with the updated state
+        setNewInvoiceInvoiceWithoutPO(updatedState);
+    };
+
+    // const handleInputChangeNoPO = (event, index = null) => {
+    //     const { name, value } = event.target;
+    
+    //     // Copy current state to updatedState variable for changes
+    //     let updatedState = { ...newInvoiceWithoutPO };
+    //     let updatedCustomProducts = [...updatedState.custom_products];
+    
+    //     if (index !== null) {
+    //         if (name === "custom_order_qty") {
+    //             updatedCustomProducts[index] = {
+    //                 ...updatedCustomProducts[index],
+    //                 [name]: Number(value), // Convert to number here
+    //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(2)) || 0,
+    //             };
+    //         } else if (name === "custom_order_price") {
+    //             updatedCustomProducts[index] = {
+    //                 ...updatedCustomProducts[index],
+    //                 [name]: Number(value), // Convert to number here
+    //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(2)) || 0,
+    //             };
+    //         }
+    //         else {
+    //             updatedCustomProducts[index] = {
+    //                 ...updatedCustomProducts[index],
+    //                 [name]: value,
+    //             };
+    //         }
+    //     }
+    
+    //     updatedState.custom_products = updatedCustomProducts;
+    
+    //     setNewInvoiceInvoiceWithoutPO(updatedState);
+    // };
+    
     const handleAddToInvoice = () => {
         if (selectedOrder === '') {
             alert('Please select an order')
@@ -582,27 +708,58 @@ const NewInvoiceForm = () => {
             })
         }        
     }
-    const handleRemoveCustomItem = (index) => {
+    const handleRemoveCustomItem = (index, noPO = false) => {
 
-        const updatedCustomItems = updatedOrder.custom_products.filter((_, idx) => idx !== index);
+        if (noPO) {
+            const updatedCustomItems = newInvoiceWithoutPO.custom_products.filter((_, idx) => idx !== index);
         
-        setUpdatedOrder({
-            ...updatedOrder,
-            custom_products: updatedCustomItems,
-        })
-    }
-    const handleAddCustomItem = () => {
-        if (updatedOrder.custom_products.length < 15) {
+            setNewInvoiceInvoiceWithoutPO({
+                ...newInvoiceWithoutPO,
+                custom_products: updatedCustomItems,
+            })
+        }
+
+        if (!noPO) {
+            const updatedCustomItems = updatedOrder.custom_products.filter((_, idx) => idx !== index);
+            
             setUpdatedOrder({
                 ...updatedOrder,
-                custom_products: [...updatedOrder.custom_products, {
-                    custom_product_name:'', 
-                    custom_product_location: '',
-                    custom_order_qty: 0
-                }]
+                custom_products: updatedCustomItems,
             })
-        } else {
-            alert("You can add up to 15 custom items only.")
+        }
+    }
+    const handleAddCustomItem = (noPO = false) => {
+
+        if (noPO) {
+            if (newInvoiceWithoutPO.custom_products.length < 15) {
+                setNewInvoiceInvoiceWithoutPO({
+                    ...newInvoiceWithoutPO,
+                    custom_products: [...newInvoiceWithoutPO.custom_products, {
+                        custom_product_name: "",
+                        custom_product_location: "",
+                        custom_order_qty: 0,
+                        custom_order_price: 0,
+                        custom_order_gross_amount: 0
+                    }]
+                })
+            } else {
+                alert("You can add up to 15 custom items only.")
+            }
+        }
+
+        if (!noPO) {
+            if (updatedOrder.custom_products.length < 15) {
+                setUpdatedOrder({
+                    ...updatedOrder,
+                    custom_products: [...updatedOrder.custom_products, {
+                        custom_product_name:'', 
+                        custom_product_location: '',
+                        custom_order_qty: 0
+                    }]
+                })
+            } else {
+                alert("You can add up to 15 custom items only.")
+            }
         }
     }
     const handleViewPriceVersion = (supplierId, targetProductId) => {
@@ -683,16 +840,28 @@ const NewInvoiceForm = () => {
     const handleSubmitInvoice = (event) => {
         event.preventDefault();
         
-        if (newInvoice.invoice_status === '') {
-            // push toast to notify successful login
-            toast.error(`Please select invoice status`, {
-                position: "bottom-right"
-            });
-            return;
+        if (!isToggled) {
+            if (newInvoice.invoice_status === '') {
+                // push toast to notify successful login
+                toast.error(`Please select invoice status`, {
+                    position: "bottom-right"
+                });
+                return;
+            }
+            addInvoice(newInvoice);
         }
 
-        addInvoice(newInvoice);
-
+        if (isToggled) {
+            if (newInvoice.invoice_status === '') {
+                // push toast to notify successful login
+                toast.error(`Please select invoice status`, {
+                    position: "bottom-right"
+                });
+                return;
+            }
+            addInvoice(newInvoiceWithoutPO);
+        }
+        
     }
     
     useEffect(() => {
@@ -768,6 +937,17 @@ const NewInvoiceForm = () => {
             abortController.abort(); // Cleanup
         };
     }, [dispatch]);
+
+    useEffect(() => {
+        setNewInvoiceInvoiceWithoutPO(prevState => ({
+            ...prevState,
+            invoice_ref: newInvoice.invoice_ref,
+            supplier: newInvoice.supplier,
+            invoice_issue_date: newInvoice.invoice_issue_date,
+            invoice_due_date: newInvoice.invoice_due_date,
+            invoice_status: newInvoice.invoice_status,
+        }));
+    }, [newInvoice]);
 
     //Component's modal
     const orderSelectionModal = (
@@ -1574,59 +1754,59 @@ const NewInvoiceForm = () => {
 
     
 
-    if (isFetchSupplierLoading) {
+    if (isFetchSupplierLoading || isFetchProjectLoading) {
         return <EmployeeDetailsSkeleton />
     }
 
-    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError) {
+    // if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError) {
 
-        const errorMessages = [
-            fetchSupplierError,
-            fetchOrderError,
-            fetchProductDetailsError,
-            addPriceErrorState,
-            fetchProjectError,
-            fetchProductsErrorState,
-            updateOrderErrorState,
-            addInvoiceError
-        ];
+    //     const errorMessages = [
+    //         fetchSupplierError,
+    //         fetchOrderError,
+    //         fetchProductDetailsError,
+    //         addPriceErrorState,
+    //         fetchProjectError,
+    //         fetchProductsErrorState,
+    //         updateOrderErrorState,
+    //         addInvoiceError
+    //     ];
         
-        const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
+    //     const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
           
-        if (isSessionExpired) {
-        return (
-            <div>
-            <SessionExpired />
-            </div>
-        );
-        }
+    //     if (isSessionExpired) {
+    //     return (
+    //         <div>
+    //         <SessionExpired />
+    //         </div>
+    //     );
+    //     }
 
-        else {
-            return (
-                <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
-                    <div className="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
-                        </svg>
-                        <h2 className="text-2xl font-bold">Ooops...Something went wrong!</h2>
-                    </div>
-                    <p className="mt-4 text-lg text-center">
-                        Error: { fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState }
-                    </p>
-                    <button 
-                        onClick={() => window.location.reload()} 
-                        className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
-                    >
-                        Try Again
-                    </button>
-                </div>
-            );
-        }
-    }
+    //     else {
+    //         return (
+    //             <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
+    //                 <div className="flex items-center space-x-2">
+    //                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+    //                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+    //                     </svg>
+    //                     <h2 className="text-2xl font-bold">Ooops...Something went wrong!</h2>
+    //                 </div>
+    //                 <p className="mt-4 text-lg text-center">
+    //                     Error: { fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError}
+    //                 </p>
+    //                 <button 
+    //                     onClick={() => window.location.reload()} 
+    //                     className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
+    //                 >
+    //                     Try Again
+    //                 </button>
+    //             </div>
+    //         );
+    //     }
+    // }
     
+    // console.log("newInvoice to submit:", newInvoice)
+    console.log("newInvoiceWithoutPO to submit:", newInvoiceWithoutPO)
 
-    console.log("currentOrder:", currentOrder)
-    console.log("newInvoice to submit:", newInvoice)
 
     return (
         <div>
@@ -1853,7 +2033,7 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 w-32"
+                                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
@@ -1871,7 +2051,7 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 w-32"
+                                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
@@ -1888,7 +2068,7 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 w-32"
+                                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
@@ -1933,7 +2113,7 @@ const NewInvoiceForm = () => {
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 bg-white w-32"
+                                            className="rounded-lg ml-1 bg-white w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
@@ -1970,134 +2150,184 @@ const NewInvoiceForm = () => {
                         <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
                             <thead className="bg-indigo-200 text-center">
                                 <tr>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-64">Name</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Location</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Invoice Qty</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-10">Unit Price</th>
-                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-24">Invoiced Amount</th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-10">
+                                        <button type="button" className="border-green-400 bg-green-400 btn p-1 hover:bg-green-500" title="Add more items">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 cursor-pointer text-white" onClick={() => handleAddCustomItem(true)}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                            </svg>
+                                        </button>
+                                    </th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-96">Item Name</th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-24">Location</th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-16">Invoice Qty</th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-20">Unit Price</th>
+                                    <th scope="col" className="border border-gray-300 px-3 py-2 w-32">Current Invoice Amount</th>
                                 </tr>
                             </thead>
                             <tbody className='text-center'>
                                 {/* custom product */}
-                                <tr>
+                                { newInvoiceWithoutPO.custom_products && newInvoiceWithoutPO.custom_products.map((cusprod,index) => (
+                                <tr key={index}>
+                                    <td className="border px-1 py-2 text-end flex justify-center items-center space-x-2">
+                                        <button type="button" onClick={() => handleRemoveCustomItem(index, true)} className="btn btn-danger p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                        </button>
+                                    </td>
                                     <td className="border border-gray-300 px-3 py-2">
                                         <input
                                             type="text"
-                                            placeholder="Enter custom name"
+                                            name="custom_product_name"
+                                            value={newInvoiceWithoutPO.custom_products[index].custom_product_name} 
+                                            onChange={(e) => handleInputChangeNoPO(e,index)}
+                                            required
+                                            placeholder="Enter product name"
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom product name')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            className="px-1 py-0.5 text-xs border rounded-md form-control"
                                         />
                                     </td>
                                     <td className="border border-gray-300 px-3 py-2">
                                         <input
                                             type="text"
+                                            name="custom_product_location"
+                                            value={newInvoiceWithoutPO.custom_products[index].custom_product_location} 
+                                            onChange={(e) => handleInputChangeNoPO(e,index)}
+                                            required
                                             placeholder="Enter location"
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter location')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            className="px-1 py-0.5 text-xs border rounded-md form-control"
+                                        />
+                                    </td>
+                                    <td className="border border-gray-300 px-3 py-2">
+                                        <input
+                                            type="number"
+                                            name="custom_order_qty"
+                                            value={newInvoiceWithoutPO.custom_products[index].custom_order_qty} 
+                                            onChange={(e) => handleInputChangeNoPO(e,index)}
+                                            step={0.0001}
+                                            required
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter quantity')}
+                                            onInput={(e) => e.target.setCustomValidity('')}
+                                            className="px-1 py-0.5 text-xs border rounded-md w-20"
                                         />
                                     </td>
                                     <td className="border border-gray-300 px-3 py-2">
                                         $
                                         <input
                                             type="number"
-                                            name="" 
-                                            value={{}} 
-                                            onChange={() => {}}
-                                            min={0}
+                                            name="custom_order_price"
+                                            value={newInvoiceWithoutPO.custom_products[index].custom_order_price} 
+                                            onChange={(e) => handleInputChangeNoPO(e,index)}
                                             step={0.01}
                                             required
-                                            onInvalid={(e) => e.target.setCustomValidity('')}
+                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom price')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 bg-white w-32"
+                                            className="px-1 py-0.5 text-xs border rounded-md w-20"
                                         />
                                     </td>
-                                    <td className="border border-gray-300 px-3 py-2">
-                                        $
-                                        <input
-                                            type="number"
-                                            name="" 
-                                            value={{}} 
-                                            onChange={() => {}}
-                                            min={0}
-                                            step={0.01}
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 bg-white w-32"
-                                        />
-                                    </td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ --.--</td>
+                                    <td className="border border-gray-300 px-3 py-2 text-end">$ {newInvoiceWithoutPO.custom_products[index].custom_order_gross_amount}</td>
                                 </tr>
+                                ))}
+                                { newInvoiceWithoutPO.custom_products.length === 0 && 
+                                <tr>
+                                    <td colSpan="9" className="border border-gray-300 p-2 text-center">Items not added...</td>
+                                </tr>
+                                }
                                 {/* calculation table */}
                                 <tr>
-                                    <td colSpan={3}></td>
+                                    <td colSpan={4}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Delivery fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$
                                         <input
                                             type="number"
-                                            name="" 
-                                            value={{}} 
-                                            onChange={() => {}}
+                                            name="invoiced_delivery_fee" 
+                                            value={newInvoiceWithoutPO.invoiced_delivery_fee} 
+                                            onChange={(e) => handleInputChangeNoPO(e,null)}
                                             min={0}
                                             step={0.0001}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 w-32"
+                                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={3}></td>
+                                    <td colSpan={4}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Strapping/Pallet/Cutting fee:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$
                                         <input
                                             type="number"
-                                            name="" 
-                                            value={{}} 
-                                            onChange={() => {}}
+                                            name="invoiced_other_fee" 
+                                            value={newInvoiceWithoutPO.invoiced_other_fee} 
+                                            onChange={(e) => handleInputChangeNoPO(e,null)}
                                             min={0}
                                             step={0.0001}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 w-32"
+                                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={3}></td>
+                                    <td colSpan={4}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Credit:</td>
                                     <td className="border border-gray-300 px-3 py-2 text-end">$
                                         <input
                                             type="number"
-                                            name="" 
-                                            value={{}} 
-                                            onChange={() => {}}
+                                            name="invoiced_credit" 
+                                            value={newInvoiceWithoutPO.invoiced_credit} 
+                                            onChange={(e) => handleInputChangeNoPO(e,null)}
                                             min={0}
                                             step={0.01}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('')}
                                             onInput={(e) => e.target.setCustomValidity('')}
-                                            className="rounded-lg ml-1 w-32"
+                                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
                                         />
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={3}></td>
+                                    <td colSpan={4}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount:</td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ --.--</td>
+                                    <td className="border border-gray-300 px-3 py-2 text-end">
+                                        $ {
+                                        (newInvoiceWithoutPO.custom_products.reduce((total, prod) => (
+                                                total + (Number(prod.custom_order_gross_amount) || 0)
+                                            ), 0) +
+                                            (Number(newInvoiceWithoutPO.invoiced_delivery_fee) || 0) +
+                                            (Number(newInvoiceWithoutPO.invoiced_other_fee) || 0) +
+                                            (Number(newInvoiceWithoutPO.invoiced_credit) || 0)
+                                        ).toFixed(2)}
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={3}></td>
+                                    <td colSpan={4}></td>
                                     <td className="border border-gray-300 px-2 py-2 font-bold text-end">Total Gross Amount (incl GST):</td>
-                                    <td className="border border-gray-300 px-3 py-2 text-end">$ --.--</td>
+                                    <td className="border border-gray-300 px-3 py-2 text-end">
+                                        $ {
+                                        ((newInvoiceWithoutPO.custom_products.reduce((total, prod) => (
+                                                total + (Number(prod.custom_order_gross_amount) || 0)
+                                            ), 0) +
+                                            (Number(newInvoiceWithoutPO.invoiced_delivery_fee) || 0) +
+                                            (Number(newInvoiceWithoutPO.invoiced_other_fee) || 0) +
+                                            (Number(newInvoiceWithoutPO.invoiced_credit) || 0)) * 1.1
+                                        ).toFixed(2)}
+                                    </td>
                                 </tr>
                                 <tr className="bg-indigo-100">
-                                    <td colSpan={3}></td>
+                                    <td colSpan={4}></td>
                                     <td className="px-2 py-2 font-bold text-end border border-gray-400">Total Raw Amount (incl GST):</td>
-                                    <td className="px-3 py-2 text-center">$
+                                    <td className="px-3 py-2 text-end">$
                                         <input
                                             type="number"
-                                            name="" 
-                                            value={{}} 
-                                            onChange={() => {}}
+                                            name="invoiced_raw_total_amount_incl_gst" 
+                                            value={newInvoiceWithoutPO.invoiced_raw_total_amount_incl_gst} 
+                                            onChange={(e) => handleInputChangeNoPO(e,null)}
                                             min={0}
                                             step={0.01}
                                             required

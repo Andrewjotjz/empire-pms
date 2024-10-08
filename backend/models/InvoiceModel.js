@@ -31,8 +31,7 @@ const invoiceSchema = new Schema({
     },
     order: {
         type: Schema.Types.ObjectId,
-        ref: 'Order',
-        required: true
+        ref: 'Order'
     },
     products: [{    //THIS Array is exactly the same as 'Order model' because we want to pull the data from order.
         product_obj_ref: {   //this will point at product_obj_ref, product_name, product_sku, product_number_a, product_unit_a, etc....
