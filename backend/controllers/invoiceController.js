@@ -39,6 +39,12 @@ const getSingleInvoice = async (req, res) => {
     .populate('supplier')
     .populate('order')
     .populate({
+        path: 'order',
+        populate: {
+            path: 'products.product_obj_ref',
+        }
+    })
+    .populate({
         path: 'products.product_obj_ref', // Populate the 'product_obj_ref' inside 'products' array
     })
     .populate('payment')

@@ -157,7 +157,7 @@ const InvoicePage = () => {
                         <tr key={invoice._id} onClick={() => handleTableClick(invoice._id)} className="cursor-pointer text-center">
                             <th scope="row">{invoice.invoice_ref}</th>
                             <td>{invoice.supplier.supplier_name}</td>
-                            <td>{invoice.order.order_ref}</td>
+                            <td>{invoice.order?.order_ref || '-'}</td>
                             <td>{formatDateTime(invoice.invoice_issue_date)}</td>
                             <td>{formatDateTime(invoice.invoice_received_date)}</td>
                             <td>{formatDateTime(invoice.invoice_due_date)}</td>
