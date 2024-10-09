@@ -163,7 +163,7 @@ const NewInvoiceForm = () => {
                         invoice_product_location: product.order_product_location,
                         invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
                         invoice_product_price_unit: product.order_product_price_unit_a,
-                        invoice_product_gross_amount_a: product.order_product_gross_amount,
+                        invoice_product_gross_amount_a: product.order_product_gross_amount * (newInvoice?.products[index]?.invoice_product_qty_a || 0),
                     })) || [];
     
                     const formattedCustomProducts = data.custom_products?.map((customProduct) => ({
@@ -1758,53 +1758,54 @@ const NewInvoiceForm = () => {
         return <EmployeeDetailsSkeleton />
     }
 
-    // if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError) {
+    if (fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError) {
 
-    //     const errorMessages = [
-    //         fetchSupplierError,
-    //         fetchOrderError,
-    //         fetchProductDetailsError,
-    //         addPriceErrorState,
-    //         fetchProjectError,
-    //         fetchProductsErrorState,
-    //         updateOrderErrorState,
-    //         addInvoiceError
-    //     ];
+        const errorMessages = [
+            fetchSupplierError,
+            fetchOrderError,
+            fetchProductDetailsError,
+            addPriceErrorState,
+            fetchProjectError,
+            fetchProductsErrorState,
+            updateOrderErrorState,
+            addInvoiceError
+        ];
         
-    //     const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
+        const isSessionExpired = errorMessages.some((error) => error?.includes('Session expired.'));
           
-    //     if (isSessionExpired) {
-    //     return (
-    //         <div>
-    //         <SessionExpired />
-    //         </div>
-    //     );
-    //     }
+        if (isSessionExpired) {
+        return (
+            <div>
+            <SessionExpired />
+            </div>
+        );
+        }
 
-    //     else {
-    //         return (
-    //             <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
-    //                 <div className="flex items-center space-x-2">
-    //                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
-    //                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
-    //                     </svg>
-    //                     <h2 className="text-2xl font-bold">Ooops...Something went wrong!</h2>
-    //                 </div>
-    //                 <p className="mt-4 text-lg text-center">
-    //                     Error: { fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError}
-    //                 </p>
-    //                 <button 
-    //                     onClick={() => window.location.reload()} 
-    //                     className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
-    //                 >
-    //                     Try Again
-    //                 </button>
-    //             </div>
-    //         );
-    //     }
-    // }
+        else {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
+                    <div className="flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-10">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" />
+                        </svg>
+                        <h2 className="text-2xl font-bold">Ooops...Something went wrong!</h2>
+                    </div>
+                    <p className="mt-4 text-lg text-center">
+                        Error: { fetchSupplierError || fetchOrderError || fetchProductDetailsError || addPriceErrorState || fetchProjectError || fetchProductsErrorState || updateOrderErrorState || addInvoiceError}
+                    </p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            );
+        }
+    }
     
-    // console.log("newInvoice to submit:", newInvoice)
+    console.log("currentOrder:", currentOrder)
+    console.log("newInvoice to submit:", newInvoice)
     console.log("newInvoiceWithoutPO to submit:", newInvoiceWithoutPO)
 
 
