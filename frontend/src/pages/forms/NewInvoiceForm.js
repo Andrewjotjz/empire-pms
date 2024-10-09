@@ -1954,12 +1954,26 @@ const NewInvoiceForm = () => {
                                     <td className="border border-gray-300 px-1 py-2">{prod.product_obj_ref.product_sku}</td>
                                     <td className="border border-gray-300 px-1 py-2">{prod.product_obj_ref.product_name}</td>
                                     <td className="border border-gray-300 px-1 py-2">{prod.order_product_location}</td>
+                                    
                                     {/* Based on previous invoice */}
                                     <td className="border border-gray-300 px-1 py-2 bg-gray-100">
-                                        <label>{(currentOrder?.invoices?.reduce((total, invoice) => (
-                                                total + (Number(invoice?.products[index]?.invoice_product_qty_a) || 0)
-                                            ), 0)).toFixed(2)}</label>
-                                        <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{prod.productprice_obj_ref.product_unit_a}</label>
+                                        <label>{currentOrder.invoices.reduce((sum, invoice) => {
+                                            // Reduce over each invoice to accumulate the quantities
+                                            const invoiceProductQtySum = invoice.products.reduce((invoiceSum, invoiceProduct) => {
+                                                // Check if the current product's _id matches the invoice product's product_obj_ref
+                                                if (prod.product_obj_ref._id === invoiceProduct.product_obj_ref) {
+                                                    // Add the invoice product quantity to the sum if there's a match
+                                                    return invoiceSum + invoiceProduct.invoice_product_qty_a;
+                                                }
+                                                return invoiceSum;
+                                            }, 0);
+
+                                            return sum + invoiceProductQtySum;
+                                        }, 0)}</label>
+                                        
+                                        <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                            {prod.productprice_obj_ref.product_unit_a}
+                                        </label>
                                     </td>
                                     <td className="border border-gray-300 px-1 py-2">
                                         <label>{prod.order_product_qty_a}</label>
