@@ -159,6 +159,7 @@ const NewInvoiceForm = () => {
     
                     // Ensure products and custom_products exist before mapping
                     const formattedProducts = data.products?.map((product,index) => ({
+                        _id: product._id,
                         product_obj_ref: product.product_obj_ref._id,
                         invoice_product_location: product.order_product_location,
                         invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
@@ -167,6 +168,7 @@ const NewInvoiceForm = () => {
                     })) || [];
     
                     const formattedCustomProducts = data.custom_products?.map((customProduct) => ({
+                        _id: customProduct._id,
                         custom_product_name: customProduct.custom_product_name,
                         custom_product_location: customProduct.custom_product_location,
                         custom_order_qty: customProduct.custom_order_qty,
@@ -1961,7 +1963,7 @@ const NewInvoiceForm = () => {
                                             // Reduce over each invoice to accumulate the quantities
                                             const invoiceProductQtySum = invoice.products.reduce((invoiceSum, invoiceProduct) => {
                                                 // Check if the current product's _id matches the invoice product's product_obj_ref
-                                                if (prod.product_obj_ref._id === invoiceProduct.product_obj_ref) {
+                                                if (prod._id === invoiceProduct._id) {
                                                     // Add the invoice product quantity to the sum if there's a match
                                                     return invoiceSum + invoiceProduct.invoice_product_qty_a;
                                                 }
