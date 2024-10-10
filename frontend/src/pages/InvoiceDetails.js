@@ -218,7 +218,7 @@ const InvoiceDetails = () => {
         <div className="container p-0 bg-slate-50 mb-4 shadow-md text-sm">
             <h2 className='font-bold text-lg m-1'>Invoiced products:</h2>
             <table className="table table-hover m-0">
-                <thead className="thead-dark text-center">
+                <thead className="text-center">
                     <tr className="table-primary">
                         <th scope="col">SKU</th>
                         <th scope="col">Name</th>
@@ -377,10 +377,20 @@ const InvoiceDetails = () => {
                                     <td className='text-end'>$ {prod.order_product_gross_amount}</td>
                                 </tr>
                             ))}
+                            {invoiceState.order.custom_products && invoiceState.order.custom_products.map((cusprod, index) => (
+                                <tr key={index}>
+                                    <td className='text-center'>-</td>
+                                    <td className='text-center'>{cusprod.custom_product_name}</td>
+                                    <td className='text-center'>{cusprod.custom_product_location}</td>
+                                    <td className='text-center'>{cusprod.custom_order_qty}</td>
+                                    <td className='text-center'>-</td>
+                                    <td className='text-end'>-</td>
+                                </tr>
+                            ))}
                             <tr>
                                 <td colSpan={3}></td>
                                 <td colSpan={2} className='text-end font-bold'>No. of Item:</td>
-                                <td className='text-end font-bold'>{invoiceState.order.products.length}</td>
+                                <td className='text-end font-bold'>{invoiceState.order.products.length + invoiceState.order.custom_products.length}</td>
                             </tr>
                             <tr>
                                 <td colSpan={3}></td>
