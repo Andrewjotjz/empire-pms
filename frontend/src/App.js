@@ -31,6 +31,7 @@ import TestPage from "./pages/TestPage";
 import PurchaseOrderDetails from "./pages/PurchaseOrderDetails";
 import NewPurchaseOrderForm from "./pages/forms/NewPurchaseOrderForm";
 import NewInvoiceForm from "./pages/forms/NewInvoiceForm";
+import UpdateInvoiceForm from "./pages/forms/UpdateInvoiceForm";
 import InvoiceDetails from "./pages/InvoiceDetails";
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
             <Route path="/EmpirePMS/invoice" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <InvoicePage />} />
             <Route path="/EmpirePMS/invoice/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <InvoiceDetails />} />
             <Route path="/EmpirePMS/invoice/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewInvoiceForm />} />
+            <Route path="/EmpirePMS/invoice/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateInvoiceForm />} />
             <Route path="/EmpirePMS/order" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <OrderPage />} />
             <Route path="/EmpirePMS/payment" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PaymentPage />} />
             <Route path="/EmpirePMS/project" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectPage />} />

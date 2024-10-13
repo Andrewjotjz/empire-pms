@@ -44,7 +44,7 @@ const InvoiceDetails = () => {
     }
 
     const handleEditInvoice = () => {
-        navigate(`/EmpirePMS/order/${id}/edit`)
+        navigate(`/EmpirePMS/invoice/${id}/edit`)
     }
 
     const handleArchive = () => {    

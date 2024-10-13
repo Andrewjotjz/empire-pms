@@ -190,29 +190,44 @@ const NewInvoiceForm = () => {
                 (newInvoice?.products[index]?.invoice_product_qty_a || 0),
             })) || [];
 
+          // const formattedCustomProducts =
+          //   data.custom_products?.map((customProduct, index) => ({
+          //     _id: customProduct._id,
+          //     custom_product_name: customProduct.custom_product_name,
+          //     custom_product_location: customProduct.custom_product_location,
+          //     custom_order_qty:
+          //       newInvoice?.custom_products[index]?.custom_order_qty || 0,
+          //     custom_order_price: '',// apply code here
+          //     custom_order_gross_amount:
+          //       (Number(customProduct.custom_order_gross_amount) || 0) *
+          //       (Number(newInvoice?.custom_products[index]?.custom_order_qty) ||
+          //         0),
+          //   })) || [];
           const formattedCustomProducts =
-            data.custom_products?.map((customProduct, index) => ({
-              _id: customProduct._id,
-              custom_product_name: customProduct.custom_product_name,
-              custom_product_location: customProduct.custom_product_location,
-              custom_order_qty:
-                newInvoice?.custom_products[index]?.custom_order_qty || 0,
-              custom_order_price: data.invoices
-                .flatMap((invoice) => invoice.custom_products) // use flatMap() to get all products from the invoices into a single array
-                .find(
-                  (
-                    invoiceProduct // use find() to search through the array of invoice products
-                  ) =>
-                    data.custom_products.some(
-                      // use some() to check if each order product matches with each invoice product
-                      (orderProduct) => orderProduct._id === invoiceProduct._id
-                    )
-                )?.custom_order_price, // if yes, get the price
-              custom_order_gross_amount:
-                (Number(customProduct.custom_order_gross_amount) || 0) *
-                (Number(newInvoice?.custom_products[index]?.custom_order_qty) ||
-                  0),
-            })) || [];
+            data.custom_products?.map((customProduct, index) => {
+              // Find if the customProduct exists in the invoices' custom_products
+              let matchingCustomProduct = null;
+              data.invoices.some(invoice => {
+                matchingCustomProduct = invoice.custom_products.find(
+                  invoiceCustomProduct => invoiceCustomProduct._id === customProduct._id
+                );
+                return matchingCustomProduct;
+              });
+
+              return {
+                _id: customProduct._id,
+                custom_product_name: customProduct.custom_product_name,
+                custom_product_location: customProduct.custom_product_location,
+                custom_order_qty:
+                  newInvoice?.custom_products[index]?.custom_order_qty || 0,
+                custom_order_price: matchingCustomProduct
+                  ? matchingCustomProduct.custom_order_price
+                  : 0, // Set custom_order_price from matching invoice or empty string
+                custom_order_gross_amount:
+                  (Number(customProduct.custom_order_gross_amount) || 0) *
+                  (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
+              };
+            }) || [];
 
           setNewInvoice({
             ...newInvoice,
@@ -3100,10 +3115,10 @@ const NewInvoiceForm = () => {
                       <td className="border border-gray-300 px-3 py-2 text-end">
                         ${" "}
                         {(
-                          newInvoice.products.reduce(
+                          currentOrder.products.reduce(
                             (total, prod) =>
                               total +
-                              (Number(prod.invoice_product_gross_amount_a) ||
+                              (Number(prod.order_product_gross_amount) ||
                                 0),
                             0
                           ) +
@@ -3131,10 +3146,10 @@ const NewInvoiceForm = () => {
                       <td className="border border-gray-300 px-3 py-2 text-end">
                         ${" "}
                         {(
-                          (newInvoice.products.reduce(
+                          (currentOrder.products.reduce(
                             (total, prod) =>
                               total +
-                              (Number(prod.invoice_product_gross_amount_a) ||
+                              (Number(prod.order_product_gross_amount) ||
                                 0),
                             0
                           ) +
