@@ -13,7 +13,7 @@ import { setInvoiceState } from "../../redux/invoiceSlice";
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
 import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
 import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
-import { useAddInvoice } from "../../hooks/useAddInvoice";
+import { useUpdateInvoice } from "../../hooks/useUpdateInvoice";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import SessionExpired from "../../components/SessionExpired";
@@ -24,7 +24,7 @@ const UpdateInvoiceForm = () => {
   const { id: invoiceId } = useParams();
   const dispatch = useDispatch();
   const { addPrice, addPriceErrorState } = useAddProductPrice();
-  const { addInvoice, addInvoiceError } = useAddInvoice();
+  const { updateInvoice, updateErrorState } = useUpdateInvoice();
   const { fetchProductsBySupplier, fetchProductsErrorState } = useFetchProductsBySupplier();
   const { updatePurchaseOrder, updateOrderErrorState } = useUpdatePurchaseOrder();
 
@@ -1016,7 +1016,7 @@ const UpdateInvoiceForm = () => {
         });
         return;
       }
-      addInvoice(newInvoice);
+      updateInvoice(newInvoice, invoiceId);
     }
 
     if (isToggled) {
@@ -1027,7 +1027,7 @@ const UpdateInvoiceForm = () => {
         });
         return;
       }
-      addInvoice(newInvoiceWithoutPO);
+      updateInvoice(newInvoiceWithoutPO, invoiceId);
     }
   };
 
@@ -2510,7 +2510,7 @@ const UpdateInvoiceForm = () => {
     fetchProjectError ||
     fetchProductsErrorState ||
     updateOrderErrorState ||
-    addInvoiceError ||
+    updateErrorState ||
     fetchInvoiceError
   ) {
     const errorMessages = [
@@ -2521,7 +2521,7 @@ const UpdateInvoiceForm = () => {
       fetchProjectError,
       fetchProductsErrorState,
       updateOrderErrorState,
-      addInvoiceError,
+      updateErrorState,
       fetchInvoiceError
     ];
 
@@ -2566,7 +2566,7 @@ const UpdateInvoiceForm = () => {
               fetchProjectError ||
               fetchProductsErrorState ||
               updateOrderErrorState ||
-              addInvoiceError ||
+              updateErrorState ||
               fetchInvoiceError}
           </p>
           <button

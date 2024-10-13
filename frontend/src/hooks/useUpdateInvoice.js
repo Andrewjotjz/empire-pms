@@ -8,13 +8,13 @@ export const useUpdateInvoice = () => {
     const [updateErrorState, setUpdateErrorState] = useState(null);
 
     //Component's function
-    const updateInvoice = async (invoiceState) => {
+    const updateInvoice = async (invoiceState, invoiceId) => {
         setIsUpdateLoadingState(true)
         setUpdateErrorState(null)
 
         const putInvoice = async () => {
             try {
-                const res = await fetch(`/api/invoice/${invoiceState._id}`, {
+                const res = await fetch(`/api/invoice/${invoiceId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...invoiceState})
