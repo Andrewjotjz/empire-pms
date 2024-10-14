@@ -394,13 +394,17 @@ const InvoiceDetails = () => {
                             </tr>
                             <tr>
                                 <td colSpan={3}></td>
-                                <td colSpan={2} className='text-end font-bold'>Computed Total Amount:</td>
-                                <td className='text-end font-bold'>$ {(invoiceState.order.order_total_amount / 1.1).toFixed(2)}</td>
+                                <td colSpan={2} className='text-end font-bold'>Total Gross Amount:</td>
+                                <td className='text-end font-bold'>$ {(invoiceState.order.products.reduce((totalSum, product) => {
+                                    return totalSum + product.order_product_gross_amount
+                                }, 0)).toFixed(2)}</td>
                             </tr>
                             <tr>
                                 <td colSpan={3}></td>
-                                <td colSpan={2} className='text-end font-bold'>Computed Total Amount (incl. GST):</td>
-                                <td className='text-end font-bold'>$ {invoiceState.order.order_total_amount}</td>
+                                <td colSpan={2} className='text-end font-bold'>Total Gross Amount (incl. GST):</td>
+                                <td className='text-end font-bold'>$ {(invoiceState.order.products.reduce((totalSum, product) => {
+                                    return totalSum + product.order_product_gross_amount
+                                }, 0) * 1.1).toFixed(2)}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -501,6 +505,8 @@ const InvoiceDetails = () => {
         </Modal>
     )
     
+    console.log("invoiceState", invoiceState)
+
     return (
         <div className="container mt-5">
             <div className="card">

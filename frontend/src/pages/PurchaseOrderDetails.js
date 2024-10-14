@@ -316,8 +316,8 @@ const PurchaseOrderDetails = () => {
 
     const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
         <>
-        <div className="container shadow-md" ref={invoicesTableRef}>
-            <table className="table table-bordered table-hover">
+        <div ref={invoicesTableRef}>
+            <table className="table table-bordered table-hover text-xs shadow-sm">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">Ref #</th>
@@ -326,36 +326,50 @@ const PurchaseOrderDetails = () => {
                         <th scope="col">Due on</th>
                         <th scope="col">Status</th>
                         <th scope="col">Stand Alone(?)</th>
-                        <th scope="col">Raw Nett Amount(+gst)</th>
-                        <th scope="col">Calculated Gross Amount (+gst)</th>
+                        <th scope="col">Raw Gross Amount (incl. GST)</th>
+                        <th scope="col">Calculated Gross Amount (incl. GST)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {purchaseOrderState.invoices && purchaseOrderState.invoices.map(invoice => (
                         <tr key={invoice._id}>
                             <th scope="row">{invoice.invoice_ref}</th>
-                            <td>{invoice.invoice_issue_date}</td>
-                            <td>{invoice.invoice_received_date}</td>
-                            <td>{invoice.invoice_due_date}</td>
+                            <td>{formatDate(invoice.invoice_issue_date)}</td>
+                            <td>{formatDate(invoice.invoice_received_date)}</td>
+                            <td>{formatDate(invoice.invoice_due_date)}</td>
                             <td>{invoice.invoice_status}</td>
-                            <td>{invoice.invoice_is_stand_alone}</td>
-                            <td>{invoice.invoiced_raw_total_amount_incl_gst}</td>
-                            <td>{invoice.invoiced_calculated_total_amount_incl_gst}</td>
+                            <td>{invoice.invoice_is_stand_alone ? `Yes` : `No`}</td>
+                            <td className='text-end'>$ {(invoice.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
+                            <td className='text-end'>$ {(invoice.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
                         </tr>
                     ))}
-                </tbody>
-            </table>
-        </div>
-        <div className='flex justify-end'>
-            <table className="table table-bordered table-hover">
-                <tbody>
                     <tr>
-                        <td>Net Amount</td>
-                        <td>$ ??.??</td>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Total Gross Amount:</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return (totalSum + invoice.invoiced_raw_total_amount_incl_gst) / 1.1;
+                            }, 0)).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0)).toFixed(2)}
+                        </td>
                     </tr>
                     <tr>
-                        <td>Gross Amount</td>
-                        <td>$ ??.??</td>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Total Gross Amount (incl GST):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return (totalSum + invoice.invoiced_raw_total_amount_incl_gst) / 1.1;
+                            }, 0)).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0)).toFixed(2)}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -465,6 +479,8 @@ const PurchaseOrderDetails = () => {
         </Modal>
     )
     
+    console.log("Purchase Order State: ", purchaseOrderState)
+
     return (
         <div className="container mt-5">
             <div className="card">
