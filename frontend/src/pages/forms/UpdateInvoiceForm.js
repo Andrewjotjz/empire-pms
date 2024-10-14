@@ -51,14 +51,14 @@ const UpdateInvoiceForm = () => {
   const [searchOrderTerm, setSearchOrderTerm] = useState("");
   const [searchProductTerm, setSearchProductTerm] = useState("");
   const [selectedProductType, setSelectedProductType] = useState("");
-  const [selectedOrder, setSelectedOrder] = useState(invoiceState.order._id);
+  const [selectedOrder, setSelectedOrder] = useState(invoiceState.order?._id || null);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [updatedOrder, setUpdatedOrder] = useState(null);
   const [newSupplier, setNewSupplier] = useState("");
   const [newProductId, setNewProductId] = useState("");
   const [targetIndex, setTargetIndex] = useState(null);
 
-  const [isToggled, setIsToggled] = useState(false);
+  const [isToggled, setIsToggled] = useState(invoiceState.invoice_is_stand_alone);
   const [isToggleProjectDropdown, setIsToggleProjectDropdown] = useState(false);
   const [showSelectionModal, setShowSelectionModal] = useState(false);
   const [showProductPriceModal, setShowProductPriceModal] = useState(false);
@@ -96,7 +96,7 @@ const UpdateInvoiceForm = () => {
     invoice_issue_date: invoiceState.invoice_issue_date.split('T')[0],
     invoice_received_date: invoiceState.invoice_received_date.split('T')[0],
     invoice_due_date: invoiceState.invoice_due_date.split('T')[0],
-    order: invoiceState.order._id,
+    order: invoiceState.order?._id || null,
     products: invoiceState.products,
     custom_products: invoiceState.custom_products,
     invoiced_delivery_fee: invoiceState.invoiced_delivery_fee,
@@ -110,32 +110,24 @@ const UpdateInvoiceForm = () => {
     payment: invoiceState.payment?._id || null,
   });
   const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({
-    invoice_ref: "",
-    supplier: "",
-    invoice_issue_date: "",
-    invoice_received_date: new Date().toISOString().split("T")[0],
-    invoice_due_date: "",
+    invoice_ref: invoiceState.invoice_ref,
+    supplier: invoiceState.supplier._id,
+    invoice_issue_date: invoiceState.invoice_issue_date.split('T')[0],
+    invoice_received_date: invoiceState.invoice_received_date.split('T')[0],
+    invoice_due_date: invoiceState.invoice_due_date.split('T')[0],
     order: null,
     products: [],
-    custom_products: [
-      {
-        custom_product_name: "",
-        custom_product_location: "",
-        custom_order_qty: 0,
-        custom_order_price: 0,
-        custom_order_gross_amount: 0,
-      },
-    ],
-    invoiced_delivery_fee: 0,
-    invoiced_other_fee: 0,
-    invoiced_credit: 0,
-    invoiced_raw_total_amount_incl_gst: 0,
-    invoiced_calculated_total_amount_incl_gst: 0,
+    custom_products: invoiceState.custom_products,
+    invoiced_delivery_fee: invoiceState.invoiced_delivery_fee,
+    invoiced_other_fee: invoiceState.invoiced_other_fee,
+    invoiced_credit: invoiceState.invoiced_credit,
+    invoiced_raw_total_amount_incl_gst: invoiceState.invoiced_raw_total_amount_incl_gst,
+    invoiced_calculated_total_amount_incl_gst: invoiceState.invoiced_calculated_total_amount_incl_gst,
     invoice_is_stand_alone: true,
-    invoice_internal_comments: "",
-    invoice_status: "",
-    invoice_isarchived: false,
-    payment: null,
+    invoice_internal_comments: invoiceState.invoice_internal_comments,
+    invoice_status: invoiceState.invoice_status,
+    invoice_isarchived: invoiceState.invoice_isarchived,
+    payment: invoiceState.payment?._id || null,
   });
   const [newProductPrice, setNewProductPrice] = useState({
     product_obj_ref: "",
@@ -1135,7 +1127,9 @@ const UpdateInvoiceForm = () => {
 
         setIsFetchInvoiceLoading(false);
         dispatch(setInvoiceState(data));
-        fetchSelectedPurchaseOrder(data.order._id);
+        if (data.order) {
+          fetchSelectedPurchaseOrder(data.order._id);
+        }
         setFetchInvoiceError(null);
       } catch (error) {
         if (error.name === "AbortError") {
@@ -3554,7 +3548,7 @@ const UpdateInvoiceForm = () => {
                 type="submit"
                 className="ml-2 bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
               >
-                SUBMIT INVOICE
+                UPDATE INVOICE
               </button>
             </div>
           </div>
