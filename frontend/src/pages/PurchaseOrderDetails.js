@@ -280,20 +280,41 @@ const PurchaseOrderDetails = () => {
                     <table className="table text-end font-bold border-x-2 mb-0">
                         <tbody>
                             <tr>
-                                <td className='pt-1'>Total Gross Amount:</td>
+                                <td className='pt-1'>Subtotal:</td>
                                 <td className='pt-1'>$ {totalGrossAmount}</td>
                             </tr>
                             <tr>
-                                <td className='pt-1'>Total Gross Amount (incl GST):</td>
-                                <td className='pt-1'>$ {purchaseOrderState.order_total_amount}</td>
+                                <td>Delivery & Other fees:</td>
+                                <td>$ {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                    return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                                }, 0)}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Due:</td>
+                                <td>$ { purchaseOrderState.products.reduce((totalSum, product) => {
+                                    return totalSum + product.order_product_gross_amount
+                                }, 0) +
+                                    purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                        return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                                    }, 0) }</td>
+                            </tr>
+                            <tr>
+                                <td>Total Due (incl GST):</td>
+                                <td>$ { (purchaseOrderState.products.reduce((totalSum, product) => {
+                                    return totalSum + product.order_product_gross_amount
+                                }, 0) +
+                                    purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                        return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                                    }, 0)) * 1.1 }</td>
                             </tr>
                             <tr>
                                 <td>Amount Paid:</td>
-                                <td>$ ??.??</td>
-                            </tr>
-                            <tr>
-                                <td>Outstanding Amount:</td>
-                                <td>$ ??.??</td>
+                                <td>$ {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                    if (invoice.invoice_status === "Settled") {
+                                        return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                                    }
+                                    return totalSum;
+                                }, 0)}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -325,9 +346,9 @@ const PurchaseOrderDetails = () => {
                         <th scope="col">Received on</th>
                         <th scope="col">Due on</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Stand Alone(?)</th>
-                        <th scope="col">Raw Gross Amount (incl. GST)</th>
+                        <th scope="col">Delivery & Other Fees</th>
                         <th scope="col">Calculated Gross Amount (incl. GST)</th>
+                        <th scope="col">Raw Gross Amount (incl. GST)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -337,37 +358,71 @@ const PurchaseOrderDetails = () => {
                             <td>{formatDate(invoice.invoice_issue_date)}</td>
                             <td>{formatDate(invoice.invoice_received_date)}</td>
                             <td>{formatDate(invoice.invoice_due_date)}</td>
-                            <td>{invoice.invoice_status}</td>
-                            <td>{invoice.invoice_is_stand_alone ? `Yes` : `No`}</td>
+                            <td>
+                                {invoice.invoice_status && (
+                                <label
+                                    className={`text-xs font-bold m-1 py-0.5 px-1 rounded-xl text-nowrap ${
+                                        invoice.invoice_status === "Cancelled"
+                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                            : invoice.invoice_status === "To review"
+                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                            : invoice.invoice_status === "Settled"
+                                            ? "border-2 bg-transparent border-green-600 text-green-600"
+                                            : invoice.invoice_status === "To reconcile"
+                                            ? "border-2 bg-transparent border-red-600 text-red-600"
+                                            : invoice.invoice_status === "Reviewed"
+                                            ? "border-2 bg-transparent border-blue-400 text-blue-400"
+                                            : ""
+                                    }`}
+                                >
+                                    {invoice.invoice_status}
+                                </label>
+                                )}
+                            </td>
+                            <td>$ {invoice.invoiced_delivery_fee + invoice.invoiced_other_fee}</td>
                             <td className='text-end'>$ {(invoice.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
                             <td className='text-end'>$ {(invoice.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
                         </tr>
                     ))}
                     <tr>
                         <td colSpan={4}></td>
-                        <td colSpan={2} className='text-end font-bold'>Total Gross Amount:</td>
-                        <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                return (totalSum + invoice.invoiced_raw_total_amount_incl_gst) / 1.1;
-                            }, 0)).toFixed(2)}
-                        </td>
+                        <td colSpan={2} className='text-end font-bold'>Subtotal:</td>
                         <td className='text-end font-bold'>
                             $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
-                            }, 0)).toFixed(2)}
+                            }, 0) / 1.1).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0) / 1.1).toFixed(2)}
                         </td>
                     </tr>
                     <tr>
                         <td colSpan={4}></td>
-                        <td colSpan={2} className='text-end font-bold'>Total Gross Amount (incl GST):</td>
+                        <td colSpan={2} className='text-end font-bold'>GST (10%):</td>
                         <td className='text-end font-bold'>
                             $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                return (totalSum + invoice.invoiced_raw_total_amount_incl_gst) / 1.1;
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0) / 1.1 * 0.1).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0) / 1.1 * 0.1).toFixed(2)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Total (incl GST):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
                             }, 0)).toFixed(2)}
                         </td>
                         <td className='text-end font-bold'>
                             $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
                             }, 0)).toFixed(2)}
                         </td>
                     </tr>
