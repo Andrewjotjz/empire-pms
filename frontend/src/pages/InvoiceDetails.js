@@ -261,6 +261,11 @@ const InvoiceDetails = () => {
                     ))}
                     <tr>
                         <td colSpan={3}></td>
+                        <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Subtotal:</td>
+                        <td className='pt-1 text-end'>$ {(invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1 - invoiceState.invoiced_delivery_fee - invoiceState.invoiced_other_fee).toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={3}></td>
                         <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Delivery Fee:</td>
                         <td className='pt-1 text-end'>$ {(invoiceState.invoiced_delivery_fee).toFixed(2)}</td>
                     </tr>
@@ -276,18 +281,18 @@ const InvoiceDetails = () => {
                     </tr>
                     <tr>
                         <td colSpan={3}></td>
-                        <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Computed Total Amount:</td>
+                        <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Total Amount:</td>
                         <td className='pt-1 font-bold text-end'>$ {(invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1).toFixed(2)}</td>
                     </tr>
                     <tr>
                         <td colSpan={3}></td>
-                        <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Computed Total Amount (incl. GST):</td>
-                        <td className='pt-1 font-bold'>$ {(invoiceState.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
+                        <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Total Amount (incl. GST):</td>
+                        <td className='pt-1 font-bold text-end'>$ {(invoiceState.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
                     </tr>
                     <tr>
                         <td colSpan={3}></td>
                         <td className='pt-1 font-bold text-end border-r-2' colSpan={2}>Raw Total Amount (incl. GST):</td>
-                        <td className='pt-1 font-bold'>$ {(invoiceState.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
+                        <td className='pt-1 font-bold text-end'>$ {(invoiceState.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
                     </tr>
                 </tbody>
             </table>

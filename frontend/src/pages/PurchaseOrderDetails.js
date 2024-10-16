@@ -347,8 +347,8 @@ const PurchaseOrderDetails = () => {
                         <th scope="col">Due on</th>
                         <th scope="col">Status</th>
                         <th scope="col">Delivery & Other Fees</th>
-                        <th scope="col">Calculated Gross Amount (incl. GST)</th>
-                        <th scope="col">Raw Gross Amount (incl. GST)</th>
+                        <th scope="col">Calculated Gross Amount</th>
+                        <th scope="col">Raw Gross Amount</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -380,13 +380,31 @@ const PurchaseOrderDetails = () => {
                                 )}
                             </td>
                             <td>$ {invoice.invoiced_delivery_fee + invoice.invoiced_other_fee}</td>
-                            <td className='text-end'>$ {(invoice.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
-                            <td className='text-end'>$ {(invoice.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
+                            <td className='text-end'>$ {(invoice.invoiced_raw_total_amount_incl_gst / 1.1).toFixed(2)}</td>
+                            <td className='text-end'>$ {(invoice.invoiced_calculated_total_amount_incl_gst / 1.1).toFixed(2)}</td>
                         </tr>
                     ))}
                     <tr>
                         <td colSpan={4}></td>
-                        <td colSpan={2} className='text-end font-bold'>Subtotal:</td>
+                        <td colSpan={2} className='text-end font-bold'>Subtotal (excl fees):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0) / 1.1 - purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                            }, 0)).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0) / 1.1 - purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                            }, 0)).toFixed(2)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Subtotal (incl fees):</td>
                         <td className='text-end font-bold'>
                             $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;

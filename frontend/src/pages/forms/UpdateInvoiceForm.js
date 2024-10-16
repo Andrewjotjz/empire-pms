@@ -170,52 +170,49 @@ const UpdateInvoiceForm = () => {
           setUpdatedOrder(data);
           fetchProductsBySupplier(data.supplier._id);
 
-          // Ensure products and custom_products exist before mapping
-          // const formattedProducts =
-          //   data.products?.map((product, index) => ({
-          //     _id: product._id,
-          //     product_obj_ref: product.product_obj_ref._id,
-          //     invoice_product_location: product.order_product_location,
-          //     invoice_product_qty_a:
-          //       newInvoice?.products[index]?.invoice_product_qty_a || 0,
-          //     invoice_product_price_unit: product.order_product_price_unit_a,
-          //     invoice_product_gross_amount_a:
-          //       product.order_product_gross_amount *
-          //       (newInvoice?.products[index]?.invoice_product_qty_a || 0),
-          //   })) || [];
+          //! Ensure products and custom_products exist before mapping
+          const formattedProducts =
+            data.products?.map((product, index) => ({
+              _id: product._id,
+              product_obj_ref: product.product_obj_ref._id,
+              invoice_product_location: product.order_product_location,
+              invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
+              invoice_product_price_unit: product.order_product_price_unit_a,
+              invoice_product_gross_amount_a: product.order_product_price_unit_a * (newInvoice?.products[index]?.invoice_product_qty_a || 0),
+            })) || [];
 
-          // const formattedCustomProducts =
-          //   data.custom_products?.map((customProduct, index) => {
-          //     // Find if the customProduct exists in the invoices' custom_products
-          //     let matchingCustomProduct = null;
-          //     data.invoices.some(invoice => {
-          //       matchingCustomProduct = invoice.custom_products.find(
-          //         invoiceCustomProduct => invoiceCustomProduct._id === customProduct._id
-          //       );
-          //       return matchingCustomProduct;
-          //     });
+          const formattedCustomProducts =
+            data.custom_products?.map((customProduct, index) => {
+              // Find if the customProduct exists in the invoices' custom_products
+              let matchingCustomProduct = null;
+              data.invoices.some(invoice => {
+                matchingCustomProduct = invoice.custom_products.find(
+                  invoiceCustomProduct => invoiceCustomProduct._id === customProduct._id
+                );
+                return matchingCustomProduct;
+              });
 
-          //     return {
-          //       _id: customProduct._id,
-          //       custom_product_name: customProduct.custom_product_name,
-          //       custom_product_location: customProduct.custom_product_location,
-          //       custom_order_qty:
-          //         newInvoice?.custom_products[index]?.custom_order_qty || 0,
-          //       custom_order_price: matchingCustomProduct
-          //         ? matchingCustomProduct.custom_order_price
-          //         : 0, // Set custom_order_price from matching invoice or empty string
-          //       custom_order_gross_amount:
-          //         (Number(customProduct.custom_order_gross_amount) || 0) *
-          //         (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
-          //     };
-          //   }) || [];
+              return {
+                _id: customProduct._id,
+                custom_product_name: customProduct.custom_product_name,
+                custom_product_location: customProduct.custom_product_location,
+                custom_order_qty:
+                  newInvoice?.custom_products[index]?.custom_order_qty || 0,
+                custom_order_price: matchingCustomProduct
+                  ? matchingCustomProduct.custom_order_price
+                  : 0, // Set custom_order_price from matching invoice or empty string
+                custom_order_gross_amount:
+                  (Number(customProduct.custom_order_gross_amount) || 0) *
+                  (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
+              };
+            }) || [];
 
-          // setNewInvoice({
-          //   ...newInvoice,
-          //   order: id,
-          //   products: formattedProducts,
-          //   custom_products: formattedCustomProducts,
-          // });
+          setNewInvoice({
+            ...newInvoice,
+            order: id,
+            products: formattedProducts,
+            custom_products: formattedCustomProducts,
+          });
 
           setIsFetchOrderLoading(false);
         }
@@ -2576,6 +2573,7 @@ const UpdateInvoiceForm = () => {
 
   console.log("invoiceState:", invoiceState);
   console.log("newInvoice:", newInvoice);
+  console.log("currentOrder:", currentOrder)
 
   return (
     <div>
@@ -2912,7 +2910,7 @@ const UpdateInvoiceForm = () => {
                                         // Add the invoice product quantity to the sum if there's a match
                                         return (
                                           invoiceSum +
-                                          invoiceCtmProd.custom_order_qty
+                                          invoiceCtmProd?.custom_order_qty
                                         );
                                       }
                                       return invoiceSum;
@@ -2939,7 +2937,7 @@ const UpdateInvoiceForm = () => {
                               name="custom_order_qty"
                               value={
                                 newInvoice.custom_products[index]
-                                  .custom_order_qty
+                                  ?.custom_order_qty
                               }
                               onChange={(e) => handleInputChange(e, index)}
                               step={0.0001}
@@ -2961,7 +2959,7 @@ const UpdateInvoiceForm = () => {
                               name="custom_order_price"
                               value={
                                 newInvoice.custom_products[index]
-                                  .custom_order_price
+                                  ?.custom_order_price
                               }
                               onChange={(e) => handleInputChange(e, index)}
                               step={0.0001}
@@ -3006,7 +3004,7 @@ const UpdateInvoiceForm = () => {
                             ${" "}
                             {
                               newInvoice.custom_products[index]
-                                .custom_order_gross_amount
+                                ?.custom_order_gross_amount
                             }
                           </td>
                         </tr>
