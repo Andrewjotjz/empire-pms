@@ -1849,6 +1849,7 @@ const UpdateInvoiceForm = () => {
                                   type="button"
                                   onClick={() => handleRemoveItem(index)}
                                   className="btn btn-danger p-1"
+                                  hidden={prod._id}
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1966,6 +1967,7 @@ const UpdateInvoiceForm = () => {
                                 type="button"
                                 onClick={() => handleRemoveCustomItem(index)}
                                 className="btn btn-danger p-1"
+                                  hidden={cproduct._id}
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"

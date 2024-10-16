@@ -893,6 +893,7 @@ const UpdatePurchaseOrderForm = () => {
                               type="button"
                               onClick={() => handleRemoveItem(index)}
                               className="btn btn-danger p-1"
+                              hidden={purchaseOrderState.invoices.flatMap(invoice => invoice.products.map(product => product._id)).includes(prod._id)}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -986,6 +987,7 @@ const UpdatePurchaseOrderForm = () => {
                               type="button"
                               onClick={() => handleRemoveCustomItem(index)}
                               className="btn btn-danger p-1"
+                              hidden={purchaseOrderState.invoices.flatMap(invoice => invoice.custom_products.map(cproduct => cproduct._id)).includes(cproduct._id)}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
