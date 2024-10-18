@@ -1,5 +1,5 @@
 //import modules
-import { useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate, Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -462,7 +462,11 @@ const PurchaseOrderDetails = () => {
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Supplier Name:</label>
-                    <p className="form-label">{purchaseOrderState.supplier.supplier_name}</p>
+                    <div>
+                        <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/supplier/${purchaseOrderState.supplier._id}`}>
+                            {purchaseOrderState.supplier.supplier_name}
+                        </Link>
+                    </div>
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Address:</label>

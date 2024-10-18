@@ -317,9 +317,10 @@ const InvoiceDetails = () => {
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Order Ref:</label>
                     <div>
-                    <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/order/${invoiceState.order._id}`}>
-                        {invoiceState.order.order_ref}
-                    </Link></div>
+                        <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/order/${invoiceState.order._id}`}>
+                            {invoiceState.order.order_ref}
+                        </Link>
+                    </div>
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Order Date:</label>
