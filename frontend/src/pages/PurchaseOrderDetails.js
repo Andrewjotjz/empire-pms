@@ -41,7 +41,7 @@ const PurchaseOrderDetails = () => {
     const invoicesTableRef = useRef(null);
 
     //Component functions and variables    
-    const handleBackClick = () => navigate(-1);
+    const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());

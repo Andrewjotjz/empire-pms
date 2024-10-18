@@ -36,7 +36,7 @@ const EmployeeDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const handleBackClick = () => navigate(-1)
+    const handleBackClick = () => window.history.back();
     
     const handleEditClick = () => navigate(`/EmpirePMS/employee/${id}/edit`, { state: id });
 

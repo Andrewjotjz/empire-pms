@@ -113,7 +113,7 @@ const SupplierDetails = () => {
         navigate(`/EmpirePMS/order/${id}`);
     }
     
-    const handleBackClick = () => navigate(-1);
+    const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
