@@ -25,16 +25,6 @@ const InvoicePage = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const formatDate = (dateString) => {
-        if (dateString === null) {
-            return ''
-        }  else {
-            const date = new Date(dateString);
-            const options = { day: '2-digit', month: 'short', year: 'numeric' };
-            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', '-').replace(' ', '-');
-        }
-    };
-
     const formatDateTime = (dateString) => {
         if (dateString === null) {
             return ''

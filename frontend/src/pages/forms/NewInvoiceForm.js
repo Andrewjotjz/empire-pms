@@ -151,6 +151,15 @@ const NewInvoiceForm = () => {
     }
   };
 
+  // Helper function to calculate the due date based on payment terms
+  const calculateDueDate = (paymentTerm) => {
+    const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10); // Extract number from "Net 60"
+    const issueDate = new Date(); // Get the current date
+    const dueDate = new Date(issueDate); // Create a copy of the current date
+    dueDate.setDate(dueDate.getDate() + daysToAdd); // Add the extracted days
+    return dueDate.toISOString().split("T")[0]; // Return formatted date as 'YYYY-MM-DD'
+  };
+
   const fetchSelectedPurchaseOrder = async (id) => {
     setIsFetchOrderLoading(true);
     setFetchOrderError(null);
@@ -296,12 +305,19 @@ const NewInvoiceForm = () => {
     }
   };
   const resetForm = () => {
+    
+    const supplier = supplierState.find(supplier => supplier._id === newSupplier); //get the supplier
+    const paymentTerm = supplier.supplier_payment_term; // get supplier's payment term, this returns "Net 60"
+
+    // Call the helper function to get the calculated due date
+    const formattedDueDate = calculateDueDate(paymentTerm);
+
     setNewInvoice({
       invoice_ref: "",
       supplier: newSupplier,
       invoice_issue_date: "",
       invoice_received_date: new Date().toISOString().split("T")[0],
-      invoice_due_date: "",
+      invoice_due_date: formattedDueDate,
       order: "",
       products: [],
       custom_products: [],
@@ -393,14 +409,21 @@ const NewInvoiceForm = () => {
     const targetSupplier = event.target.value;
 
     if (targetSupplier !== "") {
+      const supplier = supplierState.find(supplier => supplier._id === targetSupplier);
+      const paymentTerm = supplier.supplier_payment_term; // "Net 60"
+
+      // Call the helper function to get the calculated due date
+      const formattedDueDate = calculateDueDate(paymentTerm);
+
       // if this is initial selection
       if (newInvoice.supplier === "") {
+
         setNewInvoice({
           invoice_ref: "",
           supplier: targetSupplier,
           invoice_issue_date: "",
           invoice_received_date: new Date().toISOString().split("T")[0],
-          invoice_due_date: "",
+          invoice_due_date: formattedDueDate,
           order: "",
           products: [],
           custom_products: [],
