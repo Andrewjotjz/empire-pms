@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -20,6 +21,7 @@ import NewProductModal from "./NewProductModal";
 const NewInvoiceForm = () => {
   //Component's hook
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { addInvoice, addInvoiceError } = useAddInvoice();
   const { fetchProductsBySupplier, fetchProductsErrorState } =
@@ -1075,6 +1077,8 @@ const NewInvoiceForm = () => {
       }
       addInvoice(newInvoiceWithoutPO);
     }
+
+    navigate(`/EmpirePMS/invoice`)
   };
 
   useEffect(() => {
@@ -2587,10 +2591,6 @@ const NewInvoiceForm = () => {
     }
   }
 
-  console.log("currentOrder:", currentOrder);
-  console.log("newInvoice to submit:", newInvoice);
-  console.log("newInvoiceWithoutPO to submit:", newInvoiceWithoutPO);
-  console.log("updatedOrder", updatedOrder)
 
   return (
     <div>
@@ -3567,31 +3567,48 @@ const NewInvoiceForm = () => {
             </div>
           )}
           {/* Invoice Details */}
-          <div className="mx-3 p-2 border-2 flex justify-between">
-            <div>
-              <label className="font-bold">*Invoice status:</label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
-                name="invoice_status"
-                value={newInvoice.invoice_status}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select status</option>
-                <option value="To review">To review</option>
-                <option value="To reconcile">To reconcile</option>
-                <option value="Reviewed">Reviewed</option>
-                <option value="Cancelled">Cancelled</option>
-                <option value="Settled">Settled</option>
-              </select>
+          <div className="mx-3 p-2 border-2">
+
+            <div className="flex justify-between mb-2">
+              <div>
+                <label className="font-bold">*Invoice status:</label>
+                <select
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                  name="invoice_status"
+                  value={newInvoice.invoice_status}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select status</option>
+                  <option value="To review">To review</option>
+                  <option value="To reconcile">To reconcile</option>
+                  <option value="Reviewed">Reviewed</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Settled">Settled</option>
+                </select>
+              </div>
+              <div></div>
             </div>
+
             <div>
-              <button
-                type="submit"
-                className="ml-2 bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
-              >
-                SUBMIT INVOICE
-              </button>
+              <div className="mb-2">
+                <label className="font-bold">Internal Comments:</label>
+                <textarea
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  name="invoice_internal_comments"
+                  value={newInvoice.invoice_internal_comments}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
+                >
+                  SUBMIT INVOICE
+                </button>
+              </div>
             </div>
           </div>
           {/* Invoice File Upload */}

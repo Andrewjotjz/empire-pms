@@ -315,6 +315,8 @@ const UpdateProductForm = () => {
                                 <option value="External Cladding">External Cladding</option>
                                 <option value="SpeedPanel">SpeedPanel</option>
                                 <option value="Timber">Timber</option>
+                                <option value="Acoustic Ceiling Panels">Acoustic Ceiling Panels</option>
+                                <option value="Ceiling Tiles">Ceiling Tiles</option>
                                 <option value="Others">Others</option>
                                 <option value="Tools">Tools</option>
                                 <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>

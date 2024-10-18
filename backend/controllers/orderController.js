@@ -57,6 +57,11 @@ const getSingleOrder = async (req, res) => {
             .populate('invoices')
             .populate('project');
 
+        
+        const filteredInvoice = Order.invoices.filter(invoice => invoice.invoice_status !== "Cancelled")
+
+        Order.invoices = filteredInvoice;
+
         // Respond with the retrieved Order
         // Invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Order);

@@ -1,5 +1,5 @@
 //import modules
-import { useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate, Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -23,7 +23,7 @@ const InvoiceDetails = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [currentLeftTab, setCurrentLeftTab] = useState('supplierDetails');
+    const [currentLeftTab, setCurrentLeftTab] = useState('purchaseOrderTable');
     const [currentRightTab, setCurrentRightTab] = useState('internalComments');
     const [showLastDiv, setShowLastDiv] = useState(false);
     const [targetRef, setTargetRef] = useState(null);
@@ -303,7 +303,7 @@ const InvoiceDetails = () => {
 
     const internalComments = invoiceState.invoice_internal_comments !== '' ? (
         <div className="card-body border-1 relative shadow-md p-2" ref={internalCommentsRef}>
-            <div className='border rounded-md bg-blue-100 p-2 h-20 md:h-32 lg:h-48'>
+            <div className='border rounded-md bg-blue-100 p-2 h-auto'>
                 <p>{invoiceState.invoice_internal_comments}</p>
             </div>
         </div>
@@ -316,7 +316,10 @@ const InvoiceDetails = () => {
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Order Ref:</label>
-                    <p className="form-label">{invoiceState.order.order_ref}</p>
+                    <div>
+                    <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/order/${invoiceState.order._id}`}>
+                        {invoiceState.order.order_ref}
+                    </Link></div>
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Order Date:</label>
@@ -417,7 +420,7 @@ const InvoiceDetails = () => {
             </div>
         </div>
     ) : (
-        <div className='border'>Fetched successfully, but this invoice is a standalone with no Purchase Order.</div>
+        <div className='border p-2 shadow-sm'>This invoice is a standalone with no Purchase Order.</div>
     );
 
     const supplierDetails = invoiceState.supplier ? (
@@ -510,7 +513,6 @@ const InvoiceDetails = () => {
         </Modal>
     )
     
-    console.log("invoiceState", invoiceState)
 
     return (
         <div className="container mt-5">

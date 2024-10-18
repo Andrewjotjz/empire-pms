@@ -489,8 +489,6 @@ const NewPurchaseOrderForm = () => {
         </Modal>
     );
 
-    console.log("Order State: ", orderState)
-    console.log("Added Products State: ", addedProductState)
 
     return (
         <>
@@ -901,13 +899,29 @@ const NewPurchaseOrderForm = () => {
                             rows={4}
                         />
                     </div>
-                        
+
                     {/* ***** BUTTONS ***** */}
-                    <div className="flex justify-between mb-3">
+                    <div className="flex justify-between">
                         <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
                         <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800" type="submit" name="draft">SAVE AS DRAFT</button>
+                        <div className='text-sm'>
+                            <label className='font-bold'>Order status:</label>
+                            <select
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                                name="order_status"
+                                value={orderState.order_status}
+                                onChange={(e) => handleInputChange(e)}
+                                required
+                            >
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
                         <button className="btn btn-primary" type='submit' name='submit'>SUBMIT</button>
                     </div>
+                    
                 </div>
                 { confirmationModal }
             </div>

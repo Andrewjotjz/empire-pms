@@ -1173,6 +1173,26 @@ const UpdatePurchaseOrderForm = () => {
               >
                 SAVE AS DRAFT
               </button>
+              <div className='text-sm'>
+                  <label className='font-bold'>*Order status:</label>
+                  <select
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                      name="order_status"
+                      value={purchaseOrderState.order_status}
+                      onChange={handleInputChange}
+                      required
+                      onInvalid={(e) =>
+                        e.target.setCustomValidity("Enter order status")
+                      }
+                      onInput={(e) => e.target.setCustomValidity("")}
+                  >
+                  <option value="">Select status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rejected">Rejected</option>
+                  <option value="Cancelled">Cancelled</option>
+                  </select>
+              </div>
               <button
                 className="btn border rounded bg-green-700 text-white hover:bg-green-800"
                 type="submit"

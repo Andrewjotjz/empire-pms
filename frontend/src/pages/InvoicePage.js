@@ -60,10 +60,11 @@ const InvoicePage = () => {
             // Check each field for the search term
             return (
                 invoice.invoice_ref.toLowerCase().includes(lowerCaseSearchTerm) ||
-                invoice.project.project_name.toLowerCase().includes(lowerCaseSearchTerm) ||
                 invoice.supplier.supplier_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                invoice.invoice_total_amount.toString().includes(lowerCaseSearchTerm) ||
-                invoice.invoice_status.toLowerCase().includes(lowerCaseSearchTerm)
+                invoice.invoiced_calculated_total_amount_incl_gst.toString().includes(lowerCaseSearchTerm) ||
+                invoice.invoiced_raw_total_amount_incl_gst.toString().includes(lowerCaseSearchTerm) ||
+                invoice.invoice_status.toLowerCase().includes(lowerCaseSearchTerm) ||
+                (invoice.order && invoice.order.order_ref.toLowerCase().includes(lowerCaseSearchTerm))
             );
         });
     };
@@ -73,7 +74,7 @@ const InvoicePage = () => {
     
         const selected = new Date(searchDate);
         return invoices.filter(invoice => {
-            const invoiceDate = new Date(invoice.invoice_date);
+            const invoiceDate = new Date(invoice.invoice_issue_date);
             return (
                 invoiceDate.getFullYear() === selected.getFullYear() &&
                 invoiceDate.getMonth() === selected.getMonth() &&
@@ -152,8 +153,7 @@ const InvoicePage = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {/* {filterBySelectedDate(filterInvoices().filter(invoice => invoice.invoice_isarchived === isArchive)).map(invoice => ( */}
-                    {invoiceState.map(invoice => (
+                    {filterBySelectedDate(filterInvoices().filter(invoice => invoice.invoice_isarchived === isArchive)).map(invoice => (
                         <tr key={invoice._id} onClick={() => handleTableClick(invoice._id)} className="cursor-pointer text-center">
                             <th scope="row">{invoice.invoice_ref}</th>
                             <td>{invoice.supplier.supplier_name}</td>
@@ -221,7 +221,6 @@ const InvoicePage = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-    console.log("Invoice state:", invoiceState)
 
     return (
         <div className="container mt-5"><div className="card">
