@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLogin } from "../../hooks/useLogin";
 import { ToastContainer } from 'react-toastify';
+import logo from '../../empirelogo.png'
 
 const Login = () => {
   // Use the custom login hook
@@ -37,8 +38,9 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded shadow-md w-96">
-        <form onSubmit={handleSubmit} className="mt-4">
+      <div className="bg-white p-6 rounded shadow-md w-96 flex flex-col items-center">
+        <img src={logo} alt="Logo" className="h-24 rounded-full" />
+        <form onSubmit={handleSubmit} className="w-full mt-4">
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
@@ -87,6 +89,7 @@ const Login = () => {
       <ToastContainer />
     </div>
   );
+  
 };
 
 export default Login;
