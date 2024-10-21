@@ -42,6 +42,7 @@ const Employee = () => {
         dispatch(clearEmployeeDetails());
         navigate('/EmpirePMS/employee/create');
     }
+
     const handleTableClick = (id) => navigate(`/EmpirePMS/employee/${id}`, { state: id });
 
     //Render component
@@ -104,7 +105,10 @@ const Employee = () => {
                             <td>{employee.employee_email}</td>
                             <td>{employee.employee_mobile_phone}</td>
                             <td>{employee.employee_roles}</td>
-                            <td>project data...</td>
+                            <td>{employee.projects
+                                .map((project, index) => (
+                                    <div key={index}> {project.project_name}</div>
+                                ))}</td>
                         </tr>
                     ))}
                 </tbody>

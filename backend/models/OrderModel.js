@@ -30,9 +30,14 @@ const orderSchema = new Schema({
         type: Date
     },
     products: [{
-        product_id: {   //this will point at product_id, product_name, product_sku, product_number_a, product_unit_a, etc....
+        product_obj_ref: {   //this will point at product_obj_ref, product_name, product_sku, product_number_a, product_unit_a, etc....
             type: Schema.Types.ObjectId,
             ref: 'Product',
+            required: true
+        },
+        productprice_obj_ref: { 
+            type: Schema.Types.ObjectId,
+            ref: 'ProductPrice',
             required: true
         },
         order_product_location: {     //these are not in PRODUCT model, but additional information relating to a particular product
@@ -85,23 +90,15 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     },
-    //One order can be created without delivery. But if there's delivery, there must be a delivery_ID and delivery_status
+    //One order can be created without delivery. But if there's delivery, there must be a delivery_obj_ref and delivery_status
     deliveries: [{
-        _id: false,
-        delivery_id: {
-            type: Schema.Types.ObjectId,
-            ref: 'Delivery',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Delivery'
     }],
-    //One order can be created without invoice. But if there's invoice, there must be an invoice_ID and invoice_status
+    //One order can be created without invoice. But if there's invoice, there must be an invoice_obj_ref and invoice_status
     invoices: [{
-        _id: false,
-        invoice_id: {
-            type: Schema.Types.ObjectId,
-            ref: 'Invoice',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Invoice'
     }],
     project: {
         type: Schema.Types.ObjectId,

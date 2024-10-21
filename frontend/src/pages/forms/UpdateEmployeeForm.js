@@ -60,7 +60,7 @@ const UpdateEmployeeForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">First name:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="employee_first_name" 
                                     value={employeeState.employee_first_name} 
                                     onChange={handleInputChange}
@@ -73,7 +73,7 @@ const UpdateEmployeeForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Last name:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="employee_last_name" 
                                     value={employeeState.employee_last_name} 
                                     onChange={handleInputChange} 
@@ -100,11 +100,11 @@ const UpdateEmployeeForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Contact:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="employee_mobile_phone" 
                                     value={employeeState.employee_mobile_phone} 
                                     onChange={handleInputChange} 
-                                    placeholder='04 0000 0000'
+                                    placeholder='04... or 03...'
                                 />
                             </div>
                             <div className="col-md-6 mb-3">

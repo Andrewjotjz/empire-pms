@@ -17,7 +17,7 @@ const deliverySchema = new Schema({
         required: true
     },
     products: [{
-        product_id: {   //this will point at product_id, product_name, product_sku, product_number_a, product_unit_a, etc....
+        product_obj_ref: {   //this will point at product_obj_ref, product_name, product_sku, product_number_a, product_unit_a, etc....
             type: Schema.Types.ObjectId,
             ref: 'Product',
             required: true

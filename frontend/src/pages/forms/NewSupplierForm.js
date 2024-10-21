@@ -95,11 +95,11 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Supplier name:</label>
                             <input 
                                 type="text"
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="supplier_name" 
                                 value={supplierState.supplier_name} 
                                 onChange={handleInputChange}
-                                placeholder="Name"
+                                placeholder="Ex: MelbSupplier"
                                 required
                                 onInvalid={(e) => e.target.setCustomValidity('Enter supplier name')}
                                 onInput={(e) => e.target.setCustomValidity('')}
@@ -109,7 +109,7 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Supplier address:</label>
                             <input 
                                 type="text"
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="supplier_address" 
                                 value={supplierState.supplier_address} 
                                 onChange={handleInputChange}
@@ -120,7 +120,7 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Payment term:</label>
                             <input 
                                 type="text"
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="supplier_payment_term" 
                                 value={supplierState.supplier_payment_term} 
                                 onChange={handleInputChange}
@@ -131,7 +131,7 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Payment term description:</label>
                             <input 
                                 type="text"
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="supplier_payment_term_description" 
                                 value={supplierState.supplier_payment_term_description} 
                                 onChange={handleInputChange}
@@ -142,7 +142,7 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Payment method details:</label>
                             <input 
                                 type="text"
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="supplier_payment_method_details" 
                                 value={supplierState.supplier_payment_method_details} 
                                 onChange={handleInputChange}
@@ -168,7 +168,7 @@ const NewSupplierForm = () => {
                             <label className="form-label fw-bold">Material types:</label>
                             <input 
                                 type="text"
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="supplier_material_types" 
                                 value={supplierState.supplier_material_types} 
                                 onChange={handleInputChange}
@@ -204,11 +204,11 @@ const NewSupplierForm = () => {
                                             <label className="form-label fw-bold">Name:</label>
                                             <input 
                                                 type="text"
-                                                className="form-control" 
+                                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                                 name="name" 
                                                 value={contact.name} 
                                                 onChange={(e) => handleContactChange(index, e)}
-                                                placeholder="Contact Name"
+                                                placeholder="John Doe"
                                                 required
                                                 onInvalid={(e) => e.target.setCustomValidity('Enter contact name')}
                                                 onInput={(e) => e.target.setCustomValidity('')}
@@ -218,22 +218,22 @@ const NewSupplierForm = () => {
                                             <label className="form-label fw-bold">Phone:</label>
                                             <input 
                                                 type="text"
-                                                className="form-control" 
+                                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                                 name="phone" 
                                                 value={contact.phone} 
                                                 onChange={(e) => handleContactChange(index, e)}
-                                                placeholder="Phone"
+                                                placeholder="03... or 04..."
                                             />
                                         </div>
                                         <div className="col-md-3 mb-3">
                                             <label className="form-label fw-bold">Email:</label>
                                             <input 
                                                 type="email"
-                                                className="form-control" 
+                                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                                 name="email" 
                                                 value={contact.email} 
                                                 onChange={(e) => handleContactChange(index, e)}
-                                                placeholder="Email"
+                                                placeholder="john.doe@email.com"
                                             />
                                         </div>
                                         <div className="col-md-3 mb-3 d-flex align-items-end">

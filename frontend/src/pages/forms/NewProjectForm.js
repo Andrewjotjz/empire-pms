@@ -60,7 +60,7 @@ const NewProjectForm = () => {
                             <label className="form-label">Project Name:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="project_name" 
                                 value={projectState.project_name} 
                                 onChange={handleInputChange}
@@ -74,7 +74,7 @@ const NewProjectForm = () => {
                             <label className="form-label">Project Address:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="project_address" 
                                 value={projectState.project_address} 
                                 onChange={handleInputChange} 

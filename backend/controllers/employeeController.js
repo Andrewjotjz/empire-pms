@@ -39,7 +39,28 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-const maxAge = 60 * 60; //60 minutes in seconds
+const maxAge = 30 * 60; //60 minutes in seconds
+// Middleware to refresh token
+const refreshToken = (req, res, next) => {
+    const token = req.cookies.jwt;
+    
+    // Check if token exists
+    if (token) {
+      jwt.verify(token, 'empirepms2024 secret', (err, decoded) => {
+        if (err) {
+          return next(); // Token is invalid or expired, proceed to next middleware
+        }
+        
+        // Reset token expiration if the user is active
+        const newToken = createToken(decoded.id); // Generate a new token
+        res.cookie('jwt', newToken, { httpOnly: true, maxAge: maxAge * 1000 }); // Update cookie
+        next(); // Continue to the next middleware or route handler
+      });
+    } else {
+      next(); // No token found, proceed to next middleware
+    }
+  };
+// Middleware to create token
 const createToken = (id) => {
     //header&payload + secret = signature
     //user's { id } represents payload, 'empirepms2024 secret' represents secret. Use jwt's sign() to get signature. Which results in 'encoded token'.
@@ -72,7 +93,7 @@ const loginEmployee = async (req,res) => {
 const getAllEmployees = async (req, res) => {
     //'req' object not in used
     //create a new model called Employees, await, and assign it with all employee documents in the employee collection, sort created date in descending order
-    const Employees = await employeeModel.find({}).sort({createdAt: -1})
+    const Employees = await employeeModel.find({}).populate('projects').sort({createdAt: -1})
     //invoke 'res' object method: status() and json(), pass relevant data to them
     res.status(200).json(Employees);
 }
@@ -91,7 +112,7 @@ const getSingleEmployee = async (req, res) => {
 
     //if ID exists in mongoDB database
     //create a new model called Employee, await, and assign it with the employee document, which can be found in the employee collection, find using ID
-    const Employee = await employeeModel.findById(id)
+    const Employee = await employeeModel.findById(id).populate('projects').populate('companies')
 
     //check if there's 'null' or 'undefined' in 'Employee'.
     if (!Employee) {
@@ -362,4 +383,4 @@ const logoutEmployee = (req,res) => {
 
 
 //export controller module
-module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee, sendPasswordResetEmail, resetEmployeePassword };
+module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee, sendPasswordResetEmail, resetEmployeePassword, refreshToken };

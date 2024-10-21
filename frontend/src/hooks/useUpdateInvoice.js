@@ -1,27 +1,23 @@
 //import modules and files
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 
-export const useUpdatePurchaseOrder = () => {
+export const useUpdateInvoice = () => {
     //Component's hook state declaration
     const [isUpdateLoadingState, setIsUpdateLoadingState] = useState(false);
     const [updateErrorState, setUpdateErrorState] = useState(null);
 
-    //Component's hook router
-    const navigate = useNavigate();
-
     //Component's function
-    const updatePurchaseOrder = async (purchaseOrderState) => {
+    const updateInvoice = async (invoiceState, invoiceId) => {
         setIsUpdateLoadingState(true)
         setUpdateErrorState(null)
 
-        const putPurchaseOrder = async () => {
+        const putInvoice = async () => {
             try {
-                const res = await fetch(`/api/order/${purchaseOrderState._id}`, {
+                const res = await fetch(`/api/invoice/${invoiceId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({...purchaseOrderState})
+                    body: JSON.stringify({...invoiceState})
                 })
 
                 const promise = await res.json();
@@ -31,11 +27,11 @@ export const useUpdatePurchaseOrder = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to PUT purchase order details')
+                    throw new Error('Failed to PUT invoice details')
                 }
                 if (res.ok) {                
                     // push toast to notify successful login
-                    toast.success("Purchase Order updated successfully", {
+                    toast.success("Invoice updated successfully", {
                         position: "bottom-right"
                     });
                 
@@ -48,8 +44,8 @@ export const useUpdatePurchaseOrder = () => {
                 setIsUpdateLoadingState(false);
             }
         }
-        putPurchaseOrder();
+        putInvoice();
     }
 
-    return { updatePurchaseOrder, isUpdateLoadingState, updateErrorState };
+    return { updateInvoice, isUpdateLoadingState, updateErrorState };
 }

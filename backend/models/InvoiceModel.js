@@ -31,11 +31,10 @@ const invoiceSchema = new Schema({
     },
     order: {
         type: Schema.Types.ObjectId,
-        ref: 'Order',
-        required: true
+        ref: 'Order'
     },
-    products: [{    //THIS Array is exactly the same as 'Order model' because we want to pull the data from order.
-        product_id: {   //this will point at product_id, product_name, product_sku, product_number_a, product_unit_a, etc....
+    products: [{  
+        product_obj_ref: {   //this will point at product_obj_ref, product_name, product_sku, product_number_a, product_unit_a, etc....
             type: Schema.Types.ObjectId,
             ref: 'Product',
             required: true
@@ -110,10 +109,8 @@ const invoiceSchema = new Schema({
         default: false
     },
     payment: {
-        payment_id: {
-            type: Schema.Types.ObjectId,
-            ref: 'Payment'
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Payment'
     },
     invoice_status: {
         type: String,

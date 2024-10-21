@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const moment = require('moment-timezone');
+const { refreshToken } = require('./controllers/employeeController')
 
 
 
@@ -47,9 +48,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-
 //route handler
 app.get('*', checkUser); //'*' means to apply to every single route
+app.get('*', refreshToken); //'*' means to apply to every single route
 app.use('/api/company', companyRoutes);
 app.use('/api/employee', employeeRoutes);
 app.use('/api/alias', aliasRoutes);

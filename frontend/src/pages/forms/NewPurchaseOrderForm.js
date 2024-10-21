@@ -1,13 +1,16 @@
 // Import modules
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+
 import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySupplier';
 import { useFetchSupplierByProject } from '../../hooks/useFetchSupplierByProject';
 import { useAddPurchaseOrder } from '../../hooks/useAddPurchaseOrder';
-import { clearSupplierState } from '../../redux/supplierSlice'
+
 import { setProjectState } from '../../redux/projectSlice'
+import { clearSupplierState } from '../../redux/supplierSlice'
 import { clearProductState } from '../../redux/productSlice'
-import { useSelector, useDispatch } from 'react-redux';
+
 import { Modal, Button } from "react-bootstrap";
 import SessionExpired from '../../components/SessionExpired';
 import NewPurchaseOrderSkeleton from '../loaders/NewPurchaseOrderSkeleton';
@@ -19,7 +22,7 @@ const NewPurchaseOrderForm = () => {
     // Component hook
     const dispatch = useDispatch();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
-    const { fetchSupplierByProject } = useFetchSupplierByProject();
+    const { fetchSupplierByProject, isFetchSupplierLoading, fetchSupplierError } = useFetchSupplierByProject();
     const { addPurchaseOrder, isAddOrderLoadingState, addOrderErrorState } = useAddPurchaseOrder();
 
     // Component state
@@ -27,21 +30,26 @@ const NewPurchaseOrderForm = () => {
     const productState = useSelector((state) => state.productReducer.productState)
     const projectState = useSelector((state) => state.projectReducer.projectState)
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
+    const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
+    const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
     const [selectedSupplier, setSelectedSupplier] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
     const [selectedProductType, setSelectedProductType] = useState('')
-    const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
-    const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
     const [addedProductState, setAddedProductState] = useState([]);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
     const [newSupplier, setNewSupplier] = useState('');
     const [newProject, setNewProject] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
     const [searchProductTerm, setSearchProductTerm] = useState('');
+    const getCurrentDate = () => {
+        const today = new Date();
+        // Format the date as YYYY-MM-DD
+        return today.toISOString().split('T')[0];
+    };
     const [orderState, setOrderState] = useState({
         supplier: '',
         order_ref: '',
-        order_date: '',
+        order_date:  getCurrentDate(),
         order_est_datetime: '',
         products: [],
         custom_products: [],
@@ -68,7 +76,7 @@ const NewPurchaseOrderForm = () => {
                 setOrderState({
                     supplier: '',
                     order_ref: orderState.order_ref,
-                    order_date: '',
+                    order_date:  getCurrentDate(),
                     order_est_datetime: '',
                     products: [],
                     custom_products: [],
@@ -106,7 +114,7 @@ const NewPurchaseOrderForm = () => {
                 setOrderState({
                     supplier: targetSupplier,
                     order_ref: orderState.order_ref,
-                    order_date: '',
+                    order_date:  getCurrentDate(),
                     order_est_datetime: '',
                     products: [],
                     custom_products: [],
@@ -140,7 +148,7 @@ const NewPurchaseOrderForm = () => {
             setOrderState({
                 supplier: newSupplier,
                 order_ref: orderState.order_ref,
-                order_date: '',
+                order_date:  getCurrentDate(),
                 order_est_datetime: '',
                 products: [],
                 custom_products: [],
@@ -162,7 +170,7 @@ const NewPurchaseOrderForm = () => {
             setOrderState({
                 supplier: '',
                 order_ref: orderState.order_ref,
-                order_date: '',
+                order_date:  getCurrentDate(),
                 order_est_datetime: '',
                 products: [],
                 custom_products: [],
@@ -188,7 +196,8 @@ const NewPurchaseOrderForm = () => {
         setOrderState((prevState) => ({
             ...prevState,
             products: [...prevState.products, {
-                product_id: product.product._id,
+                product_obj_ref: product.product._id,
+                productprice_obj_ref: product.productPrice._id,
                 order_product_location: '',
                 order_product_qty_a: 0, // Ensure all fields are initialized properly
                 order_product_qty_b: 0,
@@ -219,12 +228,21 @@ const NewPurchaseOrderForm = () => {
         const updatedItems = orderState.products.filter((_, idx) => idx !== index);
         const updatedAddedProducts = addedProductState.filter((_, idx) => idx !== index);
 
-        setOrderState({
-            ...orderState,
-            products: updatedItems
-        })
+        if (updatedItems.length === 0) {
+            setOrderState({
+                ...orderState,
+                order_total_amount: 0,
+                products: updatedItems
+            })
+        } else {
+            setOrderState({
+                ...orderState,
+                products: updatedItems
+            })
+        }
 
         setAddedProductState(updatedAddedProducts)
+
     }
 
     const handleRemoveCustomItem = (index) => {
@@ -286,7 +304,7 @@ const NewPurchaseOrderForm = () => {
 
             if (name === 'order_product_qty_a') {
                 //Few criterias here:
-                // - Multiply if 1, otherwise divde.
+                // - Multiply if 1, otherwise divide.
                 // - If calculation results a non-integer, make it 4 decimal points.
                 if (addedProductState[index].productPrice.product_number_a === 1) {
                     updatedProducts[index].order_product_qty_b = Number.isInteger(value * addedProductState[index].productPrice.product_number_b) ? value * addedProductState[index].productPrice.product_number_b : parseFloat(value * addedProductState[index].productPrice.product_number_b).toFixed(4)
@@ -294,7 +312,12 @@ const NewPurchaseOrderForm = () => {
                 else {
                     updatedProducts[index].order_product_qty_b = Number.isInteger(value / addedProductState[index].productPrice.product_number_a) ? value / addedProductState[index].productPrice.product_number_a : parseFloat(value / addedProductState[index].productPrice.product_number_a).toFixed(4)
                 }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_a).toFixed(2)
+
+                updatedProducts[index].order_product_gross_amount = (addedProductState[index].productPrice.product_number_a === 1 
+                    ? (value * addedProductState[index].productPrice.product_price_unit_a * addedProductState[index].productPrice.product_number_a) 
+                    : value * addedProductState[index].productPrice.product_price_unit_a
+                  ).toFixed(2);
+                  
             }
             if (name === 'order_product_qty_b') {
                 if (addedProductState[index].productPrice.product_number_b === 1) {
@@ -330,7 +353,7 @@ const NewPurchaseOrderForm = () => {
         ];
     }
     
-    const filterPurchaseOrder = () => {
+    const filterPurchaseOrderNumber = () => {
         return purchaseOrderState.filter(order => {
             const lowerCaseSearchTerm = orderState.order_ref.toLowerCase();
     
@@ -353,10 +376,10 @@ const NewPurchaseOrderForm = () => {
                 product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
                 product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
-                product.productPrice.project_names.some(projectName => 
-                    projectName.toLowerCase().includes(lowerCaseSearchTerm)
-                )
+                product.product.alias_name.toString().includes(lowerCaseSearchTerm) 
+                // || product.productPrice.project_names.some(projectName => 
+                //     projectName.toLowerCase().includes(lowerCaseSearchTerm)
+                // )
             );
     
             const matchesProductType = selectedProductType 
@@ -369,6 +392,11 @@ const NewPurchaseOrderForm = () => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        
+        if (orderState.products.length === 0 && orderState.custom_products.length === 0) {
+            alert("You must have at least one product to submit a new order.")
+            return
+        }
 
         if (purchaseOrderState.some(order => order.order_ref.toLowerCase().includes(orderState.order_ref.toLowerCase()))) {
             alert("Purchase Order Number already exists. Please try another.")
@@ -425,19 +453,17 @@ const NewPurchaseOrderForm = () => {
     }, [dispatch]);
 
     // Display DOM
-    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState) {
+    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading) {
         return <NewPurchaseOrderSkeleton />;
     }
 
-    if (fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState) {
+    if (fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError) {
         if (fetchProjectErrorState.includes("Session expired") ) {
             return <div><SessionExpired /></div>;
         }
         return (
         <div>
-            <p>Error: {fetchProjectErrorState}</p>
-            <p>Error: {fetchProductsErrorState}</p>
-            <p>Error: {addOrderErrorState}</p>
+            <p>Error: {fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError}</p>
         </div>
         );
     }
@@ -462,6 +488,7 @@ const NewPurchaseOrderForm = () => {
             </Modal.Footer>
         </Modal>
     );
+
 
     return (
         <>
@@ -543,7 +570,7 @@ const NewPurchaseOrderForm = () => {
                                 </label>
                                 <div className="text-xs italic text-gray-400">
                                 Based on your search:
-                                {filterPurchaseOrder()
+                                {filterPurchaseOrderNumber()
                                     .filter((order) => order.order_isarchived === false)
                                     .slice(0, 3)
                                     .map((order, index) => (
@@ -560,7 +587,7 @@ const NewPurchaseOrderForm = () => {
                             <div className="grid grid-cols-3 m-2 gap-x-1">
                                 <input
                                     type="text"
-                                    className="form-control mb-1 col-span-2"
+                                    className="form-control mb-1 col-span-2 placeholder-gray-400 placeholder-opacity-50"
                                     placeholder="Search products..."
                                     value={searchProductTerm}
                                     onChange={(e) => setSearchProductTerm(e.target.value)}
@@ -588,7 +615,7 @@ const NewPurchaseOrderForm = () => {
                                 <div className='p-1'><label>Unit B</label></div>
                                 <div className='grid grid-cols-3 gap-2 p-1'><label className='col-span-2'>Type</label></div>
                             </div>
-                            { productState ? filterProductsBySearchTerm().filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
+                            { productState ? filterProductsBySearchTerm().filter(product => product.productPrice.projects.includes(selectedProject)).filter(product => orderState.order_date >= product.productPrice.product_effective_date).filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
                                 <div key={index} className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100" title='Add to order'>
                                     <div>{product.product.product_sku}</div>
                                     <div>{product.product.product_name}</div>
@@ -639,7 +666,7 @@ const NewPurchaseOrderForm = () => {
                                         <td>
                                             <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs" 
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
                                             name="order_product_location" 
                                             value={prod.order_product_location} 
                                             onChange={(e) => handleInputChange(e, index, true)}
@@ -687,7 +714,13 @@ const NewPurchaseOrderForm = () => {
                                             <label>${prod.order_product_price_unit_a}</label>
                                         </td>
                                         <td>
-                                            <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
+                                            <label>
+                                            ${(
+                                                addedProductState[index].productPrice.product_number_a === 1 
+                                                ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
+                                                : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
+                                            ).toFixed(2)}
+                                            </label>
                                         </td>
                                         <td>
                                             <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">
@@ -705,7 +738,7 @@ const NewPurchaseOrderForm = () => {
                                     <td>
                                         <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs" 
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
                                             name="custom_product_name" 
                                             value={cproduct.custom_product_name} 
                                             onChange={(e) => handleInputChange(e, index, false, true)}
@@ -718,7 +751,7 @@ const NewPurchaseOrderForm = () => {
                                     <td>
                                         <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs"  
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50"  
                                             name="custom_product_location" 
                                             value={cproduct.custom_product_location} 
                                             onChange={(e) => handleInputChange(e, index, false, true)}
@@ -846,7 +879,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="my-2">
                         <label className="form-label font-bold">Internal comments:</label>
                         <textarea 
-                            className="form-control" 
+                            className="form-control placeholder-gray-400 placeholder-opacity-50" 
                             name="order_internal_comments" 
                             value={orderState.order_internal_comments} 
                             onChange={handleInputChange}
@@ -858,7 +891,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="my-2">
                         <label className="form-label font-bold">Notes to supplier:</label>
                         <textarea
-                            className="form-control bg-yellow-200" 
+                            className="form-control bg-yellow-200 placeholder-gray-500 placeholder-opacity-50" 
                             name="order_notes_to_supplier" 
                             value={orderState.order_notes_to_supplier} 
                             onChange={handleInputChange}
@@ -866,13 +899,29 @@ const NewPurchaseOrderForm = () => {
                             rows={4}
                         />
                     </div>
-                        
+
                     {/* ***** BUTTONS ***** */}
-                    <div className="flex justify-between mb-3">
+                    <div className="flex justify-between">
                         <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
                         <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800" type="submit" name="draft">SAVE AS DRAFT</button>
+                        <div className='text-sm'>
+                            <label className='font-bold'>Order status:</label>
+                            <select
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                                name="order_status"
+                                value={orderState.order_status}
+                                onChange={(e) => handleInputChange(e)}
+                                required
+                            >
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
                         <button className="btn btn-primary" type='submit' name='submit'>SUBMIT</button>
                     </div>
+                    
                 </div>
                 { confirmationModal }
             </div>

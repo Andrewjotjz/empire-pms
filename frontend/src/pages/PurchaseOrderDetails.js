@@ -1,14 +1,19 @@
 //import modules
-import { useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate, Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
 import { setPurchaseOrderState } from '../redux/purchaseOrderSlice';
 import { clearProductState } from '../redux/productSlice';
+
+import { useUpdatePurchaseOrder } from '../hooks/useUpdatePurchaseOrder';
+import { useFetchSupplierByProject } from '../hooks/useFetchSupplierByProject';
+import { useFetchProductsBySupplier } from '../hooks/useFetchProductsBySupplier';
+
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-import { useUpdatePurchaseOrder } from '../hooks/useUpdatePurchaseOrder';
 
 const PurchaseOrderDetails = () => {
     //Component router
@@ -17,10 +22,12 @@ const PurchaseOrderDetails = () => {
 
     //Component state declaration
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
+    const { fetchSupplierByProject, isFetchSupplierLoading, fetchSupplierError } = useFetchSupplierByProject();
+    const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [currentLeftTab, setCurrentLeftTab] = useState('supplierDetails');
+    const [currentLeftTab, setCurrentLeftTab] = useState('invoicesTable');
     const [currentRightTab, setCurrentRightTab] = useState('internalComments');
     const [showLastDiv, setShowLastDiv] = useState(false);
     const [targetRef, setTargetRef] = useState(null);
@@ -34,7 +41,7 @@ const PurchaseOrderDetails = () => {
     const invoicesTableRef = useRef(null);
 
     //Component functions and variables    
-    const handleBackClick = () => navigate(-1);
+    const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
@@ -42,7 +49,7 @@ const PurchaseOrderDetails = () => {
     }
 
     const handleEditPurchaseOrder = () => {
-        navigate(`/EmpirePMS/test/`)
+        navigate(`/EmpirePMS/order/${id}/edit`)
     }
 
     const handleArchive = () => {    
@@ -71,8 +78,8 @@ const PurchaseOrderDetails = () => {
             return ''
         }  else {
             const date = new Date(dateString);
-            const options = { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' };
-            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', ', ');
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' };
+            return date.toLocaleDateString('en-AU', options).toUpperCase()
         }
     };
 
@@ -81,16 +88,16 @@ const PurchaseOrderDetails = () => {
             return ''
         }  else {
             const date = new Date(dateString);
-            const options = { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
-            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', ', ');
+            const options = { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            return date.toLocaleDateString('en-AU', options).toUpperCase()
         }
     };
 
     const totalGrossAmount = purchaseOrderState && purchaseOrderState.products
-    ? purchaseOrderState.products.reduce(
+    ? parseFloat(purchaseOrderState.products.reduce(
           (total, product) => total + (product.order_product_gross_amount || 0),
           0
-      ).toFixed(2) //change number to two decimal points
+      )).toFixed(2) //change number to two decimal points
     : 0;
 
     const scrollToDiv = (ref) => {
@@ -118,6 +125,8 @@ const PurchaseOrderDetails = () => {
                     throw new Error(data.tokenError);
                 }
 
+                fetchSupplierByProject(data.project._id)
+                fetchProductsBySupplier(data.supplier._id)
                 dispatch(setPurchaseOrderState(data));
 
                 setIsLoadingState(false);
@@ -139,16 +148,30 @@ const PurchaseOrderDetails = () => {
       }, [showLastDiv, targetRef]);
 
     // Display DOM
-    if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }
+    if (isLoadingState || isUpdateLoadingState || isFetchSupplierLoading || isFetchProductsLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState || updateErrorState) {
         if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
             return(<div><SessionExpired /></div>)
         }
-        return (<div>Error: {errorState}</div>);
+        return (
+            <div>
+                Error: {errorState || updateErrorState}
+            </div>
+        );
+    }
+    
+    if (fetchSupplierError || fetchProductsErrorState) {
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (
+            <div>
+                Error: {fetchSupplierError || fetchProductsErrorState}
+            </div>
+        );
     }
 
-    
     const purchaseOrderDetails = purchaseOrderState ? (
         <div className="row">
             <div className="col-md-6 mb-3">
@@ -170,11 +193,11 @@ const PurchaseOrderDetails = () => {
                 <label className="form-label fw-bold">EST Date/Time:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.order_est_datetime)}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 mb-3 text-sm opacity-50">
                 <label className="form-label fw-bold">Created on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.createdAt)}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 mb-3 text-sm opacity-50">
                 <label className="form-label fw-bold">Last Updated on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.updatedAt)}</p>
             </div>
@@ -221,9 +244,9 @@ const PurchaseOrderDetails = () => {
                 </thead>
                 <tbody className='text-center'>
                     {purchaseOrderState.products && purchaseOrderState.products.map((product, index) => (
-                    <tr key={`${product.product_id._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_id._id)}>
-                        <td>{product.product_id.product_sku}</td>
-                        <td>{product.product_id.product_name}</td>
+                    <tr key={`${product.product_obj_ref._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_obj_ref._id)}>
+                        <td>{product.product_obj_ref.product_sku}</td>
+                        <td>{product.product_obj_ref.product_name}</td>
                         <td>{product.order_product_location}</td>
                         <td>
                             {Number.isInteger(product.order_product_qty_a)
@@ -257,20 +280,45 @@ const PurchaseOrderDetails = () => {
                     <table className="table text-end font-bold border-x-2 mb-0">
                         <tbody>
                             <tr>
-                                <td className='pt-1'>Total Gross Amount:</td>
+                                <td className='pt-1'>Subtotal:</td>
                                 <td className='pt-1'>$ {totalGrossAmount}</td>
                             </tr>
                             <tr>
-                                <td className='pt-1'>Total Gross Amount (incl GST):</td>
-                                <td className='pt-1'>$ {purchaseOrderState.order_total_amount}</td>
+                                <td>Delivery & Other fees:</td>
+                                <td>$ {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                    return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                                }, 0)}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Due:</td>
+                                <td>$ { purchaseOrderState.products.reduce((totalSum, product) => {
+                                    return totalSum + product.order_product_gross_amount
+                                }, 0) +
+                                    purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                        return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                                    }, 0) }</td>
+                            </tr>
+                            <tr>
+                                <td>Total Due (incl GST):</td>
+                                <td>
+                                    $ {(
+                                        (purchaseOrderState.products.reduce((totalSum, product) => {
+                                            return totalSum + product.order_product_gross_amount;
+                                        }, 0) +
+                                        purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                            return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                                        }, 0)) * 1.1
+                                    ).toFixed(2)}
+                                </td>
                             </tr>
                             <tr>
                                 <td>Amount Paid:</td>
-                                <td>$ ??.??</td>
-                            </tr>
-                            <tr>
-                                <td>Outstanding Amount:</td>
-                                <td>$ ??.??</td>
+                                <td>$ {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                    if (invoice.invoice_status === "Settled") {
+                                        return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                                    }
+                                    return totalSum;
+                                }, 0)}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -283,7 +331,7 @@ const PurchaseOrderDetails = () => {
 
     const internalComments = purchaseOrderState.order_internal_comments !== '' ? (
         <div className="card-body border-1 relative shadow-md p-2" ref={internalCommentsRef}>
-            <div className='border rounded-md bg-blue-100 p-2 h-20 md:h-32 lg:h-48'>
+            <div className='border rounded-md bg-blue-100 p-2 h-auto'>
                 <p>{purchaseOrderState.order_internal_comments}</p>
             </div>
         </div>
@@ -293,8 +341,8 @@ const PurchaseOrderDetails = () => {
 
     const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
         <>
-        <div className="container shadow-md" ref={invoicesTableRef}>
-            <table className="table table-bordered table-hover">
+        <div ref={invoicesTableRef}>
+            <table className="table table-bordered table-hover text-xs shadow-sm">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">Ref #</th>
@@ -302,37 +350,104 @@ const PurchaseOrderDetails = () => {
                         <th scope="col">Received on</th>
                         <th scope="col">Due on</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Stand Alone(?)</th>
-                        <th scope="col">Raw Nett Amount(+gst)</th>
-                        <th scope="col">Calculated Gross Amount (+gst)</th>
+                        <th scope="col">Delivery & Other Fees</th>
+                        <th scope="col">Calculated Gross Amount</th>
+                        <th scope="col">Raw Gross Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     {purchaseOrderState.invoices && purchaseOrderState.invoices.map(invoice => (
-                        <tr key={invoice._id}>
+                        <tr key={invoice._id} className="cursor-pointer" onClick={() => navigate(`/EmpirePMS/invoice/${invoice._id}`)}>
                             <th scope="row">{invoice.invoice_ref}</th>
-                            <td>{invoice.invoice_issue_date}</td>
-                            <td>{invoice.invoice_received_date}</td>
-                            <td>{invoice.invoice_due_date}</td>
-                            <td>{invoice.invoice_status}</td>
-                            <td>{invoice.invoice_is_stand_alone}</td>
-                            <td>{invoice.invoiced_raw_total_amount_incl_gst}</td>
-                            <td>{invoice.invoiced_calculated_total_amount_incl_gst}</td>
+                            <td>{formatDate(invoice.invoice_issue_date)}</td>
+                            <td>{formatDate(invoice.invoice_received_date)}</td>
+                            <td>{formatDate(invoice.invoice_due_date)}</td>
+                            <td>
+                                {invoice.invoice_status && (
+                                <label
+                                    className={`text-xs font-bold m-1 py-0.5 px-1 rounded-xl text-nowrap ${
+                                        invoice.invoice_status === "Cancelled"
+                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                            : invoice.invoice_status === "To review"
+                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                            : invoice.invoice_status === "Settled"
+                                            ? "border-2 bg-transparent border-green-600 text-green-600"
+                                            : invoice.invoice_status === "To reconcile"
+                                            ? "border-2 bg-transparent border-red-600 text-red-600"
+                                            : invoice.invoice_status === "Reviewed"
+                                            ? "border-2 bg-transparent border-blue-400 text-blue-400"
+                                            : ""
+                                    }`}
+                                >
+                                    {invoice.invoice_status}
+                                </label>
+                                )}
+                            </td>
+                            <td>$ {invoice.invoiced_delivery_fee + invoice.invoiced_other_fee}</td>
+                            <td className='text-end'>$ {(invoice.invoiced_calculated_total_amount_incl_gst / 1.1).toFixed(2)}</td>
+                            <td className='text-end'>$ {(invoice.invoiced_raw_total_amount_incl_gst / 1.1).toFixed(2)}</td>
                         </tr>
                     ))}
-                </tbody>
-            </table>
-        </div>
-        <div className='flex justify-end'>
-            <table className="table table-bordered table-hover">
-                <tbody>
+                    {/* TEMPORARILY DEACTIVATED */}
+                    {/* <tr>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Subtotal (excl fees):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0) / 1.1 - purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                            }, 0)).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0) / 1.1 - purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
+                            }, 0)).toFixed(2)}
+                        </td>
+                    </tr> */}
                     <tr>
-                        <td>Net Amount</td>
-                        <td>$ ??.??</td>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Subtotal (incl fees):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0) / 1.1).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0) / 1.1).toFixed(2)}
+                        </td>
                     </tr>
                     <tr>
-                        <td>Gross Amount</td>
-                        <td>$ ??.??</td>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>GST (10%):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0) / 1.1 * 0.1).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0) / 1.1 * 0.1).toFixed(2)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colSpan={4}></td>
+                        <td colSpan={2} className='text-end font-bold'>Total (incl GST):</td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
+                            }, 0)).toFixed(2)}
+                        </td>
+                        <td className='text-end font-bold'>
+                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                            }, 0)).toFixed(2)}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -347,7 +462,11 @@ const PurchaseOrderDetails = () => {
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Supplier Name:</label>
-                    <p className="form-label">{purchaseOrderState.supplier.supplier_name}</p>
+                    <div>
+                        <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/supplier/${purchaseOrderState.supplier._id}`}>
+                            {purchaseOrderState.supplier.supplier_name}
+                        </Link>
+                    </div>
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Address:</label>
@@ -413,7 +532,7 @@ const PurchaseOrderDetails = () => {
 
     const notesToSupplier = purchaseOrderState.order_notes_to_supplier !== '' ? (
         <div className="card-body border-1 relative shadow-md p-2" ref={notesToSupplierRef}>
-            <div className='border rounded-md bg-yellow-200 p-2 h-20 md:h-32 lg:h-48'>
+            <div className='border rounded-md bg-yellow-200 p-2 h-auto'>
                 <p>{purchaseOrderState.order_notes_to_supplier}</p>
             </div>
         </div>
@@ -441,6 +560,7 @@ const PurchaseOrderDetails = () => {
             </Modal.Footer>
         </Modal>
     )
+    
 
     return (
         <div className="container mt-5">
@@ -456,6 +576,7 @@ const PurchaseOrderDetails = () => {
                 </div>
                 <div className="card-body">
                     {/* DROPDOWN ACTION */}
+                    { new Date(purchaseOrderState.createdAt) > new Date("2024-07-20T00:00:00.000Z") &&
                     <div className="absolute right-3">
                         <Dropdown>
                             <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -482,7 +603,7 @@ const PurchaseOrderDetails = () => {
                                 </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
-                    </div>
+                    </div>}
                     {/* PURCHASE ORDER DETAILS */}
                     <div>
                         { purchaseOrderDetails }
