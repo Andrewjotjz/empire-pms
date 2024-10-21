@@ -53,13 +53,14 @@ const getSingleOrder = async (req, res) => {
                 path: 'products.productprice_obj_ref' // Populate the 'productprice_obj_ref' inside 'products' array
             })
             .populate('project')
-            .populate({
-                path: 'deliveries.delivery_obj_ref', // Populate the 'delivery_obj_ref' inside 'deliveries' array
-            })
-            .populate({
-                path: 'invoices.invoice_obj_ref', // Populate the 'invoice_obj_ref' inside 'invoices' array
-            })
+            .populate('deliveries')
+            .populate('invoices')
             .populate('project');
+
+        
+        const filteredInvoice = Order.invoices.filter(invoice => invoice.invoice_status !== "Cancelled")
+
+        Order.invoices = filteredInvoice;
 
         // Respond with the retrieved Order
         // Invoke 'res' object method: status() and json(), pass relevant data to them

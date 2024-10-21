@@ -92,21 +92,13 @@ const orderSchema = new Schema({
     },
     //One order can be created without delivery. But if there's delivery, there must be a delivery_obj_ref and delivery_status
     deliveries: [{
-        _id: false,
-        delivery_obj_ref: {
-            type: Schema.Types.ObjectId,
-            ref: 'Delivery',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Delivery'
     }],
     //One order can be created without invoice. But if there's invoice, there must be an invoice_obj_ref and invoice_status
     invoices: [{
-        _id: false,
-        invoice_obj_ref: {
-            type: Schema.Types.ObjectId,
-            ref: 'Invoice',
-            required: true
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Invoice'
     }],
     project: {
         type: Schema.Types.ObjectId,

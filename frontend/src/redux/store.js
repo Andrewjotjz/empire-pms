@@ -8,6 +8,7 @@ import projectReducer from './projectSlice'
 import aliasReducer from './aliasSlice'
 import productPriceReducer from './productPriceSlice'
 import purchaseOrderReducer from './purchaseOrderSlice'
+import invoiceReducer from './invoiceSlice'
 
 export const store = configureStore({
     reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
         projectReducer: projectReducer,
         aliasReducer: aliasReducer,
         productPriceReducer: productPriceReducer,
-        purchaseOrderReducer: purchaseOrderReducer
+        purchaseOrderReducer: purchaseOrderReducer,
+        invoiceReducer: invoiceReducer
     }
 })

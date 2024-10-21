@@ -1,5 +1,5 @@
 //import modules
-const employeeModel = require('../models/employeeModel');
+const employeeModel = require('../models/EmployeeModel');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto')
@@ -39,7 +39,28 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-const maxAge = 60 * 60; //60 minutes in seconds
+const maxAge = 30 * 60; //60 minutes in seconds
+// Middleware to refresh token
+const refreshToken = (req, res, next) => {
+    const token = req.cookies.jwt;
+    
+    // Check if token exists
+    if (token) {
+      jwt.verify(token, 'empirepms2024 secret', (err, decoded) => {
+        if (err) {
+          return next(); // Token is invalid or expired, proceed to next middleware
+        }
+        
+        // Reset token expiration if the user is active
+        const newToken = createToken(decoded.id); // Generate a new token
+        res.cookie('jwt', newToken, { httpOnly: true, maxAge: maxAge * 1000 }); // Update cookie
+        next(); // Continue to the next middleware or route handler
+      });
+    } else {
+      next(); // No token found, proceed to next middleware
+    }
+  };
+// Middleware to create token
 const createToken = (id) => {
     //header&payload + secret = signature
     //user's { id } represents payload, 'empirepms2024 secret' represents secret. Use jwt's sign() to get signature. Which results in 'encoded token'.
@@ -362,4 +383,4 @@ const logoutEmployee = (req,res) => {
 
 
 //export controller module
-module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee, sendPasswordResetEmail, resetEmployeePassword };
+module.exports = { getAllEmployees, getSingleEmployee, createNewEmployee, updateSingleEmployee, changeEmployeePassword, deleteSingleEmployee, loginEmployee, logoutEmployee, sendPasswordResetEmail, resetEmployeePassword, refreshToken };

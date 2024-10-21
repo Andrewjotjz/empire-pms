@@ -86,11 +86,11 @@ const UpdateSupplierForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Supplier name:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="supplier_name" 
                                     value={supplierState.supplier_name} 
                                     onChange={handleInputChange}
-                                    placeholder="Name"
+                                    placeholder="Ex: MelbSupplier"
                                     required
                                     onInvalid={(e) => e.target.setCustomValidity('Enter supplier name')}
                                     onInput={(e) => e.target.setCustomValidity('')}
@@ -99,7 +99,7 @@ const UpdateSupplierForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Supplier address:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="supplier_address" 
                                     value={supplierState.supplier_address} 
                                     onChange={handleInputChange}
@@ -109,7 +109,7 @@ const UpdateSupplierForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Payment term:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="supplier_payment_term" 
                                     value={supplierState.supplier_payment_term} 
                                     onChange={handleInputChange}
@@ -119,7 +119,7 @@ const UpdateSupplierForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Payment term description:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="supplier_payment_term_description" 
                                     value={supplierState.supplier_payment_term_description} 
                                     onChange={handleInputChange}
@@ -129,7 +129,7 @@ const UpdateSupplierForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Payment method details:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="supplier_payment_method_details" 
                                     value={supplierState.supplier_payment_method_details} 
                                     onChange={handleInputChange}
@@ -154,7 +154,7 @@ const UpdateSupplierForm = () => {
                             <div className="col-md-6 mb-3">
                                 <label className="form-label fw-bold">Material types:</label>
                                 <input 
-                                    className="form-control" 
+                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                     name="supplier_material_types" 
                                     value={supplierState.supplier_material_types} 
                                     onChange={handleInputChange}
@@ -179,11 +179,11 @@ const UpdateSupplierForm = () => {
                                             <div className="col-md-4 mb-3">
                                                 <label className="form-label fw-bold">Name:</label>
                                                 <input 
-                                                    className="form-control" 
+                                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                                     name="name" 
                                                     value={contact.name} 
                                                     onChange={(e) => handleContactChange(index, e)}
-                                                    placeholder="Contact Name"
+                                                    placeholder="John Doe"
                                                     required
                                                     onInvalid={(e) => e.target.setCustomValidity('Enter contact name')}
                                                     onInput={(e) => e.target.setCustomValidity('')}
@@ -192,17 +192,17 @@ const UpdateSupplierForm = () => {
                                             <div className="col-md-4 mb-3">
                                                 <label className="form-label fw-bold">Phone:</label>
                                                 <input 
-                                                    className="form-control" 
+                                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                                     name="phone" 
                                                     value={contact.phone} 
                                                     onChange={(e) => handleContactChange(index, e)}
-                                                    placeholder="Ex: 04 0000 0000"
+                                                    placeholder="Ex: 04... or 03..."
                                                 />
                                             </div>
                                             <div className="col-md-4 mb-3">
                                                 <label className="form-label fw-bold">Email:</label>
                                                 <input 
-                                                    className="form-control" 
+                                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                                     name="email" 
                                                     value={contact.email} 
                                                     onChange={(e) => handleContactChange(index, e)}

@@ -304,7 +304,7 @@ const NewPurchaseOrderForm = () => {
 
             if (name === 'order_product_qty_a') {
                 //Few criterias here:
-                // - Multiply if 1, otherwise divde.
+                // - Multiply if 1, otherwise divide.
                 // - If calculation results a non-integer, make it 4 decimal points.
                 if (addedProductState[index].productPrice.product_number_a === 1) {
                     updatedProducts[index].order_product_qty_b = Number.isInteger(value * addedProductState[index].productPrice.product_number_b) ? value * addedProductState[index].productPrice.product_number_b : parseFloat(value * addedProductState[index].productPrice.product_number_b).toFixed(4)
@@ -312,7 +312,12 @@ const NewPurchaseOrderForm = () => {
                 else {
                     updatedProducts[index].order_product_qty_b = Number.isInteger(value / addedProductState[index].productPrice.product_number_a) ? value / addedProductState[index].productPrice.product_number_a : parseFloat(value / addedProductState[index].productPrice.product_number_a).toFixed(4)
                 }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_a).toFixed(2)
+
+                updatedProducts[index].order_product_gross_amount = (addedProductState[index].productPrice.product_number_a === 1 
+                    ? (value * addedProductState[index].productPrice.product_price_unit_a * addedProductState[index].productPrice.product_number_a) 
+                    : value * addedProductState[index].productPrice.product_price_unit_a
+                  ).toFixed(2);
+                  
             }
             if (name === 'order_product_qty_b') {
                 if (addedProductState[index].productPrice.product_number_b === 1) {
@@ -484,6 +489,7 @@ const NewPurchaseOrderForm = () => {
         </Modal>
     );
 
+
     return (
         <>
         {/* PAGE HEADER */}
@@ -581,7 +587,7 @@ const NewPurchaseOrderForm = () => {
                             <div className="grid grid-cols-3 m-2 gap-x-1">
                                 <input
                                     type="text"
-                                    className="form-control mb-1 col-span-2"
+                                    className="form-control mb-1 col-span-2 placeholder-gray-400 placeholder-opacity-50"
                                     placeholder="Search products..."
                                     value={searchProductTerm}
                                     onChange={(e) => setSearchProductTerm(e.target.value)}
@@ -660,7 +666,7 @@ const NewPurchaseOrderForm = () => {
                                         <td>
                                             <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs" 
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
                                             name="order_product_location" 
                                             value={prod.order_product_location} 
                                             onChange={(e) => handleInputChange(e, index, true)}
@@ -708,7 +714,13 @@ const NewPurchaseOrderForm = () => {
                                             <label>${prod.order_product_price_unit_a}</label>
                                         </td>
                                         <td>
-                                            <label>${(prod.order_product_qty_a * (prod.order_product_price_unit_a || 0)).toFixed(2)}</label>
+                                            <label>
+                                            ${(
+                                                addedProductState[index].productPrice.product_number_a === 1 
+                                                ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
+                                                : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
+                                            ).toFixed(2)}
+                                            </label>
                                         </td>
                                         <td>
                                             <button type="button" onClick={() => handleRemoveItem(index)} className="btn btn-danger p-1">
@@ -726,7 +738,7 @@ const NewPurchaseOrderForm = () => {
                                     <td>
                                         <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs" 
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
                                             name="custom_product_name" 
                                             value={cproduct.custom_product_name} 
                                             onChange={(e) => handleInputChange(e, index, false, true)}
@@ -739,7 +751,7 @@ const NewPurchaseOrderForm = () => {
                                     <td>
                                         <input
                                             type="text"
-                                            className="form-control px-1 py-0.5 text-xs"  
+                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50"  
                                             name="custom_product_location" 
                                             value={cproduct.custom_product_location} 
                                             onChange={(e) => handleInputChange(e, index, false, true)}
@@ -867,7 +879,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="my-2">
                         <label className="form-label font-bold">Internal comments:</label>
                         <textarea 
-                            className="form-control" 
+                            className="form-control placeholder-gray-400 placeholder-opacity-50" 
                             name="order_internal_comments" 
                             value={orderState.order_internal_comments} 
                             onChange={handleInputChange}
@@ -879,7 +891,7 @@ const NewPurchaseOrderForm = () => {
                     <div className="my-2">
                         <label className="form-label font-bold">Notes to supplier:</label>
                         <textarea
-                            className="form-control bg-yellow-200" 
+                            className="form-control bg-yellow-200 placeholder-gray-500 placeholder-opacity-50" 
                             name="order_notes_to_supplier" 
                             value={orderState.order_notes_to_supplier} 
                             onChange={handleInputChange}
@@ -887,13 +899,29 @@ const NewPurchaseOrderForm = () => {
                             rows={4}
                         />
                     </div>
-                        
+
                     {/* ***** BUTTONS ***** */}
-                    <div className="flex justify-between mb-3">
+                    <div className="flex justify-between">
                         <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
                         <button className="btn border rounded bg-gray-700 text-white hover:bg-gray-800" type="submit" name="draft">SAVE AS DRAFT</button>
+                        <div className='text-sm'>
+                            <label className='font-bold'>Order status:</label>
+                            <select
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                                name="order_status"
+                                value={orderState.order_status}
+                                onChange={(e) => handleInputChange(e)}
+                                required
+                            >
+                            <option value="Pending">Pending</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
                         <button className="btn btn-primary" type='submit' name='submit'>SUBMIT</button>
                     </div>
+                    
                 </div>
                 { confirmationModal }
             </div>

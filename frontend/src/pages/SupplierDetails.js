@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSupplierState } from '../redux/supplierSlice';
 import { setProjectState } from '../redux/projectSlice';
 import { setProductState, clearProductState } from '../redux/productSlice';
+import { setPurchaseOrderState, clearPurchaseOrderState } from '../redux/purchaseOrderSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import Dropdown from "react-bootstrap/Dropdown";
@@ -20,6 +21,7 @@ const SupplierDetails = () => {
     const supplierState = useSelector((state) => state.supplierReducer.supplierState);
     const productState = useSelector((state) => state.productReducer.productState);
     const projectState = useSelector((state) => state.projectReducer.projectState);
+    const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState);
     const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
 
     const [isLoadingState, setIsLoadingState] = useState(true);
@@ -38,6 +40,26 @@ const SupplierDetails = () => {
     const dispatch = useDispatch()
 
     //Component functions and variables
+    const formatDate = (dateString) => {
+        if (dateString === null) {
+            return ''
+        }  else {
+            const date = new Date(dateString);
+            const options = { day: '2-digit', month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', '-').replace(' ', '-');
+        }
+    };
+
+    const formatDateTime = (dateString) => {
+        if (dateString === null) {
+            return ''
+        }  else {
+            const date = new Date(dateString);
+            const options = { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', '-').replace(' ', '-');
+        }
+    };
+
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
@@ -62,13 +84,36 @@ const SupplierDetails = () => {
         });
     };
 
+    const filterOrders = () => {
+        return purchaseOrderState.filter(order => {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    
+            // Check each field for the search term
+            return (
+                order.order_ref.toLowerCase().includes(lowerCaseSearchTerm) ||
+                order.project.project_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                order.supplier.supplier_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                order.order_total_amount.toString().includes(lowerCaseSearchTerm) ||
+                order.order_status.toLowerCase().includes(lowerCaseSearchTerm)
+            );
+        });
+    };
+
     const handleAddProductClick = () => navigate(`/EmpirePMS/supplier/${id}/products/create`, { state: {supplierId: id, supplierName: supplierState.supplier_name} });
+
+    const handleCreateOrder = () => navigate(`/EmpirePMS/order/create`);
 
     const handleTableClick = (page,varID) => {
         navigate(`/EmpirePMS/${page}/${varID}`, { state: varID });
     }
+
+    const handleOrderTableClick = (id) => {
+
+        dispatch(clearPurchaseOrderState())
+        navigate(`/EmpirePMS/order/${id}`);
+    }
     
-    const handleBackClick = () => navigate(-1);
+    const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
@@ -262,6 +307,29 @@ const SupplierDetails = () => {
         }
     }, [id, dispatch]);
 
+    
+    const fetchOrdersBySupplier = async () => {
+        try{
+            const res = await fetch(`/api/order`);
+            if (!res.ok) {
+                throw new Error('Failed to fetch orders');
+            }
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError)
+            }
+
+            const filteredOrders = data.filter(order => order.supplier._id === supplierState._id)
+
+            dispatch(setPurchaseOrderState(filteredOrders))
+            setIsLoadingState(false)
+        } catch (err) {
+            setErrorState(err.message);
+            setIsLoadingState(false);
+        }
+    };
+
     useEffect(() => {
         fetchSupplierDetails();
     }, [fetchSupplierDetails]);
@@ -317,8 +385,7 @@ const SupplierDetails = () => {
         };
         fetchAllProjects();
     }, [id, dispatch]);
-
-
+    
     const selectProjectsBtn = (
         <div className='d-flex m-1 justify-content-end'>
             <Dropdown>
@@ -473,9 +540,6 @@ const SupplierDetails = () => {
         </div>
     );
 
-
-    const supplierPurchaseOrdersTable = ( <>some purchase orders data...</> )
-
     const supplierProductsTable = Array.isArray(productState) && productState.length > 0 ? (
         <div>
             <div className="flex justify-between">
@@ -543,6 +607,91 @@ const SupplierDetails = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
                     <label>ADD PRODUCT</label>
+                </div>
+            </button>
+        </div>
+    );
+    const supplierPurchaseOrdersTable = Array.isArray(purchaseOrderState) && purchaseOrderState.length > 0 ? (
+        <div>
+            <div className="flex justify-between">
+                <input
+                    type="text"
+                    className="form-control mb-1 w-10/12"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                />
+                <button className="btn btn-primary mb-1" onClick={handleCreateOrder}>
+                    <div className='flex items-center'>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <label>CREATE NEW ORDER</label>
+                    </div>
+                </button>
+            </div>
+            <table className="table table-bordered table-hover shadow-md">
+                <thead className="thead-dark text-center">
+                    <tr className="table-primary">
+                        <th scope="col">PO</th>
+                        <th scope="col">Order Date</th>
+                        <th scope="col">EST Date</th>
+                        <th scope="col">Project</th>
+                        <th scope="col">Supplier</th>
+                        <th scope="col">Products</th>
+                        <th scope="col">Gross Amount</th>
+                        <th scope="col">Status</th>
+                        {/* <th scope="col">Ordered By</th> */}
+                    </tr>
+                </thead>
+                <tbody>
+                    {filterOrders().filter(order => order.order_isarchived === false).map((order, index) => (
+                        <tr key={order._id} onClick={() => handleOrderTableClick(order._id)} className="cursor-pointer text-center">
+                            <th scope="row">{order.order_ref}</th>
+                            <td>{formatDate(order.order_date)}</td>
+                            <td>{formatDateTime(order.order_est_datetime)}</td>
+                            <td>{order.project.project_name}</td>
+                            <td>{order.supplier.supplier_name}</td>
+                            <td>{order.products.length + order.custom_products.length} products</td>
+                            <td>${(order.order_total_amount).toFixed(2)}</td>
+                            <td>
+                                {order.order_status && (
+                                <label
+                                    className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
+                                        order.order_status === "Cancelled"
+                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                            : order.order_status === "Pending"
+                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                            : order.order_status === "Approved"
+                                            ? "border-2 bg-transparent border-green-600 text-green-600"
+                                            : order.order_status === "Rejected"
+                                            ? "border-2 bg-transparent border-red-600 text-red-600"
+                                            : order.order_status === "Draft"
+                                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                                            : ""
+                                    }`}
+                                >
+                                    {order.order_status}
+                                </label>
+                                )}
+                            </td>
+                            {/* <td>To be developed using HISTORY table......</td> */}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    ) : (
+        <div className='border p-2'>
+            <div className='m-1'>
+                <label className='text-xl'>No purchase orders corresponding to this supplier.</label>
+            </div>
+            <button className="btn btn-primary m-1" onClick={() => navigate(`/EmpirePMS/order/create`)}>
+                <div className='flex items-center'>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <label>NEW PURCHASE ORDER</label>
                 </div>
             </button>
         </div>
@@ -675,6 +824,8 @@ const SupplierDetails = () => {
         return (<div>Error: {errorState}</div>);
     }
 
+    console.log("supplierState:", supplierState)
+    console.log("purchaseOrderState:", purchaseOrderState)
 
     return (
         <div className="container mt-5">
@@ -691,7 +842,7 @@ const SupplierDetails = () => {
                     <div>
                         <button className={`${currentTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierDetails')}>Details</button>
                         <button className={`${currentTab === 'supplierProductsTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierProductsTable')}>Products</button>
-                        <button className={`${currentTab === 'supplierPurchaseOrdersTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierPurchaseOrdersTable')}>Purchase Orders</button>
+                        <button className={`${currentTab === 'supplierPurchaseOrdersTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentTab('supplierPurchaseOrdersTable'); fetchOrdersBySupplier();}}>Purchase Orders</button>
                         <button className={`${currentTab === 'supplierProjectsTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierProjectsTable')}>Projects</button>
                     </div>
                     {/* SWITCH BETWEEN COMPONENTS HERE */}

@@ -77,7 +77,7 @@ const NewEmployeeForm = () => {
                             <label className="form-label font-bold">First name:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="employee_first_name" 
                                 value={employeeState.employee_first_name} 
                                 onChange={handleInputChange}
@@ -91,7 +91,7 @@ const NewEmployeeForm = () => {
                             <label className="form-label font-bold">Last name:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="employee_last_name" 
                                 value={employeeState.employee_last_name} 
                                 onChange={handleInputChange} 
@@ -104,7 +104,7 @@ const NewEmployeeForm = () => {
                         <div className="col-md-6 mb-3">
                             <label className="form-label font-bold">Role:</label>
                             <select 
-                                className="form-control"
+                                className="form-control cursor-pointer hover:shadow-md"
                                 name="employee_roles" 
                                 value={employeeState.employee_roles} 
                                 onChange={handleInputChange}
@@ -119,7 +119,7 @@ const NewEmployeeForm = () => {
                             <label className="form-label font-bold">Contact:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="employee_mobile_phone" 
                                 value={employeeState.employee_mobile_phone} 
                                 onChange={handleInputChange} 
@@ -130,7 +130,7 @@ const NewEmployeeForm = () => {
                             <label className="form-label font-bold">Email:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="employee_email" 
                                 value={employeeState.employee_email}
                                 onChange={handleInputChange}
@@ -144,7 +144,7 @@ const NewEmployeeForm = () => {
                             <label className="form-label font-bold">Password:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control placeholder-gray-400 placeholder-opacity-50" 
                                 name="employee_password" 
                                 value={employeeState.employee_password}
                                 onChange={handleInputChange}

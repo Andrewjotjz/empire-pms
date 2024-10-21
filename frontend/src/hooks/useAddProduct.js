@@ -12,7 +12,7 @@ export const useAddProduct = () => {
     const navigate = useNavigate();
 
     //Component's function
-    const addProduct = async (productState, supplierId) => {
+    const addProduct = async (productState) => {
         setIsLoadingState(true)
         setErrorState(null)
 
@@ -33,10 +33,7 @@ export const useAddProduct = () => {
                 if (!res.ok) {
                     throw new Error('Failed to POST new product details')
                 }
-                if (res.ok) {
-                    // navigate client to supplier details page
-                    navigate(`/EmpirePMS/supplier/${supplierId}`)
-                
+                if (res.ok) {                
                     // push toast to notify successful login
                     toast.success(`Product added to supplier`, {
                         position: "bottom-right"
@@ -45,13 +42,15 @@ export const useAddProduct = () => {
                     // update loading state
                     setIsLoadingState(false)
 
+                    return data.newProduct._id
+
                 }
             } catch (error) {
                 setErrorState(error.message);
                 setIsLoadingState(false);
             }
         }
-        postProduct();
+        return postProduct();
     }
 
     return { addProduct, isLoadingState, errorState };
