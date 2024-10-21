@@ -70,7 +70,7 @@ const getSingleProduct = async (req, res) => {
     const Product = await productModel.findById(id)
 
     // Get all the product prices based on the product id
-    const ProductPrices = await productPriceModel.find({product_id: id});
+    const ProductPrices = await productPriceModel.find({product_obj_ref: id});
 
     //check if there's 'null' or 'undefined' in 'Product'.
     if (!Product) {
@@ -138,7 +138,7 @@ const createNewProduct = async (req, res) => {
                 supplier, alias: newAlias._id, price_fixed, product_isarchived })
             await newProduct.save({session})
 
-            const newProductPrice = new productPriceModel({ product_id: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+            const newProductPrice = new productPriceModel({ product_obj_ref: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
                 product_price_unit_b, price_fixed, product_effective_date, projects })
             await newProductPrice.save({session})
             
@@ -152,7 +152,7 @@ const createNewProduct = async (req, res) => {
                 supplier, alias, price_fixed, product_isarchived })
             await newProduct.save({session})
 
-            const newProductPrice = new productPriceModel({ product_id: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
+            const newProductPrice = new productPriceModel({ product_obj_ref: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
                 product_price_unit_b, price_fixed, product_effective_date, projects })
             await newProductPrice.save({session})
             
@@ -240,7 +240,7 @@ const deleteSingleProduct = async (req,res) => {
 
 
     // At the same time need to delete related product Prices
-    const ProductPrices =await productPriceModel.deleteMany({ product_id: id });
+    const ProductPrices =await productPriceModel.deleteMany({ product_obj_ref: id });
 
 
     //check if there's 'null' or 'undefined' in 'Product'.

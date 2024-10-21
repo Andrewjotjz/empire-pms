@@ -49,7 +49,7 @@ const paymentSchema = new Schema({
     },
     invoices: [{
         _id: false,
-        invoice_id: {
+        invoice_obj_ref: {
         type: Schema.Types.ObjectId,
         ref: 'Invoice',
         required: true

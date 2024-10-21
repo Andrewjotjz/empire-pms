@@ -1,17 +1,101 @@
 //import modules
 const supplierModel = require('../models/supplierModel');
+const projectModel = require('../models/ProjectModel');
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
 const mongoose = require('mongoose');
 
+// const fetchSupplierwithProject = async (supplier_id) => {
+
+//     // if project_id is null, find all projects, otherwise, find single project by id
+//     const suppliers = await supplierModel.find(supplier_id).sort({ createdAt: -1 })
+
+//     // Find all employees related to the projects
+//     const suppliersIds = suppliers.map(supplier => supplier._id);
+//     const projects = await projectModel.find({ suppliers: { $in: suppliersIds } });
+
+//     // Map suppliers to their corresponding projects
+//     const supplierProjectMap = {};
+//     projects.forEach(project => {
+//         project.suppliers.forEach(supplierID => {
+//         if (!supplierProjectMap[supplierID]) 
+//             { supplierProjectMap[supplierID] = []; }
+//         supplierProjectMap[supplierID].push(project);
+//       });
+//     });
+
+//     // Attach supplier to their corresponding projects
+//     const supplierWithProjects = projects.map(project => {
+//       return {
+//         ...project.toObject(),
+//         projects: supplierProjectMap[project._id] || []
+//       };
+//     });
+
+//     return supplierWithProjects; 
+
+// };
+
+const fetchSupplierWithProjects = async (supplier_id) => {
+    try {
+        // Find the supplier by ID (assumed that supplier_id is not null)
+        const supplier = await supplierModel.findById(supplier_id);
+        if (!supplier) {
+            throw new Error('Supplier not found');
+        }
+
+        // Find all projects related to the supplier
+        const projects = await projectModel.find({ suppliers: supplier_id })
+            .select('project_name project_address project_isarchived')
+            .exec();
+
+        // Attach the projects to the supplier
+        const supplierWithProjects = {
+            ...supplier.toObject(), // Convert the supplier document to a plain object
+            projects: projects.map(project => project.toObject()) // Convert projects to plain objects
+        };
+
+        return supplierWithProjects;
+    } catch (error) {
+        console.error('Error fetching supplier with projects:', error);
+        throw error; // Handle or rethrow the error as needed
+    }
+};
+
+
 //Controller function - GET all Suppliers
 const getAllSuppliers = async (req, res) => {
-    //'req' object not in used
-    //create a new model called Suppliers, await, and assign it with all Supplier documents in the Supplier collection, sort created date in descending order
-    const Suppliers = await supplierModel.find({}).sort({createdAt: -1})
-    //invoke 'res' object method: status() and json(), pass relevant data to them
-    res.status(200).json(Suppliers);
+    try {
+        // Fetch all supplier documents, sorted by updatedAt in descending order
+        const Suppliers = await supplierModel.find({}).sort({ updatedAt: -1 });
+
+        // Define the custom order for supplier types
+        const supplierTypeOrder = {
+            'Main': 1,
+            'Special': 2,
+            'Others': 3,
+            'Inactive': 4
+        };
+
+        // Sort suppliers by supplier_type first, then by updatedAt
+        Suppliers.sort((a, b) => {
+            const orderA = supplierTypeOrder[a.supplier_type] || 5;
+            const orderB = supplierTypeOrder[b.supplier_type] || 5;
+
+            if (orderA < orderB) return -1;
+            if (orderA > orderB) return 1;
+
+            // If supplier_type is the same, sort by updatedAt
+            return b.updatedAt - a.updatedAt;
+        });
+
+        // Return the sorted suppliers as a JSON response
+        res.status(200).json(Suppliers);
+    } catch (error) {
+        res.status(500).json({ message: "Error retrieving suppliers", error });
+    }
 }
+
 
 //Controller function - GET single Supplier
 const getSingleSupplier = async (req, res) => {
@@ -27,7 +111,8 @@ const getSingleSupplier = async (req, res) => {
 
     //if ID exists in mongoDB database
     //create a new model called Supplier, await, and assign it with the Supplier document, which can be found in the Supplier collection, find using ID
-    const Supplier = await supplierModel.findById(id)
+    // const Supplier = await supplierModel.findById(id)
+    const Supplier = await fetchSupplierWithProjects({ _id: id });
 
     //check if there's 'null' or 'undefined' in 'Supplier'.
     if (!Supplier) {
@@ -55,7 +140,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
         {
             $lookup: {
                 from: 'products', // Ensure this is the correct collection name
-                localField: 'product_id',
+                localField: 'product_obj_ref',
                 foreignField: '_id',
                 as: 'product'
             }
@@ -99,7 +184,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                 },
                 productPrice: {
                     _id: '$_id',
-                    product_id: '$product_id',
+                    product_obj_ref: '$product_obj_ref',
                     product_unit_a: '$product_unit_a',
                     product_number_a: '$product_number_a',
                     product_price_unit_a: '$product_price_unit_a',
@@ -113,6 +198,12 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     createdAt: '$createdAt',
                     updatedAt: '$updatedAt',
                 }
+            }
+        },
+        {
+            $sort: {
+                'productPrice.product_effective_date': -1, // Sort by productPrice's product_effective_date in descending order
+                'productPrice.createdAt': -1, // Sort by productPrice's createdAt in descending order
             }
         }
     ]);

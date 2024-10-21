@@ -96,7 +96,7 @@ const Project = () => {
             </thead>
             <tbody>
                 {filteredProjects.map((project, index) => (
-                    <tr key={project._id} onClick={() => handleTableClick(project._id)} >
+                    <tr className="cursor-pointer" key={project._id} onClick={() => handleTableClick(project._id)} >
                         <th scope="row">{index + 1}</th>
                         <td>{project.project_name}</td>
                         <td>{project.project_address}</td>
@@ -134,7 +134,7 @@ const Project = () => {
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search by project name, or address..."
+                                placeholder="Search by project name, or address ..."
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />

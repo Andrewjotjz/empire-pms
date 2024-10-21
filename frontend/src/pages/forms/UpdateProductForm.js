@@ -43,7 +43,7 @@ const UpdateProductForm = () => {
     const [defaultAlias, setDefaultAlias] = useState('');
     const [defaultProductPrice, setDefaultProductPrice] = useState({})
     const [newProductPriceState, setNewProductPriceState] = useState({
-        product_id: productId,
+        product_obj_ref: productId,
         product_unit_a: '',
         product_number_a: '',
         product_price_unit_a: '',
@@ -60,7 +60,7 @@ const UpdateProductForm = () => {
     const handleAbortNewPrice = () => {
         setIsShowNewPriceForm(!isShowNewPriceForm)
         setNewProductPriceState({
-            product_id: productId,
+            product_obj_ref: productId,
             product_unit_a: '',
             product_number_a: '',
             product_price_unit_a: '',
@@ -177,6 +177,13 @@ const UpdateProductForm = () => {
             });
             return;
         }
+        if (!newProductPriceState.projects.length > 0 && isShowNewPriceForm === true){
+            // push toast to notify successful creation
+            toast.error(`You must select one or more projects that this new product applies to`, {
+                position: "bottom-right"
+            });
+            return;
+        }
 
         if (newProductPriceState.product_number_a !== '' && isShowNewPriceForm === true) {
             addPrice(newProductPriceState);
@@ -245,9 +252,6 @@ const UpdateProductForm = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-    // console.log("Inside productState now:", productState)
-    // console.log("Inside productPriceState now:", productPriceState)
-
     return (
         <div className="container mt-5"> 
             <div className="card">
@@ -311,10 +315,13 @@ const UpdateProductForm = () => {
                                 <option value="External Cladding">External Cladding</option>
                                 <option value="SpeedPanel">SpeedPanel</option>
                                 <option value="Timber">Timber</option>
+                                <option value="Acoustic Ceiling Panels">Acoustic Ceiling Panels</option>
+                                <option value="Ceiling Tiles">Ceiling Tiles</option>
                                 <option value="Others">Others</option>
                                 <option value="Tools">Tools</option>
                                 <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
                                 <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
+                                <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
                                 <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
                                 <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
                                 <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>
@@ -700,6 +707,7 @@ const UpdateProductForm = () => {
                                     name="product_effective_date" 
                                     value={newProductPriceState.product_effective_date}
                                     onChange={handleNewPriceInputChange}
+                                    required
                                 />
                             </div>
                             {/* **** PRICE FIXED (?) **** */}

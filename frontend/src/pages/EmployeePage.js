@@ -13,16 +13,36 @@ const Employee = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [isArchive, setIsArchive] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');    
     
 
     //Component router
     const navigate = useNavigate();
 
     //Component functions and variables
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const filterEmployees = () => {
+        return employeeState.filter(employee => {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    
+            return (
+                employee.employee_last_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                employee.employee_first_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                employee.employee_email.toLowerCase().includes(lowerCaseSearchTerm) ||
+                employee.employee_mobile_phone.toString().includes(lowerCaseSearchTerm) ||
+                employee.employee_roles.toLowerCase().toLowerCase().includes(lowerCaseSearchTerm)
+            );
+        });
+    };
+
     const handleAddClick = () => {
         dispatch(clearEmployeeDetails());
         navigate('/EmpirePMS/employee/create');
     }
+
     const handleTableClick = (id) => navigate(`/EmpirePMS/employee/${id}`, { state: id });
 
     //Render component
@@ -65,8 +85,8 @@ const Employee = () => {
 
     //Display DOM
     const employeeTable = Array.isArray(employeeState) && employeeState.length > 0 ? (
-        <div className="border rounded-sm">
-            <table className="table table-bordered table-hover">
+        <div>
+            <table className="table table-bordered table-hover shadow-md">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">ID</th>
@@ -78,14 +98,17 @@ const Employee = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {employeeState.filter(employee => employee.employee_isarchived === isArchive).map((employee, index) => (
+                    {filterEmployees().filter(employee => employee.employee_isarchived === isArchive).map((employee, index) => (
                         <tr key={employee._id} onClick={() => handleTableClick(employee._id)} className="cursor-pointer">
                             <th scope="row">{index + 1}</th>
                             <td>{`${employee.employee_first_name} ${employee.employee_last_name}`}</td>
                             <td>{employee.employee_email}</td>
                             <td>{employee.employee_mobile_phone}</td>
                             <td>{employee.employee_roles}</td>
-                            <td>project data...</td>
+                            <td>{employee.projects
+                                .map((project, index) => (
+                                    <div key={index}> {project.project_name}</div>
+                                ))}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -117,6 +140,8 @@ const Employee = () => {
                                 type="text"
                                 className="form-control"
                                 placeholder="Search..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
                             />
                         </div>
                         <div className="col-md-6 d-flex justify-content-end">

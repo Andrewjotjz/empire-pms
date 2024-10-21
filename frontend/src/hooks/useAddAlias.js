@@ -37,7 +37,6 @@ export const useAddAlias = () => {
                     // update loading state
                     setIsLoadingState(false);
 
-                    console.log("data _id is: ", data._id);
                     return data._id;
                 }
             } catch (error) {

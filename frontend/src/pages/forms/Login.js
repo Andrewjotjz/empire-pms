@@ -1,52 +1,95 @@
-import { useState } from "react"
-import { useLogin } from "../../hooks/useLogin"
+// Import modules and files
+import React, { useState, useEffect } from 'react';
+import { useLogin } from "../../hooks/useLogin";
+import { ToastContainer } from 'react-toastify';
+import logo from '../../empirelogo.png'
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const {login, error, isLoading} = useLogin()
+  // Use the custom login hook
+  const { login, isLoading, error } = useLogin();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    
-    await login(email, password)
-  }
+  // Local state for email and password
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  // State for retrying login
+  const [retry, setRetry] = useState(false);
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setRetry(false); // Reset retry state on new attempt
+    login(email, password);
+  };
+
+  // Handle retry logic
+  useEffect(() => {
+    let timer;
+    if (isLoading) {
+      // Set a timer to show the retry button after 8 seconds
+      timer = setTimeout(() => {
+        setRetry(true);
+      }, 8000);
+    }
+
+    // Clear the timer if the component unmounts or if isLoading changes
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   return (
-    <div className="container mt-5">
-      <form className="login" onSubmit={handleSubmit}>
-        <h3 className="mb-3 text-3xl font-bold">Sign In</h3>
-        
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email address:</label>
-          <input 
-            type="email" 
-            className="form-control" 
-            id="email" 
-            onChange={(e) => setEmail(e.target.value)} 
-            value={email}
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">Password:</label>
-          <input 
-            type="password" 
-            className="form-control" 
-            id="password" 
-            onChange={(e) => setPassword(e.target.value)} 
-            value={password}
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Log in'}
-        </button>
-
-        {error && <div className="alert alert-danger mt-3">{error}</div>}
-      </form>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-6 rounded shadow-md w-96 flex flex-col items-center">
+        <img src={logo} alt="Logo" className="h-24 rounded-full" />
+        <form onSubmit={handleSubmit} className="w-full mt-4">
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
+              required
+            />
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`mt-4 w-full p-2 text-white rounded-md ${isLoading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'}`}
+          >
+            {isLoading ? 'Logging in...' : 'Login'}
+          </button>
+          {retry && (
+            <button
+              type="button"
+              onClick={() => {window.location.reload()}}
+              className="mt-4 w-full p-2 text-white bg-red-500 rounded-md hover:bg-red-600"
+            >
+              Retry Login
+            </button>
+          )}
+        </form>
+      </div>
+      <ToastContainer />
     </div>
   );
-}
+  
+};
 
 export default Login;

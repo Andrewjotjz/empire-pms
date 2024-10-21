@@ -72,3 +72,43 @@ h1 {
     clip: rect(0, 0, 0, 0);
     border: 0;
   }
+
+/* Hide scrollbar in Webkit-based browsers (Chrome, Safari) */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+/* Hide scrollbar in Firefox */
+.no-scrollbar {
+scrollbar-width: none;
+}
+
+/* Default thin scrollbar (hidden by default) */
+.thin-scrollbar {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(107, 114, 128, 0.5) transparent; /* Firefox */
+  }
+  
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(107, 114, 128, 0.5); /* Thumb color */
+    border-radius: 10px;
+  }
+  
+  .thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent; /* Track color */
+  }
+  
+  /* Show scrollbar on hover */
+  .thin-scrollbar:hover {
+    scrollbar-width: thin;
+  }
+  
+  .thin-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(107, 114, 128, 0.7); /* Darker thumb on hover */
+  }
+  

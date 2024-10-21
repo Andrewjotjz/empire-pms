@@ -11,7 +11,6 @@ import Dropdown from "react-bootstrap/Dropdown"
 const ProductDetails = () => {
     //Component state declaration
     const productState = useSelector((state) => state.productReducer.productState)
-    // const productPriceState = useSelector((state) => state.productPriceReducer.productPriceState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
@@ -57,9 +56,17 @@ const ProductDetails = () => {
     
         navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId });
     };
-    
-    
 
+    const formatDate = (dateString) => {
+        if (dateString === null) {
+            return ''
+        }  else {
+            const date = new Date(dateString);
+            const options = { day: '2-digit', month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('en-AU', options).toUpperCase().replace(' ', '-').replace(' ', '-');
+        }
+    };
+    
     //Render component
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -87,52 +94,42 @@ const ProductDetails = () => {
 
     //Display DOM
     const productPriceTable = Array.isArray(productState) && productState.length > 0 ? (
-        <div className="container">
-            <h2 className='font-bold m-2 text-xl'>Product Prices</h2>
-            <table className="table table-bordered">
-                <thead className="thead-dark text-center">
-                    <tr className="table-primary">
-                        <th scope="col">ID</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Number</th>
-                        <th scope="col">Unit</th>
-                        <th scope="col">Price Unit</th>
-                        <th scope="col">Price Fixed (?)</th>
-                        <th scope="col">Effective Date</th>
-                        <th scope="col">Project</th>
+        <div className='container'>
+            <h2 className='font-bold'>Product Prices:</h2>
+            <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
+                <thead className="bg-indigo-200 text-center">
+                    <tr>
+                        <th scope="col" className="border border-gray-300 px-2 py-1">Effective Date</th>
+                        <th scope="col" className="border border-gray-300 px-2 py-1">Unit A</th>
+                        <th scope="col" className="border border-gray-300 px-2 py-1">Unit B</th>
+                        <th scope="col" className="border border-gray-300 px-2 py-1">Price Fixed (?)</th>
+                        <th scope="col" className="border border-gray-300 px-2 py-1">Project</th>
                     </tr>
                 </thead>
-                <tbody className='text-center align-middle'>
-                    {productState.map((item, index) => (
-                        <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
-                            <th scope="row">{index + 1}</th>
-                            <td className='p-0'>
-                                <div className='border-b-2'>A</div>
-                                <div>B</div>
-                            </td>
-                            <td className='p-0'>
-                                <div className='border-b-2'>{item.productPrice.product_number_a}</div>
-                                <div>{item.productPrice.product_number_b}</div>
-                            </td>
-                            <td className='p-0'>
-                                <div className='border-b-2'>{item.productPrice.product_unit_a}</div>
-                                <div>{item.productPrice.product_unit_b}</div>
-                            </td>
-                            <td className='p-0'>
-                                <div className='border-b-2'>${item.productPrice.product_price_unit_a}</div>
-                                <div>${item.productPrice.product_price_unit_b}</div>
-                            </td>
-                            <td>{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
-                            <td>{item.productPrice.product_effective_date}</td>
-                            <td>
-                                {item.productPrice.project_names.map((project, index) => (
-                                    <div key={index}>
-                                        {project}
-                                    </div>
-                                ))}
-                            </td>
-                        </tr>
-                    ))}
+                <tbody className='text-center'>
+                {productState.map((item, index) => (
+                    <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
+                        <td className="border border-gray-300 px-2 py-1">{formatDate(item.productPrice.product_effective_date)}</td>
+                        <td className="border border-gray-300 px-2 py-1">
+                            <label>{item.productPrice.product_number_a}</label>
+                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_a}</label>
+                            <div className='mt-1'>${(item.productPrice.product_price_unit_a).toFixed(2)}</div>
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">
+                            <label>{item.productPrice.product_number_b}</label>
+                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_b}</label>
+                            <div className='mt-1'>${(item.productPrice.product_price_unit_b).toFixed(2)}</div>
+                        </td>
+                        <td className="border border-gray-300 px-2 py-1">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
+                        <td className="border border-gray-300 px-1 py-1">
+                            {item.productPrice.project_names.map((project, index) => (
+                                <label key={index} className='ml-1 p-1 border-2 rounded-md'>
+                                    {project}
+                                </label>
+                            ))}
+                        </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
         </div>
