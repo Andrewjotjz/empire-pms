@@ -33,6 +33,7 @@ export const useLogin = () => {
     const response = await fetch('https://empire-pms.vercel.app/api/employee/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
+      credentials: 'include',
       body: JSON.stringify({ employee_email: email, employee_password: password })
     })
     //returns a 'Promise' that resolves to a JavaScript object. This object is the result of parsing the JSON body text from the response.
