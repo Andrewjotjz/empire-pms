@@ -1,5 +1,5 @@
 //import modules
-const statusModel = require('../models/statusModel');
+const statusModel = require('../models/StatusModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Statuses
