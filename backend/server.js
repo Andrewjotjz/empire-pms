@@ -57,8 +57,8 @@ app.use(cookieParser());
 
 
 //route handler
-app.get('*', checkUser); //'*' means to apply to every single route
-app.get('*', refreshToken); //'*' means to apply to every single route
+// app.get('*', checkUser); //'*' means to apply to every single route
+// app.get('*', refreshToken); //'*' means to apply to every single route
 app.use('/api/company', companyRoutes);
 app.use('/api/employee', employeeRoutes);
 app.use('/api/alias', aliasRoutes);
