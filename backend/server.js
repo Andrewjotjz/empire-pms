@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const moment = require('moment-timezone');
+const cors = require('cors');
 const { refreshToken } = require('./controllers/employeeController')
 
 
@@ -36,6 +37,13 @@ dotenv.config();
 
 //create express app
 const app = express();
+
+// Enable CORS
+app.use(cors({
+    origin: 'https://empire-pms.netlify.app/', // Replace with your Netlify URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
+    credentials: true // Enable if you need to allow cookies to be sent with requests
+}));
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
