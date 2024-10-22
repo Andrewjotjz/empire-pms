@@ -18,7 +18,7 @@ export const useAddProject = () => {
 
         const postProject = async () => {
             try {
-                const res = await fetch(`/api/project/create`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/project/create`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(projectState)

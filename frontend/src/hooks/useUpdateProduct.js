@@ -18,7 +18,7 @@ export const useUpdateProduct = () => {
 
         const putProduct = async () => {
             try {
-                const res = await fetch(`/api/product/${productId}`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/product/${productId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({productState, productPriceState, productPriceId})

@@ -18,7 +18,7 @@ export const useLogout = () => {
     localStorage.removeItem('localUser')
 
     const abortCont = new AbortController();
-    fetch('/api/employee/logout', { signal: abortCont.signal })
+    fetch('https://empire-pms.vercel.app/api/employee/logout', { signal: abortCont.signal })
     .then(res => {
       if (!res.ok) { // error coming back from server
         throw Error('could not fetch the data for that resource: "/api/employee". Please check your database connection.');

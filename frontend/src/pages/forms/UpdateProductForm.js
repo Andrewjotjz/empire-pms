@@ -201,7 +201,7 @@ const UpdateProductForm = () => {
         const fetchProjects = async () => {
             setIsLoadingState(true); // Set loading state to true at the beginning
             try {
-                const res = await fetch('/api/project', { signal });
+                const res = await fetch('https://empire-pms.vercel.app/api/project', { signal });
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

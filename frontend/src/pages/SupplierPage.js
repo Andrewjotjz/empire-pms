@@ -60,7 +60,7 @@ const Supplier = () => {
         const fetchAllSuppliers = async () => {
             setIsLoadingState(true);
             try {
-                const res = await fetch('/api/supplier', { signal });
+                const res = await fetch('https://empire-pms.vercel.app/api/supplier', { signal });
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

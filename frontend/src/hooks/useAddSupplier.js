@@ -18,7 +18,7 @@ export const useAddSupplier = () => {
 
         const postSupplier = async () => {
             try {
-                const res = await fetch(`/api/supplier/create`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/supplier/create`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(supplierState)

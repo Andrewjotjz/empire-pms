@@ -13,7 +13,7 @@ export const useAddProductPrice = () => {
 
         const postProductPrice = async () => {
             try {
-                const res = await fetch(`/api/productprice/create`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/productprice/create`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newProductPriceState)

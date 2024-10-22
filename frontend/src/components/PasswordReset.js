@@ -20,7 +20,7 @@ const PasswordReset = () => {
         }
 
         try {
-            const response = await fetch('/api/employee/reset-password', {
+            const response = await fetch('https://empire-pms.vercel.app/api/employee/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

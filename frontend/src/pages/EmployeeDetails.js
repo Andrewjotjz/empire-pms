@@ -49,7 +49,7 @@ const EmployeeDetails = () => {
     //Render component
     const fetchEmployee = useCallback(async () => {
         try {
-            const res = await fetch(`/api/employee/${id}`);
+            const res = await fetch(`https://empire-pms.vercel.app/api/employee/${id}`);
             if (!res.ok) {
                 throw new Error('Failed to fetch employee details');
             }
@@ -75,7 +75,7 @@ const EmployeeDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`/api/project`);
+                const res = await fetch(`https://empire-pms.vercel.app/api/project`);
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -126,7 +126,7 @@ const EmployeeDetails = () => {
         setIsLoadingState(true);
         
         try {
-            const response = await fetch(`/api/employee/${id}/send-reset-password-email`, {
+            const response = await fetch(`https://empire-pms.vercel.app/api/employee/${id}/send-reset-password-email`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json',},
             });
@@ -177,7 +177,7 @@ const EmployeeDetails = () => {
 
         const selectedProjectsArray = Array.from(selectedProjects);
 
-        const updateRes = await fetch(`/api/employee/${id}`, {
+        const updateRes = await fetch(`https://empire-pms.vercel.app/api/employee/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

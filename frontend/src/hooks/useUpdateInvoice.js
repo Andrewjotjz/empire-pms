@@ -14,7 +14,7 @@ export const useUpdateInvoice = () => {
 
         const putInvoice = async () => {
             try {
-                const res = await fetch(`/api/invoice/${invoiceId}`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/invoice/${invoiceId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...invoiceState})

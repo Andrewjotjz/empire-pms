@@ -18,7 +18,7 @@ export const useFetchSupplierByProject = () => {
 
         const getSuppliers = async () => {
             try {
-                const res = await fetch(`/api/project/${id}`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/project/${id}`, {
                     method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })

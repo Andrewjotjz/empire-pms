@@ -58,7 +58,7 @@ const Project_Details = () => {
     // fetch project details by projectID
     const fetchProjectDetails = useCallback(async () => {
         try {
-            const res = await fetch(`/api/project/${id}`);
+            const res = await fetch(`https://empire-pms.vercel.app/api/project/${id}`);
 
             if (!res.ok) {
                 throw new Error('Network response was not ok');
@@ -83,7 +83,7 @@ const Project_Details = () => {
     useEffect(() => {
         const fetchAllEmployees = async () => {
             try {
-                const res = await fetch(`/api/employee`);
+                const res = await fetch(`https://empire-pms.vercel.app/api/employee`);
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -105,7 +105,7 @@ const Project_Details = () => {
     useEffect(() => {
         const fetchAllSuppliers = async () => {
             try {
-                const res = await fetch(`/api/supplier`);
+                const res = await fetch(`https://empire-pms.vercel.app/api/supplier`);
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -258,7 +258,7 @@ const Project_Details = () => {
                     // Update each new employee to add the current project to their projects array
                     await Promise.all(newEmployees.map(async empId => {
                         // Fetch the current employee data to get their projects array
-                        const employeeRes = await fetch(`/api/employee/${empId}`);
+                        const employeeRes = await fetch(`https://empire-pms.vercel.app/api/employee/${empId}`);
                         if (!employeeRes.ok) {
                             throw new Error(`Failed to fetch employee ${empId}`);
                         }
@@ -269,7 +269,7 @@ const Project_Details = () => {
                         updatedProjects.add(id);
 
                         // Update the employee's projects array
-                        const updateRes = await fetch(`/api/employee/${empId}`, {
+                        const updateRes = await fetch(`https://empire-pms.vercel.app/api/employee/${empId}`, {
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -303,7 +303,7 @@ const Project_Details = () => {
             // Update each employee to remove the current project from their projects array
             await Promise.all(employeesToRemoveArray.map(async empId => {
                 // Fetch the current employee data to get their projects array
-                const employeeRes = await fetch(`/api/employee/${empId}`);
+                const employeeRes = await fetch(`https://empire-pms.vercel.app/api/employee/${empId}`);
                 
                 if (!employeeRes.ok) {
                     throw new Error(`Failed to fetch employee ${empId}`);
@@ -315,7 +315,7 @@ const Project_Details = () => {
 
     
                 // Update the employee's projects array
-                const updateRes = await fetch(`/api/employee/${empId}`, {
+                const updateRes = await fetch(`https://empire-pms.vercel.app/api/employee/${empId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -349,7 +349,7 @@ const Project_Details = () => {
 
         const selectedSuppliersArray = Array.from(selectedSuppliers);
 
-        const updateRes = await fetch(`/api/project/${id}`, {
+        const updateRes = await fetch(`https://empire-pms.vercel.app/api/project/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

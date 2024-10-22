@@ -110,7 +110,7 @@ const InvoiceDetails = () => {
     useEffect(() => {
         const fetchInvoiceDetails = async () => {
             try {
-                const res = await fetch(`/api/invoice/${id}`);
+                const res = await fetch(`https://empire-pms.vercel.app/api/invoice/${id}`);
                 if (!res.ok) {
                     throw new Error('Failed to fetch invoice details');
                 }

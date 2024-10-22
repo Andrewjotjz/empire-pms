@@ -24,7 +24,7 @@ export const useChangePassword = () => {
       return
     }
 
-    const response = await fetch(`/api/employee/${employeeState._id}/change-password`, {
+    const response = await fetch(`https://empire-pms.vercel.app/api/employee/${employeeState._id}/change-password`, {
       method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({employee_password: newPassword})

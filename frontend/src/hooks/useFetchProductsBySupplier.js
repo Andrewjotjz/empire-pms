@@ -18,7 +18,7 @@ export const useFetchProductsBySupplier = () => {
 
         const getProducts = async () => {
             try {
-                const res = await fetch(`/api/supplier/${id}/products`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/supplier/${id}/products`, {
                     method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })

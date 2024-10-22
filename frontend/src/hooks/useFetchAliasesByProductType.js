@@ -18,7 +18,7 @@ export const useFetchAliasesByProductType = () => {
 
         const getAliasesByProductType = async () => {
             try {
-                const res = await fetch(`/api/product/type/${productType}`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/product/type/${productType}`, {
                     method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })

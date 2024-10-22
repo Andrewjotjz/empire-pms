@@ -22,7 +22,7 @@ export const useUpdateEmployee = () => {
 
         const putEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/${employeeState._id}`, {
+                const res = await fetch(`https://empire-pms.vercel.app/api/employee/${employeeState._id}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...employeeState})
