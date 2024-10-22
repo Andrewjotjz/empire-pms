@@ -1,5 +1,5 @@
 //import modules
-const supplierModel = require('../models/supplierModel');
+const supplierModel = require('../models/SupplierModel');
 const projectModel = require('../models/ProjectModel');
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
