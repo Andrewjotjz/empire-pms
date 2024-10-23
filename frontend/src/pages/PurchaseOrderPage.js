@@ -101,7 +101,7 @@ const PurchaseOrder = () => {
         const fetchPurchaseOrders = async () => {
             setIsLoadingState(true);
             try {
-                const res = await fetch('https://empire-pms.vercel.app/api/order', { signal, credentials: 'include' });
+                const res = await fetch('https://empire-pms.vercel.app/api/order', { signal });
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }
