@@ -40,7 +40,7 @@ const app = express();
 
 // Enable CORS
 app.use(cors({
-    origin: 'https://empire-pms-client.vercel.app', // Replace with your frontend URL
+    origin: '*', // Replace with your frontend URL
     methods:  ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
     credentials: true // Enable if you need to allow cookies to be sent with requests
 }));
