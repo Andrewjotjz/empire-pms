@@ -94,7 +94,8 @@ const InvoicePage = () => {
         const fetchInvoice = async () => {
             setIsLoadingState(true);
             try {
-                const res = await fetch('https://empire-pms.vercel.app/api/invoice', { signal });
+                const res = await fetch('https://empire-pms.vercel.app/api/invoice', { signal,
+                    headers: {'Content-Type': 'application/json'} });
                 if (!res.ok) {
                     throw new Error('Failed to fetch invoices');
                 }
