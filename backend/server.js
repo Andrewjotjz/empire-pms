@@ -47,7 +47,7 @@ app.use(cors({
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
-    console.log("Request URL:", req.url, '\n', "Request path:",req.path, '\n', "Request method:", req.method);
+    console.log("Request URL:", req.url, '\n', "Request path:",req.path, '\n', "Request method:", req.method, '\n', "Request HEADER:", req.headers);
     next();})
 //create middleware - parse incoming requests with JSON payloads. 
 //It parses the JSON string in the request body and converts it into a JavaScript object, which is then attached to the req.body property.
@@ -57,6 +57,8 @@ app.use(cookieParser());
 
 
 //route handler
+app.options('*', cors()); // Preflight response
+
 app.get('*', checkUser); //'*' means to apply to every single route
 app.get('*', refreshToken); //'*' means to apply to every single route
 app.use('/api/company', companyRoutes);
