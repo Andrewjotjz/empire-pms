@@ -39,11 +39,7 @@ dotenv.config();
 const app = express();
 
 // Enable CORS
-app.use(cors({
-    origin: '*', // Replace with your frontend URL
-    methods:  ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-    credentials: false // Enable if you need to allow cookies to be sent with requests
-}));
+app.use(cors());
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
