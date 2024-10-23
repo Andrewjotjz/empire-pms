@@ -42,7 +42,6 @@ const app = express();
 app.use(cors({
     origin: '*', // Replace with your frontend URL
     methods:  ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
-    credentials: true // Enable if you need to allow cookies to be sent with requests
 }));
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
