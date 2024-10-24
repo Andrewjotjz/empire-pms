@@ -166,7 +166,7 @@ const NewInvoiceForm = () => {
 
     const getOrder = async () => {
       try {
-        const res = await fetch(`/api/order/${id}`, {
+        const res = await fetch(`https://empire-pms.onrender.com/api/order/${id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });

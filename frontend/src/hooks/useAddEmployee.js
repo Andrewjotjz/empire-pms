@@ -18,7 +18,7 @@ export const useAddEmployee = () => {
 
         const postEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/create`, {
+                const res = await fetch(`https://empire-pms.onrender.com/api/employee/create`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(employeeState)

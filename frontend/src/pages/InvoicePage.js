@@ -94,7 +94,7 @@ const InvoicePage = () => {
         const fetchInvoice = async () => {
             setIsLoadingState(true);
             try {
-                const res = await fetch('/api/invoice', { signal });
+                const res = await fetch('https://empire-pms.onrender.com/api/invoice', { signal });
                 if (!res.ok) {
                     throw new Error('Failed to fetch invoices');
                 }

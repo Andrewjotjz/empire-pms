@@ -150,7 +150,7 @@ const UpdateInvoiceForm = () => {
 
     const getOrder = async () => {
       try {
-        const res = await fetch(`/api/order/${id}`, {
+        const res = await fetch(`https://empire-pms.onrender.com/api/order/${id}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -1115,7 +1115,7 @@ const UpdateInvoiceForm = () => {
     const fetchInvoice = async () => {
       setIsFetchInvoiceLoading(true);
       try {
-        const res = await fetch(`/api/invoice/${invoiceId}`, { signal });
+        const res = await fetch(`https://empire-pms.onrender.com/api/invoice/${invoiceId}`, { signal });
         if (!res.ok) {
           throw new Error("Failed to fetch invoice");
         }

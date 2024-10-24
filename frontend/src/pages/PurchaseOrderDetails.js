@@ -115,7 +115,7 @@ const PurchaseOrderDetails = () => {
     useEffect(() => {
         const fetchPurchaseOrderDetails = async () => {
             try {
-                const res = await fetch(`/api/order/${id}`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/order/${id}`);
                 if (!res.ok) {
                     throw new Error('Failed to fetch purchase order details');
                 }

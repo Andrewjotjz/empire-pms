@@ -18,7 +18,7 @@ export const useAddPurchaseOrder = () => {
 
         const postPurchaseOrder = async () => {
             try {
-                const res = await fetch(`/api/order/create`, {
+                const res = await fetch(`https://empire-pms.onrender.com/api/order/create`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(orderState)
