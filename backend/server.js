@@ -39,7 +39,8 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-    origin: 'https://empirecbs.netlify.app'
+    origin: 'https://empirecbs.netlify.app',
+    credentials: true
 }))
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
