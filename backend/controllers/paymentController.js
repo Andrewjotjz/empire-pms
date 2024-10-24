@@ -1,5 +1,5 @@
 //import modules
-const paymentModel = require('../models/paymentModel');
+const paymentModel = require('../models/PaymentModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Payments
