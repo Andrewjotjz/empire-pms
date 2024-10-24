@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const moment = require('moment-timezone');
 const { refreshToken } = require('./controllers/employeeController')
 
@@ -36,6 +37,8 @@ dotenv.config();
 
 //create express app
 const app = express();
+
+app.use(cors())
 
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
