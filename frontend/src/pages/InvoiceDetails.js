@@ -110,7 +110,7 @@ const InvoiceDetails = () => {
     useEffect(() => {
         const fetchInvoiceDetails = async () => {
             try {
-                const res = await fetch(`https://empire-pms.onrender.com/api/invoice/${id}`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/invoice/${id}`, { credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Failed to fetch invoice details');
                 }

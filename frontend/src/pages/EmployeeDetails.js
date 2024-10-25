@@ -49,7 +49,7 @@ const EmployeeDetails = () => {
     //Render component
     const fetchEmployee = useCallback(async () => {
         try {
-            const res = await fetch(`https://empire-pms.onrender.com/api/employee/${id}`);
+            const res = await fetch(`https://empire-pms.onrender.com/api/employee/${id}`, { credentials: 'include' });
             if (!res.ok) {
                 throw new Error('Failed to fetch employee details');
             }
@@ -75,7 +75,7 @@ const EmployeeDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`https://empire-pms.onrender.com/api/project`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/project`, { credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }

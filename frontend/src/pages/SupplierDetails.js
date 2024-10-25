@@ -173,7 +173,7 @@ const SupplierDetails = () => {
                 // Update each new project to add the current supplier to its suppliers array
                 await Promise.all(newProjects.map(async projectId => {
                     // Fetch the current project data to get its suppliers array
-                    const projectRes = await fetch(`https://empire-pms.onrender.com/api/project/${projectId}`);
+                    const projectRes = await fetch(`https://empire-pms.onrender.com/api/project/${projectId}`, { credentials: 'include' });
                     if (!projectRes.ok) {
                         throw new Error(`Failed to fetch project ${projectId}`);
                     }
@@ -221,7 +221,7 @@ const SupplierDetails = () => {
 
                 await Promise.all(projectsToRemoveArray.map(async projectID =>{
 
-                    const projectRes = await fetch(`https://empire-pms.onrender.com/api/project/${projectID}`);
+                    const projectRes = await fetch(`https://empire-pms.onrender.com/api/project/${projectID}`, { credentials: 'include' });
 
                     if(!projectRes.ok){
                         throw new Error(`Failed to fetch project ${projectID}`); 
@@ -288,7 +288,7 @@ const SupplierDetails = () => {
     //Render component
     const fetchSupplierDetails = useCallback(async () => {
         try {
-            const res = await fetch(`https://empire-pms.onrender.com/api/supplier/${id}`);
+            const res = await fetch(`https://empire-pms.onrender.com/api/supplier/${id}`, { credentials: 'include' });
             if (!res.ok) {
                 throw new Error('Failed to fetch supplier details');
             }
@@ -310,7 +310,7 @@ const SupplierDetails = () => {
     
     const fetchOrdersBySupplier = async () => {
         try{
-            const res = await fetch(`https://empire-pms.onrender.com/api/order`);
+            const res = await fetch(`https://empire-pms.onrender.com/api/order`, { credentials: 'include' });
             if (!res.ok) {
                 throw new Error('Failed to fetch orders');
             }
@@ -337,7 +337,7 @@ const SupplierDetails = () => {
     useEffect(() => {
         const fetchSupplierProducts = async () => {
             try{
-                const res = await fetch(`https://empire-pms.onrender.com/api/supplier/${id}/products`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/supplier/${id}/products`, { credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Failed to fetch supplier products');
                 }
@@ -362,7 +362,7 @@ const SupplierDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`https://empire-pms.onrender.com/api/project`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/project`, { credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }

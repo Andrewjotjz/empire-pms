@@ -58,7 +58,7 @@ const Project_Details = () => {
     // fetch project details by projectID
     const fetchProjectDetails = useCallback(async () => {
         try {
-            const res = await fetch(`https://empire-pms.onrender.com/api/project/${id}`);
+            const res = await fetch(`https://empire-pms.onrender.com/api/project/${id}`, { credentials: 'include' });
 
             if (!res.ok) {
                 throw new Error('Network response was not ok');
@@ -83,7 +83,7 @@ const Project_Details = () => {
     useEffect(() => {
         const fetchAllEmployees = async () => {
             try {
-                const res = await fetch(`https://empire-pms.onrender.com/api/employee`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/employee`, { credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -105,7 +105,7 @@ const Project_Details = () => {
     useEffect(() => {
         const fetchAllSuppliers = async () => {
             try {
-                const res = await fetch(`https://empire-pms.onrender.com/api/supplier`);
+                const res = await fetch(`https://empire-pms.onrender.com/api/supplier`, { credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -258,7 +258,7 @@ const Project_Details = () => {
                     // Update each new employee to add the current project to their projects array
                     await Promise.all(newEmployees.map(async empId => {
                         // Fetch the current employee data to get their projects array
-                        const employeeRes = await fetch(`https://empire-pms.onrender.com/api/employee/${empId}`);
+                        const employeeRes = await fetch(`https://empire-pms.onrender.com/api/employee/${empId}`, { credentials: 'include' });
                         if (!employeeRes.ok) {
                             throw new Error(`Failed to fetch employee ${empId}`);
                         }
@@ -303,7 +303,7 @@ const Project_Details = () => {
             // Update each employee to remove the current project from their projects array
             await Promise.all(employeesToRemoveArray.map(async empId => {
                 // Fetch the current employee data to get their projects array
-                const employeeRes = await fetch(`https://empire-pms.onrender.com/api/employee/${empId}`);
+                const employeeRes = await fetch(`https://empire-pms.onrender.com/api/employee/${empId}`, { credentials: 'include' });
                 
                 if (!employeeRes.ok) {
                     throw new Error(`Failed to fetch employee ${empId}`);
