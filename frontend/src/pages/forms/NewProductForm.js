@@ -113,7 +113,7 @@ const NewProductForm = () => {
         const fetchProjects = async () => {
             setIsLoadingState(true); // Set loading state to true at the beginning
             try {
-                const res = await fetch('https://empire-pms.onrender.com/api/project', { signal });
+                const res = await fetch('https://empire-pms.onrender.com/api/project', { signal, credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

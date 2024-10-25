@@ -15,7 +15,7 @@ export const useUpdateInvoice = () => {
         const putInvoice = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/invoice/${invoiceId}`, {
-                    method: 'PUT',
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...invoiceState})
                 })

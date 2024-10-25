@@ -1111,7 +1111,7 @@ const NewInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal });
+        const res = await fetch("/api/supplier", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1148,7 +1148,7 @@ const NewInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal });
+        const res = await fetch("/api/order", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }

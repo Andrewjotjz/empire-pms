@@ -14,7 +14,7 @@ export const useAddProductPrice = () => {
         const postProductPrice = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/productprice/create`, {
-                    method: 'POST',
+                    credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newProductPriceState)
                 });

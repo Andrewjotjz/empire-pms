@@ -25,7 +25,7 @@ export const useChangePassword = () => {
     }
 
     const response = await fetch(`https://empire-pms.onrender.com/api/employee/${employeeState._id}/change-password`, {
-      method: 'PUT',
+      credentials: 'include', method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({employee_password: newPassword})
     })

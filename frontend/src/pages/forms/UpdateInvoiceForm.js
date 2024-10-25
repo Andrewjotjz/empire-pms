@@ -1030,7 +1030,7 @@ const UpdateInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal });
+        const res = await fetch("/api/supplier", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1067,7 +1067,7 @@ const UpdateInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal });
+        const res = await fetch("/api/order", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }
@@ -1115,7 +1115,7 @@ const UpdateInvoiceForm = () => {
     const fetchInvoice = async () => {
       setIsFetchInvoiceLoading(true);
       try {
-        const res = await fetch(`https://empire-pms.onrender.com/api/invoice/${invoiceId}`, { signal });
+        const res = await fetch(`https://empire-pms.onrender.com/api/invoice/${invoiceId}`, { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch invoice");
         }

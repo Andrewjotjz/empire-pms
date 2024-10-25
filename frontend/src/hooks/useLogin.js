@@ -31,7 +31,7 @@ export const useLogin = () => {
     }
 
     const response = await fetch('https://empire-pms.onrender.com/api/employee/login', {
-      method: 'POST',
+      credentials: 'include', method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ employee_email: email, employee_password: password })
     })

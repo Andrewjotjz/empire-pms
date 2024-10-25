@@ -19,7 +19,7 @@ export const useFetchAliasesByProductType = () => {
         const getAliasesByProductType = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/product/type/${productType}`, {
-                    method: 'GET',
+                    credentials: 'include', method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })
 

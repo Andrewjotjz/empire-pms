@@ -270,7 +270,7 @@ const Project_Details = () => {
 
                         // Update the employee's projects array
                         const updateRes = await fetch(`https://empire-pms.onrender.com/api/employee/${empId}`, {
-                            method: 'PUT',
+                            credentials: 'include', method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
@@ -316,7 +316,7 @@ const Project_Details = () => {
     
                 // Update the employee's projects array
                 const updateRes = await fetch(`https://empire-pms.onrender.com/api/employee/${empId}`, {
-                    method: 'PUT',
+                    credentials: 'include', method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -350,7 +350,7 @@ const Project_Details = () => {
         const selectedSuppliersArray = Array.from(selectedSuppliers);
 
         const updateRes = await fetch(`https://empire-pms.onrender.com/api/project/${id}`, {
-            method: 'PUT',
+            credentials: 'include', method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },

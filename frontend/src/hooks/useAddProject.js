@@ -19,7 +19,7 @@ export const useAddProject = () => {
         const postProject = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/project/create`, {
-                    method: 'POST',
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(projectState)
                 })

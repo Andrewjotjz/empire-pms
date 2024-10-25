@@ -507,7 +507,7 @@ const UpdatePurchaseOrderForm = () => {
     const fetchProjects = async () => {
       setIsFetchProjectLoadingState(true);
       try {
-        const res = await fetch("/api/project", { signal });
+        const res = await fetch("/api/project", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch projects");
         }

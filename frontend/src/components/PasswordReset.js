@@ -21,7 +21,7 @@ const PasswordReset = () => {
 
         try {
             const response = await fetch('https://empire-pms.onrender.com/api/employee/reset-password', {
-                method: 'POST',
+                credentials: 'include', method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },

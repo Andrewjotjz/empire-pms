@@ -14,7 +14,7 @@ export const useAddAlias = () => {
         const postAlias = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/alias/create`, {
-                    method: 'POST',
+                    credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ alias_name: value })
                 });

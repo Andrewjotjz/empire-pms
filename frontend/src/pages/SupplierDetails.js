@@ -185,7 +185,7 @@ const SupplierDetails = () => {
     
                     // Update the project's suppliers array
                     const updateRes = await fetch(`https://empire-pms.onrender.com/api/project/${projectId}`, {
-                        method: 'PUT',
+                        credentials: 'include', method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -234,7 +234,7 @@ const SupplierDetails = () => {
                     const updatedSuppliers = projectData[0].suppliers.filter(supplier => supplier._id !== id);
 
                     const updateRes = await fetch(`https://empire-pms.onrender.com/api/project/${projectID}`, {
-                        method: 'PUT',
+                        credentials: 'include', method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },

@@ -15,7 +15,7 @@ export const useAddInvoice = () => {
         const postInvoice = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/invoice/create`, {
-                    method: 'POST',
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(invoiceState)
                 })

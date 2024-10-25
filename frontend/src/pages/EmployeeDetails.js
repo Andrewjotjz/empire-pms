@@ -127,7 +127,7 @@ const EmployeeDetails = () => {
         
         try {
             const response = await fetch(`https://empire-pms.onrender.com/api/employee/${id}/send-reset-password-email`, {
-                method: 'POST',
+                credentials: 'include', method: 'POST',
                 headers: {'Content-Type': 'application/json',},
             });
     
@@ -178,7 +178,7 @@ const EmployeeDetails = () => {
         const selectedProjectsArray = Array.from(selectedProjects);
 
         const updateRes = await fetch(`https://empire-pms.onrender.com/api/employee/${id}`, {
-            method: 'PUT',
+            credentials: 'include', method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },

@@ -19,7 +19,7 @@ export const useFetchProductsBySupplier = () => {
         const getProducts = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/supplier/${id}/products`, {
-                    method: 'GET',
+                    credentials: 'include', method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })
 

@@ -20,7 +20,7 @@ export const useUpdateProject = () => {
         const putProject = async () => {
             try {
                 const res = await fetch(`https://empire-pms.onrender.com/api/project/${projectState._id}`, {
-                    method: 'PUT',
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...projectState})
                 })
