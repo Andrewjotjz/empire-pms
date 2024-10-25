@@ -283,7 +283,7 @@ const NewInvoiceForm = () => {
   const fetchProjects = async () => {
     setIsFetchProjectLoading(true); // Set loading state to true at the beginning
     try {
-      const res = await fetch("/api/project", { credentials: 'include' });
+      const res = await fetch("https://empire-pms.onrender.com/api/project", { credentials: 'include' });
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
@@ -1112,7 +1112,7 @@ const NewInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal, credentials: 'include' });
+        const res = await fetch("https://empire-pms.onrender.com/api/supplier", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1149,7 +1149,7 @@ const NewInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal, credentials: 'include' });
+        const res = await fetch("https://empire-pms.onrender.com/api/order", { signal, credentials: 'include' });
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }
