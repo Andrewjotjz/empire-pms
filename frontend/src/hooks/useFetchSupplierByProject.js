@@ -18,8 +18,8 @@ export const useFetchSupplierByProject = () => {
 
         const getSuppliers = async () => {
             try {
-                const res = await fetch(`/api/project/${id}`, {
-                    method: 'GET',
+                const res = await fetch(`https://empire-pms.onrender.com/api/project/${id}`, {
+                    credentials: 'include', method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })
 
