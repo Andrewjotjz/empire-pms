@@ -18,8 +18,8 @@ export const useAddProduct = () => {
 
         const postProduct = async () => {
             try {
-                const res = await fetch(`/api/product/create`, {
-                    method: 'POST',
+                const res = await fetch(`https://empire-pms.onrender.com/api/product/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(productState)
                 })

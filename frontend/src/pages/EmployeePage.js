@@ -53,7 +53,7 @@ const Employee = () => {
         const fetchEmployeeDetails = async () => {
             setIsLoadingState(true); // Set loading state to true at the beginning
             try {
-                const res = await fetch('/api/employee', { signal });
+                const res = await fetch('https://empire-pms.onrender.com/api/employee', { signal, credentials: 'include' });
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

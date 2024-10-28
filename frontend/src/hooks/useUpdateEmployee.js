@@ -22,8 +22,8 @@ export const useUpdateEmployee = () => {
 
         const putEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/${employeeState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`https://empire-pms.onrender.com/api/employee/${employeeState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...employeeState})
                 })

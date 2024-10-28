@@ -18,8 +18,8 @@ export const useAddSupplier = () => {
 
         const postSupplier = async () => {
             try {
-                const res = await fetch(`/api/supplier/create`, {
-                    method: 'POST',
+                const res = await fetch(`https://empire-pms.onrender.com/api/supplier/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(supplierState)
                 })

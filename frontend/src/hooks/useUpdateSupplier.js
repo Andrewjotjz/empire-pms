@@ -18,8 +18,8 @@ export const useUpdateSupplier = () => {
 
         const putSupplier = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`https://empire-pms.onrender.com/api/supplier/${supplierState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...supplierState})
                 })

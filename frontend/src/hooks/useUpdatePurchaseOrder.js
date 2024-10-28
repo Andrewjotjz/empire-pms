@@ -18,8 +18,8 @@ export const useUpdatePurchaseOrder = () => {
 
         const putPurchaseOrder = async () => {
             try {
-                const res = await fetch(`/api/order/${purchaseOrderState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`https://empire-pms.onrender.com/api/order/${purchaseOrderState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...purchaseOrderState})
                 })
