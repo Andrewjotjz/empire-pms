@@ -305,32 +305,54 @@ const NewInvoiceForm = () => {
     }
   };
   const resetForm = () => {
-    
-    const supplier = supplierState.find(supplier => supplier._id === newSupplier); //get the supplier
-    const paymentTerm = supplier.supplier_payment_term; // get supplier's payment term, this returns "Net 60"
+    if (newSupplier) {
+      const supplier = supplierState.find(supplier => supplier._id === newSupplier); //get the supplier
+      const paymentTerm = supplier.supplier_payment_term; // get supplier's payment term, this returns "Net 60"
 
-    // Call the helper function to get the calculated due date
-    const formattedDueDate = calculateDueDate(paymentTerm);
+      // Call the helper function to get the calculated due date
+      const formattedDueDate = calculateDueDate(paymentTerm);
 
-    setNewInvoice({
-      invoice_ref: "",
-      supplier: newSupplier,
-      invoice_issue_date: "",
-      invoice_received_date: new Date().toISOString().split("T")[0],
-      invoice_due_date: formattedDueDate,
-      order: "",
-      products: [],
-      custom_products: [],
-      invoiced_delivery_fee: 0,
-      invoiced_other_fee: 0,
-      invoiced_credit: 0,
-      invoiced_raw_total_amount_incl_gst: 0,
-      invoiced_calculated_total_amount_incl_gst: 0,
-      invoice_is_stand_alone: false,
-      invoice_internal_comments: "",
-      invoice_status: "",
-    });
-    setCurrentOrder(null);
+      setNewInvoice({
+        invoice_ref: "",
+        supplier: newSupplier,
+        invoice_issue_date: "",
+        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_due_date: formattedDueDate,
+        order: "",
+        products: [],
+        custom_products: [],
+        invoiced_delivery_fee: 0,
+        invoiced_other_fee: 0,
+        invoiced_credit: 0,
+        invoiced_raw_total_amount_incl_gst: 0,
+        invoiced_calculated_total_amount_incl_gst: 0,
+        invoice_is_stand_alone: false,
+        invoice_internal_comments: "",
+        invoice_status: "",
+      });
+      setCurrentOrder(null);
+    }
+    else {
+      setNewInvoice({
+        invoice_ref: "",
+        supplier: "",
+        invoice_issue_date: "",
+        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_due_date: "",
+        order: "",
+        products: [],
+        custom_products: [],
+        invoiced_delivery_fee: 0,
+        invoiced_other_fee: 0,
+        invoiced_credit: 0,
+        invoiced_raw_total_amount_incl_gst: 0,
+        invoiced_calculated_total_amount_incl_gst: 0,
+        invoice_is_stand_alone: false,
+        invoice_internal_comments: "",
+        invoice_status: "",
+      });
+      setCurrentOrder(null);
+    }
   };
   const resetNewProductPrice = () => {
     setNewProductPrice({
