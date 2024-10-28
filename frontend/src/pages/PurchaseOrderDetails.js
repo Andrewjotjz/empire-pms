@@ -115,7 +115,7 @@ const PurchaseOrderDetails = () => {
     useEffect(() => {
         const fetchPurchaseOrderDetails = async () => {
             try {
-                const res = await fetch(`/api/order/${id}`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, { credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Failed to fetch purchase order details');
                 }

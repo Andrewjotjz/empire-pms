@@ -18,8 +18,8 @@ export const useFetchSupplierByProject = () => {
 
         const getSuppliers = async () => {
             try {
-                const res = await fetch(`/api/project/${id}`, {
-                    method: 'GET',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, {
+                    credentials: 'include', method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })
 

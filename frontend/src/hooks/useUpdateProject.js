@@ -19,8 +19,8 @@ export const useUpdateProject = () => {
 
         const putProject = async () => {
             try {
-                const res = await fetch(`/api/project/${projectState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...projectState})
                 })

@@ -14,8 +14,8 @@ export const useUpdateInvoice = () => {
 
         const putInvoice = async () => {
             try {
-                const res = await fetch(`/api/invoice/${invoiceId}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${invoiceId}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...invoiceState})
                 })

@@ -173,7 +173,7 @@ const SupplierDetails = () => {
                 // Update each new project to add the current supplier to its suppliers array
                 await Promise.all(newProjects.map(async projectId => {
                     // Fetch the current project data to get its suppliers array
-                    const projectRes = await fetch(`/api/project/${projectId}`);
+                    const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, { credentials: 'include'});
                     if (!projectRes.ok) {
                         throw new Error(`Failed to fetch project ${projectId}`);
                     }
@@ -184,8 +184,8 @@ const SupplierDetails = () => {
                     updatedSuppliers.add(id);
     
                     // Update the project's suppliers array
-                    const updateRes = await fetch(`/api/project/${projectId}`, {
-                        method: 'PUT',
+                    const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
+                        credentials: 'include', method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -221,7 +221,7 @@ const SupplierDetails = () => {
 
                 await Promise.all(projectsToRemoveArray.map(async projectID =>{
 
-                    const projectRes = await fetch(`/api/project/${projectID}`);
+                    const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectID}`, { credentials: 'include'});
 
                     if(!projectRes.ok){
                         throw new Error(`Failed to fetch project ${projectID}`); 
@@ -233,8 +233,8 @@ const SupplierDetails = () => {
                     // Filter out the current supplier ID from project's suppliers array 
                     const updatedSuppliers = projectData[0].suppliers.filter(supplier => supplier._id !== id);
 
-                    const updateRes = await fetch(`/api/project/${projectID}`, {
-                        method: 'PUT',
+                    const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectID}`, {
+                        credentials: 'include', method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -288,7 +288,7 @@ const SupplierDetails = () => {
     //Render component
     const fetchSupplierDetails = useCallback(async () => {
         try {
-            const res = await fetch(`/api/supplier/${id}`);
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}`, { credentials: 'include' });
             if (!res.ok) {
                 throw new Error('Failed to fetch supplier details');
             }
@@ -310,7 +310,7 @@ const SupplierDetails = () => {
     
     const fetchOrdersBySupplier = async () => {
         try{
-            const res = await fetch(`/api/order`);
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { credentials: 'include' });
             if (!res.ok) {
                 throw new Error('Failed to fetch orders');
             }
@@ -337,7 +337,7 @@ const SupplierDetails = () => {
     useEffect(() => {
         const fetchSupplierProducts = async () => {
             try{
-                const res = await fetch(`/api/supplier/${id}/products`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}/products`, { credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Failed to fetch supplier products');
                 }
@@ -362,7 +362,7 @@ const SupplierDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`/api/project`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }

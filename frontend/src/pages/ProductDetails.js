@@ -71,7 +71,7 @@ const ProductDetails = () => {
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierId}/products/${productId}`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${supplierId}/products/${productId}`, { credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Failed to fetch product details');
                 }

@@ -150,7 +150,8 @@ const UpdateInvoiceForm = () => {
 
     const getOrder = async () => {
       try {
-        const res = await fetch(`/api/order/${id}`, {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, {
+          credentials: 'include',
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -250,7 +251,7 @@ const UpdateInvoiceForm = () => {
   const fetchProjects = async () => {
     setIsFetchProjectLoading(true); // Set loading state to true at the beginning
     try {
-      const res = await fetch("/api/project");
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
@@ -1030,7 +1031,7 @@ const UpdateInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1067,7 +1068,7 @@ const UpdateInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }
@@ -1115,7 +1116,7 @@ const UpdateInvoiceForm = () => {
     const fetchInvoice = async () => {
       setIsFetchInvoiceLoading(true);
       try {
-        const res = await fetch(`/api/invoice/${invoiceId}`, { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${invoiceId}`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch invoice");
         }

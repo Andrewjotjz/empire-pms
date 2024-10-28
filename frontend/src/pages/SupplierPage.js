@@ -60,7 +60,7 @@ const Supplier = () => {
         const fetchAllSuppliers = async () => {
             setIsLoadingState(true);
             try {
-                const res = await fetch('/api/supplier', { signal });
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

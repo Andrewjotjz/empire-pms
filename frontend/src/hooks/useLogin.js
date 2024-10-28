@@ -30,8 +30,8 @@ export const useLogin = () => {
       return
     }
 
-    const response = await fetch('/api/employee/login', {
-      method: 'POST',
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/login`, {
+      credentials: 'include', method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ employee_email: email, employee_password: password })
     })

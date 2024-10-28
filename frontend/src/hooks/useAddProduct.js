@@ -18,8 +18,8 @@ export const useAddProduct = () => {
 
         const postProduct = async () => {
             try {
-                const res = await fetch(`/api/product/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(productState)
                 })

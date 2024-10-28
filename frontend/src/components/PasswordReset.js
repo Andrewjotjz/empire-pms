@@ -20,8 +20,8 @@ const PasswordReset = () => {
         }
 
         try {
-            const response = await fetch('/api/employee/reset-password', {
-                method: 'POST',
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/reset-password`, {
+                credentials: 'include', method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },

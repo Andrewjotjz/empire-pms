@@ -166,7 +166,8 @@ const NewInvoiceForm = () => {
 
     const getOrder = async () => {
       try {
-        const res = await fetch(`/api/order/${id}`, {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, {
+          credentials: 'include',
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -282,7 +283,7 @@ const NewInvoiceForm = () => {
   const fetchProjects = async () => {
     setIsFetchProjectLoading(true); // Set loading state to true at the beginning
     try {
-      const res = await fetch("/api/project");
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
@@ -1133,7 +1134,7 @@ const NewInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1170,7 +1171,7 @@ const NewInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }

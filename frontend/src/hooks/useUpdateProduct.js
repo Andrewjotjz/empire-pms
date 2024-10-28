@@ -18,8 +18,8 @@ export const useUpdateProduct = () => {
 
         const putProduct = async () => {
             try {
-                const res = await fetch(`/api/product/${productId}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product/${productId}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({productState, productPriceState, productPriceId})
                 })

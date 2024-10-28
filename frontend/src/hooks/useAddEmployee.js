@@ -18,8 +18,8 @@ export const useAddEmployee = () => {
 
         const postEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(employeeState)
                 })

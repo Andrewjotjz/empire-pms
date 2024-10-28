@@ -24,8 +24,8 @@ export const useChangePassword = () => {
       return
     }
 
-    const response = await fetch(`/api/employee/${employeeState._id}/change-password`, {
-      method: 'PUT',
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${employeeState._id}/change-password`, {
+      credentials: 'include', method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({employee_password: newPassword})
     })

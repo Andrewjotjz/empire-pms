@@ -18,8 +18,8 @@ export const useUpdateSupplier = () => {
 
         const putSupplier = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${supplierState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...supplierState})
                 })

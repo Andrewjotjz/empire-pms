@@ -22,8 +22,8 @@ export const useUpdateEmployee = () => {
 
         const putEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/${employeeState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${employeeState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...employeeState})
                 })
