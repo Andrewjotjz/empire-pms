@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
+ 
 import { useAddProduct } from '../../hooks/useAddProduct'; 
 import { useFetchAliasesByProductType } from '../../hooks/useFetchAliasesByProductType'
 import { clearAliases } from '../../redux/aliasSlice';
@@ -94,10 +94,7 @@ const NewProductForm = () => {
         event.preventDefault();
 
         if (!productDetailsState.projects.length > 0){
-            // push toast to notify successful creation
-            toast.error(`You must select one or more projects that this new product applies to`, {
-                position: "bottom-right"
-            });
+            alert(`You must select one or more projects that this new product applies to`)
             return;
         }
 

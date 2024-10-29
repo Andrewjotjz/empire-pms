@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
-import { toast } from "react-toastify";
 
 import { setSupplierState } from "../../redux/supplierSlice";
 import { setPurchaseOrderState } from "../../redux/purchaseOrderSlice";
@@ -738,13 +737,7 @@ const NewInvoiceForm = () => {
     event.preventDefault();
 
     if (!newProductPrice.projects.length > 0) {
-      // push toast to notify error
-      toast.error(
-        `You must select one or more projects that this new product applies to`,
-        {
-          position: "bottom-right",
-        }
-      );
+      alert(`You must select one or more projects that this new product applies to!`)
       return;
     }
 
@@ -1104,10 +1097,7 @@ const NewInvoiceForm = () => {
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
-        // push toast to notify successful login
-        toast.error(`Please select invoice status`, {
-          position: "bottom-right",
-        });
+        alert(`Please select invoice status!`)
         return;
       }
       addInvoice(newInvoice);
@@ -1115,10 +1105,7 @@ const NewInvoiceForm = () => {
 
     if (isToggled) {
       if (newInvoice.invoice_status === "") {
-        // push toast to notify successful login
-        toast.error(`Please select invoice status`, {
-          position: "bottom-right",
-        });
+        alert(`Please select invoice status!`)
         return;
       }
       addInvoice(newInvoiceWithoutPO);

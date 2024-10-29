@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 import { useDispatch } from 'react-redux'
 import { setLocalUser } from '../redux/localUserSlice'
 
@@ -53,11 +53,6 @@ export const useLogin = () => {
 
       // navigate client to dashboard page
       navigate('/EmpirePMS/dashboard')
-
-      // push toast to notify successful login
-      toast.success(`Login successful!`, {
-        position: "bottom-right"
-      });
 
       // update loading state
       setIsLoading(false)

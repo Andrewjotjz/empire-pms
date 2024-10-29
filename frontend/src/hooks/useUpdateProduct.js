@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useUpdateProduct = () => {
     //Component's hook state declaration
@@ -37,10 +37,7 @@ export const useUpdateProduct = () => {
                     // navigate client to supplier page
                     navigate(-1)
                 
-                    // push toast to notify successful login
-                    toast.success("Product updated successfully", {
-                        position: "bottom-right"
-                    });
+                    alert(`Product updated successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

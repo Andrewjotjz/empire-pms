@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddSupplier = () => {
     //Component's hook state declaration
@@ -37,10 +37,7 @@ export const useAddSupplier = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/supplier/`)
                 
-                    // push toast to notify successful login
-                    toast.success(`Supplier added to company successfully!`, {
-                        position: "bottom-right"
-                    });
+                    alert(`Supplier added to company successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

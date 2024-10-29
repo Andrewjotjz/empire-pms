@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAddEmployee } from '../../hooks/useAddEmployee'; 
-import { toast } from 'react-toastify';
+ 
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 
@@ -43,10 +43,7 @@ const NewEmployeeForm = () => {
         event.preventDefault();
         
         if (!isValidEmail(employeeState.employee_email)) {
-            // push toast to notify successful login
-            toast.error(`Email must be in this format xxxx.xxxx@empirecbs.com!`, {
-                position: "bottom-right"
-            });
+            alert(`Email must be in this format xxxx.xxxx@empirecbs.com`);
             return;
         }
 

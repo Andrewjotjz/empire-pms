@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
 import { setProjectState } from '../redux/projectSlice';
-import { toast } from 'react-toastify';
+ 
 import { Modal, Button } from "react-bootstrap";
 import { useUpdateEmployee } from '../hooks/useUpdateEmployee';
 import SessionExpired from "../components/SessionExpired";
@@ -138,10 +138,7 @@ const EmployeeDetails = () => {
             // Navigate only if successful
             navigate(`/EmpirePMS/employee/${id}`);
     
-            // Display success message
-            toast.success(`Password reset email sent successfully!`, {
-                position: "bottom-right"
-            });
+            alert(`Password reset email sent successfully!`);
     
             // Update loading state
             setIsLoadingState(false);

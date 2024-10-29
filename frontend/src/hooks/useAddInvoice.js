@@ -1,6 +1,6 @@
 //import modules and files
 import { useState } from 'react'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddInvoice = () => {
     //Component's hook state declaration
@@ -29,11 +29,8 @@ export const useAddInvoice = () => {
                 if (!res.ok) {
                     throw new Error('Failed to POST new invoice')
                 }
-                if (res.ok) {                
-                    // push toast to notify successful login
-                    toast.success(`New invoice created successfully!`, {
-                        position: "bottom-right"
-                    });
+                if (res.ok) {      
+                    alert(`New invoice created successfully!`);
                 
                     // update loading state
                     setAddInvoiceLoading(false)

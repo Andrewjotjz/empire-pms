@@ -2,10 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { ToastContainer } from 'react-toastify';
 import { store } from './redux/store'
 import { Provider } from 'react-redux'
-import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './index.css';
@@ -15,7 +13,6 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
         <App />
-        <ToastContainer />
     </Provider>
   </React.StrictMode>
 );

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { toast } from 'react-toastify';
 
 export const useAddAlias = () => {
     // Component's hook state declaration
@@ -29,10 +28,7 @@ export const useAddAlias = () => {
                     throw new Error('Failed to create new alias. Alias already existed in database. Otherwise, please check your network.');
                 }
                 if (res.ok) {
-                    // push toast to notify successful creation
-                    toast.success(`New alias created successfully!`, {
-                        position: "bottom-right"
-                    });
+                    alert(`New alias created succesfully!`);
 
                     // update loading state
                     setIsLoadingState(false);

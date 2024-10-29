@@ -1,7 +1,6 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
 
 export const useAddEmployee = () => {
     //Component's hook state declaration
@@ -36,11 +35,8 @@ export const useAddEmployee = () => {
                 if (res.ok) {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/employee/`)
-                
-                    // push toast to notify successful login
-                    toast.success(`Employee account added successfully!`, {
-                        position: "bottom-right"
-                    });
+
+                    alert(`Employee account added successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

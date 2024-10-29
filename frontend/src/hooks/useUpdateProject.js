@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 
 export const useUpdateProject = () => {
@@ -38,10 +38,7 @@ export const useUpdateProject = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/project/${projectState._id}`)
                 
-                    // push toast to notify successful login
-                    toast.success(message ? message: "Project updated successfully", {
-                        position: "bottom-right"
-                    });
+                    alert(`Project updated successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

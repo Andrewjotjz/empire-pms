@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
 const PasswordReset = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -34,10 +33,7 @@ const PasswordReset = () => {
                 // navigate user to login page
                 navigate(`/EmpirePMS/login`)
 
-                // push toast to notify successful login
-                toast.success(`Password reset successful!`, {
-                    position: "top-center"
-                });
+                alert(`Password reset succesfully!`)
             } else {
                 setMessage(data.error);
             }
