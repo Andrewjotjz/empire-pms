@@ -6,9 +6,6 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const moment = require('moment-timezone');
 const { refreshToken } = require('./controllers/employeeController')
-
-
-
 //import routers from routes folder
 const companyRoutes = require('./routes/companyRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
@@ -22,27 +19,19 @@ const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const productPriceRoutes = require('./routes/productPriceRoutes');
-
-
 //import from importJSONtoDB file
 const importJSONtoDB = require('./importJSONtoDB'); 
 
 
-//import function from middlewares folder
-const { checkUser } = require('./middlewares/authMiddleware');
-
 // Load the .env file
 dotenv.config();
-
-
 //create express app
 const app = express();
-
+//invoke CORS
 app.use(cors({
     origin: 'http://localhost:3001',
     credentials: true
 }))
-
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
     console.log("Request URL:", req.url, '\n', "Request path:",req.path, '\n', "Request method:", req.method);
@@ -55,7 +44,6 @@ app.use(cookieParser());
 
 
 //route handler
-app.get('*', checkUser); //'*' means to apply to every single route
 app.get('*', refreshToken); //'*' means to apply to every single route
 app.use('/api/company', companyRoutes);
 app.use('/api/employee', employeeRoutes);
