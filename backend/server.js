@@ -29,7 +29,7 @@ dotenv.config();
 const app = express();
 //invoke CORS
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: 'https://empirepms-client.vercel.app',
     credentials: true
 }))
 //create middleware - Access to 'req' object and logs request url, request path and request method
