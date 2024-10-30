@@ -1,7 +1,6 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
 
 export const useAddEmployee = () => {
     //Component's hook state declaration
@@ -18,8 +17,8 @@ export const useAddEmployee = () => {
 
         const postEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(employeeState)
                 })
@@ -36,11 +35,8 @@ export const useAddEmployee = () => {
                 if (res.ok) {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/employee/`)
-                
-                    // push toast to notify successful login
-                    toast.success(`Employee account added successfully!`, {
-                        position: "bottom-right"
-                    });
+
+                    alert(`Employee account added successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

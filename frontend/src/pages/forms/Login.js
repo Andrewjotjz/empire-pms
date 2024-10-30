@@ -1,7 +1,6 @@
 // Import modules and files
 import React, { useState, useEffect } from 'react';
 import { useLogin } from "../../hooks/useLogin";
-import { ToastContainer } from 'react-toastify';
 import logo from '../../empirelogo.png'
 
 const Login = () => {
@@ -86,7 +85,6 @@ const Login = () => {
           )}
         </form>
       </div>
-      <ToastContainer />
     </div>
   );
   

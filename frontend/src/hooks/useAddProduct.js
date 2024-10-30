@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddProduct = () => {
     //Component's hook state declaration
@@ -18,8 +18,8 @@ export const useAddProduct = () => {
 
         const postProduct = async () => {
             try {
-                const res = await fetch(`/api/product/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(productState)
                 })
@@ -34,10 +34,7 @@ export const useAddProduct = () => {
                     throw new Error('Failed to POST new product details')
                 }
                 if (res.ok) {                
-                    // push toast to notify successful login
-                    toast.success(`Product added to supplier`, {
-                        position: "bottom-right"
-                    });
+                    alert(`Product added to supplier!`);
                 
                     // update loading state
                     setIsLoadingState(false)

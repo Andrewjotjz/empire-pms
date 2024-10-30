@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useUpdatePurchaseOrder = () => {
     //Component's hook state declaration
@@ -18,8 +18,8 @@ export const useUpdatePurchaseOrder = () => {
 
         const putPurchaseOrder = async () => {
             try {
-                const res = await fetch(`/api/order/${purchaseOrderState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${purchaseOrderState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...purchaseOrderState})
                 })
@@ -34,10 +34,7 @@ export const useUpdatePurchaseOrder = () => {
                     throw new Error('Failed to PUT purchase order details')
                 }
                 if (res.ok) {                
-                    // push toast to notify successful login
-                    toast.success("Purchase Order updated successfully", {
-                        position: "bottom-right"
-                    });
+                    alert(`Purchase order updated successfully!`);
                 
                     // update loading state
                     setIsUpdateLoadingState(false)

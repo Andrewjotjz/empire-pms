@@ -18,8 +18,8 @@ export const useFetchAliasesByProductType = () => {
 
         const getAliasesByProductType = async () => {
             try {
-                const res = await fetch(`/api/product/type/${productType}`, {
-                    method: 'GET',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product/type/${productType}`, {
+                    credentials: 'include', method: 'GET',
                     headers: {'Content-Type': 'application/json'}
                 })
 

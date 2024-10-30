@@ -1,6 +1,6 @@
 //import modules and files
 import { useState } from 'react'
-import { toast } from 'react-toastify';
+ 
 
 export const useUpdateInvoice = () => {
     //Component's hook state declaration
@@ -14,8 +14,8 @@ export const useUpdateInvoice = () => {
 
         const putInvoice = async () => {
             try {
-                const res = await fetch(`/api/invoice/${invoiceId}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${invoiceId}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...invoiceState})
                 })
@@ -30,10 +30,7 @@ export const useUpdateInvoice = () => {
                     throw new Error('Failed to PUT invoice details')
                 }
                 if (res.ok) {                
-                    // push toast to notify successful login
-                    toast.success("Invoice updated successfully", {
-                        position: "bottom-right"
-                    });
+                    alert(`Invoice updated successfully!`);
                 
                     // update loading state
                     setIsUpdateLoadingState(false)

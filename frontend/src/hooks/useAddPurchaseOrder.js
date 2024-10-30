@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddPurchaseOrder = () => {
     //Component's hook state declaration
@@ -18,8 +18,8 @@ export const useAddPurchaseOrder = () => {
 
         const postPurchaseOrder = async () => {
             try {
-                const res = await fetch(`/api/order/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(orderState)
                 })
@@ -41,11 +41,7 @@ export const useAddPurchaseOrder = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/order/`)
                 
-                    // push toast to notify successful login
-                    toast.success(`New Purchase Order created successfully!`, {
-                        position: "bottom-right"
-                    });
-                
+                    alert(`New Purchase Order created successfully!`);                
 
                 }
             } catch (error) {

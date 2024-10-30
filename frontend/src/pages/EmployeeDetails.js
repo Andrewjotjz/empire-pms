@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../redux/employeeSlice';
 import { setProjectState } from '../redux/projectSlice';
-import { toast } from 'react-toastify';
+ 
 import { Modal, Button } from "react-bootstrap";
 import { useUpdateEmployee } from '../hooks/useUpdateEmployee';
 import SessionExpired from "../components/SessionExpired";
@@ -49,7 +49,7 @@ const EmployeeDetails = () => {
     //Render component
     const fetchEmployee = useCallback(async () => {
         try {
-            const res = await fetch(`/api/employee/${id}`);
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}`, { credentials: 'include' });
             if (!res.ok) {
                 throw new Error('Failed to fetch employee details');
             }
@@ -75,7 +75,7 @@ const EmployeeDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`/api/project`);
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -126,8 +126,8 @@ const EmployeeDetails = () => {
         setIsLoadingState(true);
         
         try {
-            const response = await fetch(`/api/employee/${id}/send-reset-password-email`, {
-                method: 'POST',
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}/send-reset-password-email`, {
+                credentials: 'include', method: 'POST',
                 headers: {'Content-Type': 'application/json',},
             });
     
@@ -138,10 +138,7 @@ const EmployeeDetails = () => {
             // Navigate only if successful
             navigate(`/EmpirePMS/employee/${id}`);
     
-            // Display success message
-            toast.success(`Password reset email sent successfully!`, {
-                position: "bottom-right"
-            });
+            alert(`Password reset email sent successfully!`);
     
             // Update loading state
             setIsLoadingState(false);
@@ -177,8 +174,8 @@ const EmployeeDetails = () => {
 
         const selectedProjectsArray = Array.from(selectedProjects);
 
-        const updateRes = await fetch(`/api/employee/${id}`, {
-            method: 'PUT',
+        const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}`, {
+            credentials: 'include', method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },

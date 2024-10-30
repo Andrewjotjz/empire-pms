@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddProject = () => {
     //Component's hook state declaration
@@ -18,8 +18,8 @@ export const useAddProject = () => {
 
         const postProject = async () => {
             try {
-                const res = await fetch(`/api/project/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(projectState)
                 })
@@ -37,10 +37,7 @@ export const useAddProject = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/project/`)
                 
-                    // push toast to notify successful login
-                    toast.success(`Project added successfully!`, {
-                        position: "bottom-right"
-                    });
+                    alert(`Project added successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

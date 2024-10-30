@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
-import { toast } from "react-toastify";
 
 import { setSupplierState } from "../../redux/supplierSlice";
 import { setPurchaseOrderState } from "../../redux/purchaseOrderSlice";
@@ -166,7 +165,8 @@ const NewInvoiceForm = () => {
 
     const getOrder = async () => {
       try {
-        const res = await fetch(`/api/order/${id}`, {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, {
+          credentials: 'include',
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -282,7 +282,7 @@ const NewInvoiceForm = () => {
   const fetchProjects = async () => {
     setIsFetchProjectLoading(true); // Set loading state to true at the beginning
     try {
-      const res = await fetch("/api/project");
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
@@ -305,32 +305,54 @@ const NewInvoiceForm = () => {
     }
   };
   const resetForm = () => {
-    
-    const supplier = supplierState.find(supplier => supplier._id === newSupplier); //get the supplier
-    const paymentTerm = supplier.supplier_payment_term; // get supplier's payment term, this returns "Net 60"
+    if (newSupplier) {
+      const supplier = supplierState.find(supplier => supplier._id === newSupplier); //get the supplier
+      const paymentTerm = supplier.supplier_payment_term; // get supplier's payment term, this returns "Net 60"
 
-    // Call the helper function to get the calculated due date
-    const formattedDueDate = calculateDueDate(paymentTerm);
+      // Call the helper function to get the calculated due date
+      const formattedDueDate = calculateDueDate(paymentTerm);
 
-    setNewInvoice({
-      invoice_ref: "",
-      supplier: newSupplier,
-      invoice_issue_date: "",
-      invoice_received_date: new Date().toISOString().split("T")[0],
-      invoice_due_date: formattedDueDate,
-      order: "",
-      products: [],
-      custom_products: [],
-      invoiced_delivery_fee: 0,
-      invoiced_other_fee: 0,
-      invoiced_credit: 0,
-      invoiced_raw_total_amount_incl_gst: 0,
-      invoiced_calculated_total_amount_incl_gst: 0,
-      invoice_is_stand_alone: false,
-      invoice_internal_comments: "",
-      invoice_status: "",
-    });
-    setCurrentOrder(null);
+      setNewInvoice({
+        invoice_ref: "",
+        supplier: newSupplier,
+        invoice_issue_date: "",
+        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_due_date: formattedDueDate,
+        order: "",
+        products: [],
+        custom_products: [],
+        invoiced_delivery_fee: 0,
+        invoiced_other_fee: 0,
+        invoiced_credit: 0,
+        invoiced_raw_total_amount_incl_gst: 0,
+        invoiced_calculated_total_amount_incl_gst: 0,
+        invoice_is_stand_alone: false,
+        invoice_internal_comments: "",
+        invoice_status: "",
+      });
+      setCurrentOrder(null);
+    }
+    else {
+      setNewInvoice({
+        invoice_ref: "",
+        supplier: "",
+        invoice_issue_date: "",
+        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_due_date: "",
+        order: "",
+        products: [],
+        custom_products: [],
+        invoiced_delivery_fee: 0,
+        invoiced_other_fee: 0,
+        invoiced_credit: 0,
+        invoiced_raw_total_amount_incl_gst: 0,
+        invoiced_calculated_total_amount_incl_gst: 0,
+        invoice_is_stand_alone: false,
+        invoice_internal_comments: "",
+        invoice_status: "",
+      });
+      setCurrentOrder(null);
+    }
   };
   const resetNewProductPrice = () => {
     setNewProductPrice({
@@ -715,13 +737,7 @@ const NewInvoiceForm = () => {
     event.preventDefault();
 
     if (!newProductPrice.projects.length > 0) {
-      // push toast to notify error
-      toast.error(
-        `You must select one or more projects that this new product applies to`,
-        {
-          position: "bottom-right",
-        }
-      );
+      alert(`You must select one or more projects that this new product applies to!`)
       return;
     }
 
@@ -1081,10 +1097,7 @@ const NewInvoiceForm = () => {
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
-        // push toast to notify successful login
-        toast.error(`Please select invoice status`, {
-          position: "bottom-right",
-        });
+        alert(`Please select invoice status!`)
         return;
       }
       addInvoice(newInvoice);
@@ -1092,10 +1105,7 @@ const NewInvoiceForm = () => {
 
     if (isToggled) {
       if (newInvoice.invoice_status === "") {
-        // push toast to notify successful login
-        toast.error(`Please select invoice status`, {
-          position: "bottom-right",
-        });
+        alert(`Please select invoice status!`)
         return;
       }
       addInvoice(newInvoiceWithoutPO);
@@ -1111,7 +1121,7 @@ const NewInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1148,7 +1158,7 @@ const NewInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }

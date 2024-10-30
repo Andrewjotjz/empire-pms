@@ -1,7 +1,7 @@
 // Import modules
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { toast } from 'react-toastify';
+ 
 import { useAddProduct } from '../../hooks/useAddProduct'; 
 import { useFetchAliasesByProductType } from '../../hooks/useFetchAliasesByProductType'
 import { clearAliases } from '../../redux/aliasSlice';
@@ -87,10 +87,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         event.preventDefault();
 
         if (!productDetailsState.projects.length > 0){
-            // push toast to notify successful creation
-            toast.error(`You must select one or more projects that this new product applies to`, {
-                position: "bottom-right"
-            });
+            alert(`You must select one or more projects that this new product applies to`);
             return;
         }
 
@@ -116,7 +113,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         const fetchProjects = async () => {
             setIsLoadingState(true); // Set loading state to true at the beginning
             try {
-                const res = await fetch('/api/project', { signal });
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { signal , credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

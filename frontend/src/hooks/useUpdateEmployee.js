@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 import { useSelector, useDispatch } from 'react-redux'
 import { setLocalUser } from '../redux/localUserSlice'
 
@@ -22,8 +22,8 @@ export const useUpdateEmployee = () => {
 
         const putEmployee = async () => {
             try {
-                const res = await fetch(`/api/employee/${employeeState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${employeeState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...employeeState})
                 })
@@ -51,10 +51,7 @@ export const useUpdateEmployee = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/employee/${employeeState._id}`)
                 
-                    // push toast to notify successful login
-                    toast.success(`Account updated successfully!`, {
-                        position: "bottom-right"
-                    });
+                    alert(`Account updated successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

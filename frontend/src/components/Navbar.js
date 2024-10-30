@@ -1,7 +1,6 @@
 //import modules and files
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLogout } from '../hooks/useLogout';
-import { toast } from 'react-toastify';
 import NavbarSkeleton  from '../pages/loaders/NavbarSkeleton'
 
 const Navbar = () => {
@@ -21,10 +20,7 @@ const Navbar = () => {
   }
 
   const handleLogOutClick = () => {
-    // push toast to notify successful login
-    toast.success(`Logout successful!`, {
-      position: "bottom-right"
-    });
+    alert("Logout succesfully")
     logout();
   };
 

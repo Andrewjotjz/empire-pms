@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 
 const PasswordReset = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -20,8 +19,8 @@ const PasswordReset = () => {
         }
 
         try {
-            const response = await fetch('/api/employee/reset-password', {
-                method: 'POST',
+            const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/reset-password`, {
+                credentials: 'include', method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -34,10 +33,7 @@ const PasswordReset = () => {
                 // navigate user to login page
                 navigate(`/EmpirePMS/login`)
 
-                // push toast to notify successful login
-                toast.success(`Password reset successful!`, {
-                    position: "top-center"
-                });
+                alert(`Password reset succesfully!`)
             } else {
                 setMessage(data.error);
             }

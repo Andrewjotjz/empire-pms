@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toast } from 'react-toastify';
+ 
 
 export const useAddProductPrice = () => {
     // Component's hook state declaration
@@ -13,8 +13,8 @@ export const useAddProductPrice = () => {
 
         const postProductPrice = async () => {
             try {
-                const res = await fetch(`/api/productprice/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/productprice/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(newProductPriceState)
                 });
@@ -29,10 +29,7 @@ export const useAddProductPrice = () => {
                     throw new Error('Failed to create new product price.');
                 }
                 if (res.ok) {
-                    // push toast to notify successful creation
-                    toast.success(`New product price created successfully!`, {
-                        position: "bottom-right"
-                    });
+                    alert(`New product price created successfully!`);
 
                     // update loading state
                     setAddPriceIsLoadingState(false);

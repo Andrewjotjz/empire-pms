@@ -28,7 +28,7 @@ const Project = () => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const res = await fetch('/api/project');
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
                 }

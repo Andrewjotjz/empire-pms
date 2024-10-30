@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Modal, Button } from "react-bootstrap";
-import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { setSupplierState } from "../../redux/supplierSlice";
@@ -150,7 +149,8 @@ const UpdateInvoiceForm = () => {
 
     const getOrder = async () => {
       try {
-        const res = await fetch(`/api/order/${id}`, {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, {
+          credentials: 'include',
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -250,7 +250,7 @@ const UpdateInvoiceForm = () => {
   const fetchProjects = async () => {
     setIsFetchProjectLoading(true); // Set loading state to true at the beginning
     try {
-      const res = await fetch("/api/project");
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
@@ -634,13 +634,7 @@ const UpdateInvoiceForm = () => {
     event.preventDefault();
 
     if (!newProductPrice.projects.length > 0) {
-      // push toast to notify error
-      toast.error(
-        `You must select one or more projects that this new product applies to`,
-        {
-          position: "bottom-right",
-        }
-      );
+      alert(`You must select one or more projects that this new product applies to`)
       return;
     }
 
@@ -1000,10 +994,7 @@ const UpdateInvoiceForm = () => {
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
-        // push toast to notify successful login
-        toast.error(`Please select invoice status`, {
-          position: "bottom-right",
-        });
+        alert(`Please select invoice status!`)
         return;
       }
       updateInvoice(newInvoice, invoiceId);
@@ -1011,10 +1002,7 @@ const UpdateInvoiceForm = () => {
 
     if (isToggled) {
       if (newInvoice.invoice_status === "") {
-        // push toast to notify successful login
-        toast.error(`Please select invoice status`, {
-          position: "bottom-right",
-        });
+        alert(`Please select invoice status!`)
         return;
       }
       updateInvoice(newInvoiceWithoutPO, invoiceId);
@@ -1030,7 +1018,7 @@ const UpdateInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/supplier", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1067,7 +1055,7 @@ const UpdateInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch("/api/order", { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }
@@ -1115,7 +1103,7 @@ const UpdateInvoiceForm = () => {
     const fetchInvoice = async () => {
       setIsFetchInvoiceLoading(true);
       try {
-        const res = await fetch(`/api/invoice/${invoiceId}`, { signal });
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${invoiceId}`, { signal , credentials: 'include'});
         if (!res.ok) {
           throw new Error("Failed to fetch invoice");
         }

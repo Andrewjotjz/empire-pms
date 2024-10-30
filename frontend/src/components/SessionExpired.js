@@ -1,16 +1,11 @@
 //import modules and files
 import { useLogout } from '../hooks/useLogout';
-import { toast } from 'react-toastify';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const SessionExpired = () => {
     const { logout } = useLogout();
     
     const handleClick = () => {
-        // push toast to notify successful login
-        toast.info(`Session expired. Please login.`, {
-          position: "bottom-right"
-        });
         logout();
     };
 

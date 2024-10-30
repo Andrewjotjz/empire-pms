@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useUpdateSupplier = () => {
     //Component's hook state declaration
@@ -18,8 +18,8 @@ export const useUpdateSupplier = () => {
 
         const putSupplier = async () => {
             try {
-                const res = await fetch(`/api/supplier/${supplierState._id}`, {
-                    method: 'PUT',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${supplierState._id}`, {
+                    credentials: 'include', method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({...supplierState})
                 })
@@ -37,10 +37,7 @@ export const useUpdateSupplier = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/supplier/${supplierState._id}`)
                 
-                    // push toast to notify successful login
-                    toast.success(message ? message: "Supplier updated successfully", {
-                        position: "bottom-right"
-                    });
+                    alert(`Supplier updated successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

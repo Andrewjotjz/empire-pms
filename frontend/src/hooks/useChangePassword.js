@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 import { useSelector } from 'react-redux'
 
 export const useChangePassword = () => {
@@ -24,8 +24,8 @@ export const useChangePassword = () => {
       return
     }
 
-    const response = await fetch(`/api/employee/${employeeState._id}/change-password`, {
-      method: 'PUT',
+    const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${employeeState._id}/change-password`, {
+      credentials: 'include', method: 'PUT',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({employee_password: newPassword})
     })
@@ -42,10 +42,7 @@ export const useChangePassword = () => {
       // navigate client to dashboard page
       navigate(`/EmpirePMS/employee/${employeeState._id}`)
 
-      // push toast to notify successful login
-      toast.success(`Target account password updated successfully!`, {
-        position: "bottom-right"
-      });
+      alert(`Target account password updated succesfully!`);
 
       // update loading state
       setIsLoading(false)

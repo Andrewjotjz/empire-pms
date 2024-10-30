@@ -1,7 +1,7 @@
 //import modules and files
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddSupplier = () => {
     //Component's hook state declaration
@@ -18,8 +18,8 @@ export const useAddSupplier = () => {
 
         const postSupplier = async () => {
             try {
-                const res = await fetch(`/api/supplier/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(supplierState)
                 })
@@ -37,10 +37,7 @@ export const useAddSupplier = () => {
                     // navigate client to dashboard page
                     navigate(`/EmpirePMS/supplier/`)
                 
-                    // push toast to notify successful login
-                    toast.success(`Supplier added to company successfully!`, {
-                        position: "bottom-right"
-                    });
+                    alert(`Supplier added to company successfully!`);
                 
                     // update loading state
                     setIsLoadingState(false)

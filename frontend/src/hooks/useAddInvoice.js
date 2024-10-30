@@ -1,6 +1,6 @@
 //import modules and files
 import { useState } from 'react'
-import { toast } from 'react-toastify';
+ 
 
 export const useAddInvoice = () => {
     //Component's hook state declaration
@@ -14,8 +14,8 @@ export const useAddInvoice = () => {
 
         const postInvoice = async () => {
             try {
-                const res = await fetch(`/api/invoice/create`, {
-                    method: 'POST',
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/create`, {
+                    credentials: 'include', method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(invoiceState)
                 })
@@ -29,11 +29,8 @@ export const useAddInvoice = () => {
                 if (!res.ok) {
                     throw new Error('Failed to POST new invoice')
                 }
-                if (res.ok) {                
-                    // push toast to notify successful login
-                    toast.success(`New invoice created successfully!`, {
-                        position: "bottom-right"
-                    });
+                if (res.ok) {      
+                    alert(`New invoice created successfully!`);
                 
                     // update loading state
                     setAddInvoiceLoading(false)
