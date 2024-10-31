@@ -20,7 +20,10 @@ export const useFetchSupplierByProject = () => {
             try {
                 const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, {
                     credentials: 'include', method: 'GET',
-                    headers: {'Content-Type': 'application/json'}
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }
                 })
 
                 const data = await res.json();

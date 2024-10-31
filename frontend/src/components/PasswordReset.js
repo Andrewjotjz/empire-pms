@@ -23,6 +23,7 @@ const PasswordReset = () => {
                 credentials: 'include', method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                 },
                 body: JSON.stringify({ token, id, newPassword }),
             });

@@ -173,7 +173,11 @@ const SupplierDetails = () => {
                 // Update each new project to add the current supplier to its suppliers array
                 await Promise.all(newProjects.map(async projectId => {
                     // Fetch the current project data to get its suppliers array
-                    const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, { credentials: 'include'});
+                    const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, { credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                        }});
                     if (!projectRes.ok) {
                         throw new Error(`Failed to fetch project ${projectId}`);
                     }
@@ -187,7 +191,8 @@ const SupplierDetails = () => {
                     const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
                         credentials: 'include', method: 'PUT',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                         },
                         body: JSON.stringify({ suppliers: Array.from(updatedSuppliers) })
                     });
@@ -221,7 +226,11 @@ const SupplierDetails = () => {
 
                 await Promise.all(projectsToRemoveArray.map(async projectID =>{
 
-                    const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectID}`, { credentials: 'include'});
+                    const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectID}`, { credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                        }});
 
                     if(!projectRes.ok){
                         throw new Error(`Failed to fetch project ${projectID}`); 
@@ -236,7 +245,8 @@ const SupplierDetails = () => {
                     const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectID}`, {
                         credentials: 'include', method: 'PUT',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                         },
                         body: JSON.stringify({ suppliers: updatedSuppliers })
 
@@ -288,7 +298,11 @@ const SupplierDetails = () => {
     //Render component
     const fetchSupplierDetails = useCallback(async () => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}`, { credentials: 'include' });
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}`, { credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                } });
             if (!res.ok) {
                 throw new Error('Failed to fetch supplier details');
             }
@@ -310,7 +324,11 @@ const SupplierDetails = () => {
     
     const fetchOrdersBySupplier = async () => {
         try{
-            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { credentials: 'include' });
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                } });
             if (!res.ok) {
                 throw new Error('Failed to fetch orders');
             }
@@ -337,7 +355,11 @@ const SupplierDetails = () => {
     useEffect(() => {
         const fetchSupplierProducts = async () => {
             try{
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}/products`, { credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}/products`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Failed to fetch supplier products');
                 }
@@ -362,7 +384,11 @@ const SupplierDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }

@@ -53,7 +53,11 @@ const Employee = () => {
         const fetchEmployeeDetails = async () => {
             setIsLoadingState(true); // Set loading state to true at the beginning
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee`, { signal , credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Failed to fetch');
                 }

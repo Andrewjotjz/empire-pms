@@ -58,7 +58,11 @@ const Project_Details = () => {
     // fetch project details by projectID
     const fetchProjectDetails = useCallback(async () => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, { credentials: 'include'});
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, { credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                }});
 
             if (!res.ok) {
                 throw new Error('Network response was not ok');
@@ -83,7 +87,11 @@ const Project_Details = () => {
     useEffect(() => {
         const fetchAllEmployees = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee`, { credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -105,7 +113,11 @@ const Project_Details = () => {
     useEffect(() => {
         const fetchAllSuppliers = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -258,7 +270,11 @@ const Project_Details = () => {
                     // Update each new employee to add the current project to their projects array
                     await Promise.all(newEmployees.map(async empId => {
                         // Fetch the current employee data to get their projects array
-                        const employeeRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${empId}`, { credentials: 'include'});
+                        const employeeRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${empId}`, { credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                            }});
                         if (!employeeRes.ok) {
                             throw new Error(`Failed to fetch employee ${empId}`);
                         }
@@ -272,7 +288,8 @@ const Project_Details = () => {
                         const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${empId}`, {
                             credentials: 'include', method: 'PUT',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                             },
                             body: JSON.stringify({ projects: Array.from(updatedProjects) })
                         });
@@ -303,7 +320,11 @@ const Project_Details = () => {
             // Update each employee to remove the current project from their projects array
             await Promise.all(employeesToRemoveArray.map(async empId => {
                 // Fetch the current employee data to get their projects array
-                const employeeRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${empId}`, { credentials: 'include'});
+                const employeeRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${empId}`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 
                 if (!employeeRes.ok) {
                     throw new Error(`Failed to fetch employee ${empId}`);
@@ -318,7 +339,8 @@ const Project_Details = () => {
                 const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${empId}`, {
                     credentials: 'include', method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                     },
                     body: JSON.stringify({ projects: updatedProjects })
                 });
@@ -352,7 +374,8 @@ const Project_Details = () => {
         const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, {
             credentials: 'include', method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
             },
             body: JSON.stringify({ suppliers: Array.from(selectedSuppliersArray) })
         });

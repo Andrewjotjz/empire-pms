@@ -49,7 +49,11 @@ const EmployeeDetails = () => {
     //Render component
     const fetchEmployee = useCallback(async () => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}`, { credentials: 'include' });
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}`, { credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                } });
             if (!res.ok) {
                 throw new Error('Failed to fetch employee details');
             }
@@ -75,7 +79,11 @@ const EmployeeDetails = () => {
     useEffect(() => {
         const fetchAllProjects = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Network response was not ok employees data');
                 }
@@ -128,7 +136,10 @@ const EmployeeDetails = () => {
         try {
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}/send-reset-password-email`, {
                 credentials: 'include', method: 'POST',
-                headers: {'Content-Type': 'application/json',},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                },
             });
     
             if (!response.ok) {
@@ -177,7 +188,8 @@ const EmployeeDetails = () => {
         const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}`, {
             credentials: 'include', method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
             },
             body: JSON.stringify({ projects: Array.from(selectedProjectsArray) })
         });

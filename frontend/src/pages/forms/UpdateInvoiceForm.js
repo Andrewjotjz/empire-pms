@@ -152,7 +152,10 @@ const UpdateInvoiceForm = () => {
         const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, {
           credentials: 'include',
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          },
         });
 
         const data = await res.json();
@@ -229,7 +232,12 @@ const UpdateInvoiceForm = () => {
     setIsFetchProductDetailsLoading(true);
     try {
       const res = await fetch(
-        `/api/supplier/${supplierId}/products/${productId}`
+        `/api/supplier/${supplierId}/products/${productId}`, { 
+          credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }}
       );
       if (!res.ok) {
         throw new Error("Failed to fetch product details");
@@ -250,7 +258,11 @@ const UpdateInvoiceForm = () => {
   const fetchProjects = async () => {
     setIsFetchProjectLoading(true); // Set loading state to true at the beginning
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include'});
+      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+        }});
       if (!res.ok) {
         throw new Error("Failed to fetch");
       }
@@ -1018,7 +1030,11 @@ const UpdateInvoiceForm = () => {
     const fetchSuppliers = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include'});
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier`, { signal , credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }});
         if (!res.ok) {
           throw new Error("Failed to fetch suppliers");
         }
@@ -1055,7 +1071,11 @@ const UpdateInvoiceForm = () => {
     const fetchOrders = async () => {
       setIsFetchSupplierLoading(true);
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include'});
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }});
         if (!res.ok) {
           throw new Error("Failed to fetch orders");
         }
@@ -1103,7 +1123,11 @@ const UpdateInvoiceForm = () => {
     const fetchInvoice = async () => {
       setIsFetchInvoiceLoading(true);
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${invoiceId}`, { signal , credentials: 'include'});
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${invoiceId}`, { signal , credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }});
         if (!res.ok) {
           throw new Error("Failed to fetch invoice");
         }

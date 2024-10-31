@@ -14,7 +14,10 @@ export const useAddAlias = () => {
             try {
                 const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/alias/create`, {
                     credentials: 'include', method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    },
                     body: JSON.stringify({ alias_name: value })
                 });
 
