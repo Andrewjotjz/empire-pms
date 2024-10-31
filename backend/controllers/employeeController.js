@@ -79,8 +79,8 @@ const loginEmployee = async (req,res) => {
         //! insert comment
         const Employee = await employeeModel.login(employee_email, employee_password);
         const token = createToken(Employee._id);
-        res.cookie('jwt', token, { httpOnly: true, secure: true, sameSite: 'None', maxAge: maxAge * 1000 }); //in millisecond
-        res.status(200).json(Employee);
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 }); //in millisecond
+        res.status(200).json({token, employee: Employee});
     } 
     catch (err) {
         //! insert comment

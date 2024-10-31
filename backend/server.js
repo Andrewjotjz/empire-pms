@@ -29,8 +29,9 @@ dotenv.config();
 const app = express();
 //invoke CORS
 app.use(cors({
-    origin: 'https://empirecbs.onrender.com',
-    credentials: true
+    origin: 'http://localhost:3001',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {
