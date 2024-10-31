@@ -46,10 +46,11 @@ export const useLogin = () => {
     }
     if (response.ok) {
       // save the user to local storage
-      localStorage.setItem('localUser', JSON.stringify(promise))
+      localStorage.setItem('localUser', JSON.stringify(promise.employee))
+      sessionStorage.setItem('jwt', promise.token)
 
       // update the localUserState
-      dispatch(setLocalUser(promise))
+      dispatch(setLocalUser(promise.employee))
 
       // navigate client to dashboard page
       navigate('/EmpirePMS/dashboard')
