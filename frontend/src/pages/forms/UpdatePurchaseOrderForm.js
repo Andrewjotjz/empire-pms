@@ -507,7 +507,11 @@ const UpdatePurchaseOrderForm = () => {
     const fetchProjects = async () => {
       setIsFetchProjectLoadingState(true);
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { signal , credentials: 'include'});
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { signal , credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }});
         if (!res.ok) {
           throw new Error("Failed to fetch projects");
         }

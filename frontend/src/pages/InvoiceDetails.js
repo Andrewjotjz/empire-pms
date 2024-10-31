@@ -110,7 +110,11 @@ const InvoiceDetails = () => {
     useEffect(() => {
         const fetchInvoiceDetails = async () => {
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${id}`, { credentials: 'include'});
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/invoice/${id}`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
                 if (!res.ok) {
                     throw new Error('Failed to fetch invoice details');
                 }
