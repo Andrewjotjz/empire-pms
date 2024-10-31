@@ -29,7 +29,7 @@ dotenv.config();
 const app = express();
 //invoke CORS
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: 'https://empirecbs.onrender.com',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
 }))
