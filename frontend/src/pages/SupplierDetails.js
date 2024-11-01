@@ -8,6 +8,7 @@ import { setProductState, clearProductState } from '../redux/productSlice';
 import { setPurchaseOrderState, clearPurchaseOrderState } from '../redux/purchaseOrderSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 import Dropdown from "react-bootstrap/Dropdown";
 import { Modal, Button } from "react-bootstrap";
 import { useUpdateSupplier } from '../hooks/useUpdateSupplier';
@@ -40,6 +41,8 @@ const SupplierDetails = () => {
     const dispatch = useDispatch()
 
     //Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const formatDate = (dateString) => {
         if (dateString === null) {
             return ''
@@ -854,6 +857,7 @@ const SupplierDetails = () => {
     console.log("purchaseOrderState:", purchaseOrderState)
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
@@ -884,7 +888,7 @@ const SupplierDetails = () => {
                 </div>
             </div>
             { archiveModal }
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 }
 

@@ -10,6 +10,7 @@ import { setProjectState } from '../../redux/projectSlice';
 import EmployeePageSkeleton from "../../pages/loaders/EmployeePageSkeleton"
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import SessionExpired from '../../components/SessionExpired';
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const NewProductForm = () => {
     // Component router
@@ -52,6 +53,8 @@ const NewProductForm = () => {
     });
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`, {state: supplierId});
 
     const handleInputCustomToggle = () => {
@@ -167,6 +170,7 @@ const NewProductForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"> 
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
@@ -485,7 +489,7 @@ const NewProductForm = () => {
                     </div>
                 </form>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

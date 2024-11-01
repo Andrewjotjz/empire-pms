@@ -5,6 +5,7 @@ import { setSupplierState } from '../../redux/supplierSlice';
 import { useUpdateSupplier } from '../../hooks/useUpdateSupplier';
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from '../loaders/EmployeeDetailsSkeleton';
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const UpdateSupplierForm = () => {
     // Component router
@@ -19,6 +20,8 @@ const UpdateSupplierForm = () => {
     const { update, isLoadingState, errorState } = useUpdateSupplier();
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${retrieved_id}`);
     
     const handleInputChange = (event) => {
@@ -75,6 +78,7 @@ const UpdateSupplierForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         supplierState && Object.keys(supplierState).length > 0 ? (
             <div className="container mt-5">
                 <div className="card">
@@ -243,7 +247,7 @@ const UpdateSupplierForm = () => {
             </div>
         ) : (
             <div><SessionExpired /></div>
-        )
+        ) ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

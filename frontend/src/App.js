@@ -1,8 +1,5 @@
 // Import required modules, components, forms, pages, details page
-import { useEffect } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { useSelector, useDispatch } from 'react-redux'
-import { setLocalUser } from './redux/localUserSlice'
 import Navbar from './components/Navbar';
 import Login from './pages/forms/Login';
 import Dashboard from './pages/Dashboard';
@@ -35,18 +32,6 @@ import UpdateInvoiceForm from "./pages/forms/UpdateInvoiceForm";
 import InvoiceDetails from "./pages/InvoiceDetails";
 
 function App() {
-  //App state declaration
-  const localUser = useSelector((state) => state.localUserReducer.localUserState)
-  const dispatch = useDispatch();
-
- 
-  // Load localUser from localStorage on page load
-  useEffect(() => {
-    const storedUser = localStorage.getItem('localUser');
-    if (storedUser) {
-      dispatch(setLocalUser(JSON.parse(storedUser)));
-    }
-  }, [dispatch]);
 
   return (
     <div className="App">
@@ -54,53 +39,42 @@ function App() {
         <Navbar />
         <div className="pages">
           <Routes>
-            <Route path="/" element={<Navigate to="/EmpirePMS/dashboard" /> } />
-            <Route path="/EmpirePMS/" element={<Navigate to="/EmpirePMS/dashboard" /> } />
-            <Route path="/EmpirePMS/login" element={!localUser ? <Login /> : <Navigate to="/EmpirePMS/dashboard" />} />
-            <Route path="/EmpirePMS/dashboard" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <Dashboard />} />
+            <Route path="/EmpirePMS/login" element={<Login />} />
+            <Route path="/EmpirePMS/dashboard" element={<Dashboard />} />
 
+            <Route path="/EmpirePMS/order" element={<PurchaseOrder />} />
+            <Route path="/EmpirePMS/order/:id" element={<PurchaseOrderDetails />} />
+            <Route path="/EmpirePMS/order/:id/edit" element={<UpdatePurchaseOrderForm />} />
+            <Route path="/EmpirePMS/order/create" element={<NewPurchaseOrderForm />} />
 
-
-            <Route path="/EmpirePMS/order" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PurchaseOrder />} />
-            <Route path="/EmpirePMS/order/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PurchaseOrderDetails />} />
-            <Route path="/EmpirePMS/order/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdatePurchaseOrderForm />} />
-            <Route path="/EmpirePMS/order/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewPurchaseOrderForm />} />
-
-
-
-
-            <Route path="/EmpirePMS/invoice" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <InvoicePage />} />
-            <Route path="/EmpirePMS/invoice/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <InvoiceDetails />} />
-            <Route path="/EmpirePMS/invoice/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewInvoiceForm />} />
-            <Route path="/EmpirePMS/invoice/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateInvoiceForm />} />
-
+            <Route path="/EmpirePMS/invoice" element={<InvoicePage />} />
+            <Route path="/EmpirePMS/invoice/:id" element={<InvoiceDetails />} />
+            <Route path="/EmpirePMS/invoice/create" element={<NewInvoiceForm />} />
+            <Route path="/EmpirePMS/invoice/:id/edit" element={<UpdateInvoiceForm />} />
             
-            <Route path="/EmpirePMS/payment" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <PaymentPage />} />
+            <Route path="/EmpirePMS/payment" element={<PaymentPage />} />
 
+            <Route path="/EmpirePMS/account" element={<AccountPage />} />
 
-            <Route path="/EmpirePMS/account" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <AccountPage />} />
+            <Route path="/EmpirePMS/project" element={<ProjectPage />} />
+            <Route path="/EmpirePMS/project/:id" element={<ProjectDetails />} />
+            <Route path="/EmpirePMS/project/create" element={<NewProjectForm />} />
+            <Route path="/EmpirePMS/project/:id/edit" element={<UpdateProjectForm />} />
 
+            <Route path="/EmpirePMS/supplier" element={<SupplierPage />} />
+            <Route path="/EmpirePMS/supplier/:id" element={<SupplierDetails />} />
+            <Route path="/EmpirePMS/supplier/:id/edit" element={<UpdateSupplierForm />} />
+            <Route path="/EmpirePMS/supplier/create" element={<NewSupplierForm />} />
 
-            <Route path="/EmpirePMS/project" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectPage />} />
-            <Route path="/EmpirePMS/project/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProjectDetails />} />
-            <Route path="/EmpirePMS/project/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewProjectForm />} />
-            <Route path="/EmpirePMS/project/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateProjectForm />} />
-
-
-            <Route path="/EmpirePMS/supplier" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierPage />} />
-            <Route path="/EmpirePMS/supplier/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <SupplierDetails />} />
-            <Route path="/EmpirePMS/supplier/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateSupplierForm />} />
-            <Route path="/EmpirePMS/supplier/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewSupplierForm />} />
-
-            <Route path="/EmpirePMS/supplier/:id/products/:productId" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ProductDetails />} />
-            <Route path="/EmpirePMS/supplier/:id/products/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewProductForm />} />
-            <Route path="/EmpirePMS/supplier/:id/products/:productId/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateProductForm />} />
+            <Route path="/EmpirePMS/supplier/:id/products/:productId" element={<ProductDetails />} />
+            <Route path="/EmpirePMS/supplier/:id/products/create" element={<NewProductForm />} />
+            <Route path="/EmpirePMS/supplier/:id/products/:productId/edit" element={<UpdateProductForm />} />
             
-            <Route path="/EmpirePMS/employee" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <EmployeePage />} />
-            <Route path="/EmpirePMS/employee/:id" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <EmployeeDetails />} />
-            <Route path="/EmpirePMS/employee/:id/change-password" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <ChangePasswordForm />} />
-            <Route path="/EmpirePMS/employee/:id/edit" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <UpdateEmployeeForm />} />
-            <Route path="/EmpirePMS/employee/create" element={!localUser ? <Navigate to="/EmpirePMS/login" /> : <NewEmployeeForm />} />
+            <Route path="/EmpirePMS/employee" element={<EmployeePage />} />
+            <Route path="/EmpirePMS/employee/:id" element={<EmployeeDetails />} />
+            <Route path="/EmpirePMS/employee/:id/change-password" element={<ChangePasswordForm />} />
+            <Route path="/EmpirePMS/employee/:id/edit" element={<UpdateEmployeeForm />} />
+            <Route path="/EmpirePMS/employee/create" element={<NewEmployeeForm />} />
             <Route path="/EmpirePMS/employee/reset-password" element={<PasswordReset />} />
 
             <Route path="*" element={<Navigate to="/EmpirePMS/dashboard" />} />

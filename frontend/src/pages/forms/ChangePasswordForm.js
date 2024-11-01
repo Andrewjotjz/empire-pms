@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { useChangePassword } from '../../hooks/useChangePassword'; 
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const ChangePasswordForm = () => {
     // Component router
@@ -20,6 +21,8 @@ const ChangePasswordForm = () => {
     const [ isPasswordValid, setIsPasswordValid ] = useState(true);
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleBackClick = (employee_id) => navigate(`/EmpirePMS/employee/${employee_id}`);
         
     const checkPassword = () => {
@@ -49,6 +52,7 @@ const ChangePasswordForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         employeeState && Object.keys(employeeState).length > 0 ? (
             <div className="container mt-5"> 
                 <div className="card">
@@ -106,7 +110,7 @@ const ChangePasswordForm = () => {
             </div>
         ) : (
             <div><SessionExpired /></div>
-        )
+        ) ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

@@ -14,6 +14,7 @@ import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
 import { useAddInvoice } from "../../hooks/useAddInvoice";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
 
@@ -140,6 +141,8 @@ const NewInvoiceForm = () => {
   });
 
   //Component's function and variables
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
+
   const formatDate = (dateString) => {
     if (dateString === null) {
       return "";
@@ -2646,6 +2649,7 @@ const NewInvoiceForm = () => {
 
 
   return (
+    localUser && Object.keys(localUser).length > 0 ? (
     <div>
       <div className="w-screen bg-neutral-50 items-center justify-center">
         {/* HEADER */}
@@ -3674,7 +3678,7 @@ const NewInvoiceForm = () => {
         {updateConfirmationModal}
         {registerConfirmationModal}
       </div>
-    </div>
+    </div> ) : ( <UnauthenticatedSkeleton /> )
   );
 };
 

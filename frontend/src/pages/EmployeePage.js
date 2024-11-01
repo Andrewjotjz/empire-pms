@@ -5,9 +5,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setEmployeeDetails, clearEmployeeDetails } from '../redux/employeeSlice'
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const Employee = () => {
     //Component state declaration
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
     const employeeState = useSelector((state) => state.employeeReducer.employeeState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
@@ -132,6 +134,7 @@ const Employee = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white">
@@ -176,7 +179,7 @@ const Employee = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

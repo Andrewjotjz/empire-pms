@@ -7,7 +7,7 @@ const sendEmail = (email, subject, message) => {
         service: 'gmail',
         auth: {
             user: 'joojoe15@gmail.com',
-            pass: "dhce cqxb cpfj dhhx"
+            pass: "lrwk xegq mhoy fhqh"
         }
     });
 

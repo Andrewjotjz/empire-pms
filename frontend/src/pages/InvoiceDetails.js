@@ -10,8 +10,10 @@ import { useUpdateInvoice } from '../hooks/useUpdateInvoice';
 
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
+
 
 const InvoiceDetails = () => {
     //Component router
@@ -36,6 +38,8 @@ const InvoiceDetails = () => {
     const purchaseOrderTableRef = useRef(null);
 
     //Component functions and variables    
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
@@ -520,6 +524,7 @@ const InvoiceDetails = () => {
     
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 {/* CARD HEADER */}
@@ -591,7 +596,7 @@ const InvoiceDetails = () => {
                 </div>
             </div>
             { archiveModal }
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 
 }

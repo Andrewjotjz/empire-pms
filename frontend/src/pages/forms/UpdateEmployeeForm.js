@@ -5,6 +5,7 @@ import { setEmployeeDetails } from '../../redux/employeeSlice';
 import { useUpdateEmployee } from '../../hooks/useUpdateEmployee'; 
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const UpdateEmployeeForm = () => {
     // Component router
@@ -18,6 +19,8 @@ const UpdateEmployeeForm = () => {
     const { update, isLoadingState, errorState } = useUpdateEmployee();
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleChangePasswordClick = () => navigate(`/EmpirePMS/employee/${retrieved_id}/change-password`, {state: retrieved_id});
 
     const handleBackClick = () => navigate(`/EmpirePMS/employee/${retrieved_id}`);
@@ -46,6 +49,7 @@ const UpdateEmployeeForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         employeeState && Object.keys(employeeState).length > 0 ? (
             <div className="container mt-5"> 
                 <div className="card">
@@ -145,7 +149,7 @@ const UpdateEmployeeForm = () => {
             </div>
         ) : (
             <div><SessionExpired /></div>
-        )
+        ) ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

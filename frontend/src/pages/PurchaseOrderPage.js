@@ -8,9 +8,11 @@ import { clearSupplierState } from '../redux/supplierSlice'
 import { clearProjectState } from '../redux/projectSlice'
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const PurchaseOrder = () => {
     //Component state declaration
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
@@ -207,6 +209,7 @@ const PurchaseOrder = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"><div className="card">
                 <div className="card-header bg-dark text-white">
                     <h1 className='mx-auto uppercase font-bold text-xl'>PURCHASE ORDERS</h1>
@@ -260,7 +263,7 @@ const PurchaseOrder = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
  
