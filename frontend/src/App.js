@@ -30,8 +30,11 @@ import NewPurchaseOrderForm from "./pages/forms/NewPurchaseOrderForm";
 import NewInvoiceForm from "./pages/forms/NewInvoiceForm";
 import UpdateInvoiceForm from "./pages/forms/UpdateInvoiceForm";
 import InvoiceDetails from "./pages/InvoiceDetails";
+import NotFoundPage from "./pages/loaders/NotFoundPage";
 
 function App() {
+
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
 
   return (
     <div className="App">
@@ -40,6 +43,7 @@ function App() {
         <div className="pages">
           <Routes>
             <Route path="/EmpirePMS/login" element={<Login />} />
+            <Route path="/" element={!localUser ? <Navigate to='/EmpirePMS/login' />: <Dashboard />} />
             <Route path="/EmpirePMS/dashboard" element={<Dashboard />} />
 
             <Route path="/EmpirePMS/order" element={<PurchaseOrder />} />
@@ -77,7 +81,7 @@ function App() {
             <Route path="/EmpirePMS/employee/create" element={<NewEmployeeForm />} />
             <Route path="/EmpirePMS/employee/reset-password" element={<PasswordReset />} />
 
-            <Route path="*" element={<Navigate to="/EmpirePMS/dashboard" />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </BrowserRouter>
