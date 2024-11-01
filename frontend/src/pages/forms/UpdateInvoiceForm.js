@@ -15,6 +15,7 @@ import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
 import { useUpdateInvoice } from "../../hooks/useUpdateInvoice";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
 
@@ -143,6 +144,8 @@ const UpdateInvoiceForm = () => {
   });
 
   //Component's function and variables
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
+
   const fetchSelectedPurchaseOrder = async (id) => {
     setIsFetchOrderLoading(true);
     setFetchOrderError(null);
@@ -2590,6 +2593,7 @@ const UpdateInvoiceForm = () => {
 
 
   return (
+    localUser && Object.keys(localUser).length > 0 ? (
     <div>
       <div className="w-screen bg-neutral-50 items-center justify-center">
         {/* HEADER */}
@@ -3591,7 +3595,7 @@ const UpdateInvoiceForm = () => {
         {updateConfirmationModal}
         {registerConfirmationModal}
       </div>
-    </div>
+    </div> ) : ( <UnauthenticatedSkeleton /> )
   );
 };
 

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAddSupplier } from '../../hooks/useAddSupplier';
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from '../loaders/EmployeeDetailsSkeleton';
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const NewSupplierForm = () => {
     // Component router
@@ -26,6 +27,8 @@ const NewSupplierForm = () => {
     });
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
 
     const handleInputChange = (event) => {
@@ -84,6 +87,7 @@ const NewSupplierForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"> 
             <div className="card">
                 <div className="card-header bg-dark text-white">
@@ -257,7 +261,7 @@ const NewSupplierForm = () => {
                     </div>
                 </form>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

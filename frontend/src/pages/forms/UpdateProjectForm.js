@@ -6,6 +6,7 @@ import { setProjectState } from '../../redux/projectSlice';
 import { useUpdateProject } from '../../hooks/useUpdateProject';
 import SessionExpired from '../../components/SessionExpired';
 import ProjectDetailsSkeleton from '../loaders/ProjectDetailsSkeleton';
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const UpdateProjectForm = () => {
     // Component router
@@ -19,6 +20,8 @@ const UpdateProjectForm = () => {
     const { update, isLoadingState, errorState } = useUpdateProject();
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleBackClick = () => navigate(`/EmpirePMS/project/${retrieved_id}`);
 
     const handleInputChange = (event) => {
@@ -47,6 +50,7 @@ const UpdateProjectForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         projectState && Object.keys(projectState).length > 0 ? (
         <div className="container mt-5"> 
             <div className="card">
@@ -94,7 +98,7 @@ const UpdateProjectForm = () => {
         </div>
                 ) : (
                     <div><SessionExpired /></div>
-                )
+                ) ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

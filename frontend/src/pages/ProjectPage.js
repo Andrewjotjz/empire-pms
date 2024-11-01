@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setProjectState, clearProjectState } from '../redux/projectSlice';
 import SessionExpired from "../components/SessionExpired";
 import ProjectPageSkeleton from "./loaders/ProjectPageSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const Project = () => {
     // Component state declaration
@@ -18,6 +19,8 @@ const Project = () => {
     const navigate = useNavigate();
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleAddClick = () => {
         dispatch(clearProjectState());
         navigate('/EmpirePMS/project/create');
@@ -127,6 +130,7 @@ const Project = () => {
     );
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white">
@@ -165,7 +169,7 @@ const Project = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

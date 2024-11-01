@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAddProject } from '../../hooks/useAddProject'; 
 import SessionExpired from '../../components/SessionExpired';
 import ProjectDetailsSkeleton from "../loaders/ProjectDetailsSkeleton";
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const NewProjectForm = () => {
     // Component router
@@ -20,6 +21,7 @@ const NewProjectForm = () => {
     });
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
 
     const handleBackClick = () => navigate(`/EmpirePMS/project/`);
 
@@ -49,6 +51,7 @@ const NewProjectForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"> 
             <div className="card">
                 <div className="card-header bg-dark text-white">
@@ -92,7 +95,7 @@ const NewProjectForm = () => {
                     </div>
                 </form>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

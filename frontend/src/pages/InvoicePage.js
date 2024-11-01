@@ -10,6 +10,7 @@ import { clearProjectState } from '../redux/projectSlice'
 
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const InvoicePage = () => {
     //Component state declaration
@@ -25,6 +26,8 @@ const InvoicePage = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const formatDateTime = (dateString) => {
         if (dateString === null) {
             return ''
@@ -217,6 +220,7 @@ const InvoicePage = () => {
 
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"><div className="card">
                 <div className="card-header bg-dark text-white">
                     <h1 className='mx-auto uppercase font-bold text-xl'>INVOICES</h1>
@@ -270,7 +274,7 @@ const InvoicePage = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
  

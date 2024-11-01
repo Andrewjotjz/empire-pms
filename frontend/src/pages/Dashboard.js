@@ -1,9 +1,14 @@
 //import modules
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card } from 'react-bootstrap';
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const Dashboard = () => {
+
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <Container className="dashboard">
             <h1 className='mb-3 text-3xl font-bold'>Dashboard</h1>
             <Row>
@@ -72,7 +77,7 @@ const Dashboard = () => {
                     </Card>
                 </Col>
             </Row>
-        </Container>
+        </Container> ) : ( <UnauthenticatedSkeleton /> )
     );
 }
 

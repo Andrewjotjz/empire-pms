@@ -10,6 +10,7 @@ import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 import SessionExpired from "../components/SessionExpired";
 import ProjectDetailsSkeleton from './loaders/ProjectDetailsSkeleton';
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 
 const Project_Details = () => {
@@ -53,6 +54,8 @@ const Project_Details = () => {
     }
 
     //Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleEditClick = () => navigate(`/EmpirePMS/project/${id}/edit`, { state: id });
 
     // fetch project details by projectID
@@ -687,6 +690,7 @@ const Project_Details = () => {
     if (!projectState) return <p>No project details available</p>;
     
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
@@ -718,7 +722,7 @@ const Project_Details = () => {
                 </div>
             </div>
             { archiveModal }
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

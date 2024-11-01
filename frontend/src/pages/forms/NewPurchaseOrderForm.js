@@ -14,6 +14,7 @@ import { clearProductState } from '../../redux/productSlice'
 import { Modal, Button } from "react-bootstrap";
 import SessionExpired from '../../components/SessionExpired';
 import NewPurchaseOrderSkeleton from '../loaders/NewPurchaseOrderSkeleton';
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const NewPurchaseOrderForm = () => {
     // Component router
@@ -64,6 +65,8 @@ const NewPurchaseOrderForm = () => {
     })
     
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+    
     const handleBackClick = () => navigate(`/EmpirePMS/order/`);
 
     const handleProjectChange = (event) => {        
@@ -495,6 +498,7 @@ const NewPurchaseOrderForm = () => {
 
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <>
         {/* PAGE HEADER */}
         <div className='mx-4 mt-4 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg'>
@@ -930,7 +934,7 @@ const NewPurchaseOrderForm = () => {
                 { confirmationModal }
             </div>
         </form>
-        </>
+        </> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

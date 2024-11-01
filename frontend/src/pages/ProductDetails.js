@@ -6,6 +6,7 @@ import { setProductState } from '../redux/productSlice';
 import { setProductPrice } from '../redux/productPriceSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 import Dropdown from "react-bootstrap/Dropdown"
 
 const ProductDetails = () => {
@@ -22,6 +23,8 @@ const ProductDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handlePriceTableClick = (priceId) => { return }
 
     const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`);
@@ -151,6 +154,7 @@ const ProductDetails = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white">
@@ -223,7 +227,7 @@ const ProductDetails = () => {
                     { productPriceTable }
                 </div>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

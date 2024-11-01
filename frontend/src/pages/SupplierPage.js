@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setSupplierState, clearSupplierState } from '../redux/supplierSlice'
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const Supplier = () => {
     //Component state declaration
@@ -19,6 +20,8 @@ const Supplier = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
@@ -160,6 +163,7 @@ const Supplier = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container my-5"><div className="card">
                 <div className="card-header bg-dark text-white">
                     <h1 className='mx-auto uppercase font-bold text-xl'>SUPPLIERS</h1>
@@ -205,7 +209,7 @@ const Supplier = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
  

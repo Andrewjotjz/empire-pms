@@ -5,6 +5,7 @@ import { useAddEmployee } from '../../hooks/useAddEmployee';
  
 import SessionExpired from '../../components/SessionExpired';
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
+import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const NewEmployeeForm = () => {
     // Component router
@@ -24,6 +25,8 @@ const NewEmployeeForm = () => {
     });
 
     // Component functions and variables
+    const localUser = JSON.parse(localStorage.getItem('localUser'))
+
     const isValidEmail = (email) => {
         const pattern = /[a-zA-Z0-9._%+-]+@empirecbs\.com/;
         return pattern.test(email);
@@ -63,6 +66,7 @@ const NewEmployeeForm = () => {
     }
 
     return (
+        localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"> 
             <div className="card">
                 <div className="card-header bg-dark text-white">
@@ -158,7 +162,7 @@ const NewEmployeeForm = () => {
                     </div>
                 </form>
             </div>
-        </div>
+        </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 };
 

@@ -1,10 +1,14 @@
 //import modules
 import { useNavigate } from "react-router-dom";
+import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
 
 const Account = () => {
 
   // Component's router
   const navigate = useNavigate()
+
+  // Component's variable
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
   
 
   // Component's functions and variable
@@ -13,6 +17,7 @@ const Account = () => {
   }
 
     return (
+      localUser && Object.keys(localUser).length > 0 ? (
         <form className="container my-5 border rounded-xl p-5">
           <div className="space-y-12">
             <div className="border-b border-gray-900/10 pb-12">
@@ -344,7 +349,7 @@ const Account = () => {
               Save
             </button>
           </div>
-        </form>
+        </form> ) : ( <UnauthenticatedSkeleton /> )
       )
 }
  
