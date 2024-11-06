@@ -1,7 +1,7 @@
 //import modules
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card } from 'react-bootstrap';
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 
 const Dashboard = () => {
 

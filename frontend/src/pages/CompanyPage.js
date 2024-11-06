@@ -1,6 +1,6 @@
 //import modules
 import { useEffect, useState } from "react";
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 
 const Company = () => {
 

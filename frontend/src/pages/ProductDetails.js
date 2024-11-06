@@ -6,7 +6,7 @@ import { setProductState } from '../redux/productSlice';
 import { setProductPrice } from '../redux/productPriceSlice';
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 import Dropdown from "react-bootstrap/Dropdown"
 
 const ProductDetails = () => {
@@ -147,7 +147,7 @@ const ProductDetails = () => {
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (<div>Error: {errorState}</div>);
