@@ -10,7 +10,7 @@ import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 import SessionExpired from "../components/SessionExpired";
 import ProjectDetailsSkeleton from './loaders/ProjectDetailsSkeleton';
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 
 
 const Project_Details = () => {
@@ -682,7 +682,7 @@ const Project_Details = () => {
     if (isLoadingState) { return (<ProjectDetailsSkeleton />); }   
 
     if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (<div>Error: {errorState}</div>);

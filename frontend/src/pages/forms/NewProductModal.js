@@ -154,7 +154,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
     }
 
     if (productTypeErrorState || productErrorState ) {
-        if (productErrorState.includes("Session expired") || productErrorState.includes("jwt expired")) {
+        if (productErrorState.includes("Session expired") || productErrorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
             return <div><SessionExpired /></div>;
         }
         return <div>Error: {productErrorState || productTypeErrorState}</div>;
@@ -163,7 +163,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
 
     if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (<div>Error: {errorState}</div>);

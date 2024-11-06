@@ -12,7 +12,7 @@ import { useFetchProductsBySupplier } from '../hooks/useFetchProductsBySupplier'
 
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
@@ -158,7 +158,7 @@ const PurchaseOrderDetails = () => {
     if (isLoadingState || isUpdateLoadingState || isFetchSupplierLoading || isFetchProductsLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState || updateErrorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (
@@ -169,7 +169,7 @@ const PurchaseOrderDetails = () => {
     }
     
     if (fetchSupplierError || fetchProductsErrorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (

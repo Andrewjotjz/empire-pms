@@ -1,6 +1,6 @@
 //import modules
 import { useNavigate } from "react-router-dom";
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 
 const Account = () => {
 

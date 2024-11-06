@@ -71,7 +71,7 @@ const UpdateSupplierForm = () => {
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState) {
-        if (errorState.includes("Session expired") || errorState.includes("jwt expired")) {
+        if (errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
             return (<div><SessionExpired /></div>);
         }
         return (<div>Error: {errorState}</div>);

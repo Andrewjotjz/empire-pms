@@ -8,7 +8,7 @@ import { clearSupplierState } from '../redux/supplierSlice'
 import { clearProjectState } from '../redux/projectSlice'
 import SessionExpired from "../components/SessionExpired";
 import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
-import UnauthenticatedSkeleton from '../pages/loaders/UnauthenticateSkeleton'
+import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 
 const PurchaseOrder = () => {
     //Component state declaration
@@ -202,7 +202,7 @@ const PurchaseOrder = () => {
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
 
     if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (<div>Error: {errorState}</div>);

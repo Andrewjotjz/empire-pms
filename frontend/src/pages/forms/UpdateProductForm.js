@@ -238,7 +238,7 @@ const UpdateProductForm = () => {
     }
 
     if (productTypeErrorState || productUpdateErrorState || addPriceErrorState) {
-        if (productUpdateErrorState.includes("Session expired") || productUpdateErrorState.includes("jwt expired")) {
+        if (productUpdateErrorState.includes("Session expired") || productUpdateErrorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
             return <div><SessionExpired /></div>;
         }
         return <div>Error: {productUpdateErrorState}</div>;
@@ -247,7 +247,7 @@ const UpdateProductForm = () => {
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
 
     if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired")){
+        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
             return(<div><SessionExpired /></div>)
         }
         return (<div>Error: {errorState}</div>);
