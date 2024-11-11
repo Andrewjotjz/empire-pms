@@ -143,18 +143,18 @@ const PurchaseOrder = () => {
     
     //Display DOM
     const purchaseOrderTable = Array.isArray(purchaseOrderState) && purchaseOrderState.length > 0 ? (
-        <div className="container">
+        <div className="container overflow-x-auto text-xs md:text-sm">
             <table className="table table-bordered table-hover shadow-md">
                 <thead className="thead-dark text-center">
                     <tr className="table-primary">
                         <th scope="col">PO</th>
-                        <th scope="col">Order Date</th>
-                        <th scope="col">EST Date</th>
+                        <th scope="col" className="hidden sm:table-cell">Order Date</th>
+                        <th scope="col" className="hidden sm:table-cell">EST Date</th>
                         <th scope="col">Project</th>
                         <th scope="col">Supplier</th>
-                        <th scope="col">Products</th>
-                        <th scope="col">Gross Amount</th>
-                        <th scope="col">Status</th>
+                        <th scope="col" className="hidden md:table-cell">Products</th>
+                        <th scope="col" className="hidden md:table-cell">Gross Amount</th>
+                        <th scope="col" className="hidden md:table-cell">Status</th>
                         {/* <th scope="col">Ordered By</th> */}
                     </tr>
                 </thead>
@@ -162,13 +162,13 @@ const PurchaseOrder = () => {
                     {filterBySelectedDate(filterOrders().filter(order => order.order_isarchived === isArchive)).map((order, index) => (
                         <tr key={order._id} onClick={() => handleTableClick(order._id)} className="cursor-pointer text-center">
                             <th scope="row">{order.order_ref}</th>
-                            <td>{formatDate(order.order_date)}</td>
-                            <td>{formatDateTime(order.order_est_datetime)}</td>
+                            <td className="hidden sm:table-cell">{formatDate(order.order_date)}</td>
+                            <td className="hidden sm:table-cell">{formatDateTime(order.order_est_datetime)}</td>
                             <td>{order.project.project_name}</td>
                             <td>{order.supplier.supplier_name}</td>
-                            <td>{order.products.length + order.custom_products.length} products</td>
-                            <td>${(order.order_total_amount).toFixed(2)}</td>
-                            <td>
+                            <td className="hidden md:table-cell">{order.products.length + order.custom_products.length} products</td>
+                            <td className="hidden md:table-cell">${(order.order_total_amount).toFixed(2)}</td>
+                            <td className="hidden md:table-cell">
                                 {order.order_status && (
                                 <label
                                     className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
@@ -212,11 +212,12 @@ const PurchaseOrder = () => {
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"><div className="card">
                 <div className="card-header bg-dark text-white">
-                    <h1 className='mx-auto uppercase font-bold text-xl'>PURCHASE ORDERS</h1>
+                    <h1 className='mx-auto uppercase font-bold text-sm md:text-xl'>PURCHASE ORDERS</h1>
                 </div>
                 <div className="card-body">
                     <div className="row mb-1">
-                        <div className="col-md-6 mb-1">
+                        {/* Search Input */}
+                        <div className="col-12 col-md-6 mb-2 mb-md-1">
                             <input
                                 type="text"
                                 className="form-control"
@@ -225,17 +226,27 @@ const PurchaseOrder = () => {
                                 onChange={handleSearchChange}
                             />
                         </div>
-                        <div className="col-md-6 d-flex justify-content-end">
-                            <button className="btn btn-primary" onClick={handleAddClick}>
-                                <div className='flex items-center'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <label>NEW PURCHASE ORDER</label>
-                                </div>
+
+                        {/* New Purchase Order Button */}
+                        <div className="col-12 col-md-6 d-flex justify-content-md-end justify-content-center mb-2 mb-md-1">
+                            <button className="btn btn-primary d-flex align-items-center" onClick={handleAddClick}>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="size-6 me-1"
+                                    style={{ width: '24px', height: '24px' }}
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span>NEW PURCHASE ORDER</span>
                             </button>
                         </div>
-                        <div className="col-md-6 d-flex justify-content-start">
+
+                        {/* Date Input */}
+                        <div className="col-12 col-md-6 d-flex justify-content-md-start justify-content-center">
                             <input
                                 type="date"
                                 className="form-control"
@@ -244,6 +255,7 @@ const PurchaseOrder = () => {
                             />
                         </div>
                     </div>
+
                     <div className="row mb-3">
                     <div className="col-md-6">
                         <button 

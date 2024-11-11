@@ -16,7 +16,7 @@ const EmployeeDetails = () => {
 
     //Component state declaration
     const employeeState = useSelector((state) => state.employeeReducer.employeeState);
-    const localUserState = useSelector((state) => state.localUserReducer.localUserState);
+    const localUserState = JSON.parse(localStorage.getItem('localUser'))
     const projectState = useSelector((state) => state.projectReducer.projectState);
     const { update } = useUpdateEmployee();
     const dispatch = useDispatch()
@@ -210,12 +210,12 @@ const EmployeeDetails = () => {
         <div className='d-flex m-1 justify-content-end'>
             <button className="btn btn-primary" onClick={handleSelectProjectsClick}>
                 <div className='flex items-center'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 sm:size-6 mr-1">
                         <path id="Vector" 
                         d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z"
                          stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <label>SELECT PROJECTS</label>
+                    <label className='text-xs sm:text-base'>SELECT PROJECTS</label>
                 </div>
             </button>
         </div>
@@ -341,14 +341,14 @@ const EmployeeDetails = () => {
     );
 
     const employeeProjectsTable = (
-        <div className="card-body border-1 relative">
+        <div className="card-body border-1 relative text-xs sm:text-base overflow-x-auto">
             {selectProjectsBtn}
 
             {employeeState && employeeState.projects && employeeState.projects.length > 0 ? (
             <table className="table table-bordered table-hover">
                 <thead className="thead-dark">
                     <tr className="table-primary">
-                        <th scope="col">Id</th>
+                        <th scope="col" className="hidden sm:table-cell">Id</th>
                         <th scope="col">Project Name</th>
                         <th scope="col">Project Address</th>
                         <th scope="col">Project Status</th>
@@ -357,7 +357,7 @@ const EmployeeDetails = () => {
                 <tbody>
                     {employeeState.projects.map((project, index) => (
                             <tr className="cursor-pointer" key={`employeeProjectsTable-${project._id}`} onClick={() => handleTableClick('project', project._id)}>
-                                <th>{index + 1}</th>
+                                <th className="hidden sm:table-cell">{index + 1}</th>
                                 <td>{project.project_name}</td>
                                 <td>{project.project_address}</td>
                                 <td>{project.project_isarchived ? `Archived` : `Active`}</td>
@@ -411,7 +411,7 @@ const EmployeeDetails = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
                         </svg>
                     </button>
-                    <h1 className='mx-auto uppercase font-bold text-xl'>{localUserState.employee_email === employeeState.employee_email ? 'YOUR ACCOUNT' : `EMPLOYEE : ${employeeState.employee_first_name} ${employeeState.employee_last_name}`}</h1>
+                    <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>{localUserState.employee_email === employeeState.employee_email ? 'YOUR ACCOUNT' : `EMPLOYEE : ${employeeState.employee_first_name} ${employeeState.employee_last_name}`}</h1>
                 </div>
             <div className="card-body">
                 <div>

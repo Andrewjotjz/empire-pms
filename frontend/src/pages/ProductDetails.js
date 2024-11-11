@@ -27,7 +27,7 @@ const ProductDetails = () => {
 
     const handlePriceTableClick = (priceId) => { return }
 
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`);
+    const handleBackClick = () => window.history.back();
 
     const handleEditProductClick = () => {
         // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
@@ -101,44 +101,46 @@ const ProductDetails = () => {
 
     //Display DOM
     const productPriceTable = Array.isArray(productState) && productState.length > 0 ? (
-        <div className='container'>
+        <div>
             <h2 className='font-bold'>Product Prices:</h2>
-            <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
-                <thead className="bg-indigo-200 text-center">
-                    <tr>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Effective Date</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Unit A</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Unit B</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Price Fixed (?)</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Project</th>
-                    </tr>
-                </thead>
-                <tbody className='text-center'>
-                {productState.map((item, index) => (
-                    <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
-                        <td className="border border-gray-300 px-2 py-1">{formatDate(item.productPrice.product_effective_date)}</td>
-                        <td className="border border-gray-300 px-2 py-1">
-                            <label>{item.productPrice.product_number_a}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_a}</label>
-                            <div className='mt-1'>${(item.productPrice.product_price_unit_a).toFixed(2)}</div>
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1">
-                            <label>{item.productPrice.product_number_b}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_b}</label>
-                            <div className='mt-1'>${(item.productPrice.product_price_unit_b).toFixed(2)}</div>
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
-                        <td className="border border-gray-300 px-1 py-1">
-                            {item.productPrice.project_names.map((project, index) => (
-                                <label key={index} className='ml-1 p-1 border-2 rounded-md'>
-                                    {project}
-                                </label>
-                            ))}
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+            <div className='overflow-x-auto'>
+                <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
+                    <thead className="bg-indigo-200 text-center">
+                        <tr>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Effective Date</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1">Unit A</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1">Unit B</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Price Fixed (?)</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1">Project</th>
+                        </tr>
+                    </thead>
+                    <tbody className='text-center'>
+                    {productState.map((item, index) => (
+                        <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{formatDate(item.productPrice.product_effective_date)}</td>
+                            <td className="border border-gray-300 px-2 py-1">
+                                <label>{item.productPrice.product_number_a}</label>
+                                <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_a}</label>
+                                <div className='mt-1'>${(item.productPrice.product_price_unit_a).toFixed(2)}</div>
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1">
+                                <label>{item.productPrice.product_number_b}</label>
+                                <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_b}</label>
+                                <div className='mt-1'>${(item.productPrice.product_price_unit_b).toFixed(2)}</div>
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
+                            <td className="border border-gray-300 px-1 py-1">
+                                {item.productPrice.project_names.map((project, index) => (
+                                    <label key={index} className='ml-1 p-1 border-2 rounded-md text-xs sm:text-base'>
+                                        {project}
+                                    </label>
+                                ))}
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     ) : (
         <div>Product Price API fetched successfully, but it might be empty...</div>
@@ -191,31 +193,31 @@ const ProductDetails = () => {
                     </div>
                     {Array.isArray(productState) && productState.length > 0 ? (
                         <div className="row">
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">SKU:</label>
                                 <p className="form-label">{productState[0].product.product_sku}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Name:</label>
                                 <p className="form-label">{productState[0].product.product_name}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Type:</label>
                                 <p className="form-label">{productState[0].product.product_types}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Actual Size:</label>
                                 <p className="form-label">{productState[0].product.product_actual_size}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Alias:</label>
                                 <p className="form-label">{productState[0].product.alias_name}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Next available stock date:</label>
                                 <p className="form-label">{productState[0].product.product_next_available_stock_date || 'In-stock now'}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">isArchived:</label>
                                 <p className="form-label">{productState[0].product.product_isarchived ? 'Yes' : 'No'}</p>
                             </div>

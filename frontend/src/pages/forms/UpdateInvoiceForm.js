@@ -2592,18 +2592,17 @@ const UpdateInvoiceForm = () => {
   }
 
 
-  return (
-    localUser && Object.keys(localUser).length > 0 ? (
+  return localUser && Object.keys(localUser).length > 0 ? (
     <div>
       <div className="w-screen bg-neutral-50 items-center justify-center">
         {/* HEADER */}
-        <div className="mx-3 mt-3 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg">
+        <div className="mx-3 mt-3 p-2 text-center font-bold text-md md:text-xl bg-slate-800 text-white rounded-t-lg">
           <label>EDIT INVOICE: {invoiceState.invoice_ref}</label>
         </div>
         {/* BODY */}
         <form onSubmit={handleSubmitInvoice}>
           {/* Invoice Details */}
-          <div className="mx-3 p-2 grid grid-cols-4 gap-x-4 gap-y-2 border-2">
+          <div className="mx-3 p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2 border-2">
             <div>
               <label className="font-bold">*Supplier:</label>
               <select
@@ -2617,9 +2616,7 @@ const UpdateInvoiceForm = () => {
                 {supplierState &&
                   supplierState.length > 0 &&
                   supplierState
-                    .filter(
-                      (supplier) => supplier.supplier_isarchived === false
-                    )
+                    .filter((supplier) => !supplier.supplier_isarchived)
                     .map((supplier, index) => (
                       <option key={index} value={supplier._id}>
                         {supplier.supplier_name}
@@ -2680,16 +2677,14 @@ const UpdateInvoiceForm = () => {
                 name="invoice_due_date"
                 value={newInvoice.invoice_due_date}
                 onChange={handleInputChange}
-                required
                 onInvalid={(e) =>
                   e.target.setCustomValidity("Enter invoice due date")
                 }
                 onInput={(e) => e.target.setCustomValidity("")}
               />
             </div>
-            <div className="hidden">
+            <div className="col-span-1">
               <label className="font-bold">Invoice Without PO:</label>
-              {/* toggle button */}
               <div className="flex items-center px-1 py-1">
                 <div
                   onClick={handleToggle}
@@ -2709,6 +2704,7 @@ const UpdateInvoiceForm = () => {
               </div>
             </div>
           </div>
+
           {/* Purchase Order Details */}
           {!isToggled ? (
             <div className="mx-3 p-2 border-2">
@@ -2749,258 +2745,193 @@ const UpdateInvoiceForm = () => {
                 </div>
               </div>
               {/* items */}
-              <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
-                <thead className="bg-indigo-200 text-center">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-12"
-                    >
-                      SKU
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-96"
-                    >
-                      Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-40"
-                    >
-                      Location
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-20"
-                    >
-                      Previously invoiced
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Qty Ordered
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Current Invoice Qty
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Unit Price
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Expected Amount
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Current Invoice Amount
-                    </th>
-                  </tr>
-                </thead>
-                {currentOrder ? (
-                  <tbody className="text-center">
-                    {/* registered products */}
-                    {currentOrder.products &&
-                      currentOrder.products.map((prod, index) => (
-                        <tr key={index}>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {prod.product_obj_ref.product_sku}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {prod.product_obj_ref.product_name}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {prod.order_product_location}
-                          </td>
+              <div className="overflow-x-auto">
+                <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-xs md:text-sm">
+                  <thead className="bg-indigo-200 text-center">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-12"
+                      >
+                        SKU
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-96"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-40"
+                      >
+                        Location
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-20"
+                      >
+                        Previously invoiced
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Qty Ordered
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Current Invoice Qty
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Unit Price
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Expected Amount
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Current Invoice Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  {currentOrder ? (
+                    <tbody className="text-center">
+                      {/* registered products */}
+                      {currentOrder.products &&
+                        currentOrder.products.map((prod, index) => (
+                          <tr key={index}>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {prod.product_obj_ref.product_sku}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {prod.product_obj_ref.product_name}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {prod.order_product_location}
+                            </td>
 
-                          {/* Based on previous invoice */}
-                          <td className="border border-gray-300 px-1 py-2 bg-gray-100">
-                            <label>
-                              {currentOrder.invoices.reduce((sum, invoice) => {
-                                // Reduce over each invoice to accumulate the quantities
-                                const invoiceProductQtySum =
-                                  invoice.products.reduce(
-                                    (invoiceSum, invoiceProduct) => {
-                                      // Check if the current product's _id matches the invoice product's _id
-                                      if (prod._id === invoiceProduct._id && invoice._id !== invoiceState._id) {
-                                        // Add the invoice product quantity to the sum if there's a match
-                                        return (
-                                          invoiceSum +
-                                          invoiceProduct.invoice_product_qty_a
-                                        );
-                                      }
-                                      return invoiceSum;
-                                    },
-                                    0
-                                  );
+                            {/* Based on previous invoice */}
+                            <td className="border border-gray-300 px-1 py-2 bg-gray-100">
+                              <label>
+                                {currentOrder.invoices.reduce((sum, invoice) => {
+                                  // Reduce over each invoice to accumulate the quantities
+                                  const invoiceProductQtySum =
+                                    invoice.products.reduce(
+                                      (invoiceSum, invoiceProduct) => {
+                                        // Check if the current product's _id matches the invoice product's _id
+                                        if (
+                                          prod._id === invoiceProduct._id &&
+                                          invoice._id !== invoiceState._id
+                                        ) {
+                                          // Add the invoice product quantity to the sum if there's a match
+                                          return (
+                                            invoiceSum +
+                                            invoiceProduct.invoice_product_qty_a
+                                          );
+                                        }
+                                        return invoiceSum;
+                                      },
+                                      0
+                                    );
 
-                                return sum + invoiceProductQtySum;
-                              }, 0)}
-                            </label>
+                                  return sum + invoiceProductQtySum;
+                                }, 0)}
+                              </label>
 
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              {prod.productprice_obj_ref.product_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            <label>{prod.order_product_qty_a}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              {prod.productprice_obj_ref.product_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 items-center">
-                            <input
-                              type="number"
-                              name="invoice_product_qty_a"
-                              value={
-                                newInvoice.products[index].invoice_product_qty_a
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                {prod.productprice_obj_ref.product_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              <label>{prod.order_product_qty_a}</label>
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                {prod.productprice_obj_ref.product_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 items-center">
+                              <input
+                                type="number"
+                                name="invoice_product_qty_a"
+                                value={
+                                  newInvoice.products[index].invoice_product_qty_a
+                                }
+                                onChange={(e) => handleInputChange(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity(
+                                    "Enter invoice quantity"
+                                  )
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                              />
+                              <label className="ml-2 text-xs opacity-50 text-nowrap">
+                                {prod.productprice_obj_ref.product_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              <label>
+                                $ {prod.productprice_obj_ref.product_price_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-end">
+                              ${" "}
+                              {(
+                                prod.order_product_qty_a *
+                                prod.productprice_obj_ref.product_price_unit_a
+                              ).toFixed(2)}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-end">
+                              ${" "}
+                              {
+                                newInvoice.products[index]
+                                  .invoice_product_gross_amount_a
                               }
-                              onChange={(e) => handleInputChange(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter invoice quantity"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                            />
-                            <label className="ml-2 text-xs opacity-50 text-nowrap">
-                              {prod.productprice_obj_ref.product_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            <label>
-                              $ {prod.productprice_obj_ref.product_price_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-end">
-                            ${" "}
-                            {(
-                              prod.order_product_qty_a *
-                              prod.productprice_obj_ref.product_price_unit_a
-                            ).toFixed(2)}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-end">
-                            ${" "}
-                            {
-                              newInvoice.products[index]
-                                .invoice_product_gross_amount_a
-                            }
-                          </td>
-                        </tr>
-                      ))}
-                    {/* custom products */}
-                    {currentOrder.custom_products &&
-                      currentOrder.custom_products.map((cusprod, index) => (
-                        <tr key={index}>
-                          <td className="border border-gray-300 px-1 py-2">
-                            -
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {cusprod.custom_product_name}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {cusprod.custom_product_location}
-                          </td>
-                          {/* Based on previous invoice */}
-                          <td className="border border-gray-300 px-1 py-2 bg-gray-100">
-                            <label>
-                              {currentOrder.invoices.reduce((sum, invoice) => {
-                                // Reduce over each invoice to accumulate the quantities
-                                const invoiceCtmProdQtySum =
-                                  invoice.custom_products.reduce(
-                                    (invoiceSum, invoiceCtmProd) => {
-                                      // Check if the current product's _id matches the invoice product's _id
-                                      if (cusprod._id === invoiceCtmProd._id && invoice._id !== invoiceState._id) {
-                                        // Add the invoice product quantity to the sum if there's a match
-                                        return (
-                                          invoiceSum +
-                                          invoiceCtmProd?.custom_order_qty
-                                        );
-                                      }
-                                      return invoiceSum;
-                                    },
-                                    0
-                                  );
-
-                                return sum + invoiceCtmProdQtySum;
-                              }, 0)}
-                            </label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              {`unit`}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            <label>{cusprod.custom_order_qty}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              unit
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 items-center">
-                            <input
-                              type="number"
-                              name="custom_order_qty"
-                              value={
-                                newInvoice.custom_products[index]
-                                  ?.custom_order_qty
-                              }
-                              onChange={(e) => handleInputChange(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter invoice quantity"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                            />
-                            <label className="ml-2 text-xs opacity-50 text-nowrap">{`unit`}</label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            $
-                            <input
-                              type="number"
-                              name="custom_order_price"
-                              value={
-                                newInvoice.custom_products[index]
-                                  ?.custom_order_price
-                              }
-                              onChange={(e) => handleInputChange(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity("Enter custom price")
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                              disabled={
-                                currentOrder.invoices.reduce((sum, invoice) => {
+                            </td>
+                          </tr>
+                        ))}
+                      {/* custom products */}
+                      {currentOrder.custom_products &&
+                        currentOrder.custom_products.map((cusprod, index) => (
+                          <tr key={index}>
+                            <td className="border border-gray-300 px-1 py-2">
+                              -
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {cusprod.custom_product_name}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {cusprod.custom_product_location}
+                            </td>
+                            {/* Based on previous invoice */}
+                            <td className="border border-gray-300 px-1 py-2 bg-gray-100">
+                              <label>
+                                {currentOrder.invoices.reduce((sum, invoice) => {
                                   // Reduce over each invoice to accumulate the quantities
                                   const invoiceCtmProdQtySum =
                                     invoice.custom_products.reduce(
                                       (invoiceSum, invoiceCtmProd) => {
                                         // Check if the current product's _id matches the invoice product's _id
                                         if (
-                                          cusprod._id === invoiceCtmProd._id
+                                          cusprod._id === invoiceCtmProd._id &&
+                                          invoice._id !== invoiceState._id
                                         ) {
                                           // Add the invoice product quantity to the sum if there's a match
                                           return (
                                             invoiceSum +
-                                            invoiceCtmProd.custom_order_price
+                                            invoiceCtmProd?.custom_order_qty
                                           );
                                         }
                                         return invoiceSum;
@@ -3009,202 +2940,273 @@ const UpdateInvoiceForm = () => {
                                     );
 
                                   return sum + invoiceCtmProdQtySum;
-                                }, 0) > 0
-                                  ? true
-                                  : false
+                                }, 0)}
+                              </label>
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                {`unit`}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              <label>{cusprod.custom_order_qty}</label>
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                unit
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 items-center">
+                              <input
+                                type="number"
+                                name="custom_order_qty"
+                                value={
+                                  newInvoice.custom_products[index]
+                                    ?.custom_order_qty
+                                }
+                                onChange={(e) => handleInputChange(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity(
+                                    "Enter invoice quantity"
+                                  )
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                              />
+                              <label className="ml-2 text-xs opacity-50 text-nowrap">{`unit`}</label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              $
+                              <input
+                                type="number"
+                                name="custom_order_price"
+                                value={
+                                  newInvoice.custom_products[index]
+                                    ?.custom_order_price
+                                }
+                                onChange={(e) => handleInputChange(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity("Enter custom price")
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                                disabled={
+                                  currentOrder.invoices.reduce((sum, invoice) => {
+                                    // Reduce over each invoice to accumulate the quantities
+                                    const invoiceCtmProdQtySum =
+                                      invoice.custom_products.reduce(
+                                        (invoiceSum, invoiceCtmProd) => {
+                                          // Check if the current product's _id matches the invoice product's _id
+                                          if (
+                                            cusprod._id === invoiceCtmProd._id
+                                          ) {
+                                            // Add the invoice product quantity to the sum if there's a match
+                                            return (
+                                              invoiceSum +
+                                              invoiceCtmProd.custom_order_price
+                                            );
+                                          }
+                                          return invoiceSum;
+                                        },
+                                        0
+                                      );
+
+                                    return sum + invoiceCtmProdQtySum;
+                                  }, 0) > 0
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-center">
+                              -
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-end">
+                              ${" "}
+                              {
+                                newInvoice.custom_products[index]
+                                  ?.custom_order_gross_amount
                               }
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-center">
-                            -
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-end">
-                            ${" "}
-                            {
-                              newInvoice.custom_products[index]
-                                ?.custom_order_gross_amount
-                            }
-                          </td>
-                        </tr>
-                      ))}
-                    {/* calculation table */}
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Delivery fee:
-                      </td>
-                      <td
-                        className="border border-gray-300 px-3 py-2 text-center"
-                        colSpan={2}
-                      >
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_delivery_fee"
-                          value={newInvoice.invoiced_delivery_fee}
-                          onChange={(e) => handleInputChange(e)}
-                          min={0}
-                          step={0.0001}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Strapping/Pallet/Cutting fee:
-                      </td>
-                      <td
-                        className="border border-gray-300 px-3 py-2 text-center"
-                        colSpan={2}
-                      >
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_other_fee"
-                          value={newInvoice.invoiced_other_fee}
-                          onChange={(e) => handleInputChange(e)}
-                          min={0}
-                          step={0.0001}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Credit:
-                      </td>
-                      <td
-                        className="border border-gray-300 px-3 py-2 text-center"
-                        colSpan={2}
-                      >
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_credit"
-                          value={newInvoice.invoiced_credit}
-                          onChange={(e) => handleInputChange(e)}
-                          step={0.01}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Total Gross Amount:
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        ${" "}
-                        {(
-                          invoiceState.order.products.reduce(
-                            (total, prod) =>
-                              total +
-                              (Number(prod.order_product_gross_amount) ||
-                                0),
-                            0
-                          ) +
-                          (Number(newInvoice.invoiced_delivery_fee) || 0) +
-                          (Number(newInvoice.invoiced_other_fee) || 0) +
-                          (Number(newInvoice.invoiced_credit) || 0)
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        ${" "}
-                        {(
-                          newInvoice.invoiced_calculated_total_amount_incl_gst /
-                          1.1
-                        ).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Total Gross Amount (incl GST):
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        ${" "}
-                        {(
-                          (invoiceState.order.products.reduce(
-                            (total, prod) =>
-                              total +
-                              (Number(prod.order_product_gross_amount) ||
-                                0),
-                            0
-                          ) +
+                            </td>
+                          </tr>
+                        ))}
+                      {/* calculation table */}
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Delivery fee:
+                        </td>
+                        <td
+                          className="border border-gray-300 px-3 py-2 text-center"
+                          colSpan={2}
+                        >
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_delivery_fee"
+                            value={newInvoice.invoiced_delivery_fee}
+                            onChange={(e) => handleInputChange(e)}
+                            min={0}
+                            step={0.0001}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Strapping/Pallet/Cutting fee:
+                        </td>
+                        <td
+                          className="border border-gray-300 px-3 py-2 text-center"
+                          colSpan={2}
+                        >
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_other_fee"
+                            value={newInvoice.invoiced_other_fee}
+                            onChange={(e) => handleInputChange(e)}
+                            min={0}
+                            step={0.0001}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Credit:
+                        </td>
+                        <td
+                          className="border border-gray-300 px-3 py-2 text-center"
+                          colSpan={2}
+                        >
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_credit"
+                            value={newInvoice.invoiced_credit}
+                            onChange={(e) => handleInputChange(e)}
+                            step={0.01}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Total Gross Amount:
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                          ${" "}
+                          {(
+                            invoiceState.order.products.reduce(
+                              (total, prod) =>
+                                total +
+                                (Number(prod.order_product_gross_amount) || 0),
+                              0
+                            ) +
                             (Number(newInvoice.invoiced_delivery_fee) || 0) +
                             (Number(newInvoice.invoiced_other_fee) || 0) +
-                            (Number(newInvoice.invoiced_credit) || 0)) *
-                          1.1
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        $ {newInvoice.invoiced_calculated_total_amount_incl_gst}
-                      </td>
-                    </tr>
-                    <tr className="bg-indigo-100">
-                      <td colSpan={5}></td>
-                      <td
-                        className="px-2 py-2 font-bold text-end border border-gray-400"
-                        colSpan={2}
-                      >
-                        Total Raw Amount (incl GST):
-                      </td>
-                      <td className="px-3 py-2 text-center" colSpan={2}>
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_raw_total_amount_incl_gst"
-                          value={newInvoice.invoiced_raw_total_amount_incl_gst}
-                          onChange={(e) => handleInputChange(e)}
-                          min={0}
-                          step={0.01}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 bg-white w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td
-                        colSpan="9"
-                        className="border border-gray-300 p-2 text-center"
-                      >
-                        Purchase order not selected...
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
+                            (Number(newInvoice.invoiced_credit) || 0)
+                          ).toFixed(2)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                          ${" "}
+                          {(
+                            newInvoice.invoiced_calculated_total_amount_incl_gst /
+                            1.1
+                          ).toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Total Gross Amount (incl GST):
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                          ${" "}
+                          {(
+                            (invoiceState.order.products.reduce(
+                              (total, prod) =>
+                                total +
+                                (Number(prod.order_product_gross_amount) || 0),
+                              0
+                            ) +
+                              (Number(newInvoice.invoiced_delivery_fee) || 0) +
+                              (Number(newInvoice.invoiced_other_fee) || 0) +
+                              (Number(newInvoice.invoiced_credit) || 0)) *
+                            1.1
+                          ).toFixed(2)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                          $ {newInvoice.invoiced_calculated_total_amount_incl_gst}
+                        </td>
+                      </tr>
+                      <tr className="bg-indigo-100">
+                        <td colSpan={5}></td>
+                        <td
+                          className="px-2 py-2 font-bold text-end border border-gray-400"
+                          colSpan={2}
+                        >
+                          Total Raw Amount (incl GST):
+                        </td>
+                        <td className="px-3 py-2 text-center" colSpan={2}>
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_raw_total_amount_incl_gst"
+                            value={newInvoice.invoiced_raw_total_amount_incl_gst}
+                            onChange={(e) => handleInputChange(e)}
+                            min={0}
+                            step={0.01}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 bg-white w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  ) : (
+                    <tbody>
+                      <tr>
+                        <td
+                          colSpan="9"
+                          className="border border-gray-300 p-2 text-center"
+                        >
+                          Purchase order not selected...
+                        </td>
+                      </tr>
+                    </tbody>
+                  )}
+                </table>
+              </div>
             </div>
           ) : (
             // INVOICE WITHOUT PO ************************
@@ -3219,330 +3221,331 @@ const UpdateInvoiceForm = () => {
                 </div>
               </div>
               {/* items */}
-              <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
-                <thead className="bg-indigo-200 text-center">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2 w-10"
-                    >
-                      <button
-                        type="button"
-                        className="border-green-400 bg-green-400 btn p-1 hover:bg-green-500"
-                        title="Add more items"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="size-5 cursor-pointer text-white"
-                          onClick={() => handleAddCustomItem(true)}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 4.5v15m7.5-7.5h-15"
-                          />
-                        </svg>
-                      </button>
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2 w-96"
-                    >
-                      Item Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2 w-24"
-                    >
-                      Location
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2 w-16"
-                    >
-                      Invoice Qty
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2 w-20"
-                    >
-                      Unit Price
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2 w-32"
-                    >
-                      Current Invoice Amount
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-center">
-                  {/* custom product */}
-                  {newInvoiceWithoutPO.custom_products &&
-                    newInvoiceWithoutPO.custom_products.map(
-                      (cusprod, index) => (
-                        <tr key={index}>
-                          <td className="border px-1 py-2 text-end flex justify-center items-center space-x-2">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveCustomItem(index, true)
-                              }
-                              className="btn btn-danger p-1"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="h-4 w-4"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                                />
-                              </svg>
-                            </button>
-                          </td>
-                          <td className="border border-gray-300 px-3 py-2">
-                            <input
-                              type="text"
-                              name="custom_product_name"
-                              value={
-                                newInvoiceWithoutPO.custom_products[index]
-                                  .custom_product_name
-                              }
-                              onChange={(e) => handleInputChangeNoPO(e, index)}
-                              required
-                              placeholder="Enter product name"
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter custom product name"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md form-control"
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-3 py-2">
-                            <input
-                              type="text"
-                              name="custom_product_location"
-                              value={
-                                newInvoiceWithoutPO.custom_products[index]
-                                  .custom_product_location
-                              }
-                              onChange={(e) => handleInputChangeNoPO(e, index)}
-                              required
-                              placeholder="Enter location"
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity("Enter location")
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md form-control"
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-3 py-2">
-                            <input
-                              type="number"
-                              name="custom_order_qty"
-                              value={
-                                newInvoiceWithoutPO.custom_products[index]
-                                  .custom_order_qty
-                              }
-                              onChange={(e) => handleInputChangeNoPO(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity("Enter quantity")
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-3 py-2">
-                            $
-                            <input
-                              type="number"
-                              name="custom_order_price"
-                              value={
-                                newInvoiceWithoutPO.custom_products[index]
-                                  .custom_order_price
-                              }
-                              onChange={(e) => handleInputChangeNoPO(e, index)}
-                              step={0.01}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity("Enter custom price")
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-3 py-2 text-end">
-                            ${" "}
-                            {
-                              newInvoiceWithoutPO.custom_products[index]
-                                .custom_order_gross_amount
-                            }
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  {newInvoiceWithoutPO.custom_products.length === 0 && (
+              <div className="overflow-x-auto">
+                <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
+                  <thead className="bg-indigo-200 text-center">
                     <tr>
-                      <td
-                        colSpan="9"
-                        className="border border-gray-300 p-2 text-center"
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-3 py-2 w-10"
                       >
-                        Items not added...
+                        <button
+                          type="button"
+                          className="border-green-400 bg-green-400 btn p-1 hover:bg-green-500"
+                          title="Add more items"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="size-5 cursor-pointer text-white"
+                            onClick={() => handleAddCustomItem(true)}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M12 4.5v15m7.5-7.5h-15"
+                            />
+                          </svg>
+                        </button>
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-3 py-2 w-96"
+                      >
+                        Item Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-3 py-2 w-24"
+                      >
+                        Location
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-3 py-2 w-16"
+                      >
+                        Invoice Qty
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-3 py-2 w-20"
+                      >
+                        Unit Price
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-3 py-2 w-32"
+                      >
+                        Current Invoice Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-center">
+                    {/* custom product */}
+                    {newInvoiceWithoutPO.custom_products &&
+                      newInvoiceWithoutPO.custom_products.map(
+                        (cusprod, index) => (
+                          <tr key={index}>
+                            <td className="border px-1 py-2 text-end flex justify-center items-center space-x-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleRemoveCustomItem(index, true)
+                                }
+                                className="btn btn-danger p-1"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="h-4 w-4"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                  />
+                                </svg>
+                              </button>
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              <input
+                                type="text"
+                                name="custom_product_name"
+                                value={
+                                  newInvoiceWithoutPO.custom_products[index]
+                                    .custom_product_name
+                                }
+                                onChange={(e) => handleInputChangeNoPO(e, index)}
+                                required
+                                placeholder="Enter product name"
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity(
+                                    "Enter custom product name"
+                                  )
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md form-control"
+                              />
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              <input
+                                type="text"
+                                name="custom_product_location"
+                                value={
+                                  newInvoiceWithoutPO.custom_products[index]
+                                    .custom_product_location
+                                }
+                                onChange={(e) => handleInputChangeNoPO(e, index)}
+                                required
+                                placeholder="Enter location"
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity("Enter location")
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md form-control"
+                              />
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              <input
+                                type="number"
+                                name="custom_order_qty"
+                                value={
+                                  newInvoiceWithoutPO.custom_products[index]
+                                    .custom_order_qty
+                                }
+                                onChange={(e) => handleInputChangeNoPO(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity("Enter quantity")
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                              />
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2">
+                              $
+                              <input
+                                type="number"
+                                name="custom_order_price"
+                                value={
+                                  newInvoiceWithoutPO.custom_products[index]
+                                    .custom_order_price
+                                }
+                                onChange={(e) => handleInputChangeNoPO(e, index)}
+                                step={0.01}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity("Enter custom price")
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                              />
+                            </td>
+                            <td className="border border-gray-300 px-3 py-2 text-end">
+                              ${" "}
+                              {
+                                newInvoiceWithoutPO.custom_products[index]
+                                  .custom_order_gross_amount
+                              }
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    {newInvoiceWithoutPO.custom_products.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan="9"
+                          className="border border-gray-300 p-2 text-center"
+                        >
+                          Items not added...
+                        </td>
+                      </tr>
+                    )}
+                    {/* calculation table */}
+                    <tr>
+                      <td colSpan={4}></td>
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                        Delivery fee:
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2 text-end">
+                        $
+                        <input
+                          type="number"
+                          name="invoiced_delivery_fee"
+                          value={newInvoiceWithoutPO.invoiced_delivery_fee}
+                          onChange={(e) => handleInputChangeNoPO(e, null)}
+                          min={0}
+                          step={0.0001}
+                          required
+                          onInvalid={(e) => e.target.setCustomValidity("")}
+                          onInput={(e) => e.target.setCustomValidity("")}
+                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                        />
                       </td>
                     </tr>
-                  )}
-                  {/* calculation table */}
-                  <tr>
-                    <td colSpan={4}></td>
-                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">
-                      Delivery fee:
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-end">
-                      $
-                      <input
-                        type="number"
-                        name="invoiced_delivery_fee"
-                        value={newInvoiceWithoutPO.invoiced_delivery_fee}
-                        onChange={(e) => handleInputChangeNoPO(e, null)}
-                        min={0}
-                        step={0.0001}
-                        required
-                        onInvalid={(e) => e.target.setCustomValidity("")}
-                        onInput={(e) => e.target.setCustomValidity("")}
-                        className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4}></td>
-                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">
-                      Strapping/Pallet/Cutting fee:
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-end">
-                      $
-                      <input
-                        type="number"
-                        name="invoiced_other_fee"
-                        value={newInvoiceWithoutPO.invoiced_other_fee}
-                        onChange={(e) => handleInputChangeNoPO(e, null)}
-                        min={0}
-                        step={0.0001}
-                        required
-                        onInvalid={(e) => e.target.setCustomValidity("")}
-                        onInput={(e) => e.target.setCustomValidity("")}
-                        className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4}></td>
-                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">
-                      Credit:
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-end">
-                      $
-                      <input
-                        type="number"
-                        name="invoiced_credit"
-                        value={newInvoiceWithoutPO.invoiced_credit}
-                        onChange={(e) => handleInputChangeNoPO(e, null)}
-                        min={0}
-                        step={0.01}
-                        required
-                        onInvalid={(e) => e.target.setCustomValidity("")}
-                        onInput={(e) => e.target.setCustomValidity("")}
-                        className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4}></td>
-                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">
-                      Total Gross Amount:
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-end">
-                      ${" "}
-                      {(
-                        newInvoiceWithoutPO.custom_products.reduce(
-                          (total, prod) =>
-                            total +
-                            (Number(prod.custom_order_gross_amount) || 0),
-                          0
-                        ) +
-                        (Number(newInvoiceWithoutPO.invoiced_delivery_fee) ||
-                          0) +
-                        (Number(newInvoiceWithoutPO.invoiced_other_fee) || 0) +
-                        (Number(newInvoiceWithoutPO.invoiced_credit) || 0)
-                      ).toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colSpan={4}></td>
-                    <td className="border border-gray-300 px-2 py-2 font-bold text-end">
-                      Total Gross Amount (incl GST):
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-end">
-                      ${" "}
-                      {(
-                        (newInvoiceWithoutPO.custom_products.reduce(
-                          (total, prod) =>
-                            total +
-                            (Number(prod.custom_order_gross_amount) || 0),
-                          0
-                        ) +
+                    <tr>
+                      <td colSpan={4}></td>
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                        Strapping/Pallet/Cutting fee:
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2 text-end">
+                        $
+                        <input
+                          type="number"
+                          name="invoiced_other_fee"
+                          value={newInvoiceWithoutPO.invoiced_other_fee}
+                          onChange={(e) => handleInputChangeNoPO(e, null)}
+                          min={0}
+                          step={0.0001}
+                          required
+                          onInvalid={(e) => e.target.setCustomValidity("")}
+                          onInput={(e) => e.target.setCustomValidity("")}
+                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={4}></td>
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                        Credit:
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2 text-end">
+                        $
+                        <input
+                          type="number"
+                          name="invoiced_credit"
+                          value={newInvoiceWithoutPO.invoiced_credit}
+                          onChange={(e) => handleInputChangeNoPO(e, null)}
+                          min={0}
+                          step={0.01}
+                          required
+                          onInvalid={(e) => e.target.setCustomValidity("")}
+                          onInput={(e) => e.target.setCustomValidity("")}
+                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={4}></td>
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                        Total Gross Amount:
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2 text-end">
+                        ${" "}
+                        {(
+                          newInvoiceWithoutPO.custom_products.reduce(
+                            (total, prod) =>
+                              total +
+                              (Number(prod.custom_order_gross_amount) || 0),
+                            0
+                          ) +
                           (Number(newInvoiceWithoutPO.invoiced_delivery_fee) ||
                             0) +
-                          (Number(newInvoiceWithoutPO.invoiced_other_fee) ||
-                            0) +
-                          (Number(newInvoiceWithoutPO.invoiced_credit) || 0)) *
-                        1.1
-                      ).toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bg-indigo-100">
-                    <td colSpan={4}></td>
-                    <td className="px-2 py-2 font-bold text-end border border-gray-400">
-                      Total Raw Amount (incl GST):
-                    </td>
-                    <td className="px-3 py-2 text-end">
-                      $
-                      <input
-                        type="number"
-                        name="invoiced_raw_total_amount_incl_gst"
-                        value={
-                          newInvoiceWithoutPO.invoiced_raw_total_amount_incl_gst
-                        }
-                        onChange={(e) => handleInputChangeNoPO(e, null)}
-                        min={0}
-                        step={0.01}
-                        required
-                        onInvalid={(e) => e.target.setCustomValidity("")}
-                        onInput={(e) => e.target.setCustomValidity("")}
-                        className="rounded-lg ml-1 bg-white w-32"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                          (Number(newInvoiceWithoutPO.invoiced_other_fee) || 0) +
+                          (Number(newInvoiceWithoutPO.invoiced_credit) || 0)
+                        ).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td colSpan={4}></td>
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                        Total Gross Amount (incl GST):
+                      </td>
+                      <td className="border border-gray-300 px-3 py-2 text-end">
+                        ${" "}
+                        {(
+                          (newInvoiceWithoutPO.custom_products.reduce(
+                            (total, prod) =>
+                              total +
+                              (Number(prod.custom_order_gross_amount) || 0),
+                            0
+                          ) +
+                            (Number(newInvoiceWithoutPO.invoiced_delivery_fee) ||
+                              0) +
+                            (Number(newInvoiceWithoutPO.invoiced_other_fee) ||
+                              0) +
+                            (Number(newInvoiceWithoutPO.invoiced_credit) || 0)) *
+                          1.1
+                        ).toFixed(2)}
+                      </td>
+                    </tr>
+                    <tr className="bg-indigo-100">
+                      <td colSpan={4}></td>
+                      <td className="px-2 py-2 font-bold text-end border border-gray-400">
+                        Total Raw Amount (incl GST):
+                      </td>
+                      <td className="px-3 py-2 text-end">
+                        $
+                        <input
+                          type="number"
+                          name="invoiced_raw_total_amount_incl_gst"
+                          value={
+                            newInvoiceWithoutPO.invoiced_raw_total_amount_incl_gst
+                          }
+                          onChange={(e) => handleInputChangeNoPO(e, null)}
+                          min={0}
+                          step={0.01}
+                          required
+                          onInvalid={(e) => e.target.setCustomValidity("")}
+                          onInput={(e) => e.target.setCustomValidity("")}
+                          className="rounded-lg ml-1 bg-white w-32"
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
           {/* Invoice Details */}
           <div className="mx-3 p-2 border-2">
-
             <div className="flex justify-between mb-2">
               <div>
                 <label className="font-bold">*Invoice status:</label>
@@ -3595,7 +3598,9 @@ const UpdateInvoiceForm = () => {
         {updateConfirmationModal}
         {registerConfirmationModal}
       </div>
-    </div> ) : ( <UnauthenticatedSkeleton /> )
+    </div>
+  ) : (
+    <UnauthenticatedSkeleton />
   );
 };
 

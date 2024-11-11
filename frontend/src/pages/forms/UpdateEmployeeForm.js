@@ -57,8 +57,8 @@ const UpdateEmployeeForm = () => {
                         <h1>EDIT ACCOUNT DETAILS</h1>
                     </div>
                     <form className="card-body" onSubmit={handleSubmit}>
-                        <div className="d-flex justify-content-end mb-3">
-                            <button type="button" className="btn btn-secondary bg" onClick={handleChangePasswordClick}>CHANGE PASSWORD</button>
+                        <div className="d-flex justify-content-end mb-3 hover:cursor-not-allowed">
+                            <button type="button" className="btn btn-secondary bg" onClick={handleChangePasswordClick} disabled={true}>CHANGE PASSWORD</button>
                         </div>
                         <div className="row">
                             <div className="col-md-6 mb-3">

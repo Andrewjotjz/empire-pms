@@ -91,26 +91,26 @@ const Employee = () => {
 
     //Display DOM
     const employeeTable = Array.isArray(employeeState) && employeeState.length > 0 ? (
-        <div>
+        <div className="text-xs sm:text-base">
             <table className="table table-bordered table-hover shadow-md">
                 <thead className="thead-dark">
                     <tr className="table-primary">
-                        <th scope="col">ID</th>
+                        <th scope="col" className="hidden sm:table-cell">ID</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Email</th>
+                        <th scope="col" className="hidden sm:table-cell">Email</th>
                         <th scope="col">Contact</th>
-                        <th scope="col">Role</th>
+                        <th scope="col" className="hidden sm:table-cell">Role</th>
                         <th scope="col">Project</th>
                     </tr>
                 </thead>
                 <tbody>
                     {filterEmployees().filter(employee => employee.employee_isarchived === isArchive).map((employee, index) => (
                         <tr key={employee._id} onClick={() => handleTableClick(employee._id)} className="cursor-pointer">
-                            <th scope="row">{index + 1}</th>
+                            <th scope="row" className="hidden sm:table-cell">{index + 1}</th>
                             <td>{`${employee.employee_first_name} ${employee.employee_last_name}`}</td>
-                            <td>{employee.employee_email}</td>
+                            <td className="hidden sm:table-cell">{employee.employee_email}</td>
                             <td>{employee.employee_mobile_phone}</td>
-                            <td>{employee.employee_roles}</td>
+                            <td className="hidden sm:table-cell">{employee.employee_roles}</td>
                             <td>{employee.projects
                                 .map((project, index) => (
                                     <div key={index}> {project.project_name}</div>
@@ -141,8 +141,8 @@ const Employee = () => {
                     <h1 className='mx-auto uppercase font-bold text-xl'>EMPLOYEES</h1>
                 </div>
                 <div className="card-body">
-                    <div className="row mb-3">
-                        <div className="col-md-6">
+                    <div  className="flex flex-col md:flex-row mb-3 gap-2">
+                        <div className="flex-1">
                             <input
                                 type="text"
                                 className="form-control"
@@ -151,8 +151,8 @@ const Employee = () => {
                                 onChange={handleSearchChange}
                             />
                         </div>
-                        <div className="col-md-6 d-flex justify-content-end">
-                            <button className="btn btn-primary" onClick={handleAddClick}>
+                        <div className="flex justify-end">
+                            <button className="btn btn-primary flex items-center" onClick={handleAddClick}>
                                 <div className='flex items-center'>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -162,20 +162,22 @@ const Employee = () => {
                             </button>
                         </div>
                     </div>
-                    <div className="col mb-6">
+                    <div>
                         <button 
-                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} 
+                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} 
                             onClick={() => setIsArchive(false)}
                         >
                             Current
                         </button>
                         <button 
-                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50'}`} 
+                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} 
                             onClick={() => setIsArchive(true)}
                         >
                             Archived
                         </button>
-                        {employeeTable}
+                        <div className="border rounded-md overflow-auto">
+                            {employeeTable}
+                        </div>
                     </div>
                 </div>
             </div>

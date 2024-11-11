@@ -133,20 +133,20 @@ const InvoicePage = () => {
     
     //Display DOM
     const invoiceTable = Array.isArray(invoiceState) && invoiceState.length > 0 ? (
-        <div className="container text-sm">
-            <table className="table table-bordered table-hover shadow-md">
+        <div className="container text-sm overflow-x-auto">
+            <table className="table table-bordered table-hover shadow-md w-full">
                 <thead className="thead-dark text-center">
                     <tr className="table-primary">
                         <th scope="col">Invoice Ref</th>
                         <th scope="col">Supplier</th>
                         <th scope="col">Order Ref</th>
-                        <th scope="col">Issued on</th>
-                        <th scope="col">Received on</th>
-                        <th scope="col">Due on</th>
-                        <th scope="col">Computed Gross Amount (+GST)</th>
-                        <th scope="col">Raw Gross Amount (+GST)</th>
+                        <th scope="col" className="hidden sm:table-cell">Issued on</th>
+                        <th scope="col" className="hidden sm:table-cell">Received on</th>
+                        <th scope="col" className="hidden md:table-cell">Due on</th>
+                        <th scope="col" className="hidden lg:table-cell">Computed Gross Amount (+GST)</th>
+                        <th scope="col" className="hidden lg:table-cell">Raw Gross Amount (+GST)</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Payment</th>
+                        <th scope="col" className="hidden sm:table-cell">Payment</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,33 +155,33 @@ const InvoicePage = () => {
                             <th scope="row">{invoice.invoice_ref}</th>
                             <td>{invoice.supplier.supplier_name}</td>
                             <td>{invoice.order?.order_ref || '-'}</td>
-                            <td>{formatDateTime(invoice.invoice_issue_date)}</td>
-                            <td>{formatDateTime(invoice.invoice_received_date)}</td>
-                            <td>{formatDateTime(invoice.invoice_due_date)}</td>
-                            <td>${(invoice.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
-                            <td>${(invoice.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
+                            <td className="hidden sm:table-cell">{formatDateTime(invoice.invoice_issue_date)}</td>
+                            <td className="hidden sm:table-cell">{formatDateTime(invoice.invoice_received_date)}</td>
+                            <td className="hidden md:table-cell">{formatDateTime(invoice.invoice_due_date)}</td>
+                            <td className="hidden lg:table-cell">${(invoice.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
+                            <td className="hidden lg:table-cell">${(invoice.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
                             <td>
                                 {invoice.invoice_status && (
-                                <label
-                                    className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
-                                        invoice.invoice_status === "Cancelled"
-                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
-                                            : invoice.invoice_status === "To review"
-                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
-                                            : invoice.invoice_status === "Settled"
-                                            ? "border-2 bg-transparent border-green-600 text-green-600"
-                                            : invoice.invoice_status === "To reconcile"
-                                            ? "border-2 bg-transparent border-red-600 text-red-600"
-                                            : invoice.invoice_status === "Reviewed"
-                                            ? "border-2 bg-transparent border-blue-400 text-blue-400"
-                                            : ""
-                                    }`}
-                                >
-                                    {invoice.invoice_status}
-                                </label>
+                                    <label
+                                        className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
+                                            invoice.invoice_status === "Cancelled"
+                                                ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                                : invoice.invoice_status === "To review"
+                                                ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                                : invoice.invoice_status === "Settled"
+                                                ? "border-2 bg-transparent border-green-600 text-green-600"
+                                                : invoice.invoice_status === "To reconcile"
+                                                ? "border-2 bg-transparent border-red-600 text-red-600"
+                                                : invoice.invoice_status === "Reviewed"
+                                                ? "border-2 bg-transparent border-blue-400 text-blue-400"
+                                                : ""
+                                        }`}
+                                    >
+                                        {invoice.invoice_status}
+                                    </label>
                                 )}
                             </td>
-                            <td>
+                            <td className="hidden sm:table-cell">
                                 {invoice?.payment?.payment_status && (
                                     <label
                                         className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
@@ -209,6 +209,7 @@ const InvoicePage = () => {
         <div>Invoice API fetched successfully, but it might be empty...</div>
     );
     
+    
     if (isLoadingState) { return (<EmployeePageSkeleton />); }
 
     if (errorState) {
@@ -223,7 +224,7 @@ const InvoicePage = () => {
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"><div className="card">
                 <div className="card-header bg-dark text-white">
-                    <h1 className='mx-auto uppercase font-bold text-xl'>INVOICES</h1>
+                    <h1 className='mx-auto uppercase font-bold text-md sm:text-xl'>INVOICES</h1>
                 </div>
                 <div className="card-body">
                     <div className="row mb-1">
@@ -236,13 +237,20 @@ const InvoicePage = () => {
                                 onChange={handleSearchChange}
                             />
                         </div>
-                        <div className="col-md-6 d-flex justify-content-end">
-                            <button className="btn btn-primary" onClick={handleAddClick}>
-                                <div className='flex items-center'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                        <div className="col-12 col-md-6 d-flex justify-content-md-end mb-2">
+                            <button className="btn btn-primary w-full md:w-auto" onClick={handleAddClick}>
+                                <div className="flex items-center justify-center">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-5 h-5 mr-1"
+                                    >
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                     </svg>
-                                    <label>NEW INVOICE</label>
+                                    <span className="text-xs sm:text-sm">NEW INVOICE</span>
                                 </div>
                             </button>
                         </div>

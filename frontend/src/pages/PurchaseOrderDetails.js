@@ -180,39 +180,39 @@ const PurchaseOrderDetails = () => {
     }
 
     const purchaseOrderDetails = purchaseOrderState ? (
-        <div className="row">
-            <div className="col-md-6 mb-3">
+        <div className="row text-xs md:text-sm">
+            <div className="col-md-6 md:mb-3">
                 <label className="form-label fw-bold">Supplier:</label>
                 <p className="form-label">{purchaseOrderState.supplier.supplier_name}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 md:mb-3">
                 <label className="form-label fw-bold">Archived (?):</label>
                 {purchaseOrderState.order_isarchived ? 
-                    (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                    (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</label>)
+                    (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                    (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</label>)
                 }
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 md:mb-3">
                 <label className="form-label fw-bold">Order Date:</label>
                 <p className="form-label">{formatDate(purchaseOrderState.order_date)}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 md:mb-3">
                 <label className="form-label fw-bold">EST Date/Time:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.order_est_datetime)}</p>
             </div>
-            <div className="col-md-6 mb-3 text-sm opacity-50">
+            <div className="col-md-6 md:mb-3 text-sm opacity-50">
                 <label className="form-label fw-bold">Created on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.createdAt)}</p>
             </div>
-            <div className="col-md-6 mb-3 text-sm opacity-50">
+            <div className="col-md-6 md:mb-3 text-sm opacity-50">
                 <label className="form-label fw-bold">Last Updated on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.updatedAt)}</p>
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6 md:mb-3">
                 <label className="form-label fw-bold">Order Status:</label>
                 {purchaseOrderState.order_status && (
                 <label
-                    className={`text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
+                    className={`text-sm md:text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
                         purchaseOrderState.order_status === "Cancelled"
                             ? "border-2 bg-transparent border-gray-500 text-gray-500"
                             : purchaseOrderState.order_status === "Pending"
@@ -236,108 +236,136 @@ const PurchaseOrderDetails = () => {
     );
 
     const productsTable = purchaseOrderState.products.length > 0 || purchaseOrderState.custom_products.length > 0 ? (
-        <div className="container p-0 bg-slate-50 mb-4 shadow-md text-sm">
-            <table className="table table-bordered table-hover m-0">
-                <thead className="thead-dark text-center">
-                    <tr className="table-primary">
-                        <th scope="col">SKU</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Location</th>
-                        <th scope="col">Qty A</th>
-                        <th scope="col">Qty B</th>
-                        <th scope="col">Price A</th>
-                        <th scope="col">Net Amount</th>
-                    </tr>
-                </thead>
-                <tbody className='text-center'>
-                    {purchaseOrderState.products && purchaseOrderState.products.map((product, index) => (
-                    <tr key={`${product.product_obj_ref._id}-${index}`} className='cursor-pointer' onClick={() => handleProductTableClick(product.product_obj_ref._id)}>
-                        <td>{product.product_obj_ref.product_sku}</td>
-                        <td>{product.product_obj_ref.product_name}</td>
-                        <td>{product.order_product_location}</td>
-                        <td>
-                            {Number.isInteger(product.order_product_qty_a)
-                                ? product.order_product_qty_a
-                                : parseFloat(product.order_product_qty_a).toFixed(4)}
-                        </td>
-                        <td>
-                            {Number.isInteger(product.order_product_qty_b)
-                                ? product.order_product_qty_b
-                                : parseFloat(product.order_product_qty_b).toFixed(4)}
-                        </td>
-                        <td>$ {product.order_product_price_unit_a.toFixed(2)}</td>
-                        <td className='text-end'>$ {product.order_product_gross_amount.toFixed(2)}</td>
-                    </tr>
-                    ))}
-                    {purchaseOrderState.custom_products && purchaseOrderState.custom_products.map((cusProduct, index) => (
-                    <tr key={index} className='cursor-default'>
-                        <td>CUSTOM {index + 1}</td>
-                        <td>{cusProduct.custom_product_name}</td>
-                        <td>{cusProduct.custom_product_location}</td>
-                        <td>{cusProduct.custom_order_qty}</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                    </tr>
-                    ))}
-                </tbody>
-            </table>
-            <div className='flex justify-end'>
-                <div>
+        <div className="container p-0 bg-slate-50 mb-4 shadow-md text-xs md:text-sm">
+            <div className="table-responsive">
+                <table className="table table-bordered table-hover m-0">
+                    <thead className="thead-dark text-center">
+                        <tr className="table-primary">
+                            <th scope="col">SKU</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Qty A</th>
+                            <th scope="col">Qty B</th>
+                            <th scope="col">Price A</th>
+                            <th scope="col">Net Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody className="text-center">
+                        {purchaseOrderState.products &&
+                            purchaseOrderState.products.map((product, index) => (
+                                <tr
+                                    key={`${product.product_obj_ref._id}-${index}`}
+                                    className="cursor-pointer"
+                                    onClick={() => handleProductTableClick(product.product_obj_ref._id)}
+                                >
+                                    <td>{product.product_obj_ref.product_sku}</td>
+                                    <td>{product.product_obj_ref.product_name}</td>
+                                    <td>{product.order_product_location}</td>
+                                    <td>
+                                        {Number.isInteger(product.order_product_qty_a)
+                                            ? product.order_product_qty_a
+                                            : parseFloat(product.order_product_qty_a).toFixed(4)}
+                                    </td>
+                                    <td>
+                                        {Number.isInteger(product.order_product_qty_b)
+                                            ? product.order_product_qty_b
+                                            : parseFloat(product.order_product_qty_b).toFixed(4)}
+                                    </td>
+                                    <td>$ {product.order_product_price_unit_a.toFixed(2)}</td>
+                                    <td className="text-end">$ {product.order_product_gross_amount.toFixed(2)}</td>
+                                </tr>
+                            ))}
+                        {purchaseOrderState.custom_products &&
+                            purchaseOrderState.custom_products.map((cusProduct, index) => (
+                                <tr key={index} className="cursor-default">
+                                    <td>CUSTOM {index + 1}</td>
+                                    <td>{cusProduct.custom_product_name}</td>
+                                    <td>{cusProduct.custom_product_location}</td>
+                                    <td>{cusProduct.custom_order_qty}</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <div className="d-flex justify-content-end">
+                <div className="table-responsive w-auto">
                     <table className="table text-end font-bold border-x-2 mb-0">
                         <tbody>
                             <tr>
-                                <td className='pt-1'>Subtotal:</td>
-                                <td className='pt-1'>$ {totalGrossAmount}</td>
+                                <td className="pt-1">Subtotal:</td>
+                                <td className="pt-1">$ {totalGrossAmount}</td>
                             </tr>
                             <tr>
                                 <td>Delivery & Other fees:</td>
-                                <td>$ {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                    return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
-                                }, 0)}</td>
+                                <td>
+                                    $ {purchaseOrderState.invoices.reduce(
+                                        (totalSum, invoice) =>
+                                            totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee,
+                                        0
+                                    )}
+                                </td>
                             </tr>
                             <tr>
                                 <td>Total Due:</td>
-                                <td>$ { purchaseOrderState.products.reduce((totalSum, product) => {
-                                    return totalSum + product.order_product_gross_amount
-                                }, 0) +
-                                    purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                        return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
-                                    }, 0) }</td>
+                                <td>
+                                    ${" "}
+                                    {purchaseOrderState.products.reduce(
+                                        (totalSum, product) => totalSum + product.order_product_gross_amount,
+                                        0
+                                    ) +
+                                        purchaseOrderState.invoices.reduce(
+                                            (totalSum, invoice) =>
+                                                totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee,
+                                            0
+                                        )}
+                                </td>
                             </tr>
                             <tr>
                                 <td>Total Due (incl GST):</td>
                                 <td>
-                                    $ {(
-                                        (purchaseOrderState.products.reduce((totalSum, product) => {
-                                            return totalSum + product.order_product_gross_amount;
-                                        }, 0) +
-                                        purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                            return totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee;
-                                        }, 0)) * 1.1
+                                    ${" "}
+                                    {(
+                                        (purchaseOrderState.products.reduce(
+                                            (totalSum, product) => totalSum + product.order_product_gross_amount,
+                                            0
+                                        ) +
+                                            purchaseOrderState.invoices.reduce(
+                                                (totalSum, invoice) =>
+                                                    totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee,
+                                                0
+                                            )) *
+                                        1.1
                                     ).toFixed(2)}
                                 </td>
                             </tr>
                             <tr>
                                 <td>Amount Paid:</td>
-                                <td>$ {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                    if (invoice.invoice_status === "Settled") {
-                                        return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
-                                    }
-                                    return totalSum;
-                                }, 0)}</td>
+                                <td>
+                                    ${" "}
+                                    {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                        if (invoice.invoice_status === "Settled") {
+                                            return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                                        }
+                                        return totalSum;
+                                    }, 0)}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
     ): (
         <div className='border'>Purchase Order's products fetched successfully, but it might be empty...</div>
     );
 
     const internalComments = purchaseOrderState.order_internal_comments !== '' ? (
-        <div className="card-body border-1 relative shadow-md p-2" ref={internalCommentsRef}>
+        <div className="card-body border-1 relative shadow-md p-2 text-xs md:text-sm" ref={internalCommentsRef}>
             <div className='border rounded-md bg-blue-100 p-2 h-auto'>
                 <p>{purchaseOrderState.order_internal_comments}</p>
             </div>
@@ -348,7 +376,7 @@ const PurchaseOrderDetails = () => {
 
     const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
         <>
-        <div ref={invoicesTableRef}>
+        <div ref={invoicesTableRef} className='overflow-x-auto text-xs md:text-sm'>
             <table className="table table-bordered table-hover text-xs shadow-sm">
                 <thead className="thead-dark">
                     <tr className="table-primary">
@@ -465,7 +493,7 @@ const PurchaseOrderDetails = () => {
     );
 
     const supplierDetails = purchaseOrderState.supplier ? (
-        <div className="card-body border-1 relative shadow-md" ref={supplierDetailsRef}>
+        <div className="card-body border-1 relative shadow-md text-xs md:text-sm" ref={supplierDetailsRef}>
             <div className="row">
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Supplier Name:</label>
@@ -502,13 +530,13 @@ const PurchaseOrderDetails = () => {
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Supplier Status:</label>
                     {purchaseOrderState.supplier.supplier_isarchived ? 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
+                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
                     }
                 </div>
                 
-                <div>
-                    <h2 className='font-bold text-xl m-1'>Supplier Contacts</h2>
+                <div className='overflow-x-auto'>
+                    <h2 className='font-bold text-xs md:text-xl m-1'>Supplier Contacts</h2>
                     <table className="table table-bordered shadow-sm">
                         <thead className="thead-dark">
                             
@@ -538,7 +566,7 @@ const PurchaseOrderDetails = () => {
     );
 
     const notesToSupplier = purchaseOrderState.order_notes_to_supplier !== '' ? (
-        <div className="card-body border-1 relative shadow-md p-2" ref={notesToSupplierRef}>
+        <div className="card-body border-1 relative shadow-md p-2 text-xs md:text-sm" ref={notesToSupplierRef}>
             <div className='border rounded-md bg-yellow-200 p-2 h-auto'>
                 <p>{purchaseOrderState.order_notes_to_supplier}</p>
             </div>
@@ -580,7 +608,7 @@ const PurchaseOrderDetails = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
                         </svg>
                     </button>
-                    <h1 className='mx-auto uppercase font-bold text-xl'>PURCHASE ORDER: {purchaseOrderState.order_ref}</h1>
+                    <h1 className='mx-auto uppercase font-bold text-sm md:text-xl'>PURCHASE ORDER: {purchaseOrderState.order_ref}</h1>
                 </div>
                 <div className="card-body">
                     {/* DROPDOWN ACTION */}
@@ -621,26 +649,50 @@ const PurchaseOrderDetails = () => {
                         { productsTable }
                     </div>
                     {/* TABS */}
-                    <div className='grid grid-cols-3 gap-x-3'>
-                        <div className='col-span-2'>
-                            <div>
-                                <button className={`${currentLeftTab === 'invoicesTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentLeftTab('invoicesTable'); scrollToDiv(invoicesTableRef);}}>Invoices</button>
-                                <button className={`${currentLeftTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentLeftTab('supplierDetails'); scrollToDiv(supplierDetailsRef);}}>Supplier Details</button>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'>
+                        {/* Left Section with Tabs for Invoices and Supplier Details */}
+                        <div className='col-span-1 md:col-span-2'>
+                            <div className='flex text-xs md:text-sm'>
+                                <button 
+                                    className={`${currentLeftTab === 'invoicesTable' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                                    onClick={() => { setCurrentLeftTab('invoicesTable'); scrollToDiv(invoicesTableRef); }}>
+                                    Invoices
+                                </button>
+                                <button 
+                                    className={`${currentLeftTab === 'supplierDetails' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                                    onClick={() => { setCurrentLeftTab('supplierDetails'); scrollToDiv(supplierDetailsRef); }}>
+                                    Supplier Details
+                                </button>
                             </div>
-                            {/* SWITCH BETWEEN COMPONENTS HERE */}
-                            {currentLeftTab === 'invoicesTable' && invoicesTable}
-                            {currentLeftTab === 'supplierDetails' && supplierDetails}
+                            {/* Conditional Rendering for Left Tab Content */}
+                            <div>
+                                {currentLeftTab === 'invoicesTable' && invoicesTable}
+                                {currentLeftTab === 'supplierDetails' && supplierDetails}
+                            </div>
                         </div>
+
+                        {/* Right Section with Tabs for Internal Comments and Notes to Supplier */}
                         <div className='col-span-1'>
-                            <div>
-                                <button className={`${currentRightTab === 'internalComments' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentRightTab('internalComments'); scrollToDiv(internalCommentsRef);}}>Internal Comments</button>
-                                <button className={`${currentRightTab === 'notesToSupplier' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentRightTab('notesToSupplier'); scrollToDiv(notesToSupplierRef);}}>Notes to Supplier</button>
+                            <div className='flex text-xs md:text-sm'>
+                                <button 
+                                    className={`${currentRightTab === 'internalComments' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                                    onClick={() => { setCurrentRightTab('internalComments'); scrollToDiv(internalCommentsRef); }}>
+                                    Internal Comments
+                                </button>
+                                <button 
+                                    className={`${currentRightTab === 'notesToSupplier' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                                    onClick={() => { setCurrentRightTab('notesToSupplier'); scrollToDiv(notesToSupplierRef); }}>
+                                    Notes to Supplier
+                                </button>
                             </div>
-                            {/* NOTES TO SUPPLIER */}
-                            {currentRightTab === 'internalComments' && internalComments}
-                            {currentRightTab === 'notesToSupplier' && notesToSupplier}
+                            {/* Conditional Rendering for Right Tab Content */}
+                            <div>
+                                {currentRightTab === 'internalComments' && internalComments}
+                                {currentRightTab === 'notesToSupplier' && notesToSupplier}
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
             { archiveModal }
