@@ -935,7 +935,7 @@ const UpdatePurchaseOrderForm = () => {
                           <td>
                             <input
                               type="text"
-                              className="form-control text-xs lg:text-base px-1 py-0.5 text-xs"
+                              className="form-control text-xs lg:text-base px-1 py-0.5"
                               name="custom_product_name"
                               value={cproduct.custom_product_name}
                               onChange={(e) =>
@@ -954,7 +954,7 @@ const UpdatePurchaseOrderForm = () => {
                           <td>
                             <input
                               type="text"
-                              className="form-control text-xs lg:text-base px-1 py-0.5 text-xs"
+                              className="form-control text-xs lg:text-base px-1 py-0.5"
                               name="custom_product_location"
                               value={cproduct.custom_product_location}
                               onChange={(e) =>
