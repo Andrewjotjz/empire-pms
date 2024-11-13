@@ -271,8 +271,12 @@ const PurchaseOrderDetails = () => {
                                             ? product.order_product_qty_b
                                             : parseFloat(product.order_product_qty_b).toFixed(4)}
                                     </td>
-                                    <td>$ {product.order_product_price_unit_a.toFixed(2)}</td>
-                                    <td className="text-end">$ {product.order_product_gross_amount.toFixed(2)}</td>
+                                    <td>
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.order_product_price_unit_a)}
+                                    </td>
+                                    <td className="text-end">
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.order_product_gross_amount)}
+                                    </td>
                                 </tr>
                             ))}
                         {purchaseOrderState.custom_products &&
@@ -297,38 +301,37 @@ const PurchaseOrderDetails = () => {
                         <tbody>
                             <tr>
                                 <td className="pt-1">Subtotal:</td>
-                                <td className="pt-1">$ {totalGrossAmount}</td>
+                                <td className="pt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalGrossAmount)}</td>
                             </tr>
                             <tr>
                                 <td>Delivery & Other fees:</td>
                                 <td>
-                                    $ {purchaseOrderState.invoices.reduce(
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchaseOrderState.invoices.reduce(
                                         (totalSum, invoice) =>
                                             totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee,
                                         0
-                                    )}
+                                    ))}
                                 </td>
                             </tr>
                             <tr>
                                 <td>Total Due:</td>
                                 <td>
-                                    ${" "}
-                                    {purchaseOrderState.products.reduce(
-                                        (totalSum, product) => totalSum + product.order_product_gross_amount,
-                                        0
-                                    ) +
-                                        purchaseOrderState.invoices.reduce(
-                                            (totalSum, invoice) =>
-                                                totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee,
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchaseOrderState.products.reduce(
+                                            (totalSum, product) => totalSum + product.order_product_gross_amount,
                                             0
-                                        )}
+                                        ) +
+                                            purchaseOrderState.invoices.reduce(
+                                                (totalSum, invoice) =>
+                                                    totalSum + invoice.invoiced_other_fee + invoice.invoiced_delivery_fee,
+                                                0
+                                            ))
+                                    }
                                 </td>
                             </tr>
                             <tr>
                                 <td>Total Due (incl GST):</td>
                                 <td>
-                                    ${" "}
-                                    {(
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
                                         (purchaseOrderState.products.reduce(
                                             (totalSum, product) => totalSum + product.order_product_gross_amount,
                                             0
@@ -339,19 +342,18 @@ const PurchaseOrderDetails = () => {
                                                 0
                                             )) *
                                         1.1
-                                    ).toFixed(2)}
+                                    ))}
                                 </td>
                             </tr>
                             <tr>
                                 <td>Amount Paid:</td>
                                 <td>
-                                    ${" "}
-                                    {purchaseOrderState.invoices.reduce((totalSum, invoice) => {
-                                        if (invoice.invoice_status === "Settled") {
-                                            return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
-                                        }
-                                        return totalSum;
-                                    }, 0)}
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                                            if (invoice.invoice_status === "Settled") {
+                                                return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
+                                            }
+                                            return totalSum;
+                                        }, 0))}
                                 </td>
                             </tr>
                         </tbody>
@@ -418,9 +420,9 @@ const PurchaseOrderDetails = () => {
                                 </label>
                                 )}
                             </td>
-                            <td>$ {invoice.invoiced_delivery_fee + invoice.invoiced_other_fee}</td>
-                            <td className='text-end'>$ {(invoice.invoiced_calculated_total_amount_incl_gst / 1.1).toFixed(2)}</td>
-                            <td className='text-end'>$ {(invoice.invoiced_raw_total_amount_incl_gst / 1.1).toFixed(2)}</td>
+                            <td>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((invoice.invoiced_delivery_fee + invoice.invoiced_other_fee))}</td>
+                            <td className='text-end'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((invoice.invoiced_calculated_total_amount_incl_gst / 1.1))}</td>
+                            <td className='text-end'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((invoice.invoiced_raw_total_amount_incl_gst / 1.1))}</td>
                         </tr>
                     ))}
                     {/* TEMPORARILY DEACTIVATED */}
@@ -446,42 +448,42 @@ const PurchaseOrderDetails = () => {
                         <td colSpan={4}></td>
                         <td colSpan={2} className='text-end font-bold'>Subtotal (incl fees):</td>
                         <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
-                            }, 0) / 1.1).toFixed(2)}
+                            }, 0) / 1.1))}
                         </td>
                         <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
-                            }, 0) / 1.1).toFixed(2)}
+                            }, 0) / 1.1))}
                         </td>
                     </tr>
                     <tr>
                         <td colSpan={4}></td>
                         <td colSpan={2} className='text-end font-bold'>GST (10%):</td>
                         <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
-                            }, 0) / 1.1 * 0.1).toFixed(2)}
+                            }, 0) / 1.1 * 0.1))}
                         </td>
                         <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
-                            }, 0) / 1.1 * 0.1).toFixed(2)}
+                            }, 0) / 1.1 * 0.1))}
                         </td>
                     </tr>
                     <tr>
                         <td colSpan={4}></td>
                         <td colSpan={2} className='text-end font-bold'>Total (incl GST):</td>
                         <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_calculated_total_amount_incl_gst;
-                            }, 0)).toFixed(2)}
+                            }, 0)))}
                         </td>
                         <td className='text-end font-bold'>
-                            $ {(purchaseOrderState.invoices.reduce((totalSum, invoice) => {
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((purchaseOrderState.invoices.reduce((totalSum, invoice) => {
                                 return totalSum + invoice.invoiced_raw_total_amount_incl_gst;
-                            }, 0)).toFixed(2)}
+                            }, 0)))}
                         </td>
                     </tr>
                 </tbody>

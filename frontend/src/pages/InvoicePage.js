@@ -158,8 +158,8 @@ const InvoicePage = () => {
                             <td className="hidden sm:table-cell">{formatDateTime(invoice.invoice_issue_date)}</td>
                             <td className="hidden sm:table-cell">{formatDateTime(invoice.invoice_received_date)}</td>
                             <td className="hidden md:table-cell">{formatDateTime(invoice.invoice_due_date)}</td>
-                            <td className="hidden lg:table-cell">${(invoice.invoiced_calculated_total_amount_incl_gst).toFixed(2)}</td>
-                            <td className="hidden lg:table-cell">${(invoice.invoiced_raw_total_amount_incl_gst).toFixed(2)}</td>
+                            <td className="hidden lg:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.invoiced_calculated_total_amount_incl_gst)}</td>
+                            <td className="hidden lg:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.invoiced_raw_total_amount_incl_gst)}</td>
                             <td>
                                 {invoice.invoice_status && (
                                     <label

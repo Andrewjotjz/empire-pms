@@ -167,7 +167,9 @@ const PurchaseOrder = () => {
                             <td>{order.project.project_name}</td>
                             <td>{order.supplier.supplier_name}</td>
                             <td className="hidden md:table-cell">{order.products.length + order.custom_products.length} products</td>
-                            <td className="hidden md:table-cell">${(order.order_total_amount).toFixed(2)}</td>
+                            <td className="hidden md:table-cell">
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.order_total_amount)}
+                            </td>
                             <td className="hidden md:table-cell">
                                 {order.order_status && (
                                 <label

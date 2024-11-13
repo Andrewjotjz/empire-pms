@@ -737,15 +737,15 @@ const NewPurchaseOrderForm = () => {
                                             </div>
                                         </td>
                                         <td className='hidden lg:table-cell'>
-                                            <label>${prod.order_product_price_unit_a}</label>
+                                            <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(prod.order_product_price_unit_a)}</label>
                                         </td>
                                         <td className='hidden lg:table-cell'>
                                             <label>
-                                            ${(
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
                                                 addedProductState[index].productPrice.product_number_a === 1 
                                                 ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
                                                 : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
-                                            ).toFixed(2)}
+                                            ))}
                                             </label>
                                         </td>
                                         <td>
@@ -842,25 +842,25 @@ const NewPurchaseOrderForm = () => {
                                         <tr>
                                             <td className='pt-1'>Total Net Amount:</td>
                                             <td className='pt-1'>
-                                                ${orderState.products && orderState.products.length > 0 ? (
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(orderState.products && orderState.products.length > 0 ? (
                                                     orderState.products.reduce((total, prod) => (
                                                         total + (Number(prod.order_product_gross_amount) || 0)
-                                                    ), 0).toFixed(2) // Use toFixed(2) for two decimal places
+                                                    ), 0)
                                                 ) : (
                                                     ' 0.00'
-                                                )}
+                                                ))}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className='pt-1'>Total Net Amount (incl. GST):</td>
                                             <td className='pt-1'>
-                                                ${orderState.products && orderState.products.length > 0 ? (
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(orderState.products && orderState.products.length > 0 ? (
                                                     (orderState.products.reduce((total, prod) => (
                                                         total + (Number(prod.order_product_gross_amount) || 0)
-                                                    ), 0) * 1.1).toFixed(2) // Use toFixed(2) for two decimal places
+                                                    ), 0) * 1.1)
                                                 ) : (
                                                     ' 0.00'
-                                                )}
+                                                ))}
                                             </td>
                                         </tr>
                                     </tbody>

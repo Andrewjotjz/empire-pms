@@ -617,7 +617,7 @@ const SupplierDetails = () => {
                             <td>{product.product.product_name}</td>
                             <td className="hidden sm:table-cell">{product.productPrice.product_number_a}</td>
                             <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
-                            <td className="hidden sm:table-cell">${product.productPrice.product_price_unit_a}</td>
+                            <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.productPrice.product_price_unit_a)}</td>
                             <td className="hidden sm:table-cell">{product.product.product_actual_size}</td>
                             <td className="hidden sm:table-cell">{product.product.product_types}</td>
                             <td className="hidden sm:table-cell">{product.product.alias_name}</td>
@@ -691,7 +691,7 @@ const SupplierDetails = () => {
                                 <td>{order.project.project_name}</td>
                                 <td className="hidden sm:table-cell">{order.supplier.supplier_name}</td>
                                 <td className="hidden sm:table-cell">{order.products.length + order.custom_products.length} products</td>
-                                <td className="hidden sm:table-cell">${(order.order_total_amount).toFixed(2)}</td>
+                                <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.order_total_amount)}</td>
                                 <td>
                                     {order.order_status && (
                                     <label
