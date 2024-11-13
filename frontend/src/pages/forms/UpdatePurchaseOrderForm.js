@@ -178,8 +178,8 @@ const UpdatePurchaseOrderForm = () => {
         },
         productprice_obj_ref: product.productPrice,
         order_product_location: "",
-        order_product_qty_a: 0, // Ensure all fields are initialized properly
-        order_product_qty_b: 0,
+        order_product_qty_a: '', // Ensure all fields are initialized properly
+        order_product_qty_b: '',
         order_product_price_unit_a: product.productPrice.product_price_unit_a,
         order_product_gross_amount: 0,
       },
@@ -204,7 +204,7 @@ const UpdatePurchaseOrderForm = () => {
             {
               custom_product_name: "",
               custom_product_location: "",
-              custom_order_qty: 0,
+              custom_order_qty: '',
             },
           ],
         })
@@ -622,21 +622,21 @@ const UpdatePurchaseOrderForm = () => {
     localUser && Object.keys(localUser).length > 0 ? (
     <>
       {/* PAGE HEADER */}
-      <div className="mx-4 mt-4 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg">
+      <div className='mx-4 mt-2 sm:mt-4 p-1 sm:p-2 text-center font-bold text-sm sm:text-base md:text-lg lg:text-xl bg-slate-800 text-white rounded-t-lg'>
         EDIT PURCHASE ORDER
       </div>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-2 mx-4 mb-4">
-          <div className="border rounded-b-lg p-4">
-            {/* SELECT SUPPLIER */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
-              <div className="mb-1">
+        <div className="grid grid-cols-1 lg:grid-cols-2 mx-4 mb-1 sm:mb-4">
+          <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base">
+            {/* PURCHASE ORDER MAIN DETAILS */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-1 lg:gap-x-4">
+              <div className="mb-1 grid">
                 <label className="form-label font-bold">
                   *Purchase Order No:
                 </label>
                 <input
                   type="text"
-                  className="form-control"
+                  className="form-control text-xs lg:text-base"
                   name="order_ref"
                   value={purchaseOrderState.order_ref}
                   disabled
@@ -646,7 +646,7 @@ const UpdatePurchaseOrderForm = () => {
               <div className="mb-1">
                 <label className="form-label font-bold">*Project:</label>
                 <select
-                  className="form-control shadow-sm cursor-pointer"
+                  className="form-control shadow-sm cursor-pointer text-xs lg:text-base"
                   name="project"
                   value={selectedProject}
                   onChange={handleProjectChange}
@@ -668,7 +668,7 @@ const UpdatePurchaseOrderForm = () => {
               <div className="mb-1">
                 <label className="form-label font-bold">*Supplier:</label>
                 <select
-                  className="form-control shadow-sm cursor-pointer"
+                  className="form-control shadow-sm cursor-pointer text-xs lg:text-base"
                   name="supplier_name"
                   value={selectedSupplier}
                   onChange={handleSupplierChange}
@@ -691,18 +691,18 @@ const UpdatePurchaseOrderForm = () => {
             </div>
 
             {/* ***** SEARCH ITEM TABLE ****** */}
-            <div className="container p-0 border-2 shadow-md bg-slate-50">
-              <div className="grid grid-cols-3 m-2 gap-x-1">
+            <div className="container p-0 border-2 shadow-md bg-slate-50 text-xs lg:text-base mt-1 lg:mt-0">
+              <div className="grid grid-cols-1 lg:grid-cols-3 m-1 lg:m-2 gap-x-1">
                 <input
                   type="text"
-                  className="form-control mb-1 col-span-2"
+                  className="form-control mb-1 col-span-2 placeholder-gray-400 placeholder-opacity-50 text-xs lg:text-base"
                   placeholder="Search products..."
                   value={searchProductTerm}
                   onChange={(e) => setSearchProductTerm(e.target.value)}
                 />
                 <div>
                   <select
-                    className="form-control shadow-sm cursor-pointer opacity-95"
+                    className="form-control shadow-sm cursor-pointer opacity-95 text-xs lg:text-base"
                     name="product_types"
                     value={selectedProductType}
                     onChange={(e) => setSelectedProductType(e.target.value)}
@@ -716,20 +716,20 @@ const UpdatePurchaseOrderForm = () => {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-sm">
+              <div className="grid grid-cols-2 lg:grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-xs lg:text-sm">
                 <div className="p-1">
                   <label>SKU</label>
                 </div>
                 <div className="p-1">
                   <label>Name</label>
                 </div>
-                <div className="p-1">
+                <div className="p-1 hidden lg:grid">
                   <label>Unit A</label>
                 </div>
-                <div className="p-1">
+                <div className="p-1 hidden lg:grid">
                   <label>Unit B</label>
                 </div>
-                <div className="grid grid-cols-3 gap-2 p-1">
+                <div className="lg:grid lg:grid-cols-3 gap-2 p-1 hidden">
                   <label className="col-span-2">Type</label>
                 </div>
               </div>
@@ -746,24 +746,29 @@ const UpdatePurchaseOrderForm = () => {
                   .map((product, index) => (
                     <div
                       key={index}
-                      className="grid grid-cols-5 gap-1 p-1 border-b text-sm text-center hover:bg-slate-100"
+                      className="grid grid-cols-2 lg:grid-cols-5 gap-1 p-1 border-b text-xs lg:text-sm text-center hover:bg-slate-100"
                       title="Add to order"
                     >
-                      <div>{product.product.product_sku}</div>
+                      <div className='flex lg:inline-block justify-center gap-2'>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="lg:hidden size-5 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                          </svg>
+                          <label>{product.product.product_sku}</label>
+                      </div>
                       <div>{product.product.product_name}</div>
-                      <div>
+                      <div className='hidden lg:grid'>
                         {product.productPrice.product_number_a}
                         <span className="ml-2 opacity-50">
                           {product.productPrice.product_unit_a}
                         </span>
                       </div>
-                      <div>
+                      <div className='hidden lg:grid'>
                         {product.productPrice.product_number_b}
                         <span className="ml-2 opacity-50">
                           {product.productPrice.product_unit_b}
                         </span>
                       </div>
-                      <div className="grid grid-cols-3 gap-2 p-1">
+                      <div className='hidden lg:grid grid-cols-3 gap-2 p-1'>
                         <label className="col-span-2">
                           {product.product.product_types}
                         </label>
@@ -792,21 +797,21 @@ const UpdatePurchaseOrderForm = () => {
               )}
             </div>
           </div>
-          <div className="border rounded-b-lg p-4">
+          <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base">
             {/* ***** ADDED ITEM TABLE ****** */}
             <label className="font-bold">Order Items:</label>
             <div className="bg-gray-100 border rounded-lg shadow-sm">
-              <div className="border-0 rounded-lg">
+              <div className="border-0 rounded-lg overflow-x-auto">
                 <table className="table m-0 text-xs">
                   <thead className="thead-dark text-center">
                     <tr className="table-primary">
-                      <th scope="col">SKU</th>
+                      <th scope="col" className='hidden lg:table-cell'>SKU</th>
                       <th scope="col">Name</th>
                       <th scope="col">Location</th>
                       <th scope="col">Qty A</th>
                       <th scope="col">Qty B</th>
-                      <th scope="col">Price A</th>
-                      <th scope="col">Net Amount</th>
+                      <th scope="col" className='hidden lg:table-cell'>Price A</th>
+                      <th scope="col" className='hidden lg:table-cell'>Net Amount</th>
                       <th scope="col"></th>
                     </tr>
                   </thead>
@@ -814,12 +819,12 @@ const UpdatePurchaseOrderForm = () => {
                     {purchaseOrderState.products &&
                       purchaseOrderState.products.map((prod, index) => (
                         <tr key={index}>
-                          <td>{prod.product_obj_ref.product_sku}</td>
+                          <td className='hidden lg:table-cell'>{prod.product_obj_ref.product_sku}</td>
                           <td>{prod.product_obj_ref.product_name}</td>
                           <td>
                             <input
                               type="text"
-                              className="form-control px-1 py-0.5 text-xs"
+                              className="form-control text-xs lg:text-base px-1 py-0.5"
                               name="order_product_location"
                               value={prod.order_product_location}
                               onChange={(e) =>
@@ -881,10 +886,10 @@ const UpdatePurchaseOrderForm = () => {
                               </label>
                             </div>
                           </td>
-                          <td>
+                          <td className='hidden lg:table-cell'>
                             <label>${prod.order_product_price_unit_a}</label>
                           </td>
-                          <td>
+                          <td className='hidden lg:table-cell'>
                             <label>
                               $
                               {(prod.productprice_obj_ref.product_number_a === 1
@@ -929,7 +934,7 @@ const UpdatePurchaseOrderForm = () => {
                           <td>
                             <input
                               type="text"
-                              className="form-control px-1 py-0.5 text-xs"
+                              className="form-control text-xs lg:text-base px-1 py-0.5 text-xs"
                               name="custom_product_name"
                               value={cproduct.custom_product_name}
                               onChange={(e) =>
@@ -948,7 +953,7 @@ const UpdatePurchaseOrderForm = () => {
                           <td>
                             <input
                               type="text"
-                              className="form-control px-1 py-0.5 text-xs"
+                              className="form-control text-xs lg:text-base px-1 py-0.5 text-xs"
                               name="custom_product_location"
                               value={cproduct.custom_product_location}
                               onChange={(e) =>
@@ -987,9 +992,9 @@ const UpdatePurchaseOrderForm = () => {
                               </label>
                             </div>
                           </td>
-                          <td>-</td>
-                          <td>-</td>
-                          <td>-</td>
+                          <td className='hidden lg:table-cell'>-</td>
+                          <td className='hidden lg:table-cell'>-</td>
+                          <td className='hidden lg:table-cell'>-</td>
                           <td>
                             <button
                               type="button"
@@ -1106,7 +1111,7 @@ const UpdatePurchaseOrderForm = () => {
                 <label className="form-label font-bold">*Order Date:</label>
                 <input
                   type="date"
-                  className="form-control"
+                  className="form-control text-xs lg:text-base"
                   name="order_date"
                   value={purchaseOrderState.order_date.split("T")[0]}
                   onChange={handleInputChange}
@@ -1124,7 +1129,7 @@ const UpdatePurchaseOrderForm = () => {
                 </label>
                 <input
                   type="datetime-local"
-                  className="form-control"
+                  className="form-control text-xs lg:text-base"
                   name="order_est_datetime"
                   value={purchaseOrderState.order_est_datetime.slice(0, 16)}
                   onChange={handleInputChange}
@@ -1134,7 +1139,7 @@ const UpdatePurchaseOrderForm = () => {
                   }
                   onInput={(e) => e.target.setCustomValidity("")}
                 />
-                <label className="text-xs italic text-gray-400">
+                <label className="hidden lg:inline-block text-xs italic text-gray-400">
                   (EST) - Delivery estimate time of arrival
                 </label>
               </div>
@@ -1144,7 +1149,7 @@ const UpdatePurchaseOrderForm = () => {
             <div className="my-2">
               <label className="form-label font-bold">Internal comments:</label>
               <textarea
-                className="form-control"
+                className="form-control text-xs lg:text-base"
                 name="order_internal_comments"
                 value={purchaseOrderState.order_internal_comments}
                 onChange={handleInputChange}
@@ -1156,7 +1161,7 @@ const UpdatePurchaseOrderForm = () => {
             <div className="my-2">
               <label className="form-label font-bold">Notes to supplier:</label>
               <textarea
-                className="form-control bg-yellow-200"
+                className="form-control text-xs lg:text-base bg-yellow-200"
                 name="order_notes_to_supplier"
                 value={purchaseOrderState.order_notes_to_supplier}
                 onChange={handleInputChange}
@@ -1166,25 +1171,25 @@ const UpdatePurchaseOrderForm = () => {
             </div>
 
             {/* ***** BUTTONS ***** */}
-            <div className="flex justify-between mb-3">
+            <div className="flex flex-col lg:flex-row justify-between space-y-4 lg:space-y-0 lg:space-x-4">
               <button
                 type="button"
                 onClick={handleBackClick}
-                className="btn btn-secondary"
+                className="btn btn-secondary w-full lg:w-auto"
               >
                 CANCEL
               </button>
               <button
-                className="btn border rounded bg-gray-700 text-white hover:bg-gray-800"
+                className="btn border rounded bg-gray-700 text-white hover:bg-gray-800 w-full lg:w-auto"
                 type="submit"
                 name="draft"
               >
                 SAVE AS DRAFT
               </button>
-              <div className='text-sm'>
+              <div className='text-sm w-full lg:w-auto'>
                   <label className='font-bold'>*Order status:</label>
                   <select
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs lg:text-base"
                       name="order_status"
                       value={purchaseOrderState.order_status}
                       onChange={handleInputChange}
@@ -1208,7 +1213,7 @@ const UpdatePurchaseOrderForm = () => {
               >
                 APPROVE
               </button>
-              <button className="btn btn-primary" type="submit" name="submit">
+              <button className="btn btn-primary w-full lg:w-auto" type="submit" name="submit">
                 UPDATE
               </button>
             </div>

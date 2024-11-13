@@ -202,8 +202,8 @@ const NewPurchaseOrderForm = () => {
                 product_obj_ref: product.product._id,
                 productprice_obj_ref: product.productPrice._id,
                 order_product_location: '',
-                order_product_qty_a: 0, // Ensure all fields are initialized properly
-                order_product_qty_b: 0,
+                order_product_qty_a: '', // Ensure all fields are initialized properly
+                order_product_qty_b: '',
                 order_product_price_unit_a: product.productPrice.product_price_unit_a,
                 order_product_gross_amount: 0
             }]
@@ -219,7 +219,7 @@ const NewPurchaseOrderForm = () => {
                 custom_products: [...orderState.custom_products, {
                     custom_product_name:'', 
                     custom_product_location: '',
-                    custom_order_qty: 0
+                    custom_order_qty: ''
                 }]
             })
         } else {
@@ -941,7 +941,7 @@ const NewPurchaseOrderForm = () => {
                         <div className="text-sm w-full lg:w-auto">
                             <label className="font-bold">Order status:</label>
                             <select
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs lg:text-base"
                                 name="order_status"
                                 value={orderState.order_status}
                                 onChange={(e) => handleInputChange(e)}

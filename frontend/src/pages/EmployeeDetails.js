@@ -21,7 +21,7 @@ const EmployeeDetails = () => {
     const { update } = useUpdateEmployee();
     const dispatch = useDispatch()
 
-    const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
+    // const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
     const [selectedProjects, setSelectedProjects] = useState(new Set());  // set all select suppliers to add or remove
     const [isSelectProjectListVisible, setSelectProjectListVisible] = useState(false);
 
@@ -222,38 +222,39 @@ const EmployeeDetails = () => {
     );
 
     const selectProjectPopUp = (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-                <h4 className="font-bold mb-4">SELECT PROJECTS : </h4>
-                <div style={{ gridTemplateColumns: `repeat(${numberOfProjectColumns}, minmax(0, 1fr))` }} className="grid gap-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-6 md:p-8 text-xs sm:text-base">
+            <div className="bg-white p-2 sm:p-5 rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl">
+                <h4 className="font-bold mb-1 sm:mb-4 text-center sm:text-left text-sm sm:text-lg md:text-xl sm:border-b-2">SELECT PROJECTS : </h4>
+                <div className="grid gap-0 sm:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                     {
                         Array.isArray(projectState) && projectState.map(project => (
-                        <div key={`selectProjectPopUp-${project._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                        <div key={`selectProjectPopUp-${project._id}`} 
+                        className="flex items-center space-x-0 sm:space-x-4 p-2 border-b border-gray-200">
                             <input 
-                                className="form-checkbox h-5 w-5 text-blue-600"
+                                className="form-checkbox h-3 w-3 sm:h-5 sm:w-5 text-blue-600"
                                 type="checkbox"
                                 checked={selectedProjects.has(project._id)}
                                 onChange={() => handleProjectCheckbox(project._id)}
                             />
                             <label className="flex-1 text-gray-800">
-                                <span className="font-semibold">{project.project_name}</span>
-                                <span className="ml-2 text-sm">
+                                <span className="ml-2 font-semibold">{project.project_name}</span>
+                                <span className="ml-2 text-xs sm:text-sm">
                                  {project.project_isarchived ? 
                                     (<label className="text-red-500">Archived</label>) : 
                                     (<label className="text-green-600">Active</label>)
                                     }
                                 </span>
-                                <span className="block text-sm text-gray-600">{project.project_address}</span>
+                                <span className="hidden sm:block text-sm text-gray-600">{project.project_address}</span>
                             </label>
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-end mt-5">
-                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                <div className="flex flex-col sm:flex-row justify-end mt-0 sm:mt-5 space-y-2 sm:space-y-0 sm:space-x-2 text-xs sm:text-base">
+                    <button className=" bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50 w-full sm:w-auto"
                         onClick={() => setSelectProjectListVisible(false)}>
                         Cancel
                     </button>
-                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                    <button className=" bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50 w-full sm:w-auto"
                         onClick={handleSelectProjectsConfirm}>
                         Confirm
                     </button>

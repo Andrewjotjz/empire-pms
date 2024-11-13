@@ -235,7 +235,7 @@ const UpdateInvoiceForm = () => {
     setIsFetchProductDetailsLoading(true);
     try {
       const res = await fetch(
-        `/api/supplier/${supplierId}/products/${productId}`, { 
+        `${process.env.REACT_APP_API_BASE_URL}/supplier/${supplierId}/products/${productId}`, { 
           credentials: 'include',
           headers: {
               'Content-Type': 'application/json',
@@ -1172,7 +1172,7 @@ const UpdateInvoiceForm = () => {
           <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
             {/* Modal Header */}
             <div className="flex justify-between items-center p-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">
+              <h2 className="font-bold text-xs md:text-xl">
                 Select Purchase Order to Invoice
               </h2>
               <button
@@ -1201,7 +1201,7 @@ const UpdateInvoiceForm = () => {
               <div className="flex justify-between">
                 <input
                   type="text"
-                  className="w-5/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-5/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
                   name=""
                   value={searchOrderTerm}
                   onChange={(e) => setSearchOrderTerm(e.target.value)}
@@ -1211,7 +1211,7 @@ const UpdateInvoiceForm = () => {
                   placeholder="Search purchase order..."
                 />
                 <div className="flex items-center">
-                  <label className="font-bold">Supplier:</label>
+                  <label className="font-bold text-xs md:text-base">Supplier:</label>
                   <label className="ml-2">
                     {supplierState.length > 0
                       ? // '?.supplier_name' to avoid potential undefined errors if the supplier is not found.
@@ -1362,11 +1362,11 @@ const UpdateInvoiceForm = () => {
   const productPriceModal = (
     <div>
       {showProductPriceModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center px-4 sm:px-8">
           <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
             {/* Modal Header */}
             <div className="flex justify-between items-center p-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">Product Prices</h2>
+              <h2 className="text-lg sm:text-xl font-bold">Product Prices</h2>
               <button
                 onClick={handleTogglePriceModal}
                 className="text-gray-500 hover:text-gray-800"
@@ -1395,13 +1395,13 @@ const UpdateInvoiceForm = () => {
               ) : Array.isArray(productPriceState) &&
                 productPriceState.length > 0 ? (
                 <>
-                  <h2 className="text-lg font-semibold mb-3 bg-indigo-50 px-2 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+                  <h2 className="text-base sm:text-lg font-semibold mb-3 bg-indigo-50 px-2 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
                     <span>{productPriceState[0].product.product_name}</span>
                     <span className="text-xs text-gray-500 ml-2">
                       [SKU: {productPriceState[0].product.product_sku}]
                     </span>
                   </h2>
-                  <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
+                  <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-xs sm:text-sm">
                     <thead className="bg-indigo-200 text-center">
                       <tr>
                         <th
@@ -1424,7 +1424,7 @@ const UpdateInvoiceForm = () => {
                         </th>
                         <th
                           scope="col"
-                          className="border border-gray-300 px-2 py-1"
+                          className="border border-gray-300 px-2 py-1 hidden sm:table-cell"
                         >
                           Price Fixed (?)
                         </th>
@@ -1468,7 +1468,7 @@ const UpdateInvoiceForm = () => {
                               )}
                             </div>
                           </td>
-                          <td className="border border-gray-300 px-2 py-1">
+                          <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
                             {item.productPrice.price_fixed ? "Yes" : "No"}
                           </td>
                           <td className="border border-gray-300 px-1 py-1">
@@ -1496,7 +1496,7 @@ const UpdateInvoiceForm = () => {
               )}
             </div>
             {/* Modal Buttons */}
-            <div className="flex justify-end p-3">
+            <div className="flex justify-end p-3 space-x-2">
               <button
                 onClick={handleTogglePriceModal}
                 className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
@@ -1523,7 +1523,7 @@ const UpdateInvoiceForm = () => {
           <div className="bg-white max-w-[90vh] max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
             {/* Modal Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">
+              <h2 className="font-bold text-sm md:text-xl">
                 {updatedOrder.supplier.supplier_name}: NEW PRODUCT
               </h2>
               <button
@@ -1567,7 +1567,7 @@ const UpdateInvoiceForm = () => {
   const editOrderModal = (
     <div>
       {showEditOrderModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-5">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-1 lg:p-5 text-xs lg:text-base">
           <form
             className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg"
             onSubmit={() => {
@@ -1577,8 +1577,8 @@ const UpdateInvoiceForm = () => {
             }}
           >
             {/* Modal Header */}
-            <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">
+            <div className="flex justify-between items-center px-2 py-1 sm:px-4 sm:py-3 border-b bg-slate-100">
+              <h2 className="text-sm sm:text-xl font-bold">
                 EDIT PURCHASE ORDER: {updatedOrder.order_ref}
               </h2>
               <button
@@ -1591,7 +1591,7 @@ const UpdateInvoiceForm = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-6"
+                  className="size-5 sm:size-6"
                 >
                   <path
                     strokeLinecap="round"
@@ -1603,36 +1603,36 @@ const UpdateInvoiceForm = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-2 grid grid-cols-2">
+            <div className="p-2 grid grid-cols-1 lg:grid-cols-2">
               <div className="p-2 max-h-[70vh] overflow-y-auto thin-scrollbar">
                 {/* disabled details */}
-                <div className="grid grid-cols-3 text-sm">
+                <div className="grid grid-cols-1 lg:grid-cols-3 text-xs sm:text-sm">
                   <div>
-                    <span className="font-bold">Purchase Order No:</span>{" "}
+                    <span className="font-bold text-xs md:text-base">Purchase Order No:</span>{" "}
                     {updatedOrder.order_ref}
                   </div>
                   <div>
-                    <span className="font-bold">Project:</span>{" "}
+                    <span className="font-bold text-xs md:text-base">Project:</span>{" "}
                     {updatedOrder.project.project_name}
                   </div>
                   <div>
-                    <span className="font-bold">Supplier:</span>{" "}
+                    <span className="font-bold text-xs md:text-base">Supplier:</span>{" "}
                     {updatedOrder.supplier.supplier_name}
                   </div>
                 </div>
                 {/* products selection */}
                 <div className="container p-0 border-2 shadow-md bg-slate-50">
-                  <div className="grid grid-cols-3 m-2 gap-x-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 m-2 gap-x-1">
                     <input
                       type="text"
-                      className="form-control text-xs mb-1 col-span-2"
+                      className="form-control text-xs md:text-base mb-1 col-span-2"
                       placeholder="Search products..."
                       value={searchProductTerm}
                       onChange={(e) => setSearchProductTerm(e.target.value)}
                     />
                     <div>
                       <select
-                        className="form-control text-xs shadow-sm cursor-pointer opacity-95"
+                        className="form-control md:text-base text-xs shadow-sm cursor-pointer opacity-95"
                         name="product_types"
                         value={selectedProductType}
                         onChange={(e) => setSelectedProductType(e.target.value)}
@@ -1646,21 +1646,21 @@ const UpdateInvoiceForm = () => {
                       </select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-xs">
+                  <div className="grid grid-cols-3 lg:grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-xs">
                     <div className="p-1">
                       <label>SKU</label>
                     </div>
                     <div className="p-1">
                       <label>Name</label>
                     </div>
-                    <div className="p-1">
+                    <div className="p-1 hidden lg:inline-block">
                       <label>Unit A</label>
                     </div>
-                    <div className="p-1">
+                    <div className="p-1 hidden lg:inline-block">
                       <label>Unit B</label>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 p-1">
-                      <label className="col-span-2">Type</label>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-1">
+                      <label className="col-span-1 lg:col-span-2">Type</label>
                     </div>
                   </div>
                   {productState ? (
@@ -1675,25 +1675,25 @@ const UpdateInvoiceForm = () => {
                       .map((product, index) => (
                         <div
                           key={index}
-                          className="grid grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100"
+                          className="grid grid-cols-3 lg:grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100"
                           title="Add to order"
                         >
                           <div>{product.product.product_sku}</div>
                           <div>{product.product.product_name}</div>
-                          <div>
+                          <div className="hidden lg:inline-block">
                             {product.productPrice.product_number_a}
                             <span className="ml-2 opacity-50">
                               {product.productPrice.product_unit_a}
                             </span>
                           </div>
-                          <div>
+                          <div className="hidden lg:inline-block">
                             {product.productPrice.product_number_b}
                             <span className="ml-2 opacity-50">
                               {product.productPrice.product_unit_b}
                             </span>
                           </div>
-                          <div className="grid grid-cols-3 gap-2 p-1">
-                            <label className="col-span-2">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-1">
+                            <label className="col-span-1 lg:col-span-2">
                               {product.product.product_types}
                             </label>
                             <svg
@@ -1724,7 +1724,7 @@ const UpdateInvoiceForm = () => {
               <div className="p-2 mt-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
                 {/* added products */}
                 <div className="bg-gray-100 border rounded-lg shadow-sm">
-                  <div className="border-0 rounded-lg">
+                  <div className="border-0 rounded-lg overflow-x-auto">
                     <table className="table m-0 text-xs">
                       <thead className="thead-dark text-center">
                         <tr className="table-primary">
@@ -1734,7 +1734,7 @@ const UpdateInvoiceForm = () => {
                           <th scope="col">Qty A</th>
                           <th scope="col">Qty B</th>
                           <th scope="col">Price A</th>
-                          <th scope="col">Net Amount</th>
+                          <th scope="col" className="hidden sm:table-cell">Net Amount</th>
                           <th scope="col"></th>
                         </tr>
                       </thead>
@@ -1849,7 +1849,7 @@ const UpdateInvoiceForm = () => {
                                   />
                                 </svg>
                               </td>
-                              <td>
+                              <td className="hidden sm:table-cell">
                                 <label>
                                   $
                                   {(prod.productprice_obj_ref
@@ -1979,7 +1979,7 @@ const UpdateInvoiceForm = () => {
                             </td>
                             <td>-</td>
                             <td>-</td>
-                            <td>-</td>
+                            <td className="hidden sm:table-cell">-</td>
                             <td>
                               <button
                                 type="button"
@@ -2038,12 +2038,12 @@ const UpdateInvoiceForm = () => {
                 </div>
 
                 {/* more disabled details */}
-                <div className="grid grid-cols-2 text-sm mt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 text-sm mt-1">
                   <div>
-                    <span className="font-bold">Internal Comments:</span>
+                    <span className="font-bold text-xs md:text-base">Internal Comments:</span>
                   </div>
                   <div className="mb-1 text-end italic">
-                    <span className="font-bold">Order Date:</span>{" "}
+                    <span className="font-bold text-xs md:text-base">Order Date:</span>{" "}
                     {formatDate(updatedOrder.order_date)}
                   </div>
                   <div className="col-span-2 border rounded-md p-1 mb-1 bg-gray-200">
@@ -2078,14 +2078,14 @@ const UpdateInvoiceForm = () => {
   const createPriceModal = (
     <div>
       {showCreatePriceModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 overflow-y-auto">
           <form
             className="bg-white w-auto rounded-lg shadow-lg"
             onSubmit={handleSubmitNewPrice}
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">CREATE NEW PRICE</h2>
+              <h2 className="text-sm sm:text-xl font-bold">CREATE NEW PRICE</h2>
               <button
                 onClick={handleToggleCreatePriceModal}
                 className="text-gray-500 hover:text-gray-800"
@@ -2114,21 +2114,21 @@ const UpdateInvoiceForm = () => {
               )
               .map((prod) => (
                 <div className="p-2">
-                  <h2 className="text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+                  <h2 className="text-xs sm:text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
                     <span>{prod.product_obj_ref.product_name}</span>
                     <span className="text-xs text-gray-500 ml-2">
                       [SKU: {prod.product_obj_ref.product_sku}]
                     </span>
                   </h2>
-                  <div className="grid grid-cols-3 gap-x-10 gap-y-4 p-3 mb-1">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-1 md:gap-x-10 gap-y-1 md:gap-y-4 p-3 mb-1">
                     <div className="border-2 rounded p-2">
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Number-A:
                         </label>
                         <input
                           type="number"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_number_a"
                           value={newProductPrice.product_number_a}
                           onChange={handleNewProductPriceInput}
@@ -2145,11 +2145,11 @@ const UpdateInvoiceForm = () => {
                           }
                         />
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">*Unit-A:</label>
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">*Unit-A:</label>
                         <input
                           type="text"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_unit_a"
                           value={newProductPrice.product_unit_a}
                           onChange={handleNewProductPriceInput}
@@ -2160,12 +2160,12 @@ const UpdateInvoiceForm = () => {
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={prod.productprice_obj_ref.product_unit_a}
                         />
-                        <label className="text-xs italic text-gray-400">
+                        <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: Box, Pack, Carton
                         </label>
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Unit-A Price:
                         </label>
                         <div className="flex items-center border rounded">
@@ -2185,7 +2185,7 @@ const UpdateInvoiceForm = () => {
                           </svg>
                           <input
                             type="number"
-                            className="form-control placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
+                            className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
                             name="product_price_unit_a"
                             value={newProductPrice.product_price_unit_a}
                             onChange={handleNewProductPriceInput}
@@ -2204,13 +2204,13 @@ const UpdateInvoiceForm = () => {
                       </div>
                     </div>
                     <div className="border-2 rounded p-2">
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Number-B:
                         </label>
                         <input
                           type="number"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_number_b"
                           value={newProductPrice.product_number_b}
                           onChange={handleNewProductPriceInput}
@@ -2227,11 +2227,11 @@ const UpdateInvoiceForm = () => {
                           }
                         />
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">*Unit-B:</label>
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">*Unit-B:</label>
                         <input
                           type="text"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_unit_b"
                           value={newProductPrice.product_unit_b}
                           onChange={handleNewProductPriceInput}
@@ -2242,12 +2242,12 @@ const UpdateInvoiceForm = () => {
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={prod.productprice_obj_ref.product_unit_b}
                         />
-                        <label className="text-xs italic text-gray-400">
+                        <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: units, length, each, sheet
                         </label>
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Unit-B Price:
                         </label>
                         <div className="flex items-center border rounded">
@@ -2267,7 +2267,7 @@ const UpdateInvoiceForm = () => {
                           </svg>
                           <input
                             type="number"
-                            className="form-control placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
+                            className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
                             name="product_price_unit_b"
                             value={newProductPrice.product_price_unit_b}
                             onChange={handleNewProductPriceInput}
@@ -2287,11 +2287,11 @@ const UpdateInvoiceForm = () => {
                     </div>
                     {/* **** PROJECT DROPDOWN START **** */}
                     <div>
-                      <label className="block font-bold mb-2">*Project:</label>
+                      <label className="block font-bold mb-0 md:mb-2 text-xs md:text-base">*Project:</label>
                       <div>
                         <button
                           type="button"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
                           onClick={() =>
                             setIsToggleProjectDropdown(!isToggleProjectDropdown)
                           }
@@ -2301,7 +2301,7 @@ const UpdateInvoiceForm = () => {
                             : `Select Projects`}
                         </button>
                         {isToggleProjectDropdown && (
-                          <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar">
+                          <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar text-xs md:text-base">
                             <ul className="py-1">
                               {projectState &&
                                 projectState.length > 0 &&
@@ -2332,32 +2332,32 @@ const UpdateInvoiceForm = () => {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs italic text-gray-400 mt-2">
+                      <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
                         Select one or more projects that this new product
                         applies to
                       </p>
                     </div>
                     {/* **** PRICE EFFECTIVE DATE **** */}
                     <div>
-                      <label className="form-label font-bold">
+                      <label className="form-label font-bold text-xs md:text-base">
                         *Price effective date:
                       </label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="form-control text-xs md:text-base"
                         name="product_effective_date"
                         value={newProductPrice.product_effective_date}
                         onChange={handleNewProductPriceInput}
                         required
                       />
-                      <p className="text-xs italic text-gray-400 mt-2">
+                      <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
                         Product price will take effect before order date:{" "}
                         {formatDate(newProductPrice.product_effective_date)}
                       </p>
                     </div>
                     {/* **** PRICE FIXED (?) **** */}
                     <div>
-                      <label className="form-label font-bold">
+                      <label className="form-label font-bold text-xs md:text-base">
                         Price fixed(?):
                       </label>
                       <input
@@ -2385,13 +2385,13 @@ const UpdateInvoiceForm = () => {
                   handleTogglePriceModal();
                   handleToggleCreatePriceModal();
                 }}
-                className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
+                className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400 text-sm md:text-base"
               >
                 BACK
               </button>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+                className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm md:text-base"
               >
                 SUBMIT NEW PRICE
               </button>
@@ -2564,7 +2564,7 @@ const UpdateInvoiceForm = () => {
                 d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
               />
             </svg>
-            <h2 className="text-2xl font-bold">
+            <h2 className="font-bold text-xs md:text-2xl">
               Ooops...Something went wrong!
             </h2>
           </div>
@@ -2596,7 +2596,7 @@ const UpdateInvoiceForm = () => {
     <div>
       <div className="w-screen bg-neutral-50 items-center justify-center">
         {/* HEADER */}
-        <div className="mx-3 mt-3 p-2 text-center font-bold text-md md:text-xl bg-slate-800 text-white rounded-t-lg">
+        <div className="mx-3 mt-3 p-2 text-center font-bold text-xs md:text-xl bg-slate-800 text-white rounded-t-lg">
           <label>EDIT INVOICE: {invoiceState.invoice_ref}</label>
         </div>
         {/* BODY */}
@@ -2604,9 +2604,9 @@ const UpdateInvoiceForm = () => {
           {/* Invoice Details */}
           <div className="mx-3 p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2 border-2">
             <div>
-              <label className="font-bold">*Supplier:</label>
+              <label className="font-bold text-xs md:text-base">*Supplier:</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base shadow-sm cursor-pointer"
                 name="supplier_name"
                 value={newInvoice.supplier}
                 onChange={handleSupplierChange}
@@ -2625,10 +2625,10 @@ const UpdateInvoiceForm = () => {
               </select>
             </div>
             <div>
-              <label className="font-bold">*Invoice Ref:</label>
+              <label className="font-bold text-xs md:text-base">*Invoice Ref:</label>
               <input
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
                 name="invoice_ref"
                 value={newInvoice.invoice_ref}
                 onChange={handleInputChange}
@@ -2640,10 +2640,10 @@ const UpdateInvoiceForm = () => {
               />
             </div>
             <div>
-              <label className="font-bold">*Invoice Issue Date:</label>
+              <label className="font-bold text-xs md:text-base">*Invoice Issue Date:</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs shadow-sm cursor-pointer md:text-base"
                 name="invoice_issue_date"
                 value={newInvoice.invoice_issue_date}
                 onChange={handleInputChange}
@@ -2655,10 +2655,10 @@ const UpdateInvoiceForm = () => {
               />
             </div>
             <div>
-              <label className="font-bold">*Invoice Received Date:</label>
+              <label className="font-bold text-xs md:text-base">*Invoice Received Date:</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base shadow-sm cursor-pointer"
                 name="invoice_received_date"
                 value={newInvoice.invoice_received_date}
                 onChange={handleInputChange}
@@ -2670,10 +2670,10 @@ const UpdateInvoiceForm = () => {
               />
             </div>
             <div>
-              <label className="font-bold">Invoice Due Date:</label>
+              <label className="font-bold text-xs md:text-base">Invoice Due Date:</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base shadow-sm cursor-pointer"
                 name="invoice_due_date"
                 value={newInvoice.invoice_due_date}
                 onChange={handleInputChange}
@@ -2684,21 +2684,21 @@ const UpdateInvoiceForm = () => {
               />
             </div>
             <div className="col-span-1">
-              <label className="font-bold">Invoice Without PO:</label>
+              <label className="font-bold text-xs md:text-base">Invoice Without PO:</label>
               <div className="flex items-center px-1 py-1">
                 <div
                   onClick={handleToggle}
-                  className={`w-14 h-8 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition-colors duration-300 ease-in-out ${
+                  className={`w-7 md:w-14 h-4 md:h-8 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition-colors duration-300 ease-in-out ${
                     isToggled ? "bg-green-500" : ""
                   }`}
                 >
                   <div
-                    className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                    className={`bg-white w-3 md:w-6 h-3 md:h-6 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
                       isToggled ? "translate-x-6" : ""
                     }`}
                   ></div>
                 </div>
-                <span className="ml-3 text-gray-700 font-medium">
+                <span className="ml-1 md:ml-3 text-gray-700 font-medium">
                   {isToggled ? "Yes" : "No"}
                 </span>
               </div>
@@ -2710,7 +2710,7 @@ const UpdateInvoiceForm = () => {
             <div className="mx-3 p-2 border-2">
               {/* header */}
               <div className="flex justify-between">
-                <div className="font-bold flex justify-center">
+                <div className="font-bold text-xs md:text-base flex justify-center">
                   <label>
                     Purchase Order:{" "}
                     {currentOrder ? currentOrder.order_ref : `not selected`}
@@ -2722,7 +2722,7 @@ const UpdateInvoiceForm = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="ml-2 size-4 cursor-pointer"
+                      className="ml-2 size-5 sm:size-4 cursor-pointer"
                       onClick={() => {
                         handleToggleEditOrderModal();
                         setUpdatedOrder(currentOrder);
@@ -2737,7 +2737,7 @@ const UpdateInvoiceForm = () => {
                     </svg>
                   )}
                 </div>
-                <div className="font-bold italic text-sm">
+                <div className="font-bold text-xs md:text-sm italic">
                   Order Date:{" "}
                   {currentOrder
                     ? formatDate(currentOrder.order_date)
@@ -3034,7 +3034,7 @@ const UpdateInvoiceForm = () => {
                       <tr>
                         <td colSpan={5}></td>
                         <td
-                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end"
                           colSpan={2}
                         >
                           Delivery fee:
@@ -3061,7 +3061,7 @@ const UpdateInvoiceForm = () => {
                       <tr>
                         <td colSpan={5}></td>
                         <td
-                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end"
                           colSpan={2}
                         >
                           Strapping/Pallet/Cutting fee:
@@ -3088,7 +3088,7 @@ const UpdateInvoiceForm = () => {
                       <tr>
                         <td colSpan={5}></td>
                         <td
-                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end"
                           colSpan={2}
                         >
                           Credit:
@@ -3114,7 +3114,7 @@ const UpdateInvoiceForm = () => {
                       <tr>
                         <td colSpan={5}></td>
                         <td
-                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end"
                           colSpan={2}
                         >
                           Total Gross Amount:
@@ -3144,7 +3144,7 @@ const UpdateInvoiceForm = () => {
                       <tr>
                         <td colSpan={5}></td>
                         <td
-                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end"
                           colSpan={2}
                         >
                           Total Gross Amount (incl GST):
@@ -3171,7 +3171,7 @@ const UpdateInvoiceForm = () => {
                       <tr className="bg-indigo-100">
                         <td colSpan={5}></td>
                         <td
-                          className="px-2 py-2 font-bold text-end border border-gray-400"
+                          className="px-2 py-2 font-bold text-xs md:text-base text-end border border-gray-400"
                           colSpan={2}
                         >
                           Total Raw Amount (incl GST):
@@ -3213,10 +3213,10 @@ const UpdateInvoiceForm = () => {
             <div className="mx-3 p-2 border-2">
               {/* header */}
               <div className="flex justify-between">
-                <div className="font-bold flex justify-center">
+                <div className="font-bold text-xs md:text-base flex justify-center">
                   <label>Invoice without order number:</label>
                 </div>
-                <div className="font-bold italic text-sm">
+                <div className="font-bold text-xs md:text-sm italic">
                   Order Date: {`--/--/--`}
                 </div>
               </div>
@@ -3411,7 +3411,7 @@ const UpdateInvoiceForm = () => {
                     {/* calculation table */}
                     <tr>
                       <td colSpan={4}></td>
-                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end">
                         Delivery fee:
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
@@ -3432,7 +3432,7 @@ const UpdateInvoiceForm = () => {
                     </tr>
                     <tr>
                       <td colSpan={4}></td>
-                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end">
                         Strapping/Pallet/Cutting fee:
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
@@ -3453,7 +3453,7 @@ const UpdateInvoiceForm = () => {
                     </tr>
                     <tr>
                       <td colSpan={4}></td>
-                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end">
                         Credit:
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
@@ -3474,7 +3474,7 @@ const UpdateInvoiceForm = () => {
                     </tr>
                     <tr>
                       <td colSpan={4}></td>
-                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end">
                         Total Gross Amount:
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
@@ -3495,7 +3495,7 @@ const UpdateInvoiceForm = () => {
                     </tr>
                     <tr>
                       <td colSpan={4}></td>
-                      <td className="border border-gray-300 px-2 py-2 font-bold text-end">
+                      <td className="border border-gray-300 px-2 py-2 font-bold text-xs md:text-base text-end">
                         Total Gross Amount (incl GST):
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
@@ -3518,7 +3518,7 @@ const UpdateInvoiceForm = () => {
                     </tr>
                     <tr className="bg-indigo-100">
                       <td colSpan={4}></td>
-                      <td className="px-2 py-2 font-bold text-end border border-gray-400">
+                      <td className="px-2 py-2 font-bold text-xs md:text-base text-end border border-gray-400">
                         Total Raw Amount (incl GST):
                       </td>
                       <td className="px-3 py-2 text-end">
@@ -3546,11 +3546,11 @@ const UpdateInvoiceForm = () => {
           )}
           {/* Invoice Details */}
           <div className="mx-3 p-2 border-2">
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between mb-0 md:mb-2">
               <div>
-                <label className="font-bold">*Invoice status:</label>
+                <label className="font-bold text-xs md:text-base">*Invoice status:</label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base shadow-sm cursor-pointer"
                   name="invoice_status"
                   value={newInvoice.invoice_status}
                   onChange={handleInputChange}
@@ -3568,11 +3568,11 @@ const UpdateInvoiceForm = () => {
             </div>
 
             <div>
-              <div className="mb-2">
-                <label className="font-bold">Internal Comments:</label>
+              <div className="mb-0 md:mb-2">
+                <label className="font-bold text-xs md:text-base">Internal Comments:</label>
                 <textarea
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
                   name="invoice_internal_comments"
                   value={newInvoice.invoice_internal_comments}
                   onChange={handleInputChange}
@@ -3581,7 +3581,7 @@ const UpdateInvoiceForm = () => {
               <div>
                 <button
                   type="submit"
-                  className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
+                  className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm md:text-base"
                 >
                   UPDATE INVOICE
                 </button>
