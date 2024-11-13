@@ -787,35 +787,35 @@ const SupplierDetails = () => {
                 </Dropdown>
             </div>
             <div className="row">
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Name:</label>
                     <p className="form-label">{supplierState.supplier_name}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Address:</label>
                     <p className="form-label">{supplierState.supplier_address}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Term:</label>
                     <p className="form-label">{supplierState.supplier_payment_term}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Term Description:</label>
                     <p className="form-label">{supplierState.supplier_term_description}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Method:</label>
                     <p className="form-label">{supplierState.supplier_payment_method_details}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Supplier Type:</label>
                     <p className="form-label">{supplierState.supplier_type}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Supplier Material Type:</label>
                     <p className="form-label">{supplierState.supplier_material_types}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Status:</label>
                     {supplierState.supplier_isarchived ? 
                         (<label className="text-base sm:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 

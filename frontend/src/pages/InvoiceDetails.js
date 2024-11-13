@@ -164,34 +164,34 @@ const InvoiceDetails = () => {
 
     const invoiceDetails = invoiceState ? (
         <div className="row">
-            <div className="col-12 col-md-6 mb-3">
-                <label className="form-label fw-bold">Supplier:</label>
-                <p className="form-label">{invoiceState.supplier.supplier_name}</p>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label fw-bold text-sm sm:text-base">Supplier:</label>
+                <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_name}</p>
             </div>
-            <div className="col-12 col-md-6 mb-3">
-                <label className="form-label fw-bold">Archived (?):</label>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label fw-bold text-sm sm:text-base">Archived (?):</label>
                 {invoiceState.invoice_isarchived ? 
-                    (<span className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</span>) : 
-                    (<span className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</span>)
+                    (<span className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</span>) : 
+                    (<span className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</span>)
                 }
             </div>
-            <div className="col-12 col-md-6 mb-3">
-                <label className="form-label fw-bold">Invoice Issue Date:</label>
-                <p className="form-label">{formatDate(invoiceState.invoice_issue_date)}</p>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label fw-bold text-sm sm:text-base">Invoice Issue Date:</label>
+                <p className="form-label text-xs sm:text-base">{formatDate(invoiceState.invoice_issue_date)}</p>
             </div>
-            <div className="col-12 col-md-6 mb-3">
-                <label className="form-label fw-bold">Invoice Received Date:</label>
-                <p className="form-label">{formatDateTime(invoiceState.invoice_received_date)}</p>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label fw-bold text-sm sm:text-base">Invoice Received Date:</label>
+                <p className="form-label text-xs sm:text-base">{formatDateTime(invoiceState.invoice_received_date)}</p>
             </div>
-            <div className="col-12 col-md-6 mb-3">
-                <label className="form-label fw-bold">Invoice Due Date:</label>
-                <p className="form-label">{formatDateTime(invoiceState.invoice_due_date)}</p>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label fw-bold text-sm sm:text-base">Invoice Due Date:</label>
+                <p className="form-label text-xs sm:text-base">{formatDateTime(invoiceState.invoice_due_date)}</p>
             </div>
-            <div className="col-12 col-md-6 mb-3">
-                <label className="form-label fw-bold">Invoice Status:</label>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label fw-bold text-sm sm:text-base">Invoice Status:</label>
                 {invoiceState.invoice_status && (
                     <span
-                        className={`text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
+                        className={`text-sm md:text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
                             invoiceState.invoice_status === "Cancelled"
                             ? "border-2 bg-transparent border-gray-500 text-gray-500"
                             : invoiceState.invoice_status === "To review"
@@ -209,12 +209,12 @@ const InvoiceDetails = () => {
                     </span>
                 )}
             </div>
-            <div className="col-12 col-md-6 mb-3 text-sm opacity-50">
-                <label className="form-label fw-bold">Standalone:</label>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3 text-sm opacity-50">
+                <label className="form-label fw-bold text-sm sm:text-base">Standalone:</label>
                 <p className="form-label">{invoiceState.invoice_is_stand_alone ? `Yes` : `No`}</p>
             </div>
-            <div className="col-12 col-md-6 mb-3 text-sm opacity-50">
-                <label className="form-label fw-bold">Archived:</label>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3 text-sm opacity-50">
+                <label className="form-label fw-bold text-sm sm:text-base">Archived:</label>
                 <p className="form-label">{invoiceState.invoice_isarchived ? `Yes` : `No`}</p>
             </div>
         </div>
@@ -225,9 +225,9 @@ const InvoiceDetails = () => {
 
     const productsTable = invoiceState.products.length > 0 || invoiceState.custom_products.length > 0 ? (
         <div className="container p-0 bg-slate-50 mb-4 shadow-md text-sm">
-            <h2 className='font-bold text-lg m-1'>Invoiced products:</h2>
+            <h2 className='font-bold text-sm md:text-lg m-1'>Invoiced products:</h2>
             <div className="overflow-x-auto">
-                <table className="table table-hover m-0 min-w-full text-xs">
+                <table className="table table-hover m-0 min-w-full text-xs sm:text-sm">
                     <thead className="text-center">
                         <tr className="table-primary">
                             <th scope="col" className="px-2 py-1">SKU</th>
@@ -325,24 +325,24 @@ const InvoiceDetails = () => {
     const purchaseOrderTable = invoiceState.order ? (
         <div className="card-body border-1 relative shadow-md" ref={purchaseOrderTableRef}>
             <div className="row">
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Order Ref:</label>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Order Ref:</label>
                     <div>
                         <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/order/${invoiceState.order._id}`}>
                             {invoiceState.order.order_ref}
                         </Link>
                     </div>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Order Date:</label>
-                    <p className="form-label">{formatDate(invoiceState.order.order_date)}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Order Date:</label>
+                    <p className="form-label text-xs sm:text-base">{formatDate(invoiceState.order.order_date)}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Order EST Datetime:</label>
-                    <p className="form-label">{formatDateTime(invoiceState.order.order_est_datetime)}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Order EST Datetime:</label>
+                    <p className="form-label text-xs sm:text-base">{formatDateTime(invoiceState.order.order_est_datetime)}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Order Status:</label>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Order Status:</label>
                     <label>
                         {invoiceState.order.order_status && (
                         <label
@@ -365,18 +365,18 @@ const InvoiceDetails = () => {
                         )}
                     </label>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">isArchived:</label>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">isArchived:</label>
                     {invoiceState.order.order_isarchived ? 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
+                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
                     }
                 </div>
                 
                 <div className="col-12">
-                    <h2 className="font-bold text-lg m-1">Products Ordered:</h2>
+                    <h2 className="font-bold text-sm md:text-lg m-0 sm:m-1">Products Ordered:</h2>
                     <div className="overflow-auto">
-                        <table className="table table-bordered shadow-sm text-xs w-full min-w-[600px]">
+                        <table className="table table-bordered shadow-sm w-full min-w-[600px] text-xs sm:text-sm">
                             <thead className="thead-dark">
                                 <tr className="table-primary">
                                     <th scope="col" className="text-center">SKU</th>
@@ -441,44 +441,44 @@ const InvoiceDetails = () => {
     const supplierDetails = invoiceState.supplier ? (
         <div className="card-body border-1 relative shadow-md" ref={supplierDetailsRef}>
             <div className="row">
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Supplier Name:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_name}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Supplier Name:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_name}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Address:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_address}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Address:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_address}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Payment Term:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_payment_term}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Payment Term:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_payment_term}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Payment Term Description:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_term_description}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Payment Term Description:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_term_description}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Payment Method:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_payment_method_details}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Payment Method:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_payment_method_details}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Supplier Type:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_type}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Supplier Type:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_type}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Supplier Material Type:</label>
-                    <p className="form-label">{invoiceState.supplier.supplier_material_types}</p>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Supplier Material Type:</label>
+                    <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_material_types}</p>
                 </div>
-                <div className="col-md-6 col-12 mb-3">
-                    <label className="form-label fw-bold">Supplier Status:</label>
+                <div className="col-md-6 col-12 mb-0 sm:mb-3">
+                    <label className="form-label fw-bold text-sm sm:text-base">Supplier Status:</label>
                     {invoiceState.supplier.supplier_isarchived ? 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
+                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
                     }
                 </div>
     
-                <div className="w-100 mt-3">
-                    <h2 className="font-bold text-lg m-1">Supplier Contacts</h2>
+                <div className="w-100 mt-1 sm:mt-3">
+                    <h2 className="font-bold text-sm md:text-lg m-1">Supplier Contacts</h2>
                     <div className="table-responsive">
                         <table className="table table-bordered shadow-sm text-sm">
                             <thead className="thead-dark">
@@ -583,8 +583,8 @@ const InvoiceDetails = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             <div className="sm:col-span-2 lg:col-span-2">
                                 <div>
-                                    <button className={`${currentLeftTab === 'purchaseOrderTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} onClick={() => {setCurrentLeftTab('purchaseOrderTable'); scrollToDiv(purchaseOrderTableRef);}}>Purchase Order</button>
-                                    <button className={`${currentLeftTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} onClick={() => {setCurrentLeftTab('supplierDetails'); scrollToDiv(supplierDetailsRef);}}>Supplier Details</button>
+                                    <button className={`${currentLeftTab === 'purchaseOrderTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} onClick={() => {setCurrentLeftTab('purchaseOrderTable'); scrollToDiv(purchaseOrderTableRef);}}>Purchase Order</button>
+                                    <button className={`${currentLeftTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} onClick={() => {setCurrentLeftTab('supplierDetails'); scrollToDiv(supplierDetailsRef);}}>Supplier Details</button>
                                 </div>
                                 {/* SWITCH BETWEEN COMPONENTS HERE */}
                                 {currentLeftTab === 'purchaseOrderTable' && purchaseOrderTable}
@@ -592,7 +592,7 @@ const InvoiceDetails = () => {
                             </div>
                             <div className="sm:col-span-1">
                                 <div>
-                                    <button className={`${currentRightTab === 'internalComments' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} onClick={() => {setCurrentRightTab('internalComments'); scrollToDiv(internalCommentsRef);}}>Internal Comments</button>
+                                    <button className={`${currentRightTab === 'internalComments' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} onClick={() => {setCurrentRightTab('internalComments'); scrollToDiv(internalCommentsRef);}}>Internal Comments</button>
                                 </div>
                                 {/* NOTES TO SUPPLIER */}
                                 {currentRightTab === 'internalComments' && internalComments}

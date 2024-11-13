@@ -373,7 +373,7 @@ const PurchaseOrderDetails = () => {
             </div>
         </div>
     ) : (
-        <div className='border shadow-sm'><p className='m-2 p-1'>There are no internal comments...</p></div>
+        <div className='border shadow-sm'><p className='m-2 p-1 text-xs sm:text-base'>There are no internal comments...</p></div>
     )
 
     const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
@@ -491,7 +491,7 @@ const PurchaseOrderDetails = () => {
         </div>
         </>
     ) : (
-        <div className='border shadow-sm'><p className='m-2 p-1'>Purchase Order's invoices fetched successfully, but it might be empty...</p></div>
+        <div className='border shadow-sm'><p className='m-2 p-1 text-xs sm:text-base'>Purchase Order's invoices fetched successfully, but it might be empty...</p></div>
     );
 
     const supplierDetails = purchaseOrderState.supplier ? (

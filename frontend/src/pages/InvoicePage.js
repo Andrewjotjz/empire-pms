@@ -149,7 +149,7 @@ const InvoicePage = () => {
                         <th scope="col" className="hidden sm:table-cell">Payment</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-xs sm:text-base">
                     {filterBySelectedDate(filterInvoices().filter(invoice => invoice.invoice_isarchived === isArchive)).map(invoice => (
                         <tr key={invoice._id} onClick={() => handleTableClick(invoice._id)} className="cursor-pointer text-center">
                             <th scope="row">{invoice.invoice_ref}</th>
@@ -231,7 +231,7 @@ const InvoicePage = () => {
                         <div className="col-md-6 mb-1">
                             <input
                                 type="text"
-                                className="form-control"
+                                className="form-control text-xs sm:text-base"
                                 placeholder="Search..."
                                 value={searchTerm}
                                 onChange={handleSearchChange}
@@ -257,7 +257,7 @@ const InvoicePage = () => {
                         <div className="col-md-6 d-flex justify-content-start">
                             <input
                                 type="date"
-                                className="form-control"
+                                className="form-control text-xs sm:text-base"
                                 value={searchDate}
                                 onChange={handleSearchDateChange}
                             />
@@ -266,13 +266,13 @@ const InvoicePage = () => {
                     <div className="row mb-3">
                     <div className="col-md-6">
                         <button 
-                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} 
+                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} 
                             onClick={() => setIsArchive(false)}
                         >
                             Current
                         </button>
                         <button 
-                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50'}`} 
+                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} 
                             onClick={() => setIsArchive(true)}
                         >
                             Archived

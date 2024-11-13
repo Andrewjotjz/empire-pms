@@ -1576,7 +1576,7 @@ const NewInvoiceForm = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-2 grid grid-cols-1 lg:grid-cols-2">
+            <div className="py-1 px-4 lg:p-2 grid grid-cols-1 lg:grid-cols-2">
               <div className="p-2 max-h-[70vh] overflow-y-auto thin-scrollbar">
                 {/* disabled details */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 text-xs sm:text-sm">
@@ -2668,7 +2668,7 @@ const NewInvoiceForm = () => {
                 >
                   <div
                     className={`bg-white w-3 h-3 sm:w-6 sm:h-6 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                      isToggled ? "translate-x-6" : ""
+                      isToggled ? "translate-x-3 sm:translate-x-6" : ""
                     }`}
                   ></div>
                 </div>

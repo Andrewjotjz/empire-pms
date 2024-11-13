@@ -1561,7 +1561,7 @@ const UpdateInvoiceForm = () => {
   const editOrderModal = (
     <div>
       {showEditOrderModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-1 lg:p-5 text-xs lg:text-base">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 lg:p-5 text-xs lg:text-base">
           <form
             className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg"
             onSubmit={() => {
@@ -1597,7 +1597,7 @@ const UpdateInvoiceForm = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-2 grid grid-cols-1 lg:grid-cols-2">
+            <div className="py-1 px-4 lg:p-2 grid grid-cols-1 lg:grid-cols-2">
               <div className="p-2 max-h-[70vh] overflow-y-auto thin-scrollbar">
                 {/* disabled details */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 text-xs sm:text-sm">
@@ -2687,7 +2687,7 @@ const UpdateInvoiceForm = () => {
                 >
                   <div
                     className={`bg-white w-3 md:w-6 h-3 md:h-6 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                      isToggled ? "translate-x-6" : ""
+                      isToggled ? "translate-x-3 sm:translate-x-6" : ""
                     }`}
                   ></div>
                 </div>
