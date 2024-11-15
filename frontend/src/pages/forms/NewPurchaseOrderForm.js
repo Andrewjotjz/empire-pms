@@ -45,7 +45,12 @@ const NewPurchaseOrderForm = () => {
     const getCurrentDate = () => {
         const today = new Date();
         // Format the date as YYYY-MM-DD
-        return today.toISOString().split('T')[0];
+        return today.toLocaleDateString("en-AU", {
+            timeZone: "Australia/Melbourne",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).split("/").reverse().join("-");
     };
     const [orderState, setOrderState] = useState({
         supplier: '',
@@ -319,7 +324,7 @@ const NewPurchaseOrderForm = () => {
                 updatedProducts[index].order_product_gross_amount = (addedProductState[index].productPrice.product_number_a === 1 
                     ? (value * addedProductState[index].productPrice.product_price_unit_a * addedProductState[index].productPrice.product_number_a) 
                     : value * addedProductState[index].productPrice.product_price_unit_a
-                  ).toFixed(2);
+                  ).toFixed(4);
                   
             }
             if (name === 'order_product_qty_b') {
@@ -329,13 +334,13 @@ const NewPurchaseOrderForm = () => {
                 else {
                     updatedProducts[index].order_product_qty_a = Number.isInteger(value / addedProductState[index].productPrice.product_number_b) ? value / addedProductState[index].productPrice.product_number_b : parseFloat(value / addedProductState[index].productPrice.product_number_b).toFixed(4)
                 }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_b).toFixed(2)
+                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_b).toFixed(4)
             }
 
             // Calculate updatedTotalAmount using updatedProducts from prevState
             let updatedTotalAmount = (updatedProducts.reduce((total, prod) => (
                 total + (Number(prod.order_product_gross_amount) || 0)
-            ), 0) * 1.1).toFixed(2);
+            ), 0) * 1.1).toFixed(4);
             
             return {
                 ...prevState,
@@ -737,15 +742,15 @@ const NewPurchaseOrderForm = () => {
                                             </div>
                                         </td>
                                         <td className='hidden lg:table-cell'>
-                                            <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(prod.order_product_price_unit_a)}</label>
+                                            <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</label>
                                         </td>
                                         <td className='hidden lg:table-cell'>
                                             <label>
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                                                 addedProductState[index].productPrice.product_number_a === 1 
                                                 ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
                                                 : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
-                                            ))}
+                                            ) * 100) / 100)}
                                             </label>
                                         </td>
                                         <td>
@@ -842,25 +847,25 @@ const NewPurchaseOrderForm = () => {
                                         <tr>
                                             <td className='pt-1'>Total Net Amount:</td>
                                             <td className='pt-1'>
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(orderState.products && orderState.products.length > 0 ? (
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(orderState.products && orderState.products.length > 0 ? (
                                                     orderState.products.reduce((total, prod) => (
                                                         total + (Number(prod.order_product_gross_amount) || 0)
                                                     ), 0)
                                                 ) : (
                                                     ' 0.00'
-                                                ))}
+                                                ) * 100) / 100)}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className='pt-1'>Total Net Amount (incl. GST):</td>
                                             <td className='pt-1'>
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(orderState.products && orderState.products.length > 0 ? (
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(orderState.products && orderState.products.length > 0 ? (
                                                     (orderState.products.reduce((total, prod) => (
                                                         total + (Number(prod.order_product_gross_amount) || 0)
                                                     ), 0) * 1.1)
                                                 ) : (
                                                     ' 0.00'
-                                                ))}
+                                                ) * 100) / 100)}
                                             </td>
                                         </tr>
                                     </tbody>

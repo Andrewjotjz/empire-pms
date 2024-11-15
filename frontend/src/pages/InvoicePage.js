@@ -151,15 +151,15 @@ const InvoicePage = () => {
                 </thead>
                 <tbody className="text-xs sm:text-base">
                     {filterBySelectedDate(filterInvoices().filter(invoice => invoice.invoice_isarchived === isArchive)).map(invoice => (
-                        <tr key={invoice._id} onClick={() => handleTableClick(invoice._id)} className="cursor-pointer text-center">
+                        <tr key={invoice._id} onClick={() => handleTableClick(invoice._id)} className="cursor-pointer text-center text-sm">
                             <th scope="row">{invoice.invoice_ref}</th>
                             <td>{invoice.supplier.supplier_name}</td>
                             <td>{invoice.order?.order_ref || '-'}</td>
                             <td className="hidden sm:table-cell">{formatDateTime(invoice.invoice_issue_date)}</td>
                             <td className="hidden sm:table-cell">{formatDateTime(invoice.invoice_received_date)}</td>
                             <td className="hidden md:table-cell">{formatDateTime(invoice.invoice_due_date)}</td>
-                            <td className="hidden lg:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.invoiced_calculated_total_amount_incl_gst)}</td>
-                            <td className="hidden lg:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.invoiced_raw_total_amount_incl_gst)}</td>
+                            <td className="hidden lg:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
+                            <td className="hidden lg:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_raw_total_amount_incl_gst * 100) / 100)}</td>
                             <td>
                                 {invoice.invoice_status && (
                                     <label

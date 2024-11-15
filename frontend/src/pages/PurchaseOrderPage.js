@@ -168,7 +168,7 @@ const PurchaseOrder = () => {
                             <td>{order.supplier.supplier_name}</td>
                             <td className="hidden md:table-cell">{order.products.length + order.custom_products.length} products</td>
                             <td className="hidden md:table-cell">
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.order_total_amount)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}
                             </td>
                             <td className="hidden md:table-cell">
                                 {order.order_status && (

@@ -121,12 +121,12 @@ const ProductDetails = () => {
                             <td className="border border-gray-300 px-2 py-1">
                                 <label>{item.productPrice.product_number_a}</label>
                                 <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_a}</label>
-                                <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.productPrice.product_price_unit_a)}</div>
+                                <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_a * 100) / 100)}</div>
                             </td>
                             <td className="border border-gray-300 px-2 py-1">
                                 <label>{item.productPrice.product_number_b}</label>
                                 <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_b}</label>
-                                <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.productPrice.product_price_unit_b)}</div>
+                                <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_b * 100) / 100)}</div>
                             </td>
                             <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
                             <td className="border border-gray-300 px-1 py-1">

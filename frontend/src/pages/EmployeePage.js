@@ -35,7 +35,8 @@ const Employee = () => {
                 employee.employee_first_name.toLowerCase().includes(lowerCaseSearchTerm) ||
                 employee.employee_email.toLowerCase().includes(lowerCaseSearchTerm) ||
                 employee.employee_mobile_phone.toString().includes(lowerCaseSearchTerm) ||
-                employee.employee_roles.toLowerCase().toLowerCase().includes(lowerCaseSearchTerm)
+                employee.employee_roles.toLowerCase().includes(lowerCaseSearchTerm) ||
+                employee.projects.some(project => project.project_name.toLowerCase().includes(lowerCaseSearchTerm))
             );
         });
     };
@@ -103,7 +104,7 @@ const Employee = () => {
                         <th scope="col">Project</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="text-sm">
                     {filterEmployees().filter(employee => employee.employee_isarchived === isArchive).map((employee, index) => (
                         <tr key={employee._id} onClick={() => handleTableClick(employee._id)} className="cursor-pointer">
                             <th scope="row" className="hidden sm:table-cell">{index + 1}</th>
@@ -111,10 +112,13 @@ const Employee = () => {
                             <td className="hidden sm:table-cell">{employee.employee_email}</td>
                             <td>{employee.employee_mobile_phone}</td>
                             <td className="hidden sm:table-cell">{employee.employee_roles}</td>
-                            <td>{employee.projects
-                                .map((project, index) => (
-                                    <div key={index}> {project.project_name}</div>
-                                ))}</td>
+                            <td>
+                                {employee.projects.map((project, index) => (
+                                    <span key={index} className="inline-block mr-1 border rounded-lg text-xs p-1">
+                                        {project.project_name}
+                                    </span>
+                                ))}
+                            </td>
                         </tr>
                     ))}
                 </tbody>

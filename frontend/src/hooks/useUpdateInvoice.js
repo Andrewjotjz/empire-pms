@@ -8,7 +8,7 @@ export const useUpdateInvoice = () => {
     const [updateErrorState, setUpdateErrorState] = useState(null);
 
     //Component's function
-    const updateInvoice = async (invoiceState, invoiceId) => {
+    const updateInvoice = async (invoiceState, invoiceId = invoiceState._id) => {
         setIsUpdateLoadingState(true)
         setUpdateErrorState(null)
 

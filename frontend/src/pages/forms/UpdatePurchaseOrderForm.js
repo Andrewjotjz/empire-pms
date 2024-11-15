@@ -361,7 +361,7 @@ const UpdatePurchaseOrderForm = () => {
           : value *
             purchaseOrderState.products[index].productprice_obj_ref
               .product_price_unit_a
-      ).toFixed(2);
+      ).toFixed(4);
     }
 
     // Handle `order_product_qty_b` changes
@@ -402,7 +402,7 @@ const UpdatePurchaseOrderForm = () => {
         value *
         purchaseOrderState.products[index].productprice_obj_ref
           .product_price_unit_b
-      ).toFixed(2);
+      ).toFixed(4);
     }
 
     // Calculate updatedTotalAmount using updatedProducts
@@ -411,7 +411,7 @@ const UpdatePurchaseOrderForm = () => {
         (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
         0
       ) * 1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Dispatch the updated state with a plain object
     dispatch(
@@ -888,18 +888,18 @@ const UpdatePurchaseOrderForm = () => {
                           </td>
                           <td className='hidden lg:table-cell'>
                             <label>
-                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(prod.order_product_price_unit_a)}
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}
                             </label>
                           </td>
                           <td className='hidden lg:table-cell'>
                             <label>
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((prod.productprice_obj_ref.product_number_a === 1
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((prod.productprice_obj_ref.product_number_a === 1
                                 ? prod.order_product_qty_a *
                                   (prod.order_product_price_unit_a || 0) *
                                   prod.productprice_obj_ref.product_number_a
                                 : prod.order_product_qty_a *
                                   (prod.order_product_price_unit_a || 0)
-                              ))}
+                              ) * 100) / 100)}
                             </label>
                           </td>
                           <td>
@@ -1067,7 +1067,7 @@ const UpdatePurchaseOrderForm = () => {
                       <tr>
                         <td className="pt-1">Total Net Amount:</td>
                         <td className="pt-1">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchaseOrderState.products &&
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(purchaseOrderState.products &&
                           purchaseOrderState.products.length > 0
                             ? purchaseOrderState.products
                                 .reduce(
@@ -1076,14 +1076,14 @@ const UpdatePurchaseOrderForm = () => {
                                     (Number(prod.order_product_gross_amount) ||
                                       0),
                                   0
-                                )
-                            : " 0.00")}
+                                ) * 100
+                            : " 0.00") / 100)}
                         </td>
                       </tr>
                       <tr>
                         <td className="pt-1">Total Net Amount (incl. GST):</td>
                         <td className="pt-1">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(purchaseOrderState.products &&
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(purchaseOrderState.products &&
                           purchaseOrderState.products.length > 0
                             ? (
                                 purchaseOrderState.products.reduce(
@@ -1093,8 +1093,8 @@ const UpdatePurchaseOrderForm = () => {
                                       0),
                                   0
                                 ) * 1.1
-                              )
-                            : " 0.00")}
+                              ) * 100
+                            : " 0.00") / 100)}
                         </td>
                       </tr>
                     </tbody>

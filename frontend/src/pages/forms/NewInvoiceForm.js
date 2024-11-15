@@ -83,8 +83,18 @@ const NewInvoiceForm = () => {
   const [newInvoice, setNewInvoice] = useState({
     invoice_ref: "",
     supplier: "",
-    invoice_issue_date: "",
-    invoice_received_date: new Date().toISOString().split("T")[0],
+    invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
+    invoice_received_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
     invoice_due_date: "",
     order: "",
     products: [],
@@ -102,8 +112,18 @@ const NewInvoiceForm = () => {
   const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({
     invoice_ref: "",
     supplier: "",
-    invoice_issue_date: "",
-    invoice_received_date: new Date().toISOString().split("T")[0],
+    invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
+    invoice_received_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
     invoice_due_date: "",
     order: null,
     products: [],
@@ -155,11 +175,28 @@ const NewInvoiceForm = () => {
 
   // Helper function to calculate the due date based on payment terms
   const calculateDueDate = (paymentTerm) => {
-    const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10); // Extract number from "Net 60"
+    const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10) || 30; // Default to 30 days if no term specified
     const issueDate = new Date(); // Get the current date
-    const dueDate = new Date(issueDate); // Create a copy of the current date
-    dueDate.setDate(dueDate.getDate() + daysToAdd); // Add the extracted days
-    return dueDate.toISOString().split("T")[0]; // Return formatted date as 'YYYY-MM-DD'
+    const interimDueDate = new Date(issueDate); // Create a copy of the current date
+
+    // Add the payment term days to get the interim due date
+    interimDueDate.setDate(interimDueDate.getDate() + daysToAdd);
+
+    // Find the end of the month of the interim due date
+    const month = interimDueDate.getMonth() + 1; // 0-based to 1-based month
+    const year = interimDueDate.getFullYear();
+    const lastDayOfMonth = new Date(year, month, 0).getDate(); // Get the last day of the month
+
+    // Set the due date to the last day of that month
+    const dueDate = new Date(year, month - 1, lastDayOfMonth);
+
+    // Format to 'YYYY-MM-DD' in Melbourne timezone
+    return dueDate.toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-");
   };
 
   const fetchSelectedPurchaseOrder = async (id) => {
@@ -330,8 +367,18 @@ const NewInvoiceForm = () => {
       setNewInvoice({
         invoice_ref: "",
         supplier: newSupplier,
-        invoice_issue_date: "",
-        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
+        invoice_received_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
         invoice_due_date: formattedDueDate,
         order: "",
         products: [],
@@ -351,8 +398,18 @@ const NewInvoiceForm = () => {
       setNewInvoice({
         invoice_ref: "",
         supplier: "",
-        invoice_issue_date: "",
-        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
+        invoice_received_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
         invoice_due_date: "",
         order: "",
         products: [],
@@ -458,8 +515,18 @@ const NewInvoiceForm = () => {
         setNewInvoice({
           invoice_ref: "",
           supplier: targetSupplier,
-          invoice_issue_date: "",
-          invoice_received_date: new Date().toISOString().split("T")[0],
+          invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+            timeZone: "Australia/Melbourne",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).split("/").reverse().join("-"),
+          invoice_received_date: new Date().toLocaleDateString("en-AU", {
+            timeZone: "Australia/Melbourne",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).split("/").reverse().join("-"),
           invoice_due_date: formattedDueDate,
           order: "",
           products: [],
@@ -511,7 +578,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * currentState.products[index]?.invoice_product_price_unit
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       }
@@ -524,7 +591,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * currentState.custom_products[index]?.custom_order_price
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       }
@@ -536,7 +603,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * currentState.custom_products[index]?.custom_order_qty
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       }
@@ -577,7 +644,7 @@ const NewInvoiceForm = () => {
         (Number(updatedState.invoiced_other_fee) || 0) +
         (Number(updatedState.invoiced_credit) || 0)) *
       1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Final update to the state with recalculated total amount
     updatedState = {
@@ -612,7 +679,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * updatedCustomProducts[index]?.custom_order_price
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       } else if (name === "custom_order_price") {
@@ -663,7 +730,7 @@ const NewInvoiceForm = () => {
         (Number(updatedState.invoiced_other_fee) || 0) +
         (Number(updatedState.invoiced_credit) || 0)) *
       1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Final update to the state with recalculated total amount
     updatedState = {
@@ -689,13 +756,13 @@ const NewInvoiceForm = () => {
   //             updatedCustomProducts[index] = {
   //                 ...updatedCustomProducts[index],
   //                 [name]: Number(value), // Convert to number here
-  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(2)) || 0,
+  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(4)) || 0,
   //             };
   //         } else if (name === "custom_order_price") {
   //             updatedCustomProducts[index] = {
   //                 ...updatedCustomProducts[index],
   //                 [name]: Number(value), // Convert to number here
-  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(2)) || 0,
+  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(4)) || 0,
   //             };
   //         }
   //         else {
@@ -896,7 +963,7 @@ const NewInvoiceForm = () => {
           : value *
             updatedOrder.products[index].productprice_obj_ref
               .product_price_unit_a
-      ).toFixed(2);
+      ).toFixed(4);
     }
 
     // Handle `order_product_qty_b` changes
@@ -931,7 +998,7 @@ const NewInvoiceForm = () => {
       updatedProducts[index].order_product_gross_amount = (
         value *
         updatedOrder.products[index].productprice_obj_ref.product_price_unit_b
-      ).toFixed(2);
+      ).toFixed(4);
     }
 
     // Calculate updatedTotalAmount using updatedProducts
@@ -940,7 +1007,7 @@ const NewInvoiceForm = () => {
         (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
         0
       ) * 1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Dispatch the updated state with a plain object
     setUpdatedOrder({
@@ -1333,7 +1400,7 @@ const NewInvoiceForm = () => {
                             {order.products.length + order.custom_products.length}
                           </td>
                           <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(order.order_total_amount)}
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}
                           </td>
                           <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
                             {order.order_status}
@@ -1436,14 +1503,14 @@ const NewInvoiceForm = () => {
                             <label className="ml-1 text-xs opacity-50 text-nowrap">
                               {item.productPrice.product_unit_a}
                             </label>
-                            <div className="mt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.productPrice.product_price_unit_a)}</div>
+                            <div className="mt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_a * 100) / 100)}</div>
                           </td>
                           <td className="border border-gray-300 px-2 py-1">
                             <label>{item.productPrice.product_number_b}</label>
                             <label className="ml-1 text-xs opacity-50 text-nowrap">
                               {item.productPrice.product_unit_b}
                             </label>
-                            <div className="mt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.productPrice.product_price_unit_b)}</div>
+                            <div className="mt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_b * 100) / 100)}</div>
                           </td>
                           <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
                             {item.productPrice.price_fixed ? "Yes" : "No"}
@@ -1798,7 +1865,7 @@ const NewInvoiceForm = () => {
                               </td>
                               <td className="relative">
                                 <label>
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(prod.order_product_price_unit_a)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}
                                 </label>
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -1824,14 +1891,14 @@ const NewInvoiceForm = () => {
                               </td>
                               <td className="hidden sm:table-cell">
                                 <label>
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((prod.productprice_obj_ref
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((prod.productprice_obj_ref
                                     .product_number_a === 1
                                     ? prod.order_product_qty_a *
                                       (prod.order_product_price_unit_a || 0) *
                                       prod.productprice_obj_ref.product_number_a
                                     : prod.order_product_qty_a *
                                       (prod.order_product_price_unit_a || 0)
-                                  ))}
+                                  ) * 100) / 100)}
                                 </label>
                               </td>
                               <td>
@@ -2626,7 +2693,8 @@ const NewInvoiceForm = () => {
                 onInput={(e) => e.target.setCustomValidity("")}
               />
             </div>
-            <div>
+            {/* TEMPORARILY REMOVED as it's not required - Feedback from Office team */}
+            {/* <div>
               <label className="font-bold text-sm sm:text-base">*Invoice Received Date:</label>
               <input
                 type="date"
@@ -2640,7 +2708,7 @@ const NewInvoiceForm = () => {
                 }
                 onInput={(e) => e.target.setCustomValidity("")}
               />
-            </div>
+            </div> */}
             <div>
               <label className="font-bold text-sm sm:text-base">Invoice Due Date:</label>
               <input
@@ -2853,18 +2921,18 @@ const NewInvoiceForm = () => {
                             </td>
                             <td className="border border-gray-300 px-1 py-2">
                               <label>
-                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(prod.productprice_obj_ref.product_price_unit_a)}
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.productprice_obj_ref.product_price_unit_a * 100) / 100)}
                               </label>
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end ">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                                 prod.order_product_qty_a *
                                 prod.productprice_obj_ref.product_price_unit_a
-                              ))}
+                              ) * 100) / 100)}
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(newInvoice.products[index]
-                                  .invoice_product_gross_amount_a)}
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.products[index]
+                                  .invoice_product_gross_amount_a * 100) / 100)}
                             </td>
                           </tr>
                         ))}
@@ -2985,8 +3053,8 @@ const NewInvoiceForm = () => {
                               -
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(newInvoice.custom_products[index]
-                                  .custom_order_gross_amount)}
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.custom_products[index]
+                                  .custom_order_gross_amount * 100) / 100)}
                             </td>
                           </tr>
                         ))}
@@ -3080,7 +3148,7 @@ const NewInvoiceForm = () => {
                           Total Gross Amount:
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                             currentOrder.products.reduce(
                               (total, prod) =>
                                 total +
@@ -3091,13 +3159,13 @@ const NewInvoiceForm = () => {
                             (Number(newInvoice.invoiced_delivery_fee) || 0) +
                             (Number(newInvoice.invoiced_other_fee) || 0) +
                             (Number(newInvoice.invoiced_credit) || 0)
-                          ))}
+                          ) * 100) / 100)}
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                             newInvoice.invoiced_calculated_total_amount_incl_gst /
                             1.1
-                          ))}
+                          ) * 100) / 100)}
                         </td>
                       </tr>
                       <tr>
@@ -3109,7 +3177,7 @@ const NewInvoiceForm = () => {
                           Total Gross Amount (incl GST):
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                             (currentOrder.products.reduce(
                               (total, prod) =>
                                 total +
@@ -3121,10 +3189,10 @@ const NewInvoiceForm = () => {
                               (Number(newInvoice.invoiced_other_fee) || 0) +
                               (Number(newInvoice.invoiced_credit) || 0)) *
                             1.1
-                          ))}
+                          ) * 100) / 100)}
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(newInvoice.invoiced_calculated_total_amount_incl_gst)}
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}
                         </td>
                       </tr>
                       <tr className="bg-indigo-100">
@@ -3149,6 +3217,15 @@ const NewInvoiceForm = () => {
                             onInput={(e) => e.target.setCustomValidity("")}
                             className="rounded-lg ml-1 bg-white w-32 px-1 py-0.5 border"
                           />
+                          {(
+                            newInvoice.invoiced_raw_total_amount_incl_gst - (Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
+                          (<span className="text-xs text-red-600 ml-2 font-bold">+
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((newInvoice.invoiced_raw_total_amount_incl_gst - newInvoice.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                            </span>) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 inline-block font-bold ml-2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            ))}
                         </td>
                       </tr>
                     </tbody>
@@ -3374,8 +3451,8 @@ const NewInvoiceForm = () => {
                             />
                           </td>
                           <td className="border border-gray-300 px-3 py-2 text-end">
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(newInvoiceWithoutPO.custom_products[index]
-                                .custom_order_gross_amount)}
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoiceWithoutPO.custom_products[index]
+                                .custom_order_gross_amount * 100) / 100)}
                           </td>
                         </tr>
                       )
@@ -3460,7 +3537,7 @@ const NewInvoiceForm = () => {
                       Total Gross Amount:
                     </td>
                     <td className="border border-gray-300 px-3 py-2 text-end">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                         newInvoiceWithoutPO.custom_products.reduce(
                           (total, prod) =>
                             total +
@@ -3471,7 +3548,7 @@ const NewInvoiceForm = () => {
                           0) +
                         (Number(newInvoiceWithoutPO.invoiced_other_fee) || 0) +
                         (Number(newInvoiceWithoutPO.invoiced_credit) || 0)
-                      ))}
+                      ) * 100) / 100)}
                     </td>
                   </tr>
                   <tr>
@@ -3480,7 +3557,7 @@ const NewInvoiceForm = () => {
                       Total Gross Amount (incl GST):
                     </td>
                     <td className="border border-gray-300 px-3 py-2 text-end">
-                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format((
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                         (newInvoiceWithoutPO.custom_products.reduce(
                           (total, prod) =>
                             total +
@@ -3493,7 +3570,7 @@ const NewInvoiceForm = () => {
                             0) +
                           (Number(newInvoiceWithoutPO.invoiced_credit) || 0)) *
                         1.1
-                      ))}
+                      ) * 100) / 100)}
                     </td>
                   </tr>
                   <tr className="bg-indigo-100">
