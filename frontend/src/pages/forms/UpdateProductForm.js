@@ -762,6 +762,20 @@ const UpdateProductForm = () => {
                                     required
                                 />
                             </div>
+                            <div className="col-md-6 mb-0 sm:mb-3">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Actual Rate:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_actual_rate" 
+                                    value={productState.product_actual_rate} 
+                                    onChange={handleProductInputChange}
+                                    step="0.001"  // Allows input with up to three decimal places
+                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
+                                    min={1}
+                                    required
+                                />
+                            </div>
 
                             <div className="col-md-6 mb-0 sm:mb-3">
                                 <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Next available stock date:</label>

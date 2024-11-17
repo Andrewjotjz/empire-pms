@@ -174,6 +174,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     product_name: '$product.product_name',
                     product_types: '$product.product_types',
                     product_actual_size: '$product.product_actual_size',
+                    product_actual_rate: '$product.product_actual_rate',
                     product_next_available_stock_date: '$product.product_next_available_stock_date',
                     supplier: '$product.supplier',
                     alias: '$product.alias',

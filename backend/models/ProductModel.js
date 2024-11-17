@@ -47,6 +47,11 @@ const productSchema = new Schema({
         required: true,
         min: 0
     },
+    product_actual_rate: {
+        type: Number,
+        required: true,
+        min: 0
+    },
     product_next_available_stock_date: {
         type: Date, 
         default: null

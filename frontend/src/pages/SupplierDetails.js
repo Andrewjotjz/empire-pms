@@ -605,6 +605,7 @@ const SupplierDetails = () => {
                         <th scope="col" className="hidden sm:table-cell">Unit A</th>
                         <th scope="col" className="hidden sm:table-cell">Price A</th>
                         <th scope="col" className="hidden sm:table-cell">Actual M<span className='text-xs align-top'>2</span>/M</th>
+                        <th scope="col" className="hidden sm:table-cell">Actual Rate</th>
                         <th scope="col" className="hidden sm:table-cell">Type</th>
                         <th scope="col" className="hidden sm:table-cell">Alias</th>
                         <th scope="col" className="hidden sm:table-cell">Project Name</th>
@@ -619,6 +620,7 @@ const SupplierDetails = () => {
                             <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
                             <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.productPrice.product_price_unit_a * 100) / 100)}</td>
                             <td className="hidden sm:table-cell">{product.product.product_actual_size}</td>
+                            <td className="hidden sm:table-cell">{product.product.product_actual_rate}</td>
                             <td className="hidden sm:table-cell">{product.product.product_types}</td>
                             <td className="hidden sm:table-cell">{product.product.alias_name}</td>
                             <td className="hidden sm:table-cell">

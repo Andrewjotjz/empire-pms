@@ -29,7 +29,8 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         product_sku: '',
         product_name: '',
         product_types: '',
-        product_actual_size: '',
+        product_actual_size: 0,
+        product_actual_rate: 0,
         product_next_available_stock_date: '',
         product_isarchived: false,
         supplier: supplierId,
@@ -450,6 +451,20 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                     className="form-control text-xs md:text-base" 
                                     name="product_actual_size" 
                                     value={productDetailsState.product_actual_size} 
+                                    onChange={handleProductInputChange}
+                                    step="0.001"  // Allows input with up to three decimal places
+                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
+                                    min={1}
+                                    required
+                                />
+                            </div>
+                            <div className="col-md-6 mb-0 md:mb-3">
+                                <label className="form-label font-bold text-xs md:text-base">*Actual Rate:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control text-xs md:text-base" 
+                                    name="product_actual_rate" 
+                                    value={productDetailsState.product_actual_rate} 
                                     onChange={handleProductInputChange}
                                     step="0.001"  // Allows input with up to three decimal places
                                     pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places

@@ -210,6 +210,10 @@ const ProductDetails = () => {
                                 <p className="form-label">{productState[0].product.product_actual_size}</p>
                             </div>
                             <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
+                                <label className="form-label fw-bold">Actual Rate:</label>
+                                <p className="form-label">{productState[0].product.product_actual_rate}</p>
+                            </div>
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Alias:</label>
                                 <p className="form-label">{productState[0].product.alias_name}</p>
                             </div>
