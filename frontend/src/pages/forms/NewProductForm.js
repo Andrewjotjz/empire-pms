@@ -435,7 +435,7 @@ const NewProductForm = () => {
                                 <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price effective date:</label>
                                 <input 
                                     type='date'
-                                    className="form-control text-xs sm:text-base text-xs sm:text-base" 
+                                    className="form-control text-xs sm:text-base" 
                                     name="product_effective_date" 
                                     value={productDetailsState.product_effective_date}
                                     onChange={handleProductInputChange}
@@ -488,7 +488,7 @@ const NewProductForm = () => {
                                 <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Next available stock date:</label>
                                 <input 
                                     type='date'
-                                    className="form-control text-xs sm:text-base text-xs sm:text-base" 
+                                    className="form-control text-xs sm:text-base" 
                                     name="product_next_available_stock_date" 
                                     value={productDetailsState.product_next_available_stock_date}
                                     onChange={handleProductInputChange}
