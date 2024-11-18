@@ -29,7 +29,7 @@ const NewSupplierForm = () => {
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/`);
+    const handleBackClick = () => navigate(`/EmpirePMS/supplier`);
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;

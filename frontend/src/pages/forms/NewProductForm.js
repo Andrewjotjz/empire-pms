@@ -1,6 +1,6 @@
 // Import modules
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
  
 import { useAddProduct } from '../../hooks/useAddProduct'; 
@@ -16,7 +16,9 @@ const NewProductForm = () => {
     // Component router
     const navigate = useNavigate();
     const location = useLocation();
-    const {supplierId, supplierName}  = location.state;
+    const { id } = useParams();
+    const { supplierId = null, supplierName = '' } = location.state || {};
+
 
     // Component hook
     const dispatch = useDispatch();
@@ -39,7 +41,7 @@ const NewProductForm = () => {
         product_actual_rate: 0,
         product_next_available_stock_date: '',
         product_isarchived: false,
-        supplier: supplierId,
+        supplier: supplierId || id,
         alias: '',
         product_unit_a: '',
         product_number_a: 1,
@@ -56,7 +58,10 @@ const NewProductForm = () => {
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`, {state: supplierId});
+    const handleBackClick = () => {
+        const idToUse = supplierId || id; // Use `id` if `supplierId` is null or undefined
+        navigate(`/EmpirePMS/supplier/${idToUse}`, { state: idToUse });
+      };      
 
     const handleInputCustomToggle = () => {
         setIsInputCustomOpen(!isInputCustomOpen)
@@ -101,9 +106,10 @@ const NewProductForm = () => {
             alert(`You must select one or more projects that this new product applies to`)
             return;
         }
+        const idToUse = supplierId || id; // Use `id` if `supplierId` is null or undefined
 
-        addProduct(productDetailsState, supplierId);
-        navigate(`/EmpirePMS/supplier/${supplierId}`);
+        addProduct(productDetailsState, idToUse);
+        navigate(`/EmpirePMS/supplier/${idToUse}`);
     };
     
     //Render component

@@ -72,7 +72,7 @@ const NewPurchaseOrderForm = () => {
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
     
-    const handleBackClick = () => navigate(`/EmpirePMS/order/`);
+    const handleBackClick = () => navigate(`/EmpirePMS/order`);
 
     const handleProjectChange = (event) => {        
         const targetProject = event.target.value

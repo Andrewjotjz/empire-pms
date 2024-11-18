@@ -1,5 +1,5 @@
 // Import required modules, components, forms, pages, details page
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, Outlet } from "react-router-dom";
 import Navbar from './components/Navbar';
 import Login from './pages/forms/Login';
 import Dashboard from './pages/Dashboard';
@@ -31,6 +31,7 @@ import NewInvoiceForm from "./pages/forms/NewInvoiceForm";
 import UpdateInvoiceForm from "./pages/forms/UpdateInvoiceForm";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import NotFoundPage from "./pages/loaders/NotFoundPage";
+import Breadcrumbs from "./components/Breadcrumbs";
 
 function App() {
 
@@ -40,6 +41,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Navbar />
+        <Breadcrumbs />
         <div className="pages">
           <Routes>
             <Route path="/EmpirePMS/login" element={<Login />} />

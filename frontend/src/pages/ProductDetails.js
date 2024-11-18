@@ -16,10 +16,10 @@ const ProductDetails = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const location = useLocation();
-    const supplierId = location.state;
 
     //Component router
-    const { productId } = useParams();
+    const { id, productId } = useParams();
+    const supplierId = location.state || id;
     const navigate = useNavigate();
 
     //Component functions and variables

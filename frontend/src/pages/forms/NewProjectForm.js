@@ -23,7 +23,7 @@ const NewProjectForm = () => {
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleBackClick = () => navigate(`/EmpirePMS/project/`);
+    const handleBackClick = () => navigate(`/EmpirePMS/project`);
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;
