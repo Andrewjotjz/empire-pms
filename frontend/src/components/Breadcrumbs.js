@@ -211,15 +211,15 @@ const Breadcrumbs = () => {
                 </>
                 )}
 
-                {location.pathname.includes(`/EmpirePMS/employee/${id}/edit`) && (
+                {location.pathname.includes(`/EmpirePMS/employee/${id}/`) && (
                 <>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
                     </svg>
 
                     <Link
-                    to={`/EmpirePMS/employee/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/edit`) && "text-blue-500"}`}>
+                    to={`/EmpirePMS/employee/${id}/`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/`) && "text-blue-500"}`}>
                     Edit Employee
                     </Link>
                 </>
@@ -235,6 +235,20 @@ const Breadcrumbs = () => {
                     to={`/EmpirePMS/employee/create`}
                     className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/create`) && "text-blue-500"}`}>
                     New Employee
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/employee/${id}/change-password`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/employee/${id}/change-password`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/change-password`) && "text-blue-500"}`}>
+                    Change Password
                     </Link>
                 </>
                 )}

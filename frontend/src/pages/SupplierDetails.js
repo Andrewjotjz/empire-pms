@@ -115,8 +115,6 @@ const SupplierDetails = () => {
         dispatch(clearPurchaseOrderState())
         navigate(`/EmpirePMS/order/${id}`);
     }
-    
-    const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
@@ -871,11 +869,6 @@ const SupplierDetails = () => {
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <button onClick={handleBackClick}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
-                        </svg>
-                    </button>
                     <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>Supplier: {supplierState.supplier_name}</h1>
                 </div>
                 <div className="card-body">

@@ -40,8 +40,6 @@ const InvoiceDetails = () => {
     //Component functions and variables    
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleBackClick = () => window.history.back();
-
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
         navigate(`/EmpirePMS/supplier/${invoiceState.supplier._id}/products/${productId}`, {state: invoiceState.supplier._id})
@@ -537,11 +535,6 @@ const InvoiceDetails = () => {
                 <div className="card">
                     {/* CARD HEADER */}
                     <div className="card-header bg-dark text-white flex justify-between items-center flex-wrap">
-                        <button onClick={handleBackClick} className="hidden sm:flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
-                            </svg>
-                        </button>
                         <h1 className="mx-auto uppercase font-bold text-md sm:text-xl">INVOICE REF: {invoiceState.invoice_ref}</h1>
                     </div>
                     <div className="card-body">

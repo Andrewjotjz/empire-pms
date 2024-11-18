@@ -36,7 +36,6 @@ const EmployeeDetails = () => {
     const navigate = useNavigate();
 
     //Component functions and variables
-    const handleBackClick = () => window.history.back();
     
     const handleEditClick = () => navigate(`/EmpirePMS/employee/${id}/edit`, { state: id });
 
@@ -289,7 +288,7 @@ const EmployeeDetails = () => {
                                 <label>EMAIL PASSWORD RESET</label>
                             </div>
                         </Dropdown.Item>
-                        <Dropdown.Item onClick={handleChangePassword} disabled>
+                        <Dropdown.Item onClick={handleChangePassword} >
                             <div className='flex items-center'>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 mr-2">
                                     <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
@@ -407,11 +406,6 @@ const EmployeeDetails = () => {
         <div className="container mt-5">
         <div className="card">
             <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <button onClick={handleBackClick}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
-                        </svg>
-                    </button>
                     <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>{localUserState.employee_email === employeeState.employee_email ? 'YOUR ACCOUNT' : `EMPLOYEE : ${employeeState.employee_first_name} ${employeeState.employee_last_name}`}</h1>
                 </div>
             <div className="card-body">

@@ -27,8 +27,6 @@ const ProductDetails = () => {
 
     const handlePriceTableClick = (priceId) => { return }
 
-    const handleBackClick = () => window.history.back();
-
     const handleEditProductClick = () => {
         // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
         if (productState && productState.length > 0) {
@@ -164,7 +162,7 @@ const ProductDetails = () => {
                 </div>
                 <div className="card-body">
                     <div className="d-flex justify-content-between mb-3">
-                        <button className="btn btn-secondary" onClick={handleBackClick}>BACK</button>
+                        <div></div>
                         <Dropdown>
                             <Dropdown.Toggle variant="success" id="dropdown-basic">
                                 ACTIONS
