@@ -17,6 +17,7 @@ import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
+import { useUploadInvoice } from "../../hooks/useUploadInvoice";
 
 const NewInvoiceForm = () => {
   //Component's hook
@@ -24,6 +25,7 @@ const NewInvoiceForm = () => {
   const navigate = useNavigate();
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { addInvoice, addInvoiceError } = useAddInvoice();
+  const { uploadInvoice, uploadInvoiceError } = useUploadInvoice();
   const { fetchProductsBySupplier, fetchProductsErrorState } =
     useFetchProductsBySupplier();
   const { updatePurchaseOrder, updateOrderErrorState } =
@@ -159,6 +161,7 @@ const NewInvoiceForm = () => {
     product_effective_date: "",
     projects: [],
   });
+  const [files, setFiles] = useState([]);
 
   //Component's function and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -499,6 +502,10 @@ const NewInvoiceForm = () => {
   const handleTogglePriceModal = () =>
     setShowProductPriceModal(!showProductPriceModal);
 
+  const handleFileChange = (event) => {
+    const selectedFiles = Array.from(event.target.files); // Convert FileList to an array
+    setFiles([...files, ...selectedFiles]); // Append new files to the existing list
+  };
   const handleSupplierChange = (event) => {
     const targetSupplier = event.target.value;
 
@@ -1057,6 +1064,13 @@ const NewInvoiceForm = () => {
       });
     }
   };
+
+  const handleRemoveFile = (index) => {
+    const updatedFileList = files.filter((_, idx) => idx !== index);
+
+    setFiles(updatedFileList);
+  };
+
   const handleAddCustomItem = (noPO = false) => {
     if (noPO) {
       if (newInvoiceWithoutPO.custom_products.length < 15) {
@@ -1174,15 +1188,32 @@ const NewInvoiceForm = () => {
     // Step 3: Remove custom product from list
     handleRemoveCustomItem(targetIndex);
   };
-  const handleSubmitInvoice = (event) => {
+  const handleSubmitInvoice = async (event) => {
     event.preventDefault();
+
+    //upload Invoice logic
+    if (!files || files.length === 0) {
+      return alert("Please select at least one file.");
+    }
+
+    if (files.length > 10) {
+      return alert("You can only upload up to 10 files.")
+    }
+
+    const formData = new FormData();
+    Array.from(files).forEach((file) => {
+        formData.append("invoices", file); // 'invoices' must match the backend key
+    });
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
         alert(`Please select invoice status!`)
         return;
       }
-      addInvoice(newInvoice);
+
+      const invoice_id = await addInvoice(newInvoice);
+      formData.append("id", invoice_id);
+      await uploadInvoice(formData);
     }
 
     if (isToggled) {
@@ -1190,7 +1221,11 @@ const NewInvoiceForm = () => {
         alert(`Please select invoice status!`)
         return;
       }
-      addInvoice(newInvoiceWithoutPO);
+      
+      const invoice_id = await addInvoice(newInvoiceWithoutPO);
+      formData.append("id", invoice_id);
+      await uploadInvoice(formData);
+
     }
 
     navigate(`/EmpirePMS/invoice`)
@@ -3635,6 +3670,83 @@ const NewInvoiceForm = () => {
                   onChange={handleInputChange}
                 />
               </div>
+              
+              {/* File Upload Input */}
+              <div class="flex flex-col items-center w-full p-1">
+                <label
+                  for="file-upload"
+                  class="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-10 h-10 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 16l4-4m0 0l4-4m-4 4v12M16 5l4 4m0 0l-4 4m4-4H8"
+                    />
+                  </svg>
+                  <p class="mt-2 text-sm text-gray-500">
+                    <span class="font-medium">Click to upload</span> or drag and drop files
+                  </p>
+                  <p class="text-xs text-gray-400">PNG, JPG, GIF, PDF up to 10MB</p>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    name="invoices"
+                    multiple
+                    onChange={handleFileChange}
+                    class="hidden"
+                  />
+                </label>
+                {/* Display Selected Files */}
+                <ul class="mt-2 w-full max-w-md space-y-2">
+                  {files.length > 0 ? (
+                    files.map((file, index) => (
+                      <li
+                        key={index}
+                        class="flex items-center justify-between p-2 text-sm text-gray-700 bg-gray-100 rounded-lg"
+                      >
+                        <span>{file.name}</span>
+                        <div class="flex items-center justify-between">
+                          <span class="text-xs text-gray-500 mr-1 text-nowrap">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </span>
+                          <button
+                              type="button"
+                              onClick={() => handleRemoveFile(index)}
+                              className="btn btn-danger p-1"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="h-4 w-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                      </li>
+                    ))
+                  ) : (
+                    <p class="text-gray-500 text-sm">No files selected</p>
+                  )}
+                </ul>
+              </div>
+
+              {/* SUBMIT INVOICE BUTTON */}
               <div>
                 <button
                   type="submit"
@@ -3645,8 +3757,6 @@ const NewInvoiceForm = () => {
               </div>
             </div>
           </div>
-          {/* Invoice File Upload */}
-          <div></div>
         </form>
         {orderSelectionModal}
         {editOrderModal}

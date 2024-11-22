@@ -1,5 +1,5 @@
 // Import required modules, components, forms, pages, details page
-import { BrowserRouter, Route, Routes, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Navbar from './components/Navbar';
 import Login from './pages/forms/Login';
 import Dashboard from './pages/Dashboard';

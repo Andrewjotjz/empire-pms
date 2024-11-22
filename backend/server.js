@@ -19,6 +19,7 @@ const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const productPriceRoutes = require('./routes/productPriceRoutes');
+const invoiceFileRoutes = require('./routes/invoiceFileRoutes');
 //import from importJSONtoDB file
 const importJSONtoDB = require('./importJSONtoDB'); 
 
@@ -44,6 +45,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+
+
 //route handler
 app.get('*', refreshToken); //'*' means to apply to every single route
 app.use('/api/company', companyRoutes);
@@ -58,7 +61,8 @@ app.use('/api/project', projectRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/supplier', supplierRoutes);
 app.use('/api/productprice', productPriceRoutes);
-
+app.use('/api/invoice-file', invoiceFileRoutes);
+// app.use('/uploads', express.static("uploads"));
 
 
 

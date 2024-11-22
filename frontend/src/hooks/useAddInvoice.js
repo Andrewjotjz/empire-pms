@@ -34,9 +34,11 @@ export const useAddInvoice = () => {
                 }
                 if (res.ok) {      
                     alert(`New invoice created successfully!`);
-                
+
                     // update loading state
                     setAddInvoiceLoading(false)
+
+                    return data._id;
 
                 }
             } catch (error) {
@@ -44,7 +46,7 @@ export const useAddInvoice = () => {
                 setAddInvoiceLoading(false);
             }
         }
-        postInvoice();
+        return postInvoice();
     }
 
     return { addInvoice, addInvoiceLoading, addInvoiceError };
