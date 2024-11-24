@@ -2595,7 +2595,7 @@ const NewInvoiceForm = () => {
     fetchProjectError ||
     fetchProductsErrorState ||
     updateOrderErrorState ||
-    addInvoiceError
+    addInvoiceError || uploadInvoiceError
   ) {
     const errorMessages = [
       fetchSupplierError,
@@ -2606,6 +2606,7 @@ const NewInvoiceForm = () => {
       fetchProductsErrorState,
       updateOrderErrorState,
       addInvoiceError,
+      uploadInvoiceError
     ];
 
     const isSessionExpired = errorMessages.some((error) =>
@@ -2649,7 +2650,7 @@ const NewInvoiceForm = () => {
               fetchProjectError ||
               fetchProductsErrorState ||
               updateOrderErrorState ||
-              addInvoiceError}
+              addInvoiceError || uploadInvoiceError}
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -3672,14 +3673,14 @@ const NewInvoiceForm = () => {
               </div>
               
               {/* File Upload Input */}
-              <div class="flex flex-col items-center w-full p-1">
+              <div className="flex flex-col items-center w-full p-1">
                 <label
                   for="file-upload"
-                  class="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition"
+                  className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    class="w-10 h-10 text-gray-400"
+                    className="w-10 h-10 text-gray-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -3691,30 +3692,30 @@ const NewInvoiceForm = () => {
                       d="M3 16l4-4m0 0l4-4m-4 4v12M16 5l4 4m0 0l-4 4m4-4H8"
                     />
                   </svg>
-                  <p class="mt-2 text-sm text-gray-500">
-                    <span class="font-medium">Click to upload</span> or drag and drop files
+                  <p className="mt-2 text-sm text-gray-500">
+                    <span className="font-medium">Click to upload</span> or drag and drop files
                   </p>
-                  <p class="text-xs text-gray-400">PNG, JPG, GIF, PDF up to 10MB</p>
+                  <p className="text-xs text-gray-400">PNG, JPG, GIF, PDF up to 10MB</p>
                   <input
                     id="file-upload"
                     type="file"
                     name="invoices"
                     multiple
                     onChange={handleFileChange}
-                    class="hidden"
+                    className="hidden"
                   />
                 </label>
                 {/* Display Selected Files */}
-                <ul class="mt-2 w-full max-w-md space-y-2">
+                <ul className="mt-2 w-full max-w-md space-y-2">
                   {files.length > 0 ? (
                     files.map((file, index) => (
                       <li
                         key={index}
-                        class="flex items-center justify-between p-2 text-sm text-gray-700 bg-gray-100 rounded-lg"
+                        className="flex items-center justify-between p-2 text-sm text-gray-700 bg-gray-100 rounded-lg"
                       >
                         <span>{file.name}</span>
-                        <div class="flex items-center justify-between">
-                          <span class="text-xs text-gray-500 mr-1 text-nowrap">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500 mr-1 text-nowrap">
                             {(file.size / 1024).toFixed(1)} KB
                           </span>
                           <button
