@@ -236,7 +236,7 @@ const PurchaseOrder = () => {
                     <tr className="table-primary">
                         <th scope="col" hidden={!purchaseOrderState.map(order => order.order_status).includes('Pending')}>
                             <input 
-                                className="form-checkbox h-3 w-3 sm:h-4 sm:w-4 text-blue-600"
+                                className="form-checkbox h-3 w-8 sm:h-4 sm:w-4 text-blue-600"
                                 type="checkbox"
                                 checked={Array.from(selectedPOs).length === purchaseOrderState.filter(order => order.order_status === 'Pending').length && Array.from(selectedPOs).length !== 0}
                                 onChange={handleSelectAllPO}
