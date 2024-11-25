@@ -138,7 +138,7 @@ const PurchaseOrder = () => {
         if (Array.from(selectedPOs).length === 0) {
             setSelectedPOs(new Set(
                 purchaseOrderState
-                    .filter(order => order.order_status === 'Pending')
+                    .filter(order => order.order_status === 'Pending' && !order.order_isarchived)
                     .map(order => order._id)
             ));
         } else {
@@ -240,6 +240,7 @@ const PurchaseOrder = () => {
                                 type="checkbox"
                                 checked={Array.from(selectedPOs).length === purchaseOrderState.filter(order => order.order_status === 'Pending').length && Array.from(selectedPOs).length !== 0}
                                 onChange={handleSelectAllPO}
+                                disabled={isArchive}
                             />
                         </th>
                         <th scope="col">PO</th>
@@ -262,6 +263,7 @@ const PurchaseOrder = () => {
                                     type="checkbox"
                                     checked={selectedPOs.has(order._id)}
                                     onChange={() => handleSelectPO(order._id)}
+                                    disabled={order.order_isarchived}
                                 />
                             </td>
                             <td className="cursor-pointer" onClick={() => handleTableClick(order._id)}>{order.order_ref}</td>
@@ -379,7 +381,7 @@ const PurchaseOrder = () => {
                             
                         </div>
                         
-                        { Array.from(selectedPOs).length > 0 && (
+                        { Array.from(selectedPOs).length > 0 && !isArchive &&(
                         <div className="col-md-6 d-flex items-center justify-content-md-end text-xs sm:text-base">
                             <span className="mr-2">{Array.from(selectedPOs).length} PO{Array.from(selectedPOs).length > 1 && <span>s</span>} selected</span>
                             <span className="mr-2">|</span>
