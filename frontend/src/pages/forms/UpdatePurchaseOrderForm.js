@@ -61,6 +61,7 @@ const UpdatePurchaseOrderForm = () => {
   const [newProject, setNewProject] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
   const [searchProductTerm, setSearchProductTerm] = useState("");
+  const [currentOrderStatus] = useState(purchaseOrderState.order_status);
 
   // Component functions and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -422,6 +423,8 @@ const UpdatePurchaseOrderForm = () => {
       })
     );
   };
+
+  
 
   let distinctProductTypes = [];
   if (Array.isArray(productState) && selectedProject) {
@@ -1208,6 +1211,7 @@ const UpdatePurchaseOrderForm = () => {
                 className="btn border rounded bg-green-700 text-white hover:bg-green-800"
                 type="submit"
                 name="approve"
+                hidden={currentOrderStatus === "Approved" || purchaseOrderState.order_status === "Approved"}
               >
                 APPROVE
               </button>
