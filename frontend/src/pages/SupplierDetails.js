@@ -29,7 +29,8 @@ const SupplierDetails = () => {
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('supplierDetails');
-    const [searchTerm, setSearchTerm] = useState('');    
+    const [searchTerm, setSearchTerm] = useState('');  
+    const [productTypeState, setProductTypeState] = useState([]);  
 
     const [selectedProjects, setSelectedProjects] = useState(new Set());  // set select projects to add
     const [projectsToRemove, setProjectsToRemove] = useState(new Set());  // set select projects to remove
@@ -78,7 +79,7 @@ const SupplierDetails = () => {
                 product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
-                product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_type.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
                 product.productPrice.project_names.some(projectName => 
                     projectName.toLowerCase().includes(lowerCaseSearchTerm)
@@ -412,6 +413,47 @@ const SupplierDetails = () => {
         };
         fetchAllProjects();
     }, [id, dispatch]);
+
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
     
     const selectProjectsBtn = (
         <div className='d-flex m-1 justify-content-end'>
@@ -594,7 +636,7 @@ const SupplierDetails = () => {
                     </div>
                 </button>
             </div>
-            <table className="table table-bordered table-hover">
+            <table className="table table-bordered table-hover text-xs">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">SKU</th>
@@ -619,7 +661,7 @@ const SupplierDetails = () => {
                             <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.productPrice.product_price_unit_a * 100) / 100)}</td>
                             <td className="hidden sm:table-cell">{product.product.product_actual_size}</td>
                             <td className="hidden sm:table-cell">{product.product.product_actual_rate}</td>
-                            <td className="hidden sm:table-cell">{product.product.product_types}</td>
+                            <td className="hidden sm:table-cell">{productTypeState.find(type => type._id === product.product.product_type)?.type_name || "Unknown"}</td>
                             <td className="hidden sm:table-cell">{product.product.alias_name}</td>
                             <td className="hidden sm:table-cell">
                                 {product.productPrice.project_names.map((project, index) => (

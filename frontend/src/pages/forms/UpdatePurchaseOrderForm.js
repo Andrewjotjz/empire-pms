@@ -429,7 +429,7 @@ const UpdatePurchaseOrderForm = () => {
   let distinctProductTypes = [];
   if (Array.isArray(productState) && selectedProject) {
     distinctProductTypes = [
-      ...new Set(productState.map((prod) => prod.product.product_types)),
+      ...new Set(productState.map((prod) => prod.product.product_type)),
     ];
   }
 
@@ -457,13 +457,13 @@ const UpdatePurchaseOrderForm = () => {
         product.product.product_actual_size
           .toString()
           .includes(lowerCaseSearchTerm) ||
-        product.product.product_types
+        product.product.product_type
           .toLowerCase()
           .includes(lowerCaseSearchTerm) ||
         product.product.alias_name.toString().includes(lowerCaseSearchTerm);
 
       const matchesProductType = selectedProductType
-        ? product.product.product_types === selectedProductType
+        ? product.product.product_type === selectedProductType
         : true; // If no product type is selected, don't filter by type
 
       const matchesProjectId = product.productPrice.projects.some((projectId) =>
@@ -706,7 +706,7 @@ const UpdatePurchaseOrderForm = () => {
                 <div>
                   <select
                     className="form-control shadow-sm cursor-pointer opacity-95 text-xs lg:text-base"
-                    name="product_types"
+                    name="product_type"
                     value={selectedProductType}
                     onChange={(e) => setSelectedProductType(e.target.value)}
                   >
@@ -773,7 +773,7 @@ const UpdatePurchaseOrderForm = () => {
                       </div>
                       <div className='hidden lg:grid grid-cols-3 gap-2 p-1'>
                         <label className="col-span-2">
-                          {product.product.product_types}
+                          {product.product.product_type}
                         </label>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

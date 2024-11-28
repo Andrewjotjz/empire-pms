@@ -15,7 +15,7 @@ router.get('/', requireAuth, getAllProducts)
 router.get('/:id', requireAuth, getSingleProduct)
 
 //!GET - get products by Type
-router.get('/type/:type', requireAuth, getFilteredProducts)
+router.get('/type/:id', requireAuth, getFilteredProducts)
 
 //POST - create a new Product
 router.post('/create', requireAuth, createNewProduct)

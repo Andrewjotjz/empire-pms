@@ -101,14 +101,14 @@ const getProductsByType = async (req, res) => {
 
 // Controller method to get filtered products
 const getFilteredProducts = async (req, res) => {
-    const { type } = req.params;
+    const { id } = req.params;
 
-    if (!type) {
-        return res.status(400).json({ error: 'Product type is required' });
+    if (!id) {
+        return res.status(400).json({ error: 'Product type ID is required' });
     }
 
     try {
-        const products = await productModel.find({ product_type: type })
+        const products = await productModel.find({ product_type: id })
             .populate('alias')
             .exec();
 
@@ -118,6 +118,7 @@ const getFilteredProducts = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 //Controller function - POST to create a new Product
 const createNewProduct = async (req, res) => {

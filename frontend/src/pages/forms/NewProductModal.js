@@ -28,7 +28,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
     const [productDetailsState, setProductDetailsState] = useState({
         product_sku: '',
         product_name: '',
-        product_types: '',
+        product_type: '',
         product_actual_size: 0,
         product_actual_rate: 0,
         product_next_available_stock_date: '',
@@ -58,7 +58,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
 
     const handleProductInputChange = (event) => {
         const { name, value } = event.target;
-        if (name === 'product_types'){
+        if (name === 'product_type'){
             if (value !== ''){
                 fetchAliasesByProductType(value)
                 setAliasFieldToggle(false);
@@ -208,8 +208,8 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                             <label className="form-label font-bold text-xs md:text-base">*Type:</label>
                             <select 
                                 className="form-control text-xs md:text-base shadow-sm cursor-pointer"
-                                name="product_types" 
-                                value={productDetailsState.product_types} 
+                                name="product_type" 
+                                value={productDetailsState.product_type} 
                                 onChange={handleProductInputChange}
                                 required
                             >                                

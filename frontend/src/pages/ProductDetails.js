@@ -15,6 +15,7 @@ const ProductDetails = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [productTypeState, setProductTypeState] = useState([]);
     const location = useLocation();
 
     //Component router
@@ -96,6 +97,47 @@ const ProductDetails = () => {
 
         fetchProductDetails();
     }, [supplierId, productId, dispatch]);
+
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
 
     //Display DOM
     const productPriceTable = Array.isArray(productState) && productState.length > 0 ? (
@@ -201,7 +243,7 @@ const ProductDetails = () => {
                             </div>
                             <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Type:</label>
-                                <p className="form-label">{productState[0].product.product_types}</p>
+                                <p className="form-label">{productTypeState.find(type => type._id === productState[0].product.product_type)?.type_name || "Unknown"}</p>
                             </div>
                             <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Actual Size:</label>

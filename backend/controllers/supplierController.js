@@ -172,7 +172,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     _id: '$product._id',
                     product_sku: '$product.product_sku',
                     product_name: '$product.product_name',
-                    product_types: '$product.product_types',
+                    product_type: '$product.product_type',
                     product_actual_size: '$product.product_actual_size',
                     product_actual_rate: '$product.product_actual_rate',
                     product_next_available_stock_date: '$product.product_next_available_stock_date',
@@ -181,7 +181,7 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     alias_name: '$alias.alias_name',
                     product_isarchived: '$product.product_isarchived',
                     createdAt: '$product.createdAt',
-                    updatedAt: '$product.updatedAt',
+                    updatedAt: '$product.updatedAt'
                 },
                 productPrice: {
                     _id: '$_id',

@@ -446,7 +446,7 @@ const NewInvoiceForm = () => {
   let distinctProductTypes = [];
   if (Array.isArray(productState) && (currentOrder?.project._id || false)) {
     distinctProductTypes = [
-      ...new Set(productState.map((prod) => prod.product.product_types)),
+      ...new Set(productState.map((prod) => prod.product.product_type)),
     ];
   }
   const filterProductsBySearchTerm = () => {
@@ -473,13 +473,13 @@ const NewInvoiceForm = () => {
         product.product.product_actual_size
           .toString()
           .includes(lowerCaseSearchTerm) ||
-        product.product.product_types
+        product.product.product_type
           .toLowerCase()
           .includes(lowerCaseSearchTerm) ||
         product.product.alias_name.toString().includes(lowerCaseSearchTerm);
 
       const matchesProductType = selectedProductType
-        ? product.product.product_types === selectedProductType
+        ? product.product.product_type === selectedProductType
         : true; // If no product type is selected, don't filter by type
 
       const matchesProjectId = product.productPrice.projects.some((projectId) =>
@@ -1708,7 +1708,7 @@ const NewInvoiceForm = () => {
                     <div>
                       <select
                         className="form-control md:text-base text-xs shadow-sm cursor-pointer opacity-95"
-                        name="product_types"
+                        name="product_type"
                         value={selectedProductType}
                         onChange={(e) => setSelectedProductType(e.target.value)}
                       >
@@ -1769,7 +1769,7 @@ const NewInvoiceForm = () => {
                           </div>
                           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-1">
                             <label className="col-span-1 lg:col-span-2">
-                              {product.product.product_types}
+                              {product.product.product_type}
                             </label>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

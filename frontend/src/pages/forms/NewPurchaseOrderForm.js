@@ -357,7 +357,7 @@ const NewPurchaseOrderForm = () => {
     let distinctProductTypes = [];
     if (Array.isArray(productState) && selectedProject) {
         distinctProductTypes = [
-            ...new Set(productState.map((prod) => prod.product.product_types))
+            ...new Set(productState.map((prod) => prod.product.product_type))
         ];
     }
     
@@ -383,7 +383,7 @@ const NewPurchaseOrderForm = () => {
                 product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
-                product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_type.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.alias_name.toString().includes(lowerCaseSearchTerm) 
                 // || product.productPrice.project_names.some(projectName => 
                 //     projectName.toLowerCase().includes(lowerCaseSearchTerm)
@@ -391,7 +391,7 @@ const NewPurchaseOrderForm = () => {
             );
     
             const matchesProductType = selectedProductType 
-                ? product.product.product_types === selectedProductType 
+                ? product.product.product_type === selectedProductType 
                 : true; // If no product type is selected, don't filter by type
     
             return matchesSearchTerm && matchesProductType;
@@ -621,7 +621,7 @@ const NewPurchaseOrderForm = () => {
                                 <div>
                                     <select
                                     className="form-control shadow-sm cursor-pointer opacity-95 text-xs lg:text-base"
-                                    name="product_types"
+                                    name="product_type"
                                     value={selectedProductType}
                                     onChange={(e) => setSelectedProductType(e.target.value)}
                                     >
@@ -653,7 +653,7 @@ const NewPurchaseOrderForm = () => {
                                     <div className='hidden lg:grid'>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
                                     <div className='hidden lg:grid'>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
                                     <div className='hidden lg:grid grid-cols-3 gap-2 p-1'>
-                                        <label className="col-span-2">{product.product.product_types}</label>
+                                        <label className="col-span-2">{product.product.product_type}</label>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                         </svg>

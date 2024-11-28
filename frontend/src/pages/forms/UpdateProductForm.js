@@ -55,6 +55,8 @@ const UpdateProductForm = () => {
         product_effective_date: '',
         projects: []
     })
+    const [productTypeState, setProductTypeState] = useState([]);
+
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
@@ -106,15 +108,15 @@ const UpdateProductForm = () => {
     const changeAlias = () => {
         setIsChangeAlias(!isChangeAlias)
         if (defaultProductType === '') {
-            setDefaultProductType(productState.product_types)
+            setDefaultProductType(productState.product_type)
             setDefaultAlias(productState.alias_name)
-            fetchAliasesByProductType(productState.product_types)
+            fetchAliasesByProductType(productState.product_type)
             setIsDisabled(false);
         }
         else {
             fetchAliasesByProductType(defaultProductType)
         }
-        dispatch(setProductState({...productState, product_types: defaultProductType, alias_name: defaultAlias}))
+        dispatch(setProductState({...productState, product_type: defaultProductType, alias_name: defaultAlias}))
         setIsDisabled(false);
     }
 
@@ -129,7 +131,7 @@ const UpdateProductForm = () => {
 
     const handleProductInputChange = (event) => {
         const { name, value } = event.target;
-        if (name === 'product_types'){
+        if (name === 'product_type'){
             if (value !== ''){
                 fetchAliasesByProductType(value)
             }
@@ -232,6 +234,47 @@ const UpdateProductForm = () => {
         };
     }, [dispatch]);
 
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
+
     // Display DOM
     if (productTypeIsLoadingState || productUpdateIsLoadingState || isAddPriceLoadingState) {
         return <EmployeeDetailsSkeleton />;
@@ -300,34 +343,18 @@ const UpdateProductForm = () => {
                             <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Type:</label>
                             <select 
                                 className="form-control text-xs sm:text-base shadow-sm cursor-pointer"
-                                name="product_types" 
-                                value={productState.product_types} 
+                                name="product_type" 
+                                value={productState.product_type} 
                                 onChange={handleProductInputChange}
                                 required
                                 disabled={!isChangeAlias}
                             >                                
                                 <option value="" disabled>Select Product Type</option>
-                                <option value="Compound">Compound</option>
-                                <option value="Access Panel">Access Panel</option>
-                                <option value="Framing Ceiling">Framing Ceiling</option>
-                                <option value="Framing Wall">Framing Wall</option>
-                                <option value="Batt Insulation">Batt Insulation</option>
-                                <option value="Rigid Insulation">Rigid Insulation</option>
-                                <option value="Plasterboard">Plasterboard</option>
-                                <option value="External Cladding">External Cladding</option>
-                                <option value="SpeedPanel">SpeedPanel</option>
-                                <option value="Timber">Timber</option>
-                                <option value="Acoustic Ceiling Panels">Acoustic Ceiling Panels</option>
-                                <option value="Ceiling Tiles">Ceiling Tiles</option>
-                                <option value="Others">Others</option>
-                                <option value="Tools">Tools</option>
-                                <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
-                                <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
-                                <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
-                                <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
-                                <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
-                                <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>
-                                <option value="SpeedPanel(Accessories)">SpeedPanel(Accessories)</option>
+                                {productTypeState.filter(type => !type.type_isarchived).map(type => (
+                                    <>
+                                    <option value={type._id}>{type.type_name}</option>
+                                    </>
+                                ))}
                             </select>
                             <label className='hidden sm:inline-block text-xs italic text-gray-400'>Alias is based on the product type you select</label>
                         </div>
