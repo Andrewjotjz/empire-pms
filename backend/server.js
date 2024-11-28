@@ -17,6 +17,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const statusRoutes = require('./routes/statusRoutes');
 const productRoutes = require('./routes/productRoutes');
+const productTypeRoutes = require('./routes/productTypeRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const productPriceRoutes = require('./routes/productPriceRoutes');
 const invoiceFileRoutes = require('./routes/invoiceFileRoutes');
@@ -57,12 +58,12 @@ app.use('/api/invoice', invoiceRoutes);
 app.use('/api/order', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/product', productRoutes);
+app.use('/api/product-type', productTypeRoutes);
 app.use('/api/project', projectRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/supplier', supplierRoutes);
 app.use('/api/productprice', productPriceRoutes);
 app.use('/api/invoice-file', invoiceFileRoutes);
-// app.use('/uploads', express.static("uploads"));
 
 
 

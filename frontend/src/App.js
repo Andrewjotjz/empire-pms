@@ -32,6 +32,9 @@ import UpdateInvoiceForm from "./pages/forms/UpdateInvoiceForm";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import NotFoundPage from "./pages/loaders/NotFoundPage";
 import Breadcrumbs from "./components/Breadcrumbs";
+import ProductType from "./pages/ProductTypePage";
+import NewProductTypeForm from "./pages/forms/NewProductTypeForm";
+import UpdateProductTypeForm from "./pages/forms/UpdateProductTypeForm";
 
 function App() {
 
@@ -82,6 +85,10 @@ function App() {
             <Route path="/EmpirePMS/employee/:id/edit" element={<UpdateEmployeeForm />} />
             <Route path="/EmpirePMS/employee/create" element={<NewEmployeeForm />} />
             <Route path="/EmpirePMS/employee/reset-password" element={<PasswordReset />} />
+
+            <Route path="/EmpirePMS/product-type" element={<ProductType />} />
+            <Route path="/EmpirePMS/product-type/create" element={<NewProductTypeForm />} />
+            <Route path="/EmpirePMS/product-type/:id/edit" element={<UpdateProductTypeForm /> } />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
