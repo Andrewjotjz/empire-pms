@@ -130,14 +130,25 @@ const createNewProduct = async (req, res) => {
     session.startTransaction();
 
     try {
-        if (!mongoose.Types.ObjectId.isValid(alias)){
-            const newAlias = new aliasModel({
-                alias_name: alias
-            })
-            await newAlias.save({session});
+        if (!mongoose.Types.ObjectId.isValid(alias)){ // if alias is not an ObjectId
+            // create a variable
+            let targetAlias = null; 
+
+            // check if the custom alias string exists in the database
+            const existingId = await aliasModel.findOne({ alias_name: alias });
+
+            // if exists, get the object from the database and assign to variable
+            if (existingId) {
+                targetAlias = existingId
+            } else { // if not exists, create a new Alias Object and assign to variable
+                targetAlias = new aliasModel({
+                    alias_name: alias
+                })
+                await targetAlias.save({session});
+            }
 
             const newProduct = new productModel({ product_sku, product_name, product_type, product_actual_size,product_actual_rate, product_next_available_stock_date,
-                supplier, alias: newAlias._id, price_fixed, product_isarchived })
+                supplier, alias: targetAlias._id, price_fixed, product_isarchived })
             await newProduct.save({session})
 
             const newProductPrice = new productPriceModel({ product_obj_ref: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
