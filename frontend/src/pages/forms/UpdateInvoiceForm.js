@@ -80,6 +80,8 @@ const UpdateInvoiceForm = () => {
   const [fetchProjectError, setFetchProjectError] = useState(null);
   const [isFetchInvoiceLoading, setIsFetchInvoiceLoading] = useState(false);
   const [fetchInvoiceError, setFetchInvoiceError] = useState(null);
+  const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
+  const [fetchTypeError, setFetchTypeError] = useState(null);
 
   const formatDate = (dateString) => {
     if (dateString === null) {
@@ -168,6 +170,7 @@ const UpdateInvoiceForm = () => {
     product_effective_date: "",
     projects: [],
   });
+  const [productTypeState, setProductTypeState] = useState([]);
 
   //Component's function and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -364,12 +367,6 @@ const UpdateInvoiceForm = () => {
       projects: [],
     });
   };
-  let distinctProductTypes = [];
-  if (Array.isArray(productState) && (currentOrder?.project._id || false)) {
-    distinctProductTypes = [
-      ...new Set(productState.map((prod) => prod.product.product_type)),
-    ];
-  }
   const filterProductsBySearchTerm = () => {
     const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
 
@@ -394,9 +391,8 @@ const UpdateInvoiceForm = () => {
         product.product.product_actual_size
           .toString()
           .includes(lowerCaseSearchTerm) ||
-        product.product.product_type
-          .toLowerCase()
-          .includes(lowerCaseSearchTerm) ||
+        productTypeState
+          .find(type => type._id === product.product.product_type)?.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
         product.product.alias_name.toString().includes(lowerCaseSearchTerm);
 
       const matchesProductType = selectedProductType
@@ -1220,6 +1216,47 @@ const UpdateInvoiceForm = () => {
     };
   }, [dispatch, invoiceId]);
 
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchProductTypes = async () => {
+        setIsFetchTypeLoading(true); // Set loading state to true at the beginning
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                }});
+            if (!res.ok) {
+                throw new Error('Failed to fetch');
+            }
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError);
+            }
+            
+            setIsFetchTypeLoading(false);
+            setProductTypeState(data);
+            setFetchTypeError(null);
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                // do nothing
+            } else {
+                setIsFetchTypeLoading(false);
+                setFetchTypeError(error.message);
+            }
+        }
+    };
+
+    fetchProductTypes();
+
+    return () => {
+        abortController.abort(); // Cleanup
+    };
+}, []);
+
   //Component's modal
   const orderSelectionModal = (
     <div>
@@ -1689,9 +1726,15 @@ const UpdateInvoiceForm = () => {
                         onChange={(e) => setSelectedProductType(e.target.value)}
                       >
                         <option value="">Filter by Product Type...</option>
-                        {distinctProductTypes.map((productType, index) => (
-                          <option key={index} value={productType}>
-                            {productType}
+                        {productTypeState
+                        .filter(type =>
+                          productState?.some(
+                            object => object.product.product_type === type._id
+                          )
+                        )
+                        .map((productType, index) => (
+                          <option key={index} value={productType._id}>
+                            {productType.type_name}
                           </option>
                         ))}
                       </select>
@@ -1745,7 +1788,7 @@ const UpdateInvoiceForm = () => {
                           </div>
                           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-1">
                             <label className="col-span-1 lg:col-span-2">
-                              {product.product.product_type}
+                              {productTypeState.find(type => type._id === product.product.product_type)?.type_name || 'Unknown'}
                             </label>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

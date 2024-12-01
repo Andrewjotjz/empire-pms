@@ -42,6 +42,7 @@ const NewPurchaseOrderForm = () => {
     const [newProject, setNewProject] = useState('');
     const [pendingAction, setPendingAction] = useState(null);
     const [searchProductTerm, setSearchProductTerm] = useState('');
+    const [productTypeState, setProductTypeState] = useState([]);
     const getCurrentDate = () => {
         const today = new Date();
         // Format the date as YYYY-MM-DD
@@ -68,6 +69,8 @@ const NewPurchaseOrderForm = () => {
         project: '',
         order_status: 'Pending'
     })
+    const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
+    const [fetchTypeError, setFetchTypeError] = useState(null);
     
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -353,13 +356,6 @@ const NewPurchaseOrderForm = () => {
     const handleSearchChange = (e) => {
         setOrderState({...orderState, order_ref: e.target.value});
     };
-
-    let distinctProductTypes = [];
-    if (Array.isArray(productState) && selectedProject) {
-        distinctProductTypes = [
-            ...new Set(productState.map((prod) => prod.product.product_type))
-        ];
-    }
     
     const filterPurchaseOrderNumber = () => {
         return purchaseOrderState.filter(order => {
@@ -383,7 +379,7 @@ const NewPurchaseOrderForm = () => {
                 product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
-                product.product.product_type.toLowerCase().includes(lowerCaseSearchTerm) ||
+                productTypeState.find(type => type._id === product.product.product_type)?.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.alias_name.toString().includes(lowerCaseSearchTerm) 
                 // || product.productPrice.project_names.some(projectName => 
                 //     projectName.toLowerCase().includes(lowerCaseSearchTerm)
@@ -463,6 +459,47 @@ const NewPurchaseOrderForm = () => {
             abortController.abort(); // Cleanup
         };
     }, [dispatch]);
+
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+    
+        const fetchProductTypes = async () => {
+            setIsFetchTypeLoading(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+    
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsFetchTypeLoading(false);
+                setProductTypeState(data);
+                setFetchTypeError(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsFetchTypeLoading(false);
+                    setFetchTypeError(error.message);
+                }
+            }
+        };
+    
+        fetchProductTypes();
+    
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
 
     // Display DOM
     if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading) {
@@ -626,9 +663,15 @@ const NewPurchaseOrderForm = () => {
                                     onChange={(e) => setSelectedProductType(e.target.value)}
                                     >
                                     <option value="">Filter by Product Type...</option>
-                                    {distinctProductTypes.map((productType, index) => (
-                                    <option key={index} value={productType}>
-                                        {productType}
+                                    {productTypeState
+                                    .filter(type =>
+                                    productState?.some(
+                                        object => object.product.product_type === type._id
+                                    )
+                                    )
+                                    .map((productType, index) => (
+                                    <option key={index} value={productType._id}>
+                                        {productType.type_name}
                                     </option>
                                     ))}
                                     </select>
@@ -653,7 +696,7 @@ const NewPurchaseOrderForm = () => {
                                     <div className='hidden lg:grid'>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
                                     <div className='hidden lg:grid'>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
                                     <div className='hidden lg:grid grid-cols-3 gap-2 p-1'>
-                                        <label className="col-span-2">{product.product.product_type}</label>
+                                        <label className="col-span-2">{productTypeState.find(type => type._id === product.product.product_type)?.type_name || 'Unknown'}</label>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                         </svg>

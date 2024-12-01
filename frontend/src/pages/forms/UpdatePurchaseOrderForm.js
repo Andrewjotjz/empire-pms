@@ -62,6 +62,9 @@ const UpdatePurchaseOrderForm = () => {
   const [pendingAction, setPendingAction] = useState(null);
   const [searchProductTerm, setSearchProductTerm] = useState("");
   const [currentOrderStatus] = useState(purchaseOrderState.order_status);
+  const [productTypeState, setProductTypeState] = useState([]);
+  const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
+  const [fetchTypeError, setFetchTypeError] = useState(null);
 
   // Component functions and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -424,15 +427,6 @@ const UpdatePurchaseOrderForm = () => {
     );
   };
 
-  
-
-  let distinctProductTypes = [];
-  if (Array.isArray(productState) && selectedProject) {
-    distinctProductTypes = [
-      ...new Set(productState.map((prod) => prod.product.product_type)),
-    ];
-  }
-
   const filterProductsBySearchTerm = () => {
     const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
 
@@ -457,9 +451,8 @@ const UpdatePurchaseOrderForm = () => {
         product.product.product_actual_size
           .toString()
           .includes(lowerCaseSearchTerm) ||
-        product.product.product_type
-          .toLowerCase()
-          .includes(lowerCaseSearchTerm) ||
+          productTypeState
+          .find(type => type._id === product.product.product_type)?.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
         product.product.alias_name.toString().includes(lowerCaseSearchTerm);
 
       const matchesProductType = selectedProductType
@@ -546,6 +539,47 @@ const UpdatePurchaseOrderForm = () => {
       abortController.abort(); // Cleanup
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchProductTypes = async () => {
+        setIsFetchTypeLoading(true); // Set loading state to true at the beginning
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                }});
+            if (!res.ok) {
+                throw new Error('Failed to fetch');
+            }
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError);
+            }
+            
+            setIsFetchTypeLoading(false);
+            setProductTypeState(data);
+            setFetchTypeError(null);
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                // do nothing
+            } else {
+                setIsFetchTypeLoading(false);
+                setFetchTypeError(error.message);
+            }
+        }
+    };
+
+    fetchProductTypes();
+
+    return () => {
+        abortController.abort(); // Cleanup
+    };
+  }, []);
 
   // Display DOM
   if (
@@ -711,11 +745,17 @@ const UpdatePurchaseOrderForm = () => {
                     onChange={(e) => setSelectedProductType(e.target.value)}
                   >
                     <option value="">Filter by Product Type...</option>
-                    {distinctProductTypes.map((productType, index) => (
-                      <option key={index} value={productType}>
-                        {productType}
-                      </option>
-                    ))}
+                    {productTypeState
+                        .filter(type =>
+                          productState?.some(
+                            object => object.product.product_type === type._id
+                          )
+                        )
+                        .map((productType, index) => (
+                          <option key={index} value={productType._id}>
+                            {productType.type_name}
+                          </option>
+                        ))}
                   </select>
                 </div>
               </div>
@@ -773,7 +813,7 @@ const UpdatePurchaseOrderForm = () => {
                       </div>
                       <div className='hidden lg:grid grid-cols-3 gap-2 p-1'>
                         <label className="col-span-2">
-                          {product.product.product_type}
+                          {productTypeState.find(type => type._id === product.product.product_type)?.type_name || 'Unknown'}
                         </label>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
