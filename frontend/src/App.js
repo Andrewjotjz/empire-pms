@@ -35,6 +35,9 @@ import Breadcrumbs from "./components/Breadcrumbs";
 import ProductType from "./pages/ProductTypePage";
 import NewProductTypeForm from "./pages/forms/NewProductTypeForm";
 import UpdateProductTypeForm from "./pages/forms/UpdateProductTypeForm";
+import Budget from "./pages/BudgetPage";
+import NewBudgetForm from "./pages/forms/NewBudgetForm";
+import UpdateBudgetForm from "./pages/forms/UpdateBudgetForm";
 
 function App() {
 
@@ -89,6 +92,10 @@ function App() {
             <Route path="/EmpirePMS/product-type" element={<ProductType />} />
             <Route path="/EmpirePMS/product-type/create" element={<NewProductTypeForm />} />
             <Route path="/EmpirePMS/product-type/:id/edit" element={<UpdateProductTypeForm /> } />
+            
+            <Route path="/EmpirePMS/budget" element={<Budget />} />
+            <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
+            <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

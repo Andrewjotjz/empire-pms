@@ -21,6 +21,7 @@ const productTypeRoutes = require('./routes/productTypeRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const productPriceRoutes = require('./routes/productPriceRoutes');
 const invoiceFileRoutes = require('./routes/invoiceFileRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
 //import from importJSONtoDB file
 const importJSONtoDB = require('./importJSONtoDB'); 
 
@@ -64,6 +65,7 @@ app.use('/api/status', statusRoutes);
 app.use('/api/supplier', supplierRoutes);
 app.use('/api/productprice', productPriceRoutes);
 app.use('/api/invoice-file', invoiceFileRoutes);
+app.use('/api/budget', budgetRoutes);
 
 
 

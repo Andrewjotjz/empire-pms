@@ -7,7 +7,10 @@ const Schema = mongoose.Schema;
 const subcategorySchema = new Schema({
     subcategory_name: {
         type: String
-    }
+    },
+    subcategory_unit: {
+        type: String
+    },
 }, { timestamps: true })
 
 
@@ -15,6 +18,9 @@ const categorySchema = new Schema({
     category_name: {
         type: String
     }, 
+    category_unit: {
+        type: String
+    },
     subcategories: {
         type: [subcategorySchema]
     }
@@ -25,6 +31,9 @@ const productTypeSchema = new Schema({
         type: String,
         required: true,
         unique: true
+    },
+    type_unit: {
+        type: String
     },
     type_categories: {
         type: [categorySchema]
