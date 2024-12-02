@@ -15,27 +15,37 @@ const budgetSchema = new Schema({
         ref: 'Project',
         required: true
     },
-    budget_location: [{
+    budget_location: {
         type: String,
         required: true
-    }],
+    },
     entries: [{
-        type_obj_ref: {
-            type: Schema.Types.ObjectId,
-            ref: 'ProductType',
-            required: true
+        product_type_obj_ref: {
+            type: {
+                type_id: Schema.Types.ObjectId,
+                ref: 'ProductType',
+                required: true
+            },
+            type_total_m2: { type: Number, default: 0 },
+            type_rate: { type: Number, default: 0 },
+            type_total_amount: { type: Number, default: 0 }
         },
-        category: {
-            category_id: Schema.Types.ObjectId,
-            category_name: String,
+        category_obj_ref: {
+            category: {
+                category_id: Schema.Types.ObjectId
+            },
+            category_total_m2: { type: Number, default: 0 },
+            category_rate: { type: Number, default: 0 },
+            category_total_amount: { type: Number, default: 0 }
+        },
+        subcategory_obj_ref: {
             subcategory: {
-                subcategory_id: Schema.Types.ObjectId,
-                subcategory_name: String
-            }
-        },
-        total_m2: { type: Number, required: true, default: 0 },
-        rate: { type: Number, required: true, default: 0 },
-        total_amount: { type: Number, required: true, default: 0 }
+                subcategory_id: Schema.Types.ObjectId
+            },
+            subcategory_total_m2: { type: Number, default: 0 },
+            subcategory_rate: { type: Number, default: 0 },
+            subcategory_total_amount: { type: Number, default: 0 }
+        }
     }],
     budget_isarchived: {
         type: Boolean,
