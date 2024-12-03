@@ -128,8 +128,10 @@ const ProductType = () => {
                       )}
                     </button>
                   )}
+                  {/* empty box for indentation */}
                   {!hasChildren && <div className="w-4 sm:w-6 h-6 mr-0 sm:mr-2" />}
-                  - {node.name}
+                  <label className='border-l-2 pl-2 border-gray-300'>{node.name}</label>
+                  {/* edit button */}
                   { level === 0 && (
                     <button className='ml-1 text-gray-400 hover:text-gray-600' onClick={() => handleEditClick(node.id)}>
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3">
