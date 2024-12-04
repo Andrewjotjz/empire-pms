@@ -17,12 +17,15 @@ const NewProductTypeForm = () => {
     // state
     const [productTypeState, setProductTypeState] = useState({
         type_name: '',
+        type_unit: '',
         type_categories: [
             {
             category_name: '',
+            category_unit: '',
             subcategories: [
                 {
-                subcategory_name: ''
+                subcategory_name: '',
+                subcategory_unit: ''
                 }]
             }
         ]
@@ -35,21 +38,21 @@ const NewProductTypeForm = () => {
     const handleBackClick = () => navigate(`/EmpirePMS/product-type`);
 
     // Handle changes for type name
-    const handleTypeChange = (e) => {
-        setProductTypeState({ ...productTypeState, type_name: e.target.value });
+    const handleTypeChange = (field, e) => {
+        setProductTypeState({ ...productTypeState, [field]: e.target.value });
     };
 
     // Handle changes for category name
-    const handleCategoryChange = (index, value) => {
+    const handleCategoryChange = (index, field, value) => {
         const updatedCategories = [...productTypeState.type_categories];
-        updatedCategories[index].category_name = value;
+        updatedCategories[index][field] = value;
         setProductTypeState({ ...productTypeState, type_categories: updatedCategories });
     };
 
     // Handle changes for subcategory name
-    const handleSubcategoryChange = (catIndex, subIndex, value) => {
+    const handleSubcategoryChange = (catIndex, subIndex, field, value) => {
         const updatedCategories = [...productTypeState.type_categories];
-        updatedCategories[catIndex].subcategories[subIndex].subcategory_name = value;
+        updatedCategories[catIndex].subcategories[subIndex][field] = value;
         setProductTypeState({ ...productTypeState, type_categories: updatedCategories });
     };
     
@@ -59,7 +62,7 @@ const NewProductTypeForm = () => {
         ...productTypeState,
         type_categories: [
           ...productTypeState.type_categories,
-          { category_name: '', subcategories: [{ subcategory_name: '' }] }
+          { category_name: '', category_unit: '', subcategories: [{ subcategory_name: '', subcategory_unit: ''}] }
         ]
       });
     };
@@ -67,7 +70,7 @@ const NewProductTypeForm = () => {
     // Add a new subcategory to a specific category
     const addSubcategory = (catIndex) => {
         const updatedCategories = [...productTypeState.type_categories];
-        updatedCategories[catIndex].subcategories.push({ subcategory_name: '' });
+        updatedCategories[catIndex].subcategories.push({ subcategory_name: '', subcategory_unit: ''});
         setProductTypeState({ ...productTypeState, type_categories: updatedCategories });
     };
 
@@ -118,7 +121,8 @@ const NewProductTypeForm = () => {
 
         setProductTypeState({
         type_name: '',
-        type_categories: [{ category_name: '', subcategories: [{ subcategory_name: '' }] }]
+        type_unit: '',
+        type_categories: [{ category_name: '', category_unit: '', subcategories: [{ subcategory_name: '', subcategory_unit: ''}] }]
         });
     };
 
@@ -142,22 +146,35 @@ const NewProductTypeForm = () => {
               <h1 className=" text-xs sm:text-xl font-bold text-white">NEW PRODUCT TYPE</h1>
             </div>
             <form className="p-4 sm:p-6 space-y-2 sm:space-y-6 text-xs sm:text-base" onSubmit={handleSubmit}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">* Product Type Name</label>
-                <input
-                  type="text"
-                  value={productTypeState.type_name}
-                  onChange={handleTypeChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                  required
-                />
-                <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: Plasterboard, Framing Wall, Framing Wall (Accessories), Ceiling Tiles, Rigid Insulation, Speedpanel (Accessories)</label>
+              <div className='flex gap-x-2'>
+                <div className='w-full'>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">* Product Type Name</label>
+                  <input
+                    type="text"
+                    value={productTypeState.type_name}
+                    onChange={(e) => handleTypeChange("type_name", e)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                    required
+                  />
+                  <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: Plasterboard, Framing Wall, Framing Wall (Accessories), Ceiling Tiles, Rigid Insulation, Speedpanel (Accessories)</label>
+                </div>
+                <div className='w-full'>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">* Product Type Unit</label>
+                  <input
+                    type="text"
+                    value={productTypeState.type_unit}
+                    onChange={(e) => handleTypeChange("type_unit", e)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                    required
+                  />
+                  <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: M2, UNIT, EACH</label>
+                </div>
               </div>
     
               {productTypeState.type_categories.map((category, catIndex) => (
-                <div key={catIndex} className="space-y-2 p-4 bg-gray-50 rounded-md">
+                <div key={catIndex} className="space-y-2 p-4 bg-gray-100 rounded-md">
                   <div className="flex items-center justify-between">
-                    <label className="block text-sm font-medium text-gray-700">Category Name</label>
+                    <label className="block text-sm font-medium text-gray-700">Category</label>
                     <button
                       type="button"
                       onClick={() => removeCategory(catIndex)}
@@ -168,39 +185,67 @@ const NewProductTypeForm = () => {
                         </svg>
                     </button>
                   </div>
-                  <input
-                    type="text"
-                    value={category.category_name}
-                    onChange={(e) => handleCategoryChange(catIndex, e.target.value)}
-                    placeholder='Category Name'
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-                  />
-                  <label className='hidden sm:inline text-xs italic text-gray-400'>Ex: 13mm RE, 16mm FR, 64mm Stud 3m 0.5BMT, 92mm Stud 3m 0.75BMT</label>
-    
-                  {category.subcategories.map((subcategory, subIndex) => (
-                    <div key={subIndex} className="flex items-center space-x-2">
-                      <button
-                        type="button"
-                        onClick={() => removeSubcategory(catIndex, subIndex)}
-                        className="text-red-500 hover:text-red-700 transition duration-150 ease-in-out"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
-                      </button>
+                  <div className='flex gap-x-2'>
+                    <div className='w-full'>
                       <input
                         type="text"
-                        value={subcategory.subcategory_name}
-                        onChange={(e) => handleSubcategoryChange(catIndex, subIndex, e.target.value)}
-                        className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out w-full"
-                        placeholder="Sub-category Name"
+                        value={category.category_name}
+                        onChange={(e) => handleCategoryChange(catIndex, "category_name", e.target.value)}
+                        placeholder='Category Name'
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
                       />
+                      <label className='hidden sm:inline text-xs italic text-gray-400'>Ex: 13mm RE, 16mm FR, 64mm Stud 3m 0.5BMT, 92mm Stud 3m 0.75BMT</label>
                     </div>
-                  ))}
-                  <div className='mt-0'>
-                    <label className='hidden sm:inline-block text-xs italic text-gray-400 ml-8'>Ex: 64mm Track, 64mm Nogging, 64mm Stud, 64mm DH Track</label>
+                    <div className='w-full'>
+                      <input
+                        type="text"
+                        value={category.category_unit}
+                        onChange={(e) => handleCategoryChange(catIndex, "category_unit", e.target.value)}
+                        placeholder='Category Unit'
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                      />
+                      <label className='hidden sm:inline text-xs italic text-gray-400'>Ex: M2, UNIT, EACH</label>
+                    </div>
                   </div>
                   
+                  <label className="block text-sm font-medium text-gray-700 ml-2">Sub-category</label>
+                  {category.subcategories.map((subcategory, subIndex) => (
+                    <div key={subIndex}>
+                      <div className="flex items-center space-x-2">
+                        <div className='w-full'>
+                          <div className='flex'>
+                            <button
+                              type="button"
+                              onClick={() => removeSubcategory(catIndex, subIndex)}
+                              className="text-red-500 hover:text-red-700 transition duration-150 ease-in-out inline-block mx-2"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                              </svg>
+                            </button>
+                            <input
+                              type="text"
+                              value={subcategory.subcategory_name}
+                              onChange={(e) => handleSubcategoryChange(catIndex, subIndex, "subcategory_name", e.target.value)}
+                              className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out w-full"
+                              placeholder="Sub-category Name"
+                            />
+                          </div>
+                          <label className='hidden sm:inline-block text-xs italic text-gray-400 ml-8'>Ex: 64mm Track, 64mm Nogging, 64mm Stud, 64mm DH Track</label>
+                        </div>
+                        <div className='w-full'>
+                          <input
+                            type="text"
+                            value={subcategory.subcategory_unit}
+                            onChange={(e) => handleSubcategoryChange(catIndex, subIndex, "subcategory_unit", e.target.value)}
+                            className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out w-full"
+                            placeholder="Sub-category Unit"
+                          />
+                          <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: M2, UNIT, EACH</label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}                  
                   <button
                     type="button"
                     onClick={() => addSubcategory(catIndex)}

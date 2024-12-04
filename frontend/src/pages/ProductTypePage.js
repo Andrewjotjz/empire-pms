@@ -47,12 +47,15 @@ const ProductType = () => {
         return rawData.map(type => ({
         id: type._id,
         name: type.type_name,
+        unit: type.type_unit,
         children: type.type_categories.map(category => ({
             id: category._id,
             name: category.category_name,
+            unit: category.category_unit,
             children: category.subcategories.map(subcategory => ({
             id: subcategory._id,
-            name: subcategory.subcategory_name
+            name: subcategory.subcategory_name,
+            unit: subcategory.subcategory_unit
             }))
         }))
         }));
@@ -130,7 +133,7 @@ const ProductType = () => {
                   )}
                   {/* empty box for indentation */}
                   {!hasChildren && <div className="w-4 sm:w-6 h-6 mr-0 sm:mr-2" />}
-                  <label className='border-l-2 pl-2 border-gray-300'>{node.name}</label>
+                  <label className='border-l-2 pl-2 border-gray-300'>{node.name} <span className='hidden sm:inline-block text-xs italic text-gray-400'>{node.unit}</span></label>
                   {/* edit button */}
                   { level === 0 && (
                     <button className='ml-1 text-gray-400 hover:text-gray-600' onClick={() => handleEditClick(node.id)}>

@@ -44,11 +44,11 @@ const getSingleProductType = async (req, res) => {
 const createNewProductType = async (req, res) => {
     //retrieve incoming request (along with new productType object) by using 'req' object property 'body', which stores new productType object.
     //destructure all relevant attributes in new productType object
-    const { type_name } = req.body;
+    const { type_name, type_unit, type_categories } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const productType = await productTypeModel.create({ type_name })
+        const productType = await productTypeModel.create({ type_name, type_unit, type_categories})
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(productType)
     }
