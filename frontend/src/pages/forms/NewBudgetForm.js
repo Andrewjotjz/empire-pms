@@ -1,40 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Mock data for dropdowns (in a real app, you'd fetch this from an API)
-const productTypes = [
-  { id: '1', name: 'Product Type 1' },
-  { id: '2', name: 'Product Type 2' },
-];
-
-const categories = {
-  '1': [
-    { id: '1', name: 'Category 1 for Product Type 1' },
-    { id: '2', name: 'Category 2 for Product Type 1' },
-  ],
-  '2': [
-    { id: '3', name: 'Category 1 for Product Type 2' },
-    { id: '4', name: 'Category 2 for Product Type 2' },
-  ],
-};
-
-const subcategories = {
-  '1': [
-    { id: '1', name: 'Subcategory 1 for Category 1' },
-    { id: '2', name: 'Subcategory 2 for Category 1' },
-  ],
-  '2': [
-    { id: '3', name: 'Subcategory 1 for Category 2' },
-    { id: '4', name: 'Subcategory 2 for Category 2' },
-  ],
-  '3': [
-    { id: '5', name: 'Subcategory 1 for Category 3' },
-    { id: '6', name: 'Subcategory 2 for Category 3' },
-  ],
-  '4': [
-    { id: '7', name: 'Subcategory 1 for Category 4' },
-    { id: '8', name: 'Subcategory 2 for Category 4' },
-  ],
-};
 
 const NewBudgetForm = () => {
   const [budget, setBudget] = useState({
@@ -121,6 +86,33 @@ const NewBudgetForm = () => {
     setBudget({ ...budget, entries: newEntries });
   };
 
+  const removeEntry = (entryIndex) => {
+    setBudget((prevBudget) => ({
+      ...prevBudget,
+      entries: prevBudget.entries.filter((_, index) => index !== entryIndex),
+    }));
+  };
+
+  const removeCategory = (entryIndex, categoryIndex) => {
+    const newEntries = [...budget.entries];
+    newEntries[entryIndex].product_type_obj_ref.category_obj_ref = 
+      newEntries[entryIndex].product_type_obj_ref.category_obj_ref.filter(
+        (_, index) => index !== categoryIndex
+      );
+    setBudget({ ...budget, entries: newEntries });
+  };
+  
+  const removeSubcategory = (entryIndex, categoryIndex, subcategoryIndex) => {
+    const newEntries = [...budget.entries];
+    newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].subcategory_obj_ref = 
+      newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].subcategory_obj_ref.filter(
+        (_, index) => index !== subcategoryIndex
+      );
+    setBudget({ ...budget, entries: newEntries });
+  };
+  
+  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Budget submitted:', budget);
@@ -168,9 +160,6 @@ const NewBudgetForm = () => {
     };
 }, []);
 
-console.log("budget", budget);
-console.log("productTypeState", productTypeState);
-
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-3">Create Budget</h2>
@@ -186,7 +175,7 @@ console.log("productTypeState", productTypeState);
             value={budget.budget_name}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
           />
         </div>
 
@@ -201,7 +190,7 @@ console.log("productTypeState", productTypeState);
             value={budget.project}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
           />
         </div>
 
@@ -216,7 +205,7 @@ console.log("productTypeState", productTypeState);
             value={budget.budget_location}
             onChange={handleChange}
             required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
           />
         </div>
 
@@ -224,6 +213,13 @@ console.log("productTypeState", productTypeState);
           <h3 className="text-lg font-medium text-gray-700 mb-2">Entries</h3>
           {budget.entries.map((entry, entryIndex) => (
             <div key={entryIndex} className="border p-6 rounded-md mb-3 bg-gray-50">
+              <button
+                type="button"
+                onClick={() => removeEntry(entryIndex)}
+                className="px-3 py-1 text-sm border border-transparent rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+              >
+                Remove Entry
+              </button>
               {/* <h4 className="font-medium mb-1 text-lg text-gray-700">Product Type</h4> */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-1">
                 <div className="col-span-1 md:col-span-2 lg:col-span-2">
@@ -273,6 +269,14 @@ console.log("productTypeState", productTypeState);
               {/* <h5 className="font-medium mb-2 mt-6 text-gray-700">Categories</h5> */}
               {entry.product_type_obj_ref.category_obj_ref.map((category, categoryIndex) => (
                 <div key={categoryIndex} className="border-l-2 border-purple-200 mb-1 mt-4 p-3 bg-purple-100 bg-opacity-50">
+                  <button
+                    type="button"
+                    onClick={() => removeCategory(entryIndex, categoryIndex)}
+                    className="px-3 py-1 text-sm border border-transparent rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                  >
+                    Remove Category
+                  </button>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-3">
                     <div className="col-span-1 md:col-span-2 lg:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
@@ -321,6 +325,13 @@ console.log("productTypeState", productTypeState);
                   {/* <h6 className="font-medium mb-2 mt-4 text-gray-700">Subcategories</h6> */}
                   {category.subcategory_obj_ref.map((subcategory, subcategoryIndex) => (
                     <div key={subcategoryIndex} className="border-l-2 border-pink-100 mb-1 p-2 bg-pink-100 bg-opacity-50">
+                      <button
+                        type="button"
+                        onClick={() => removeSubcategory(entryIndex, categoryIndex, subcategoryIndex)}
+                        className="px-3 py-1 text-sm border border-transparent rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                      >
+                        Remove Subcategory
+                      </button>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-1">
                         <div className="col-span-1 md:col-span-2 lg:col-span-2">
                           <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>

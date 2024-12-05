@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 //create mongoose's Schema
 const Schema = mongoose.Schema;
 
-
 //create a new Schema object, and define Project's schema/properties in its parameter.
 const projectSchema = new Schema({
     project_name: {
@@ -22,6 +21,32 @@ const projectSchema = new Schema({
     suppliers: [{
         type: Schema.Types.ObjectId,
         ref: 'Supplier'
+    }],
+    area_obj_ref: [{
+        areas: {
+            area_id: {
+                type: Schema.Types.ObjectId
+            },
+            area_name: { 
+                type: String
+            },
+            levels: [{
+                level_id: {
+                    type: Schema.Types.ObjectId
+                },
+                level_name: { 
+                    type: String
+                },
+                subareas: [{
+                    subarea_id: {
+                        type: Schema.Types.ObjectId
+                    },
+                    subarea_name: {
+                        type: String
+                    }
+                }]
+            }]
+        }
     }]
 }, { timestamps: true });
 
