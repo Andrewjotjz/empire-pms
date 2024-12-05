@@ -200,7 +200,7 @@ const ProjectForm = () => {
     };
 }, []);
 
-if (isLoadingState) {
+if (isLoadingState || addProjectLoading) {
   return <LoadingScreen />;
 }
 
@@ -208,7 +208,7 @@ if (errorState) {
   if (errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
       return <div><SessionExpired /></div>;
   }
-  return <div>Error: {errorState}</div>;
+  return <div>Error: {errorState || addProjectError}</div>;
 }
 
   return (
