@@ -218,7 +218,6 @@ const NewProductForm = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-    console.log("product details state:", productDetailsState)
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-2 sm:mt-5"> 

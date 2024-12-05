@@ -70,6 +70,7 @@ const Breadcrumbs = () => {
                 </>
                 )}
 
+                {/* ****************** ORDERS ******************** */}
                 {location.pathname.includes(`/EmpirePMS/order`) && (
                 <>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
@@ -126,6 +127,7 @@ const Breadcrumbs = () => {
                 </>
                 )}
 
+                {/* ****************** PROJECTS ******************** */}
                 {location.pathname.includes(`/EmpirePMS/project`) && (
                 <>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
@@ -349,6 +351,106 @@ const Breadcrumbs = () => {
                     to={`/EmpirePMS/supplier/${id}/products/create`}
                     className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/create`) && "text-blue-500"}`}>
                     New Product
+                    </Link>
+                </>
+                )}
+
+                {/* ****************** PRODUCT TYPE ******************** */}
+                {location.pathname.includes(`/EmpirePMS/product-type`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/product-type`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type`) && "text-blue-500"}`}>
+                    Product Types
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/product-type/${id}/edit`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/product-type/${id}/edit`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type/${id}/edit`) && "text-blue-500"}`}>
+                    Edit Product Type
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/product-type/create`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/product-type/create`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type/create`) && "text-blue-500"}`}>
+                    New Product Type
+                    </Link>
+                </>
+                )}
+
+                {/* ****************** BUDGET ******************** */}
+                {location.pathname.includes(`/EmpirePMS/budget`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/budget`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget`) && "text-blue-500"}`}>
+                    Budgets
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/budget/${id}`) && id !== 'create' && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/budget/${id}`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}`) && "text-blue-500"}`}>
+                    Budget Details
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/budget/${id}/edit`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/budget/${id}/edit`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}/edit`) && "text-blue-500"}`}>
+                    Edit Budget
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/budget/create`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/budget/create`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/create`) && "text-blue-500"}`}>
+                    New Budget
                     </Link>
                 </>
                 )}

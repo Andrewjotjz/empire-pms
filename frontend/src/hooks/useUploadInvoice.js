@@ -29,7 +29,6 @@ export const useUploadInvoice = () => {
                 }
         
                 const data = await res.json();
-                // console.log("Response data:", data);
     
                 alert(`${data.message}\n${data.urls.join("\n")}`);
             } catch (error) {

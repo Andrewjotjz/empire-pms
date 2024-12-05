@@ -184,7 +184,6 @@ const PurchaseOrder = () => {
     
     //Render component
     useEffect(() => {
-        console.log("Token in sessionstorage:", sessionStorage.getItem('jwt'));
         const abortController = new AbortController();
         const signal = abortController.signal;
 

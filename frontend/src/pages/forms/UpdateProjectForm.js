@@ -224,8 +224,6 @@ const UpdateProjectForm = () => {
       }
       return <div>Error: {errorState || updateError}</div>;
     }
-    console.log("projectState", projectState)
-    console.log("supplierState", supplierState)
     
       return (
         localUser && Object.keys(localUser).length > 0 ? (

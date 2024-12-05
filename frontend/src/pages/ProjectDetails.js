@@ -778,7 +778,6 @@ const Project_Details = () => {
     }
     if (!projectState) return <p>No project details available</p>;
 
-    console.log("projectState", projectState)
     
     return (
         localUser && Object.keys(localUser).length > 0 ? (
@@ -811,63 +810,6 @@ const Project_Details = () => {
 
 
                 </div>
-                {/* <div className="container mx-auto p-4">
-                    <h2 className="text-2xl font-semibold mt-6 mb-2">Areas</h2>
-                    {projectState.area_obj_ref?.map((areaObj) => (
-                        <div key={areaObj._id} className="mb-6">
-                        <h3 className="text-xl font-semibold bg-blue-100 p-2 rounded">
-                            {areaObj.areas.area_name}
-                        </h3>
-                        {areaObj.areas.levels?.map((level) => (
-                            <div key={level._id} className="ml-4 mt-2">
-                            <h4 className="text-lg font-medium bg-green-100 p-1 rounded">
-                                {level.level_name}
-                            </h4>
-                            {level.subareas.length > 0 && (
-                                <ul className="list-disc list-inside ml-4">
-                                {level.subareas?.map((subarea) => (
-                                    <li key={subarea._id} className="text-gray-700">
-                                    {subarea.subarea_name}
-                                    </li>
-                                ))}
-                                </ul>
-                            )}
-                            </div>
-                        ))}
-                        </div>
-                    ))}
-                </div> */}
-                 {/* <div>
-                    <h2 className="text-xl font-semibold text-gray-800">Areas</h2>
-                    {projectState.area_obj_ref.map((area) => (
-                    <div
-                        key={area._id}
-                        className="p-4 bg-gray-50 rounded-lg shadow-sm border space-y-2"
-                    >
-                        <h3 className="font-bold">{area.areas.area_name}</h3>
-                        {area.areas.levels.length > 0 ? (
-                        <ul className="space-y-2">
-                            {area.areas.levels.map((level) => (
-                            <li key={level._id}>
-                                <p className="font-medium">{level.level_name}</p>
-                                {level.subareas.length > 0 ? (
-                                <ul className="ml-4 list-disc text-gray-600">
-                                    {level.subareas.map((subarea) => (
-                                    <li key={subarea._id}>{subarea.subarea_name}</li>
-                                    ))}
-                                </ul>
-                                ) : (
-                                <p className="text-sm text-gray-500">No subareas available.</p>
-                                )}
-                            </li>
-                            ))}
-                        </ul>
-                        ) : (
-                        <p className="text-gray-500">No levels available.</p>
-                        )}
-                    </div>
-                    ))}
-                </div> */}
 
             </div>
             { archiveModal }
