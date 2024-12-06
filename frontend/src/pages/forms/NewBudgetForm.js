@@ -22,8 +22,11 @@ const NewBudgetForm = () => {
     ],
   });
   const [productTypeState, setProductTypeState] = useState([]);
+  const [projectState, setProjectState] = useState([]);
   const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
   const [fetchTypeError, setFetchTypeError] = useState(null);
+  const [isFetchProjectLoading, setIsFetchProjectLoading] = useState(false);
+  const [fetchProjectError, setFetchProjectError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,6 +39,9 @@ const NewBudgetForm = () => {
   const handleTypeChange = (entryIndex, field, value) => {
     const newEntries = [...budget.entries];
     newEntries[entryIndex].product_type_obj_ref[field] = value;
+    // Auto calculate total amount
+    newEntries[entryIndex].product_type_obj_ref.type_total_amount = newEntries[entryIndex].product_type_obj_ref.type_total_m2 * newEntries[entryIndex].product_type_obj_ref.type_rate;
+
     setBudget({ ...budget, entries: newEntries });
   };
 
@@ -44,7 +50,9 @@ const NewBudgetForm = () => {
   
     // Update the specified field with the new value
     newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex][field] = value;
-  
+    // Auto calculate total amount
+    newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].category_total_amount = newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].category_total_m2 * newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].category_rate;
+
     if (field === "category_id"){
     // Reset subcategories for the category
     const subcategories = productTypeState
@@ -69,6 +77,9 @@ const NewBudgetForm = () => {
   const handleSubcategoryChange = (entryIndex, categoryIndex, subcategoryIndex, field, value) => {
     const newEntries = [...budget.entries];
     newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].subcategory_obj_ref[subcategoryIndex][field] = value;
+    // Auto calculate total amount
+    newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].subcategory_obj_ref[subcategoryIndex].subcategory_total_amount = newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].subcategory_obj_ref[subcategoryIndex].subcategory_total_m2 * newEntries[entryIndex].product_type_obj_ref.category_obj_ref[categoryIndex].subcategory_obj_ref[subcategoryIndex].subcategory_rate;
+
     setBudget({ ...budget, entries: newEntries });
   };
 
@@ -177,14 +188,54 @@ const NewBudgetForm = () => {
         abortController.abort(); // Cleanup
     };
 }, []);
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
 
-if (isFetchTypeLoading) { return (<LoadingScreen />); }
+    const fetchProjects = async () => {
+        setIsFetchProjectLoading(true); // Set loading state to true at the beginning
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { signal , credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                }});
+            if (!res.ok) {
+                throw new Error('Failed to fetch');
+            }
+            const data = await res.json();
 
-if (fetchTypeError) {
+            if (data.tokenError) {
+                throw new Error(data.tokenError);
+            }
+            
+            setIsFetchProjectLoading(false);
+            setProjectState(data);
+            setFetchProjectError(null);
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                // do nothing
+            } else {
+                setIsFetchProjectLoading(false);
+                setFetchProjectError(error.message);
+            }
+        }
+    };
+
+    fetchProjects();
+
+    return () => {
+        abortController.abort(); // Cleanup
+    };
+}, []);
+
+if (isFetchTypeLoading || isFetchProjectLoading) { return (<LoadingScreen />); }
+
+if (fetchTypeError || fetchProjectError) {
     if(fetchTypeError.includes("Session expired") || fetchTypeError.includes("jwt expired") || fetchTypeError.includes("jwt malformed")){
         return(<div><SessionExpired /></div>)
     }
-    return (<div>Error: {fetchTypeError}</div>);
+    return (<div>Error: {fetchTypeError || fetchProjectError}</div>);
 }
 
 
@@ -211,15 +262,18 @@ if (fetchTypeError) {
           <label htmlFor="project" className="block text-sm font-medium text-gray-700">
             Project
           </label>
-          <input
-            type="text"
-            id="project"
-            name="project"
-            value={budget.project}
+          <select
+            value={budget.project._id}
             onChange={handleChange}
-            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-          />
+          >
+            <option value="">Select Project</option>
+            {projectState.map((project) => (
+              <option key={project._id} value={project._id}>
+                {project.project_name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -254,7 +308,7 @@ if (fetchTypeError) {
                 </button>
               </div>
               {/* <h4 className="font-medium mb-1 text-lg text-gray-700">Product Type</h4> */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-1">
                 <div className="col-span-1 md:col-span-2 lg:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Product Type</label>
                   <select
@@ -271,7 +325,20 @@ if (fetchTypeError) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Total m²</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unit of Measurement</label>
+                  <input
+                    type="string"
+                    disabled
+                    value={productTypeState
+                      .find(type => type._id === entry.product_type_obj_ref.type_id)
+                      ?.type_unit}
+                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total {productTypeState
+                      .find(type => type._id === entry.product_type_obj_ref.type_id)
+                      ?.type_unit}</label>
                   <input
                     type="number"
                     value={entry.product_type_obj_ref.type_total_m2}
@@ -280,7 +347,7 @@ if (fetchTypeError) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rate</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">$ Rate</label>
                   <input
                     type="number"
                     value={entry.product_type_obj_ref.type_rate}
@@ -289,9 +356,10 @@ if (fetchTypeError) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">$ Total Amount</label>
                   <input
                     type="number"
+                    disabled
                     value={entry.product_type_obj_ref.type_total_amount}
                     onChange={(e) => handleTypeChange(entryIndex, 'type_total_amount', parseFloat(e.target.value))}
                     className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -315,7 +383,7 @@ if (fetchTypeError) {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-3">
                     <div className="col-span-1 md:col-span-2 lg:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                       <select
@@ -332,7 +400,16 @@ if (fetchTypeError) {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Total m²</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Unit of Measurement</label>
+                      <input
+                        type="string"
+                        disabled
+                        value={productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories[categoryIndex]?.category_unit}
+                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Total {productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories[categoryIndex]?.category_unit}</label>
                       <input
                         type="number"
                         value={category.category_total_m2}
@@ -341,7 +418,7 @@ if (fetchTypeError) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Rate</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">$ Rate</label>
                       <input
                         type="number"
                         value={category.category_rate}
@@ -350,9 +427,10 @@ if (fetchTypeError) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">$ Total Amount</label>
                       <input
                         type="number"
+                        disabled
                         value={category.category_total_amount}
                         onChange={(e) => handleCategoryChange(entryIndex, categoryIndex, 'category_total_amount', parseFloat(e.target.value))}
                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
@@ -363,7 +441,7 @@ if (fetchTypeError) {
                   {/* <h6 className="font-medium mb-2 mt-4 text-gray-700">Subcategories</h6> */}
                   {category.subcategory_obj_ref.map((subcategory, subcategoryIndex) => (
                     <div key={subcategoryIndex} className="border-l-2 border-pink-100 mb-1 p-2 bg-pink-100 bg-opacity-50">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-1">
                         <div className="col-span-1 md:col-span-2 lg:col-span-2">
                           <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
                           <select
@@ -380,7 +458,16 @@ if (fetchTypeError) {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Total m²</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Unit of Measurement</label>
+                          <input
+                            type="string"
+                            disabled
+                            value={productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories.find(cat => cat._id === category.category_id)?.subcategories[subcategoryIndex].subcategory_unit}
+                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Total {productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories.find(cat => cat._id === category.category_id)?.subcategories[subcategoryIndex].subcategory_unit}</label>
                           <input
                             type="number"
                             value={subcategory.subcategory_total_m2}
@@ -389,7 +476,7 @@ if (fetchTypeError) {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Rate</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">$ Rate</label>
                           <input
                             type="number"
                             value={subcategory.subcategory_rate}
@@ -398,10 +485,11 @@ if (fetchTypeError) {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">$ Total Amount</label>
                           <div className='flex'>
                             <input
                               type="number"
+                              disabled
                               value={subcategory.subcategory_total_amount}
                               onChange={(e) => handleSubcategoryChange(entryIndex, categoryIndex, subcategoryIndex, 'subcategory_total_amount', parseFloat(e.target.value))}
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
