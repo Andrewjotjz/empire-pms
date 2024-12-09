@@ -36,6 +36,7 @@ import ProductType from "./pages/ProductTypePage";
 import NewProductTypeForm from "./pages/forms/NewProductTypeForm";
 import UpdateProductTypeForm from "./pages/forms/UpdateProductTypeForm";
 import Budget from "./pages/BudgetPage";
+import BudgetDetails from "./pages/BudgetDetails";
 import NewBudgetForm from "./pages/forms/NewBudgetForm";
 import UpdateBudgetForm from "./pages/forms/UpdateBudgetForm";
 
@@ -94,6 +95,7 @@ function App() {
             <Route path="/EmpirePMS/product-type/:id/edit" element={<UpdateProductTypeForm /> } />
             
             <Route path="/EmpirePMS/budget" element={<Budget />} />
+            <Route path="/EmpirePMS/budget/:id" element={<BudgetDetails />} />
             <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
             <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'
-import LoadingScreen from "../loaders/LoadingScreen";
-import SessionExpired from "../../components/SessionExpired"
+import LoadingScreen from "./loaders/LoadingScreen";
+import SessionExpired from "../components/SessionExpired"
 
-const UpdateBudgetForm = () => {
+const BudgetDetails = () => {
   //Component's hook router
   const navigate = useNavigate();
   const { id } = useParams();
@@ -32,8 +32,8 @@ const UpdateBudgetForm = () => {
   const [fetchTypeError, setFetchTypeError] = useState(null);
   const [isFetchProjectLoading, setIsFetchProjectLoading] = useState(false);
   const [fetchProjectError, setFetchProjectError] = useState(null);
-  const [isUpdateBudgetLoading, setIsUpdateBudgetLoading] = useState(false);
-  const [updateBudgetError, setUpdateBudgetError] = useState(null);
+  const [isAddBudgetLoading, setIsAddBudgetLoading] = useState(false);
+  const [addBudgetError, setAddBudgetError] = useState(null);
   const [isFetchBudgetLoading, setIsFetchBudgetLoading] = useState(false);
   const [fetchBudgetError, setFetchBudgetError] = useState(null);
 
@@ -150,14 +150,14 @@ const UpdateBudgetForm = () => {
   };
   
   
-  const updateBudget = async (budget) => {
-    setIsUpdateBudgetLoading(true)
-    setUpdateBudgetError(null)
+  const addBudget = async (budget) => {
+    setIsAddBudgetLoading(true)
+    setAddBudgetError(null)
 
-    const putBudget = async () => {
+    const postBudget = async () => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/${id}`, {
-                credentials: 'include', method: 'PUT',
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/create`, {
+                credentials: 'include', method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
@@ -172,30 +172,28 @@ const UpdateBudgetForm = () => {
             }
 
             if (!res.ok) {
-                throw new Error('Failed to PUT update budget details')
+                throw new Error('Failed to POST new budget details')
             }
             if (res.ok) {
                 // navigate client to dashboard page
-                navigate(`/EmpirePMS/budget/${id}`)
+                navigate(`/EmpirePMS/budget/`)
 
-                alert(`Budget updated successfully!`);
+                alert(`Budget created successfully!`);
             
                 // update loading state
-                setIsUpdateBudgetLoading(false)
+                setIsAddBudgetLoading(false)
 
             }
         } catch (error) {
-            setUpdateBudgetError(error.message);
-            setIsUpdateBudgetLoading(false);
+            setAddBudgetError(error.message);
+            setIsAddBudgetLoading(false);
         }
     }
-    putBudget();
+    postBudget();
 }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    updateBudget(budget)
+  const handleUpdateBudget = () => {
+    navigate(`/EmpirePMS/budget/${id}/edit`);
   };
 
   // Fetch product type
@@ -325,26 +323,34 @@ const UpdateBudgetForm = () => {
     };
 }, []);
 
-if (isFetchTypeLoading || isFetchProjectLoading || isUpdateBudgetLoading || isFetchBudgetLoading) { return (<LoadingScreen />); }
+if (isFetchTypeLoading || isFetchProjectLoading || isAddBudgetLoading || isFetchBudgetLoading) { return (<LoadingScreen />); }
 
-if (fetchTypeError || fetchProjectError || updateBudgetError || fetchBudgetError) {
+if (fetchTypeError || fetchProjectError || addBudgetError || fetchBudgetError) {
     if(fetchTypeError.includes("Session expired") || fetchTypeError.includes("jwt expired") || fetchTypeError.includes("jwt malformed")){
         return(<div><SessionExpired /></div>)
     }
-    return (<div>Error: {fetchTypeError || fetchProjectError || updateBudgetError || fetchBudgetError}</div>);
+    return (<div>Error: {fetchTypeError || fetchProjectError || addBudgetError || fetchBudgetError}</div>);
 }
 
-console.log("budget", budget)
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-3">Edit Budget</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className='flex justify-between'>
+        <h2 className="text-2xl font-bold mb-3">Budget Details</h2>
+        <button
+          onClick={handleUpdateBudget}
+          className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          EDIT BUDGET
+        </button>
+      </div>
+      <form className="space-y-6">
         <div>
           <label htmlFor="budget_name" className="block text-sm font-medium text-gray-700">
             Budget Name
           </label>
           <input
+            disabled
             type="text"
             id="budget_name"
             name="budget_name"
@@ -360,10 +366,11 @@ console.log("budget", budget)
             Project
           </label>
           <select
+            disabled
             value={budget.project}
             name='project'
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+            className="disabled:bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
           >
             <option value="">Select Project</option>
             {projectState.map((project) => (
@@ -379,10 +386,11 @@ console.log("budget", budget)
             Budget Area
           </label>
           <select
+            disabled
             value={budget.budget_area}
             name="budget_area"
             onChange={handleChange}
-            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+            className="disabled:bg-gray-100 w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
           >
             <option value="">Select Area</option>
             {projectState
@@ -396,10 +404,11 @@ console.log("budget", budget)
 
           {budget.budget_area && (
             <select
+              disabled
               value={budget.budget_area_level}
               name="budget_area_level"
               onChange={handleChange}
-              className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+              className="disabled:bg-gray-100 w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
             >
               <option value="">Select Level</option>
               {projectState
@@ -414,10 +423,11 @@ console.log("budget", budget)
 
           {budget.budget_area_level && (
             <select
+              disabled
               value={budget.budget_area_subarea}
               name="budget_area_subarea"
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+              className="disabled:bg-gray-100 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
             >
               <option value="">Select Subarea</option>
               {projectState
@@ -431,13 +441,13 @@ console.log("budget", budget)
           )}
         </div>
 
-
         <div>
           <h3 className="text-lg font-medium text-gray-700 mb-2">Entries</h3>
           {budget.entries.map((entry, entryIndex) => (
             <div key={entryIndex} className="border px-6 pb-6 pt-1 rounded-md mb-3 bg-gray-50">
               <div className='w-full flex justify-end'>
                 <button
+                  hidden
                   type="button"
                       title='Remove whole entry'
                   onClick={() => removeEntry(entryIndex)}
@@ -453,9 +463,10 @@ console.log("budget", budget)
                 <div className="col-span-1 md:col-span-2 lg:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Product Type</label>
                   <select
+                    disabled
                     value={entry.product_type_obj_ref.type_id}
                     onChange={(e) => handleTypeChange(entryIndex, 'type_id', e.target.value)}
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    className="disabled:bg-gray-100 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                   >
                     <option value="">Select Product Type</option>
                     {productTypeState.map((type) => (
@@ -481,6 +492,7 @@ console.log("budget", budget)
                       .find(type => type._id === entry.product_type_obj_ref.type_id)
                       ?.type_unit}</label>
                   <input
+                    disabled
                     type="number"
                     value={entry.product_type_obj_ref.type_total_m2}
                     onChange={(e) => handleTypeChange(entryIndex, 'type_total_m2', parseFloat(e.target.value))}
@@ -490,6 +502,7 @@ console.log("budget", budget)
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">$ Rate</label>
                   <input
+                    disabled
                     type="number"
                     value={entry.product_type_obj_ref.type_rate}
                     onChange={(e) => handleTypeChange(entryIndex, 'type_rate', parseFloat(e.target.value))}
@@ -513,6 +526,7 @@ console.log("budget", budget)
                 <div key={categoryIndex} className="border-l-2 border-purple-200 mb-1 px-3 pb-3 py-1 bg-purple-100 bg-opacity-50">
                   <div className='w-full flex justify-end'>
                     <button
+                      hidden
                       type="button"
                       title='Remove category'
                       onClick={() => removeCategory(entryIndex, categoryIndex)}
@@ -528,9 +542,10 @@ console.log("budget", budget)
                     <div className="col-span-1 md:col-span-2 lg:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                       <select
+                        disabled
                         value={category.category_id}
                         onChange={(e) => handleCategoryChange(entryIndex, categoryIndex, 'category_id', e.target.value, entry, category)}
-                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
+                        className="disabled:bg-gray-100 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-300 focus:ring focus:ring-purple-200 focus:ring-opacity-50"
                       >
                         <option value="">Select Category</option>
                         {productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories?.map((cat) => (
@@ -552,6 +567,7 @@ console.log("budget", budget)
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Total {productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories[categoryIndex]?.category_unit}</label>
                       <input
+                        disabled
                         type="number"
                         value={category.category_total_m2}
                         onChange={(e) => handleCategoryChange(entryIndex, categoryIndex, 'category_total_m2', parseFloat(e.target.value))}
@@ -561,6 +577,7 @@ console.log("budget", budget)
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">$ Rate</label>
                       <input
+                        disabled
                         type="number"
                         value={category.category_rate}
                         onChange={(e) => handleCategoryChange(entryIndex, categoryIndex, 'category_rate', parseFloat(e.target.value))}
@@ -586,9 +603,10 @@ console.log("budget", budget)
                         <div className="col-span-1 md:col-span-2 lg:col-span-2">
                           <label className="block text-sm font-medium text-gray-700 mb-1">Subcategory</label>
                           <select
+                            disabled
                             value={subcategory.subcategory_id}
                             onChange={(e) => handleSubcategoryChange(entryIndex, categoryIndex, subcategoryIndex, 'subcategory_id', e.target.value)}
-                            className="w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
+                            className="disabled:bg-gray-100 w-full rounded-md border-gray-300 shadow-sm focus:border-pink-300 focus:ring focus:ring-pink-200 focus:ring-opacity-50"
                           >
                             <option value="">Select Subcategory</option>
                             {productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories.find(cat => cat._id === category.category_id)?.subcategories.map((subcat) => (
@@ -610,6 +628,7 @@ console.log("budget", budget)
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Total {productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories.find(cat => cat._id === category.category_id)?.subcategories[subcategoryIndex].subcategory_unit}</label>
                           <input
+                            disabled
                             type="number"
                             value={subcategory.subcategory_total_m2}
                             onChange={(e) => handleSubcategoryChange(entryIndex, categoryIndex, subcategoryIndex, 'subcategory_total_m2', parseFloat(e.target.value))}
@@ -619,6 +638,7 @@ console.log("budget", budget)
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">$ Rate</label>
                           <input
+                            disabled
                             type="number"
                             value={subcategory.subcategory_rate}
                             onChange={(e) => handleSubcategoryChange(entryIndex, categoryIndex, subcategoryIndex, 'subcategory_rate', parseFloat(e.target.value))}
@@ -636,6 +656,7 @@ console.log("budget", budget)
                               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                             />
                             <button
+                              disabled
                               type="button"
                               title="Remove subcategory"
                               onClick={() => removeSubcategory(entryIndex, categoryIndex, subcategoryIndex)}
@@ -662,6 +683,7 @@ console.log("budget", budget)
                 </div>
               ))}
               <button
+                hidden
                 type="button"
                 onClick={() => addCategory(entryIndex)}
                 disabled={!productTypeState.find(type => type._id === entry.product_type_obj_ref.type_id)?.type_categories?.length}                
@@ -672,6 +694,7 @@ console.log("budget", budget)
             </div>
           ))}
           <button
+            hidden
             type="button"
             onClick={() => setBudget({ ...budget, entries: [...budget.entries, { product_type_obj_ref: { type_id: '', type_total_m2: 0, type_rate: 0, type_total_amount: 0, category_obj_ref: [] } }] })}
             className="mt-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -682,10 +705,10 @@ console.log("budget", budget)
 
         <div>
           <button
-            type="submit"
+            onClick={handleUpdateBudget}
             className="w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            UPDATE
+            EDIT BUDGET
           </button>
         </div>
       </form>
@@ -693,4 +716,4 @@ console.log("budget", budget)
   );
 };
 
-export default UpdateBudgetForm;
+export default BudgetDetails;

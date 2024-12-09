@@ -75,12 +75,12 @@ const SupplierDetails = () => {
             return (
                 product.product.product_sku.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.productPrice.product_number_a.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_number_a?.toString().includes(lowerCaseSearchTerm) ||
                 product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_price_unit_a?.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_actual_size?.toString().includes(lowerCaseSearchTerm) ||
                 productTypeState.find(type => type._id === product.product.product_type)?.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
+                product.product.alias_name?.toString().includes(lowerCaseSearchTerm) ||
                 product.productPrice.project_names.some(projectName => 
                     projectName.toLowerCase().includes(lowerCaseSearchTerm)
                 )

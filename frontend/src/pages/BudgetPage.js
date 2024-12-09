@@ -47,12 +47,12 @@ const Budget = () => {
     
             // Check each field for the search term
             return (
-                budget.budget_ref.toLowerCase().includes(lowerCaseSearchTerm) ||
-                budget.supplier.supplier_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                budget.budgetd_calculated_total_amount_incl_gst.toString().includes(lowerCaseSearchTerm) ||
-                budget.budgetd_raw_total_amount_incl_gst.toString().includes(lowerCaseSearchTerm) ||
-                budget.budget_status.toLowerCase().includes(lowerCaseSearchTerm) ||
-                (budget.order && budget.order.order_ref.toLowerCase().includes(lowerCaseSearchTerm))
+                budget.budget_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                budget.project.project_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                budget.budget_area.toString().includes(lowerCaseSearchTerm) ||
+                budget.budget_level.toString().includes(lowerCaseSearchTerm) ||
+                budget.budget_subarea.toLowerCase().includes(lowerCaseSearchTerm) 
+                // || (budget.order && budget.order.order_ref.toLowerCase().includes(lowerCaseSearchTerm))
             );
         });
     };
@@ -120,7 +120,7 @@ const Budget = () => {
         return () => {
             abortController.abort(); // Cleanup
         };
-    }, [dispatch]);
+    }, []);
     
     //Display DOM
     const budgetTable = budgetState.length > 0 ? (
@@ -130,17 +130,21 @@ const Budget = () => {
                     <tr className="table-primary">
                         <th scope="col">Budget Name</th>
                         <th scope="col">Project</th>
-                        <th scope="col">Location</th>
+                        <th scope="col">Budget Area</th>
+                        <th scope="col">Budget Level</th>
+                        <th scope="col">Budget Subarea</th>
                         <th scope="col" className="hidden sm:table-cell">Total Budget</th>
                     </tr>
                 </thead>
                 <tbody className="text-xs sm:text-base">
                     {filterBySelectedDate(filterBudgets().filter(budget => budget.budget_isarchived === isArchive)).map(budget => (
                         <tr key={budget._id} onClick={() => handleTableClick(budget._id)} className="cursor-pointer text-center text-sm">
-                            <td>{budget.budget_ref}</td>
-                            <td>{budget.supplier.supplier_name}</td>
-                            <td>{budget.order?.order_ref || '-'}</td>
-                            <td className="hidden sm:table-cell">{formatDateTime(budget.budget_issue_date)}</td>
+                            <td>{budget.budget_name}</td>
+                            <td>{budget.project.project_name}</td>
+                            <td>{budget.project.area_obj_ref.find(area => area._id === budget.budget_area)?.areas.area_name}</td>
+                            <td>{budget.project.area_obj_ref.find(area => area._id === budget.budget_area)?.areas.levels.find(level => level._id === budget.budget_area_level)?.level_name}</td>
+                            <td>{budget.project.area_obj_ref.find(area => area._id === budget.budget_area)?.areas.levels.find(level => level._id === budget.budget_area_level)?.subareas.find(subarea => subarea._id === budget.budget_area_subarea).subarea_name}</td>
+                            <td className="hidden sm:table-cell">{}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -160,7 +164,7 @@ const Budget = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-
+    console.log("budgetState", budgetState)
 
     return (
         localUser && Object.keys(localUser).length > 0 ? (

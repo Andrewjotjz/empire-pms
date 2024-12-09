@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-
+import { useNavigate } from 'react-router-dom'
 import LoadingScreen from "../loaders/LoadingScreen";
 import SessionExpired from "../../components/SessionExpired"
 
-
 const NewBudgetForm = () => {
+  //Component's hook router
+  const navigate = useNavigate();
+
   const [budget, setBudget] = useState({
     budget_name: '',
     project: '',
-    budget_location: '',
+    budget_area: '',
+    budget_area_level: '',
+    budget_area_subarea: '',
     entries: [
       {
         product_type_obj_ref: {
@@ -27,6 +31,8 @@ const NewBudgetForm = () => {
   const [fetchTypeError, setFetchTypeError] = useState(null);
   const [isFetchProjectLoading, setIsFetchProjectLoading] = useState(false);
   const [fetchProjectError, setFetchProjectError] = useState(null);
+  const [isAddBudgetLoading, setIsAddBudgetLoading] = useState(false);
+  const [addBudgetError, setAddBudgetError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -141,10 +147,52 @@ const NewBudgetForm = () => {
   };
   
   
+  const addBudget = async (budget) => {
+    setIsAddBudgetLoading(true)
+    setAddBudgetError(null)
+
+    const postBudget = async () => {
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/create`, {
+                credentials: 'include', method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                },
+                body: JSON.stringify(budget)
+            })
+
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError)
+            }
+
+            if (!res.ok) {
+                throw new Error('Failed to POST new budget details')
+            }
+            if (res.ok) {
+                // navigate client to dashboard page
+                navigate(`/EmpirePMS/budget/`)
+
+                alert(`Budget created successfully!`);
+            
+                // update loading state
+                setIsAddBudgetLoading(false)
+
+            }
+        } catch (error) {
+            setAddBudgetError(error.message);
+            setIsAddBudgetLoading(false);
+        }
+    }
+    postBudget();
+}
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Budget submitted:', budget);
+
+    addBudget(budget)
   };
 
   useEffect(() => {
@@ -229,15 +277,16 @@ const NewBudgetForm = () => {
     };
 }, []);
 
-if (isFetchTypeLoading || isFetchProjectLoading) { return (<LoadingScreen />); }
+if (isFetchTypeLoading || isFetchProjectLoading || isAddBudgetLoading) { return (<LoadingScreen />); }
 
-if (fetchTypeError || fetchProjectError) {
+if (fetchTypeError || fetchProjectError || addBudgetError) {
     if(fetchTypeError.includes("Session expired") || fetchTypeError.includes("jwt expired") || fetchTypeError.includes("jwt malformed")){
         return(<div><SessionExpired /></div>)
     }
-    return (<div>Error: {fetchTypeError || fetchProjectError}</div>);
+    return (<div>Error: {fetchTypeError || fetchProjectError || addBudgetError}</div>);
 }
 
+console.log(budget)
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
@@ -263,7 +312,8 @@ if (fetchTypeError || fetchProjectError) {
             Project
           </label>
           <select
-            value={budget.project._id}
+            value={budget.project}
+            name='project'
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
           >
@@ -278,18 +328,61 @@ if (fetchTypeError || fetchProjectError) {
 
         <div>
           <label htmlFor="budget_location" className="block text-sm font-medium text-gray-700">
-            Budget Location
+            Budget Area
           </label>
-          <input
-            type="text"
-            id="budget_location"
-            name="budget_location"
-            value={budget.budget_location}
+          <select
+            value={budget.budget_area}
+            name="budget_area"
             onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
-          />
+            className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+          >
+            <option value="">Select Area</option>
+            {projectState
+              .find((project) => project._id === budget.project)
+              ?.area_obj_ref.map((area) => (
+                <option key={area._id} value={area._id}>
+                  {area.areas.area_name}
+                </option>
+              ))}
+          </select>
+
+          {budget.budget_area && (
+            <select
+              value={budget.budget_area_level}
+              name="budget_area_level"
+              onChange={handleChange}
+              className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+            >
+              <option value="">Select Level</option>
+              {projectState
+                .find((project) => project._id === budget.project)
+                ?.area_obj_ref.find((area) => area._id === budget.budget_area)?.areas.levels?.map((level) => (
+                  <option key={level._id} value={level._id}>
+                    {level.level_name}
+                  </option>
+                ))}
+            </select>
+          )}
+
+          {budget.budget_area_level && (
+            <select
+              value={budget.budget_area_subarea}
+              name="budget_area_subarea"
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+            >
+              <option value="">Select Subarea</option>
+              {projectState
+                .find((project) => project._id === budget.project)
+                ?.area_obj_ref.find((area) => area._id === budget.budget_area)?.areas.levels.find((level) => level._id === budget.budget_area_level)?.subareas.map((subarea) => (
+                  <option key={subarea._id} value={subarea._id}>
+                    {subarea.subarea_name}
+                  </option>
+              ))}
+            </select>
+          )}
         </div>
+
 
         <div>
           <h3 className="text-lg font-medium text-gray-700 mb-2">Entries</h3>
@@ -496,6 +589,7 @@ if (fetchTypeError || fetchProjectError) {
                             />
                             <button
                               type="button"
+                              title="Remove subcategory"
                               onClick={() => removeSubcategory(entryIndex, categoryIndex, subcategoryIndex)}
                               className="px-1 py-1 text-sm rounded-md text-red-500 hover:bg-red-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400 transition ease-in-out"
                             >

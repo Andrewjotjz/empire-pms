@@ -15,9 +15,14 @@ const budgetSchema = new Schema({
         ref: 'Project',
         required: true
     },
-    budget_location: {
-        type: String,
-        required: true
+    budget_area: {
+        type: Schema.Types.ObjectId
+    },
+    budget_area_level: {
+        type: Schema.Types.ObjectId
+    },
+    budget_area_subarea: {
+        type: Schema.Types.ObjectId
     },
     entries: [{
         product_type_obj_ref: {
