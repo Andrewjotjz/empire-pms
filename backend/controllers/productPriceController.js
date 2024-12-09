@@ -50,12 +50,12 @@ const createNewProductPrice = async (req, res) => {
     //retrieve incoming request (along with new ProjectPrice object) by using 'req' object property 'body', which stores new ProjectPrice object.
     //destructure all relevant attributes in new ProjectPrice object
     const { product_obj_ref, product_unit_a, product_number_a, product_price_unit_a, product_unit_b,
-        product_number_b, product_price_unit_b, price_fixed, product_effective_date, projects } = req.body;
+        product_number_b, product_price_unit_b, price_fixed, product_actual_rate, product_effective_date, projects } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new ProductPrice model with retrieved attributes.
         const ProjectPrice = await productPriceModel.create({ product_obj_ref, product_unit_a, product_number_a, product_price_unit_a, product_unit_b,
-            product_number_b, product_price_unit_b, price_fixed, product_effective_date, projects })
+            product_number_b, product_price_unit_b, price_fixed, product_actual_rate, product_effective_date, projects })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(ProjectPrice)
     }
