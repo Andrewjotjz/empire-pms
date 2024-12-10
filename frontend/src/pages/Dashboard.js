@@ -96,6 +96,16 @@ const Dashboard = () => {
                         </Card.Body>
                     </Card>
                 </Col>
+                <Col md={6}>
+                    <Card className="mb-4">
+                        <Card.Body>
+                        <Link to="/EmpirePMS/delivery"><Card.Title>Deliveries</Card.Title></Link>
+                            <Card.Text>
+                                {/* Insert Invoices content here */}
+                            </Card.Text>
+                        </Card.Body>
+                    </Card>
+                </Col>
             </Row>
         </Container> ) : ( <UnauthenticatedSkeleton /> )
     );

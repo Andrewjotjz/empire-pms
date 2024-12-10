@@ -39,6 +39,10 @@ import Budget from "./pages/BudgetPage";
 import BudgetDetails from "./pages/BudgetDetails";
 import NewBudgetForm from "./pages/forms/NewBudgetForm";
 import UpdateBudgetForm from "./pages/forms/UpdateBudgetForm";
+import Delivery from "./pages/DeliveryPage";
+import DeliveryDetails from "./pages/DeliveryDetails";
+import NewDeliveryForm from "./pages/forms/NewDeliveryForm";
+import UpdateDeliveryForm from "./pages/forms/UpdateDeliveryForm";
 
 function App() {
 
@@ -98,6 +102,11 @@ function App() {
             <Route path="/EmpirePMS/budget/:id" element={<BudgetDetails />} />
             <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
             <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
+
+            <Route path="/EmpirePMS/delivery" element={<Delivery />} />
+            <Route path="/EmpirePMS/delivery/:id" element={<DeliveryDetails />} />
+            <Route path="/EmpirePMS/delivery/create" element={<NewDeliveryForm />} />
+            <Route path="/EmpirePMS/delivery/:id/edit" element={<UpdateDeliveryForm /> } />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
