@@ -12,8 +12,6 @@ const uploadInvoiceFile = async (req, res) => {
             return res.status(400).json({ message: "No files uploaded." });
         }
 
-        console.log("Multiple files in request:", req.files);
-
         // Save file metadata to MongoDB
         const savedFiles = await Promise.all(
             files.map((file) =>
@@ -27,8 +25,6 @@ const uploadInvoiceFile = async (req, res) => {
         );
 
         const urls = savedFiles.map(file => file.invoice_file_url)
-
-        console.log("SavedFiles showing:", savedFiles);
 
         return res.status(201).json({
             message: "Files uploaded successfully.",

@@ -454,6 +454,64 @@ const Breadcrumbs = () => {
                     </Link>
                 </>
                 )}
+
+
+                {/* ****************** PAYMENTS ******************** */}
+                {location.pathname.includes(`/EmpirePMS/payment`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/payment`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment`) && "text-blue-500"}`}>
+                    Payments
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/payment/${id}`) && id !== 'create' && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/payment/${id}`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/${id}`) && "text-blue-500"}`}>
+                    Payment Details
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/payment/${id}/edit`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/payment/${id}/edit`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/${id}/edit`) && "text-blue-500"}`}>
+                    Edit Payment
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/payment/create`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/payment/create`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/create`) && "text-blue-500"}`}>
+                    New Payment
+                    </Link>
+                </>
+                )}
             </ul>
         </div>) : (
             <></>

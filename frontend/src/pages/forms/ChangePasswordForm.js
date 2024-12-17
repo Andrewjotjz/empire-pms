@@ -44,7 +44,6 @@ const ChangePasswordForm = () => {
     if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState) {
-        console.log(errorState)
         if (errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
             return (<div><SessionExpired /></div>);
         }

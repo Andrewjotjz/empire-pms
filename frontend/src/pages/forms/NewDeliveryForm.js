@@ -167,8 +167,8 @@ const NewDeliveryForm = ({order, supplier}) => {
             <label className="block text-sm font-medium text-gray-700">
                 Delivery reference:
             </label>
-            <input 
-                type="textarea"
+            <textarea 
+                rows={2}
                 name= "delivery_evidence_reference"
                 onChange={handleChange}
             />

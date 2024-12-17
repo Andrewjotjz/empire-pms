@@ -1187,19 +1187,19 @@ const NewInvoiceForm = () => {
   const handleSubmitInvoice = async (event) => {
     event.preventDefault();
 
-    //upload Invoice logic
-    if (!files || files.length === 0) {
-      return alert("Please select at least one file.");
-    }
+    //! upload Invoice logic
+    // if (!files || files.length === 0) {
+    //   return alert("Please select at least one file.");
+    // }
 
-    if (files.length > 10) {
-      return alert("You can only upload up to 10 files.")
-    }
+    // if (files.length > 10) {
+    //   return alert("You can only upload up to 10 files.")
+    // }
 
-    const formData = new FormData();
-    Array.from(files).forEach((file) => {
-        formData.append("invoices", file); // 'invoices' must match the backend key
-    });
+    // const formData = new FormData();
+    // Array.from(files).forEach((file) => {
+    //     formData.append("invoices", file); // 'invoices' must match the backend key
+    // });
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
@@ -1208,8 +1208,8 @@ const NewInvoiceForm = () => {
       }
 
       const invoice_id = await addInvoice(newInvoice);
-      formData.append("id", invoice_id);
-      await uploadInvoice(formData);
+      // formData.append("id", invoice_id);
+      // await uploadInvoice(formData);
     }
 
     if (isToggled) {
@@ -1219,8 +1219,8 @@ const NewInvoiceForm = () => {
       }
       
       const invoice_id = await addInvoice(newInvoiceWithoutPO);
-      formData.append("id", invoice_id);
-      await uploadInvoice(formData);
+      // formData.append("id", invoice_id);
+      // await uploadInvoice(formData);
 
     }
 

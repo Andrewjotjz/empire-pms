@@ -43,6 +43,10 @@ import Delivery from "./pages/DeliveryPage";
 import DeliveryDetails from "./pages/DeliveryDetails";
 import NewDeliveryForm from "./pages/forms/NewDeliveryForm";
 import UpdateDeliveryForm from "./pages/forms/UpdateDeliveryForm";
+import Payment from "./pages/PaymentPage";
+import PaymentDetails from "./pages/PaymentDetails";
+import NewPaymentForm from "./pages/forms/NewPaymentForm";
+import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 
 function App() {
 
@@ -107,6 +111,11 @@ function App() {
             <Route path="/EmpirePMS/delivery/:id" element={<DeliveryDetails />} />
             <Route path="/EmpirePMS/delivery/create" element={<NewDeliveryForm />} />
             <Route path="/EmpirePMS/delivery/:id/edit" element={<UpdateDeliveryForm /> } />
+
+            <Route path="/EmpirePMS/payment" element={<Payment />} />
+            <Route path="/EmpirePMS/payment/:id" element={<PaymentDetails />} />
+            <Route path="/EmpirePMS/payment/create" element={<NewPaymentForm />} />
+            <Route path="/EmpirePMS/payment/:id/edit" element={<UpdatePaymentForm /> } />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

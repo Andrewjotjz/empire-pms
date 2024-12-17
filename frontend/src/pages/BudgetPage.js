@@ -164,8 +164,6 @@ const Budget = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-    console.log("budgetState", budgetState)
-
     return (
         localUser && Object.keys(localUser).length > 0 ? (
             <div className="container mt-5"><div className="card">

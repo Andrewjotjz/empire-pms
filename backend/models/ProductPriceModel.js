@@ -52,6 +52,9 @@ const productPriceSchema = new Schema({
         type: Date,
         required: true
     },
+    product_price_note: {
+        type: String
+    },
     projects: [{
         type: Schema.Types.ObjectId,
         ref: 'Project'

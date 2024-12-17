@@ -286,8 +286,6 @@ if (fetchTypeError || fetchProjectError || addBudgetError) {
     return (<div>Error: {fetchTypeError || fetchProjectError || addBudgetError}</div>);
 }
 
-console.log(budget)
-
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-3">Create Budget</h2>

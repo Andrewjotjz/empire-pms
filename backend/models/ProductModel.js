@@ -38,6 +38,9 @@ const productSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Alias'
     },
+    product_note: {
+        type: String
+    },
     product_isarchived: {
         type: Boolean,
         default: false

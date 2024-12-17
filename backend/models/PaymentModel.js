@@ -25,19 +25,21 @@ const paymentSchema = new Schema({
         required: true,
         enum: ['Bank transfer', 'Credit card', 'Cash', 'Letter of credit', 'Others']
     },
-    payment_datetime: {
-        type: Date,
-        required: true,
-        default: Date.now
-    },
+    payment_term: [{
+        payment_datetime: {
+            type: Date,
+            required: true,
+            default: Date.now
+        },
+        payment_amount_paid: {
+            type: Number,
+            min: 0
+        }
+    }],
     payment_raw_total_amount_incl_gst: {
         type: Number,
         min: 0,
         required: true
-    },
-    payment_outstanding_amount: {
-        type: Number,
-        min: 0
     },
     period_start_date: {
         type: Date,
@@ -50,9 +52,9 @@ const paymentSchema = new Schema({
     invoices: [{
         _id: false,
         invoice_obj_ref: {
-        type: Schema.Types.ObjectId,
-        ref: 'Invoice',
-        required: true
+            type: Schema.Types.ObjectId,
+            ref: 'Invoice',
+            required: true
         },
         // ** Not necessary, already exist in the invoice db
         gross_total_amount: {
@@ -78,4 +80,5 @@ const paymentSchema = new Schema({
 }, { timestamps: true });
 
 //export the model
-module.exports = mongoose.model('Payment', paymentSchema);
+const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
+module.exports = Payment;
