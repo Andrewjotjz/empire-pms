@@ -27,11 +27,32 @@ const PurchaseOrderDetails = () => {
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [isAddDeliveryLoading, setIsAddDeliveryLoading] = useState(true);
+    const [addDeliveryError, setAddDeliveryError] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
     const [currentLeftTab, setCurrentLeftTab] = useState('invoicesTable');
     const [currentRightTab, setCurrentRightTab] = useState('internalComments');
     const [showLastDiv, setShowLastDiv] = useState(false);
     const [targetRef, setTargetRef] = useState(null);
+    const [deliveryState, setDeliveryState] = useState({
+        delivery_evidence_type: '',
+        delivery_evidence_reference: '',
+        products: [],
+        delivery_receiving_date: new Date().toISOString().split('T')[0],
+        delivery_status: '',
+        order: '',
+        supplier: '',
+        delivery_notes: ''
+      });
+    const deliveryType = ['Delivery Docket', 'Invoice'];
+    const deliveryStatus = ['Partially delivered', 'Delivered'];
+
+    
+    // {
+    //     product_obj_ref: '',
+    //     delivered_qty_a: 0
+    //   }
 
     //Component hooks
     const { updatePurchaseOrder, isUpdateLoadingState, updateErrorState } = useUpdatePurchaseOrder();
@@ -44,6 +65,25 @@ const PurchaseOrderDetails = () => {
     //Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
+    
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setDeliveryState(prevState => ({
+        ...prevState,
+        [name]: value
+        }));
+    };
+
+    const handleProductChange = (index, field, value) => {
+        const updatedProducts = [...deliveryState.products];
+        updatedProducts[index][field] = value;
+        setDeliveryState(prevState => ({
+        ...prevState,
+        products: updatedProducts
+        }));
+    };
+
+
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
         navigate(`/EmpirePMS/supplier/${purchaseOrderState.supplier._id}/products/${productId}`, {state: purchaseOrderState.supplier._id})
@@ -54,8 +94,21 @@ const PurchaseOrderDetails = () => {
     }
 
     const handleNewDelivery = () => {
-        navigate(`/EmpirePMS/order/${id}/edit`)
-    }
+        const currentProducts = purchaseOrderState.products.map(product => ({
+            ...product,
+            delivered_qty_a: 0 // Initialize with a default value, e.g., 0
+        }));
+    
+        setDeliveryState((prevDelivery) => ({
+            ...prevDelivery, // Spread the previous state
+            products: currentProducts, // Updated products with delivered_qty_a
+            order: purchaseOrderState._id,
+            supplier: purchaseOrderState.supplier._id
+        }));
+
+        setIsDeliveryModalOpen(true);
+    };
+    
 
     const handleArchive = () => {    
         let updatedState;
@@ -115,6 +168,53 @@ const PurchaseOrderDetails = () => {
           setShowLastDiv(true);
         }
       };
+
+    
+    const createDelivery = async (deliveryState) => {
+        setIsAddDeliveryLoading(true)
+        setAddDeliveryError(null)
+    
+        const postDelivery = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/delivery/create`, {
+                    credentials: 'include', method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    },
+                    body: JSON.stringify(deliveryState)
+                })
+    
+                const data = await res.json();
+    
+                if (data.tokenError) {
+                    throw new Error(data.tokenError)
+                }
+    
+                if (!res.ok) {
+                    throw new Error('Failed to POST new delivery')
+                }
+                if (res.ok) {
+    
+                    alert(`Delivery created successfully!`);
+                
+                    // update loading state
+                    setIsAddDeliveryLoading(false)
+    
+                }
+            } catch (error) {
+                setAddDeliveryError(error.message);
+                setIsAddDeliveryLoading(false);
+            }
+        }
+        postDelivery();
+    }
+
+    const handleSubmit = () => {
+        createDelivery(deliveryState);
+        setIsDeliveryModalOpen(false);
+        window.location.reload();
+    }
     
     //Render component
     useEffect(() => {
@@ -601,6 +701,164 @@ const PurchaseOrderDetails = () => {
         </Modal>
     )
     
+    const deliveryModal = (
+        <div>    
+          {isDeliveryModalOpen && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4 text-xs">
+                <div className="flex justify-between items-center px-4 py-3 border-b">
+                  <h2 className="text-lg font-bold text-gray-800">Receiving Items</h2>
+                  <button
+                    onClick={() => setIsDeliveryModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out"
+                  >
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+    
+                <div className="p-4 max-h-[60vh] overflow-y-auto">
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className='grid grid-cols-2 gap-x-4 gap-y-2'>
+                        <div>
+                            <label className="block mb-1 font-medium text-gray-700">* Evidence Reference:</label>
+                            <input
+                                type="text"
+                                required
+                                name="delivery_evidence_reference"
+                                value={deliveryState.delivery_evidence_reference}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+        
+                        <div>
+                            <label className="block mb-1 font-medium text-gray-700">* Receiving Date:</label>
+                            <input
+                                type="date"
+                                required
+                                name="delivery_receiving_date"
+                                value={deliveryState.delivery_receiving_date}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-1 font-medium text-gray-700">* Evidence Type:</label>
+                            <select
+                                required
+                                name="delivery_evidence_type"
+                                value={deliveryState.delivery_evidence_type}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">Select Type</option>
+                                {deliveryType.map(type => (
+                                <option key={type} value={type}>{type}</option>
+                                ))}
+                            </select>
+                        </div>                            
+            
+                        <div>
+                            <label className="block mb-1 font-medium text-gray-700">* Delivery Status:</label>
+                            <select
+                                required
+                                name="delivery_status"
+                                value={deliveryState.delivery_status}
+                                onChange={handleInputChange}
+                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">Select Status</option>
+                                {deliveryStatus.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>                   
+    
+                    <div>
+                      <h3 className="font-semibold mb-2 text-gray-800">Products</h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="bg-gray-100">
+                              <th className="border-b p-1.5 text-left font-semibold text-gray-600">Product SKU</th>
+                              <th className="border-b p-1.5 text-left font-semibold text-gray-600">Product Name</th>
+                              <th className="border-b p-1.5 text-left font-semibold text-gray-600">Quantity</th>
+                              <th className="border-b p-1.5 text-left font-semibold text-gray-600">Receiving</th>
+                              <th className="border-b p-1.5 text-left font-semibold text-gray-600">Delivered</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {purchaseOrderState.products.map((prod, index) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_sku}</td>
+                                <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_name}</td>
+                                <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}</td>
+                                <td className="border-b p-1.5">
+                                  <input
+                                    required
+                                    type="number"
+                                    value={deliveryState.products[index]?.delivered_qty_a || ''}
+                                    onChange={(e) => handleProductChange(index, 'delivered_qty_a', parseInt(e.target.value))}
+                                    className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                  />
+                                </td>
+                                <td className="border-b p-1.5 text-gray-800">
+                                {
+                                    purchaseOrderState.deliveries
+                                    .map(delivery =>
+                                        delivery.products[index].delivered_qty_a
+                                        // .reduce((totalSum, product) => totalSum + (product.delivered_qty_a || 0), 0)
+                                    ).reduce((totalSum, product) => totalSum + (product || 0), 0)
+                                    // .reduce((grandTotal, deliveryTotal) => grandTotal + deliveryTotal, 0)
+                                }
+                                /
+                                {prod.order_product_qty_a}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div>
+                        <textarea
+                            name='delivery_notes'
+                            value={deliveryState.delivery_notes}
+                            onChange={handleInputChange}
+                            placeholder='Delivery notes...'
+                            className='border rounded-md w-full p-2'
+                        />
+                    </div>
+                  </form>
+                </div>
+    
+                <div className="flex justify-end space-x-2 p-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeliveryModalOpen(false)}
+                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition duration-300 ease-in-out"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition duration-300 ease-in-out"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+
+    console.log(deliveryState)
+    console.log(purchaseOrderState)
 
     return (
         localUser && Object.keys(localUser).length > 0 ? (
@@ -704,6 +962,7 @@ const PurchaseOrderDetails = () => {
                 </div>
             </div>
             { archiveModal }
+            { deliveryModal }
         </div> ) : ( <UnauthenticatedSkeleton /> )
     );
 

@@ -512,6 +512,35 @@ const Breadcrumbs = () => {
                     </Link>
                 </>
                 )}
+
+                {/* ****************** DELIVERIES ******************** */}
+                {location.pathname.includes(`/EmpirePMS/delivery`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/delivery`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/delivery`) && "text-blue-500"}`}>
+                    Deliveries
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/delivery/${id}`) && id !== 'create' && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/delivery/${id}`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/delivery/${id}`) && "text-blue-500"}`}>
+                    Delivery Details
+                    </Link>
+                </>
+                )}
             </ul>
         </div>) : (
             <></>

@@ -41,8 +41,6 @@ import NewBudgetForm from "./pages/forms/NewBudgetForm";
 import UpdateBudgetForm from "./pages/forms/UpdateBudgetForm";
 import Delivery from "./pages/DeliveryPage";
 import DeliveryDetails from "./pages/DeliveryDetails";
-import NewDeliveryForm from "./pages/forms/NewDeliveryForm";
-import UpdateDeliveryForm from "./pages/forms/UpdateDeliveryForm";
 import Payment from "./pages/PaymentPage";
 import PaymentDetails from "./pages/PaymentDetails";
 import NewPaymentForm from "./pages/forms/NewPaymentForm";
@@ -109,8 +107,6 @@ function App() {
 
             <Route path="/EmpirePMS/delivery" element={<Delivery />} />
             <Route path="/EmpirePMS/delivery/:id" element={<DeliveryDetails />} />
-            <Route path="/EmpirePMS/delivery/create" element={<NewDeliveryForm />} />
-            <Route path="/EmpirePMS/delivery/:id/edit" element={<UpdateDeliveryForm /> } />
 
             <Route path="/EmpirePMS/payment" element={<Payment />} />
             <Route path="/EmpirePMS/payment/:id" element={<PaymentDetails />} />
