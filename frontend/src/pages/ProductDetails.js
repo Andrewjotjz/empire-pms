@@ -151,6 +151,8 @@ const ProductDetails = () => {
                             <th scope="col" className="border border-gray-300 px-2 py-1">Unit A</th>
                             <th scope="col" className="border border-gray-300 px-2 py-1">Unit B</th>
                             <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Price Fixed (?)</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Actual Rate</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Notes</th>
                             <th scope="col" className="border border-gray-300 px-2 py-1">Project</th>
                         </tr>
                     </thead>
@@ -169,6 +171,8 @@ const ProductDetails = () => {
                                 <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_b * 100) / 100)}</div>
                             </td>
                             <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice.product_actual_rate}</td>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice?.product_price_note || 'None'}</td>
                             <td className="border border-gray-300 px-1 py-1">
                                 {item.productPrice.project_names.map((project, index) => (
                                     <label key={index} className='ml-1 p-1 border-2 rounded-md text-xs sm:text-base'>
@@ -250,16 +254,16 @@ const ProductDetails = () => {
                                 <p className="form-label">{productState[0].product.product_actual_size}</p>
                             </div>
                             <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
-                                <label className="form-label fw-bold">Actual Rate:</label>
-                                <p className="form-label">{productState[0].product.product_actual_rate}</p>
-                            </div>
-                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Alias:</label>
                                 <p className="form-label">{productState[0].product.alias_name}</p>
                             </div>
                             <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Next available stock date:</label>
                                 <p className="form-label">{productState[0].product.product_next_available_stock_date || 'In-stock now'}</p>
+                            </div>
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
+                                <label className="form-label fw-bold">Notes:</label>
+                                <p className="form-label">{productState[0].product?.product_note || 'None'}</p>
                             </div>
                             <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">isArchived:</label>

@@ -161,13 +161,15 @@ const UpdateInvoiceForm = () => {
   const [newProductPrice, setNewProductPrice] = useState({
     product_obj_ref: "",
     product_unit_a: "",
-    product_number_a: "",
-    product_price_unit_a: "",
+    product_number_a: 0,
+    product_price_unit_a: 0,
     product_unit_b: "",
-    product_number_b: "",
-    product_price_unit_b: "",
+    product_number_b: 0,
+    product_price_unit_b: 0,
     price_fixed: false,
     product_effective_date: "",
+    product_actual_rate: 0,
+    product_price_note: "",
     projects: [],
   });
   const [productTypeState, setProductTypeState] = useState([]);
@@ -685,6 +687,7 @@ const UpdateInvoiceForm = () => {
         "product_price_unit_a",
         "product_number_b",
         "product_price_unit_b",
+        "product_actual_rate"
       ].includes(name)
         ? Number(value)
         : value,
@@ -1524,6 +1527,18 @@ const UpdateInvoiceForm = () => {
                         </th>
                         <th
                           scope="col"
+                          className="border border-gray-300 px-2 py-1 hidden sm:table-cell"
+                        >
+                          Actual Rate
+                        </th>
+                        <th
+                          scope="col"
+                          className="border border-gray-300 px-2 py-1 hidden sm:table-cell"
+                        >
+                          Notes
+                        </th>
+                        <th
+                          scope="col"
                           className="border border-gray-300 px-2 py-1"
                         >
                           Project
@@ -1558,6 +1573,12 @@ const UpdateInvoiceForm = () => {
                           </td>
                           <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
                             {item.productPrice.price_fixed ? "Yes" : "No"}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
+                            {item.productPrice.product_actual_rate}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
+                            {item.productPrice?.product_price_note || "None"}
                           </td>
                           <td className="border border-gray-300 px-1 py-1">
                             {item.productPrice.project_names.map(
@@ -2448,6 +2469,23 @@ const UpdateInvoiceForm = () => {
                         {formatDate(newProductPrice.product_effective_date)}
                       </p>
                     </div>
+                    {/* **** PRICE ACTUAL RATE **** */}
+                    <div>
+                      <label className="form-label font-bold text-xs md:text-base">
+                        *Price actual price/rate:
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control text-xs md:text-base"
+                        name="product_actual_rate"
+                        value={newProductPrice.product_actual_rate}
+                        onChange={handleNewProductPriceInput}
+                        required
+                      />
+                      <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
+                        The price/rate of the product's actual size.
+                      </p>
+                    </div>
                     {/* **** PRICE FIXED (?) **** */}
                     <div>
                       <label className="form-label font-bold text-xs md:text-base">
@@ -2466,6 +2504,18 @@ const UpdateInvoiceForm = () => {
                             },
                           })
                         }
+                      />
+                    </div>
+                    {/* **** PRODUCT PRICE NOTE **** */}
+                    <div className="col-span-3">
+                      <label className="form-label font-bold text-xs md:text-base">
+                        Price notes:
+                      </label>
+                      <textarea
+                        className="form-control text-xs md:text-base"
+                        name="product_price_note"
+                        value={newProductPrice.product_price_note}
+                        onChange={handleNewProductPriceInput}
                       />
                     </div>
                   </div>

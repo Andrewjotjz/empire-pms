@@ -5,37 +5,6 @@ const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
 const mongoose = require('mongoose');
 
-// const fetchSupplierwithProject = async (supplier_id) => {
-
-//     // if project_id is null, find all projects, otherwise, find single project by id
-//     const suppliers = await supplierModel.find(supplier_id).sort({ createdAt: -1 })
-
-//     // Find all employees related to the projects
-//     const suppliersIds = suppliers.map(supplier => supplier._id);
-//     const projects = await projectModel.find({ suppliers: { $in: suppliersIds } });
-
-//     // Map suppliers to their corresponding projects
-//     const supplierProjectMap = {};
-//     projects.forEach(project => {
-//         project.suppliers.forEach(supplierID => {
-//         if (!supplierProjectMap[supplierID]) 
-//             { supplierProjectMap[supplierID] = []; }
-//         supplierProjectMap[supplierID].push(project);
-//       });
-//     });
-
-//     // Attach supplier to their corresponding projects
-//     const supplierWithProjects = projects.map(project => {
-//       return {
-//         ...project.toObject(),
-//         projects: supplierProjectMap[project._id] || []
-//       };
-//     });
-
-//     return supplierWithProjects; 
-
-// };
-
 const fetchSupplierWithProjects = async (supplier_id) => {
     try {
         // Find the supplier by ID (assumed that supplier_id is not null)
@@ -174,11 +143,11 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     product_name: '$product.product_name',
                     product_type: '$product.product_type',
                     product_actual_size: '$product.product_actual_size',
-                    product_actual_rate: '$product.product_actual_rate',
                     product_next_available_stock_date: '$product.product_next_available_stock_date',
                     supplier: '$product.supplier',
                     alias: '$product.alias',
                     alias_name: '$alias.alias_name',
+                    product_note: '$product.product_note',
                     product_isarchived: '$product.product_isarchived',
                     createdAt: '$product.createdAt',
                     updatedAt: '$product.updatedAt'
@@ -193,6 +162,8 @@ const fetchProductsWithPrices = async (supplierObjectId, productObjectId = null)
                     product_number_b: '$product_number_b',
                     product_price_unit_b: '$product_price_unit_b',
                     price_fixed: '$price_fixed',
+                    product_actual_rate: '$product_actual_rate',
+                    product_price_note: '$product_price_note',
                     product_effective_date: '$product_effective_date',
                     projects: '$projects',
                     project_names: '$projectDetails.project_name', // Get project names

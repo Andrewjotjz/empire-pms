@@ -645,7 +645,6 @@ const SupplierDetails = () => {
                         <th scope="col" className="hidden sm:table-cell">Unit A</th>
                         <th scope="col" className="hidden sm:table-cell">Price A</th>
                         <th scope="col" className="hidden sm:table-cell">Actual M<span className='text-xs align-top'>2</span>/M</th>
-                        <th scope="col" className="hidden sm:table-cell">Actual Rate</th>
                         <th scope="col" className="hidden sm:table-cell">Type</th>
                         <th scope="col" className="hidden sm:table-cell">Alias</th>
                         <th scope="col" className="hidden sm:table-cell">Project Name</th>
@@ -660,7 +659,6 @@ const SupplierDetails = () => {
                             <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
                             <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.productPrice.product_price_unit_a * 100) / 100)}</td>
                             <td className="hidden sm:table-cell">{product.product.product_actual_size}</td>
-                            <td className="hidden sm:table-cell">{product.product.product_actual_rate}</td>
                             <td className="hidden sm:table-cell">{productTypeState.find(type => type._id === product.product.product_type)?.type_name || "Unknown"}</td>
                             <td className="hidden sm:table-cell">{product.product.alias_name}</td>
                             <td className="hidden sm:table-cell">
@@ -843,7 +841,7 @@ const SupplierDetails = () => {
                 </div>
                 <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Term Description:</label>
-                    <p className="form-label">{supplierState.supplier_term_description}</p>
+                    <p className="form-label">{supplierState?.supplier_term_description || 'None'}</p>
                 </div>
                 <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Method:</label>

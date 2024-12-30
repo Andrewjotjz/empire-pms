@@ -51,6 +51,7 @@ const UpdateProductForm = () => {
         product_unit_b: '',
         product_number_b: '',
         product_price_unit_b: '',
+        product_price_note: '',
         price_fixed: false,
         product_effective_date: '',
         projects: []
@@ -573,6 +574,18 @@ const UpdateProductForm = () => {
                                 />
                             </div>
                             <div>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price actual price/rate:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_actual_rate" 
+                                    value={productPriceState.product_actual_rate}
+                                    onChange={handlePriceInputChange}
+                                    required
+                                    disabled={isProductPriceDisabled}
+                                />
+                            </div>
+                            <div>
                                 <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Price fixed(?):</label>
                                 <input 
                                         type="checkbox"
@@ -582,6 +595,16 @@ const UpdateProductForm = () => {
                                         onChange={(e) => handlePriceInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
                                         disabled={isProductPriceDisabled}
                                     />
+                            </div>
+                            <div className='col-span-3'>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price notes:</label>
+                                <textarea
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_price_note"
+                                    value={productPriceState.product_price_note}
+                                    onChange={handlePriceInputChange}
+                                    disabled={isProductPriceDisabled}
+                                />
                             </div>
                         </div>
                                     {/* Creating New Price */}
@@ -739,6 +762,17 @@ const UpdateProductForm = () => {
                                     required
                                 />
                             </div>
+                            <div>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price actual price/rate:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_actual_rate" 
+                                    value={newProductPriceState.product_actual_rate}
+                                    onChange={handleNewPriceInputChange}
+                                    required
+                                />
+                            </div>
                             {/* **** PRICE FIXED (?) **** */}
                             <div>
                                 <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Price fixed(?):</label>
@@ -748,6 +782,16 @@ const UpdateProductForm = () => {
                                     name="price_fixed" 
                                     checked={newProductPriceState.price_fixed} 
                                     onChange={(e) => handleNewPriceInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
+                                />
+                            </div>
+                            <div className='col-span-3'>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price notes:</label>
+                                <textarea
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_price_note"
+                                    value={newProductPriceState.product_price_note}
+                                    onChange={handleNewPriceInputChange}
+                                    required
                                 />
                             </div>
                         </div>
@@ -773,10 +817,11 @@ const UpdateProductForm = () => {
                                 </label>
                             </div>
                         }
-                        {/* ********************************************* PRODUCT PRICE TABLE END *********************************************** */}
-                        <div>
-                            <div className="col-md-6 mb-0 sm:mb-3">
-                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
+                        
+                        {/* ********************************************* PRODUCT PRICE END *********************************************** */}
+                        <div className='grid grid-cols-2 gap-x-4'>
+                            <div className="mb-0 sm:mb-3">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Actual Size (M<span className='text-xs align-top'>2</span>/LENGTH):</label>
                                 <input 
                                     type='number'
                                     className="form-control text-xs sm:text-base" 
@@ -789,29 +834,29 @@ const UpdateProductForm = () => {
                                     required
                                 />
                             </div>
-                            <div className="col-md-6 mb-0 sm:mb-3">
-                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Actual Rate:</label>
-                                <input 
-                                    type='number'
-                                    className="form-control text-xs sm:text-base" 
-                                    name="product_actual_rate" 
-                                    value={productState.product_actual_rate} 
-                                    onChange={handleProductInputChange}
-                                    step="0.001"  // Allows input with up to three decimal places
-                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                    min={1}
-                                    required
-                                />
-                            </div>
 
-                            <div className="col-md-6 mb-0 sm:mb-3">
+                            <div className="mb-0 sm:mb-3">
                                 <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Next available stock date:</label>
                                 <input 
                                     type='date'
                                     className="form-control text-xs sm:text-base" 
                                     name="product_next_available_stock_date" 
-                                    defaultValue={productState.product_next_available_stock_date}
+                                    value={productState.product_next_available_stock_date}
                                     onChange={handleProductInputChange}
+                                />
+                            </div>
+
+                            <div className="mb-0 sm:mb-3 col-span-2">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Product notes:</label>
+                                <textarea 
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_note" 
+                                    value={productState.product_note} 
+                                    onChange={handleProductInputChange}
+                                    step="0.001"  // Allows input with up to three decimal places
+                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
+                                    min={1}
+                                    required
                                 />
                             </div>
                         </div>
