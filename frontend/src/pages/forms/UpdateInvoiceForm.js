@@ -52,14 +52,14 @@ const UpdateInvoiceForm = () => {
   const [searchOrderTerm, setSearchOrderTerm] = useState("");
   const [searchProductTerm, setSearchProductTerm] = useState("");
   const [selectedProductType, setSelectedProductType] = useState("");
-  const [selectedOrder, setSelectedOrder] = useState(invoiceState.order?._id || null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [updatedOrder, setUpdatedOrder] = useState(null);
   const [newSupplier, setNewSupplier] = useState("");
   const [newProductId, setNewProductId] = useState("");
   const [targetIndex, setTargetIndex] = useState(null);
 
-  const [isToggled, setIsToggled] = useState(invoiceState.invoice_is_stand_alone);
+  const [isToggled, setIsToggled] = useState(null);
   const [isToggleProjectDropdown, setIsToggleProjectDropdown] = useState(false);
   const [showSelectionModal, setShowSelectionModal] = useState(false);
   const [showProductPriceModal, setShowProductPriceModal] = useState(false);
@@ -119,45 +119,8 @@ const UpdateInvoiceForm = () => {
     }).split("/").reverse().join("-");
   };
 
-  const [newInvoice, setNewInvoice] = useState({
-    invoice_ref: invoiceState.invoice_ref,
-    supplier: invoiceState.supplier._id,
-    invoice_issue_date: invoiceState.invoice_issue_date.split('T')[0],
-    invoice_received_date: invoiceState.invoice_received_date.split('T')[0],
-    invoice_due_date: invoiceState.invoice_due_date.split('T')[0],
-    order: invoiceState.order?._id || null,
-    products: invoiceState.products,
-    custom_products: invoiceState.custom_products,
-    invoiced_delivery_fee: invoiceState.invoiced_delivery_fee,
-    invoiced_other_fee: invoiceState.invoiced_other_fee,
-    invoiced_credit: invoiceState.invoiced_credit,
-    invoiced_raw_total_amount_incl_gst: invoiceState.invoiced_raw_total_amount_incl_gst,
-    invoiced_calculated_total_amount_incl_gst: invoiceState.invoiced_calculated_total_amount_incl_gst,
-    invoice_is_stand_alone: invoiceState.invoice_is_stand_alone,
-    invoice_internal_comments: invoiceState.invoice_internal_comments,
-    invoice_status: invoiceState.invoice_status,
-    payment: invoiceState.payment?._id || null,
-  });
-  const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({
-    invoice_ref: invoiceState.invoice_ref,
-    supplier: invoiceState.supplier._id,
-    invoice_issue_date: invoiceState.invoice_issue_date.split('T')[0],
-    invoice_received_date: invoiceState.invoice_received_date.split('T')[0],
-    invoice_due_date: invoiceState.invoice_due_date.split('T')[0],
-    order: null,
-    products: [],
-    custom_products: invoiceState.custom_products,
-    invoiced_delivery_fee: invoiceState.invoiced_delivery_fee,
-    invoiced_other_fee: invoiceState.invoiced_other_fee,
-    invoiced_credit: invoiceState.invoiced_credit,
-    invoiced_raw_total_amount_incl_gst: invoiceState.invoiced_raw_total_amount_incl_gst,
-    invoiced_calculated_total_amount_incl_gst: invoiceState.invoiced_calculated_total_amount_incl_gst,
-    invoice_is_stand_alone: true,
-    invoice_internal_comments: invoiceState.invoice_internal_comments,
-    invoice_status: invoiceState.invoice_status,
-    invoice_isarchived: invoiceState.invoice_isarchived,
-    payment: invoiceState.payment?._id || null,
-  });
+  const [newInvoice, setNewInvoice] = useState({});
+  const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({});
   const [newProductPrice, setNewProductPrice] = useState({
     product_obj_ref: "",
     product_unit_a: "",
@@ -1082,6 +1045,7 @@ const UpdateInvoiceForm = () => {
     navigate(`/EmpirePMS/invoice/${invoiceId}`)
   };
 
+  // Fetch suppliers
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -1123,6 +1087,7 @@ const UpdateInvoiceForm = () => {
     };
   }, [dispatch]);
 
+  // Fetch orders
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -1164,6 +1129,7 @@ const UpdateInvoiceForm = () => {
     };
   }, [dispatch]);
 
+  // Set new invoice without PO
   useEffect(() => {
     setNewInvoiceInvoiceWithoutPO((prevState) => ({
       ...prevState,
@@ -1175,6 +1141,7 @@ const UpdateInvoiceForm = () => {
     }));
   }, [newInvoice]);
 
+  // Fetch invoice details
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -1197,6 +1164,47 @@ const UpdateInvoiceForm = () => {
         }
 
         setIsFetchInvoiceLoading(false);
+        setSelectedOrder(data.order._id);
+        setIsToggled(data.invoice_is_stand_alone);
+        setNewInvoice({
+          invoice_ref: data.invoice_ref,
+          supplier: data.supplier._id,
+          invoice_issue_date: data.invoice_issue_date.split('T')[0],
+          invoice_received_date: data.invoice_received_date.split('T')[0],
+          invoice_due_date: data.invoice_due_date.split('T')[0],
+          order: data.order?._id || null,
+          products: data.products,
+          custom_products: data.custom_products,
+          invoiced_delivery_fee: data.invoiced_delivery_fee,
+          invoiced_other_fee: data.invoiced_other_fee,
+          invoiced_credit: data.invoiced_credit,
+          invoiced_raw_total_amount_incl_gst: data.invoiced_raw_total_amount_incl_gst,
+          invoiced_calculated_total_amount_incl_gst: data.invoiced_calculated_total_amount_incl_gst,
+          invoice_is_stand_alone: data.invoice_is_stand_alone,
+          invoice_internal_comments: data.invoice_internal_comments,
+          invoice_status: data.invoice_status,
+          payment: data.payment?._id || null,
+        })
+        setNewInvoiceInvoiceWithoutPO({
+          invoice_ref: data.invoice_ref,
+          supplier: data.supplier._id,
+          invoice_issue_date: data.invoice_issue_date.split('T')[0],
+          invoice_received_date: data.invoice_received_date.split('T')[0],
+          invoice_due_date: data.invoice_due_date.split('T')[0],
+          order: null,
+          products: [],
+          custom_products: data.custom_products,
+          invoiced_delivery_fee: data.invoiced_delivery_fee,
+          invoiced_other_fee: data.invoiced_other_fee,
+          invoiced_credit: data.invoiced_credit,
+          invoiced_raw_total_amount_incl_gst: data.invoiced_raw_total_amount_incl_gst,
+          invoiced_calculated_total_amount_incl_gst: data.invoiced_calculated_total_amount_incl_gst,
+          invoice_is_stand_alone: true,
+          invoice_internal_comments: data.invoice_internal_comments,
+          invoice_status: data.invoice_status,
+          invoice_isarchived: data.invoice_isarchived,
+          payment: data.payment?._id || null,
+        })
         dispatch(setInvoiceState(data));
         if (data.order) {
           fetchSelectedPurchaseOrder(data.order._id);
@@ -1219,6 +1227,7 @@ const UpdateInvoiceForm = () => {
     };
   }, [dispatch, invoiceId]);
 
+  // Fetch product types
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -2656,83 +2665,83 @@ const UpdateInvoiceForm = () => {
     return <EmployeeDetailsSkeleton />;
   }
 
-  if (
-    fetchSupplierError ||
-    fetchOrderError ||
-    fetchProductDetailsError ||
-    addPriceErrorState ||
-    fetchProjectError ||
-    fetchProductsErrorState ||
-    updateOrderErrorState ||
-    updateErrorState ||
-    fetchInvoiceError
-  ) {
-    const errorMessages = [
-      fetchSupplierError,
-      fetchOrderError,
-      fetchProductDetailsError,
-      addPriceErrorState,
-      fetchProjectError,
-      fetchProductsErrorState,
-      updateOrderErrorState,
-      updateErrorState,
-      fetchInvoiceError
-    ];
+  // if (
+  //   fetchSupplierError ||
+  //   fetchOrderError ||
+  //   fetchProductDetailsError ||
+  //   addPriceErrorState ||
+  //   fetchProjectError ||
+  //   fetchProductsErrorState ||
+  //   updateOrderErrorState ||
+  //   updateErrorState ||
+  //   fetchInvoiceError
+  // ) {
+  //   const errorMessages = [
+  //     fetchSupplierError,
+  //     fetchOrderError,
+  //     fetchProductDetailsError,
+  //     addPriceErrorState,
+  //     fetchProjectError,
+  //     fetchProductsErrorState,
+  //     updateOrderErrorState,
+  //     updateErrorState,
+  //     fetchInvoiceError
+  //   ];
 
-    const isSessionExpired = errorMessages.some((error) =>
-      error?.includes("Session expired.")
-    );
+  //   const isSessionExpired = errorMessages.some((error) =>
+  //     error?.includes("Session expired.")
+  //   );
 
-    if (isSessionExpired) {
-      return (
-        <div>
-          <SessionExpired />
-        </div>
-      );
-    } else {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
-          <div className="flex items-center space-x-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-10"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
-              />
-            </svg>
-            <h2 className="font-bold text-xs md:text-2xl">
-              Ooops...Something went wrong!
-            </h2>
-          </div>
-          <p className="mt-4 text-lg text-center">
-            Error:{" "}
-            {fetchSupplierError ||
-              fetchOrderError ||
-              fetchProductDetailsError ||
-              addPriceErrorState ||
-              fetchProjectError ||
-              fetchProductsErrorState ||
-              updateOrderErrorState ||
-              updateErrorState ||
-              fetchInvoiceError}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
-          >
-            Try Again
-          </button>
-        </div>
-      );
-    }
-  }
+  //   if (isSessionExpired) {
+  //     return (
+  //       <div>
+  //         <SessionExpired />
+  //       </div>
+  //     );
+  //   } else {
+  //     return (
+  //       <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
+  //         <div className="flex items-center space-x-2">
+  //           <svg
+  //             xmlns="http://www.w3.org/2000/svg"
+  //             fill="none"
+  //             viewBox="0 0 24 24"
+  //             strokeWidth={1.5}
+  //             stroke="currentColor"
+  //             className="size-10"
+  //           >
+  //             <path
+  //               strokeLinecap="round"
+  //               strokeLinejoin="round"
+  //               d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
+  //             />
+  //           </svg>
+  //           <h2 className="font-bold text-xs md:text-2xl">
+  //             Ooops...Something went wrong!
+  //           </h2>
+  //         </div>
+  //         <p className="mt-4 text-lg text-center">
+  //           Error:{" "}
+  //           {fetchSupplierError ||
+  //             fetchOrderError ||
+  //             fetchProductDetailsError ||
+  //             addPriceErrorState ||
+  //             fetchProjectError ||
+  //             fetchProductsErrorState ||
+  //             updateOrderErrorState ||
+  //             updateErrorState ||
+  //             fetchInvoiceError}
+  //         </p>
+  //         <button
+  //           onClick={() => window.location.reload()}
+  //           className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
+  //         >
+  //           Try Again
+  //         </button>
+  //       </div>
+  //     );
+  //   }
+  // }
 
 
   return localUser && Object.keys(localUser).length > 0 ? (

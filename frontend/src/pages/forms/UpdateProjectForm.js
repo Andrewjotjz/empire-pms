@@ -1,8 +1,8 @@
 
 // Import modules
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { useUpdateProject } from '../../hooks/useUpdateProject';
 import SessionExpired from '../../components/SessionExpired';
 import LoadingScreen from "../loaders/LoadingScreen";
@@ -13,9 +13,10 @@ const UpdateProjectForm = () => {
     const location = useLocation();
     const retrieved_id = location.state;
     const navigate = useNavigate();
+    const {id} = useParams();
+    const dispatch = useDispatch();
 
     // Component state declaration
-    const projectGlobalState = useSelector((state) => state.projectReducer.projectState);
     const [projectState, setProjectState] = useState({
       project_name: '',
       project_address: '',
@@ -31,8 +32,6 @@ const UpdateProjectForm = () => {
 
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
-
-    const handleBackClick = () => navigate(`/EmpirePMS/project/${retrieved_id}`);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -55,14 +54,7 @@ const UpdateProjectForm = () => {
           area_obj_ref: prevData.area_obj_ref.filter((_, index) => index !== areaIndex)
         }));
       };
-    
-      // const addLevel = (areaIndex) => {
-      //   setProjectState(prevData => {
-      //     const newData = { ...prevData };
-      //     newData.area_obj_ref[areaIndex].areas.levels.push({ level_name: '', subareas: [] });
-      //     return newData;
-      //   });
-      // };
+  
       const addLevel = (areaIndex) => {
         setProjectState(prevData => ({
           ...prevData,
@@ -89,13 +81,6 @@ const UpdateProjectForm = () => {
         });
       };
     
-      // const addSubarea = (areaIndex, levelIndex) => {
-      //   setProjectState(prevData => {
-      //     const newData = { ...prevData };
-      //     newData.area_obj_ref[areaIndex].areas.levels[levelIndex].subareas.push({ subarea_name: '' });
-      //     return newData;
-      //   });
-      // };
       const addSubarea = (areaIndex, levelIndex) => {
         setProjectState(prevData => ({
           ...prevData,
@@ -155,20 +140,26 @@ const UpdateProjectForm = () => {
     
       const handleCheckboxChange = (event) => {
         const { value, checked } = event.target;
+    
         setProjectState((prevState) => {
-            const updatedSupplier = checked
-                ? [...prevState.suppliers, value]
-                : prevState.suppliers.filter(projectId => projectId !== value);
-            return { ...prevState, suppliers: updatedSupplier };
+            // Find the supplier object based on the value (ID)
+            const supplierToAdd = supplierState.find(supplier => supplier._id === value);
+    
+            const updatedSuppliers = checked
+                ? [...prevState.suppliers, supplierToAdd] // Add the supplier object if checked
+                : prevState.suppliers.filter(supplier => supplier._id !== value); // Remove the supplier object if unchecked
+    
+            return { ...prevState, suppliers: updatedSuppliers };
         });
     };
+    
     
       const handleSubmit = (e) => {
         e.preventDefault();
         update(projectState);
       };
     
-      // useEffect
+      // fetch all suppliers
       useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -210,9 +201,33 @@ const UpdateProjectForm = () => {
         };
     }, []);
 
+    // fetch project details
+    const fetchProjectDetails = useCallback(async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+    
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await res.json();
+    
+                setProjectState(data[0]);
+                setIsLoadingState(false);
+    
+            } catch (error) {
+                setErrorState(error.message);
+            } finally {
+                setIsLoadingState(false);
+            }
+        }, [id, dispatch]);
+
     useEffect(() => {
-        setProjectState(projectGlobalState);
-    }, [projectGlobalState])
+        fetchProjectDetails();
+    }, [fetchProjectDetails]);  // Add id as dependency
     
     if (isLoadingState || updateLoading) {
       return <LoadingScreen />;
@@ -222,9 +237,10 @@ const UpdateProjectForm = () => {
       if (errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
           return <div><SessionExpired /></div>;
       }
-      return <div>Error: {errorState || updateError}</div>;
+      return <div>Error: {errorState}</div>;
     }
     
+    console.log("projectState", projectState)
       return (
         localUser && Object.keys(localUser).length > 0 ? (
           <div className="container mx-auto mt-4 sm:mt-10 px-4 sm:px-6 lg:px-8">
@@ -273,25 +289,29 @@ const UpdateProjectForm = () => {
                             {projectState.suppliers.length > 0 ? `x${projectState.suppliers.length} Suppliers Selected` : `Select Suppliers`}
                         </button>
                         {isDropdownOpen && (
-                            <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto" onMouseLeave={() => setIsDropdownOpen(false)}>
+                            <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto" onClick={() => setIsDropdownOpen(true)}>
                                 <ul className="py-1">
-                                    {supplierState && supplierState.length > 0 && supplierState.map((supplier, index) => (
-                                        <li key={index} className="flex items-center px-4 py-2 hover:bg-gray-100">
-                                            <input
-                                                type="checkbox"
-                                                id={`supplier-${supplier._id}`}
-                                                value={supplier._id}
-                                                checked={projectState.suppliers.some(sup => sup._id === supplier._id)}
-                                                onChange={handleCheckboxChange}
-                                                className="mr-2"
-                                                required
-                                                onInvalid={(e) => e.target.setCustomValidity('You must select one or more supplier applied to this Project')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
-                                            />
-                                            <label htmlFor={`supplier-${supplier._id}`} className="text-gray-900">{supplier.supplier_name}</label>
-                                        </li>
-                                    ))}
-                                </ul>
+                                  {supplierState && supplierState.length > 0 && supplierState.map((supplier, index) => (
+                                      <li key={index} className="flex items-center px-4 py-2 hover:bg-gray-100">
+                                          <input
+                                              type="checkbox"
+                                              id={`supplier-${supplier._id}`}
+                                              value={supplier._id}
+                                              checked={projectState.suppliers.some(sup => sup._id === supplier._id)}
+                                              onChange={handleCheckboxChange}
+                                              className="mr-2"
+                                              required={projectState.suppliers.length === 0} // Set required only if no supplier is selected
+                                              onInvalid={(e) => {
+                                                  if (projectState.suppliers.length === 0) {
+                                                      e.target.setCustomValidity('You must select one or more supplier(s) applied to this Project');
+                                                  }
+                                              }}
+                                              onInput={(e) => e.target.setCustomValidity('')}
+                                          />
+                                          <label htmlFor={`supplier-${supplier._id}`} className="text-gray-900">{supplier.supplier_name}</label>
+                                      </li>
+                                  ))}
+                              </ul>
                             </div>
                         )}
                     </div>

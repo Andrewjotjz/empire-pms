@@ -909,7 +909,7 @@ const SupplierDetails = () => {
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>Supplier: {supplierState.supplier_name}</h1>
+                    <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>Supplier: {supplierState?.supplier_name}</h1>
                 </div>
                 <div className="card-body">
                     <div>

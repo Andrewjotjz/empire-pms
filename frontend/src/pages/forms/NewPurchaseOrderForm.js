@@ -625,7 +625,7 @@ const NewPurchaseOrderForm = () => {
                             <div className='lg:col-span-2 lg:mb-3'>
                                 <label className="text-xs italic text-gray-400 mb-2">
                                     Previous order numbers:
-                                    {purchaseOrderState.slice(0, 3).map((order, index) => (
+                                    {purchaseOrderState?.slice(0, 3).map((order, index) => (
                                         <div key={index} className="inline-block ml-1 border rounded-lg px-1">
                                         {order.order_ref}
                                         </div>
@@ -633,7 +633,7 @@ const NewPurchaseOrderForm = () => {
                                 </label>
                                 <div className="text-xs italic text-gray-400">
                                 Based on your search:
-                                {filterPurchaseOrderNumber()
+                                {purchaseOrderState && filterPurchaseOrderNumber()
                                     .filter((order) => order.order_isarchived === false)
                                     .slice(0, 3)
                                     .map((order, index) => (

@@ -1,5 +1,6 @@
 // Import modules
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useEffect, useState, useCallback} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSupplierState } from '../../redux/supplierSlice';
 import { useUpdateSupplier } from '../../hooks/useUpdateSupplier';
@@ -12,12 +13,15 @@ const UpdateSupplierForm = () => {
     const location = useLocation();
     const retrieved_id = location.state;
     const navigate = useNavigate();
+    const {id} = useParams();
 
     // Component state declaration
     const supplierState = useSelector((state) => state.supplierReducer.supplierState);
     
     const dispatch = useDispatch();
     const { update, isLoadingState, errorState } = useUpdateSupplier();
+    const [fetchSupplierLoading, setFetchSupplierLoading] = useState(true);
+    const [fetchSupplierError, setFetchSupplierError] = useState(null);
 
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -67,14 +71,43 @@ const UpdateSupplierForm = () => {
         update(supplierState);
     };
 
+    const fetchSupplierDetails = useCallback(async () => {
+            setFetchSupplierLoading(true);
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    } });
+                if (!res.ok) {
+                    throw new Error('Failed to fetch supplier details');
+                }
+                const data = await res.json();
+    
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+    
+                dispatch(setSupplierState(data));
+    
+                setFetchSupplierLoading(false);
+            } catch (err) {
+                setFetchSupplierError(err.message);
+                setFetchSupplierLoading(false);
+            }
+        }, [id, dispatch]);
+    useEffect(() => {
+        fetchSupplierDetails();
+    }, [fetchSupplierDetails]);
+
     // Display DOM
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+    if (isLoadingState || fetchSupplierLoading) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState) {
         if (errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
             return (<div><SessionExpired /></div>);
         }
-        return (<div>Error: {errorState}</div>);
+        return (<div>Error: {errorState || fetchSupplierError}</div>);
     }
 
     return (

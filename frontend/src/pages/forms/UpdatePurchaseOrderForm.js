@@ -1,6 +1,6 @@
 // Import modules
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
 import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
@@ -20,6 +20,7 @@ import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 const UpdatePurchaseOrderForm = () => {
   // Component router
   const navigate = useNavigate();
+  const {id} = useParams();
 
   // Component hook
   const dispatch = useDispatch();
@@ -47,10 +48,10 @@ const UpdatePurchaseOrderForm = () => {
     (state) => state.purchaseOrderReducer.purchaseOrderState
   );
   const [selectedSupplier, setSelectedSupplier] = useState(
-    purchaseOrderState.supplier._id
+    null
   );
   const [selectedProject, setSelectedProject] = useState(
-    purchaseOrderState.project._id
+    null
   );
   const [selectedProductType, setSelectedProductType] = useState("");
   const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] =
@@ -61,10 +62,12 @@ const UpdatePurchaseOrderForm = () => {
   const [newProject, setNewProject] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
   const [searchProductTerm, setSearchProductTerm] = useState("");
-  const [currentOrderStatus] = useState(purchaseOrderState.order_status);
+  const [currentOrderStatus] = useState(purchaseOrderState?.order_status);
   const [productTypeState, setProductTypeState] = useState([]);
   const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
   const [fetchTypeError, setFetchTypeError] = useState(null);
+  const [isLoadingState, setIsLoadingState] = useState(true);
+  const [errorState, setErrorState] = useState(null);
 
   // Component functions and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -498,7 +501,7 @@ const UpdatePurchaseOrderForm = () => {
     }
   };
 
-  //Render component
+  // Fetch projects
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -540,6 +543,7 @@ const UpdatePurchaseOrderForm = () => {
     };
   }, [dispatch]);
 
+  // Fetch product types
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -580,6 +584,40 @@ const UpdatePurchaseOrderForm = () => {
         abortController.abort(); // Cleanup
     };
   }, []);
+
+  // Fetch purchase order
+  useEffect(() => {
+    const fetchPurchaseOrderDetails = async () => {
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, { credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                }});
+            if (!res.ok) {
+                throw new Error('Failed to fetch purchase order details');
+            }
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError);
+            }
+
+            fetchSupplierByProject(data.project._id)
+            fetchProductsBySupplier(data.supplier._id)
+            setSelectedProject(data.project._id)
+            setSelectedSupplier(data.supplier._id)
+            dispatch(setPurchaseOrderState(data));
+
+            setIsLoadingState(false);
+        } catch (err) {
+            setErrorState(err.message);
+            setIsLoadingState(false);
+        }
+    };
+
+    fetchPurchaseOrderDetails();
+}, [id, dispatch]);
 
   // Display DOM
   if (
@@ -656,7 +694,7 @@ const UpdatePurchaseOrderForm = () => {
   );
 
   return (
-    localUser && Object.keys(localUser).length > 0 ? (
+    purchaseOrderState && localUser && Object.keys(localUser).length > 0 ? (
     <>
       {/* PAGE HEADER */}
       <div className='mx-4 mt-2 sm:mt-4 p-1 sm:p-2 text-center font-bold text-sm sm:text-base md:text-lg lg:text-xl bg-slate-800 text-white rounded-t-lg'>
@@ -675,7 +713,7 @@ const UpdatePurchaseOrderForm = () => {
                   type="text"
                   className="form-control text-xs lg:text-base"
                   name="order_ref"
-                  value={purchaseOrderState.order_ref}
+                  value={purchaseOrderState?.order_ref}
                   disabled
                 />
               </div>
@@ -859,7 +897,7 @@ const UpdatePurchaseOrderForm = () => {
                     </tr>
                   </thead>
                   <tbody className="text-center">
-                    {purchaseOrderState.products &&
+                    {purchaseOrderState && purchaseOrderState.products &&
                       purchaseOrderState.products.map((prod, index) => (
                         <tr key={index}>
                           <td className='hidden lg:table-cell'>{prod.product_obj_ref.product_sku}</td>
@@ -971,7 +1009,7 @@ const UpdatePurchaseOrderForm = () => {
                         </tr>
                       ))}
                     {/* ***** CUSTOM ITEMS ***** */}
-                    {purchaseOrderState.custom_products.map(
+                    {purchaseOrderState?.custom_products.map(
                       (cproduct, index) => (
                         <tr key={index}>
                           <td>Custom {index + 1}</td>

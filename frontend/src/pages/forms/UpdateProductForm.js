@@ -1,6 +1,6 @@
 // Import modules
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
  
 import { useAddProductPrice } from '../../hooks/useAddProductPrice'; 
@@ -17,8 +17,7 @@ import SessionExpired from '../../components/SessionExpired';
 const UpdateProductForm = () => {
     // Component router
     const navigate = useNavigate();
-    const location = useLocation();
-    const productId = location.state;
+    const {id, productId} = useParams();
 
     // Component hook
     const dispatch = useDispatch();
@@ -193,7 +192,7 @@ const UpdateProductForm = () => {
     };
     
 
-    //Render component
+    // Fetch projects
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -235,6 +234,7 @@ const UpdateProductForm = () => {
         };
     }, [dispatch]);
 
+    // Fetch product types
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -276,6 +276,63 @@ const UpdateProductForm = () => {
         };
     }, []);
 
+    // Fetch product details
+    useEffect(() => {
+        const fetchProductDetails = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/supplier/${id}/products/${productId}`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch product details');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+
+                
+                // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
+                if (data && data.length > 0) {
+                    const product = data[0].product || {};
+                    const modifiedProductState = {
+                        ...product,
+                        product_next_available_stock_date: product.product_next_available_stock_date
+                            ? product.product_next_available_stock_date.split('T')[0]
+                            : '', // or 'null' depending on your needs
+                    };
+                    dispatch(setProductState(modifiedProductState));
+                }
+            
+                // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
+                if (
+                    data &&
+                    data[0].productPrice &&
+                    data[0].productPrice.product_effective_date
+                ) {
+                    const modifiedProductPriceState = {
+                        ...data[0].productPrice,
+                        product_effective_date: data[0].productPrice.product_effective_date
+                            ? data[0].productPrice.product_effective_date.split('T')[0]
+                            : '', // or 'null' depending on your needs
+                    };
+                    dispatch(setProductPrice(modifiedProductPriceState));
+                }
+
+
+                setIsLoadingState(false);
+            } catch (err) {
+                setErrorState(err.message);
+                setIsLoadingState(false);
+            }
+        };
+
+        fetchProductDetails();
+    }, [id, productId, dispatch]);
+
     // Display DOM
     if (productTypeIsLoadingState || productUpdateIsLoadingState || isAddPriceLoadingState) {
         return <EmployeeDetailsSkeleton />;
@@ -298,7 +355,7 @@ const UpdateProductForm = () => {
     }
 
     return (
-        localUser && Object.keys(localUser).length > 0 ? (
+        localUser && Object.keys(localUser).length > 0 && productState ? (
         <div className="container mt-2 sm:mt-5"> 
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">

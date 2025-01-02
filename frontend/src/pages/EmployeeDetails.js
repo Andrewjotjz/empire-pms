@@ -262,7 +262,7 @@ const EmployeeDetails = () => {
         </div>
     );
 
-    const employeeDetails = (
+    const employeeDetails = employeeState && (
         <div className="card-body border-1 mx-1 rounded-sm relative">
             <div className="absolute right-4">
                 <Dropdown>

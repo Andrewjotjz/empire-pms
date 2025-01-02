@@ -69,7 +69,7 @@ const ProductDetails = () => {
         }
     };
     
-    //Render component
+    // Fetch product details
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
@@ -98,6 +98,7 @@ const ProductDetails = () => {
         fetchProductDetails();
     }, [supplierId, productId, dispatch]);
 
+    // Fetch product types
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
