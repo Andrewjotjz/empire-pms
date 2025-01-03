@@ -23,13 +23,14 @@ const SupplierDetails = () => {
     const productState = useSelector((state) => state.productReducer.productState);
     const projectState = useSelector((state) => state.projectReducer.projectState);
     const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState);
-    const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
+    // const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
 
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('supplierDetails');
-    const [searchTerm, setSearchTerm] = useState('');    
+    const [searchTerm, setSearchTerm] = useState('');  
+    const [productTypeState, setProductTypeState] = useState([]);  
 
     const [selectedProjects, setSelectedProjects] = useState(new Set());  // set select projects to add
     const [projectsToRemove, setProjectsToRemove] = useState(new Set());  // set select projects to remove
@@ -74,12 +75,12 @@ const SupplierDetails = () => {
             return (
                 product.product.product_sku.toLowerCase().includes(lowerCaseSearchTerm) ||
                 product.product.product_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.productPrice.product_number_a.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_number_a?.toString().includes(lowerCaseSearchTerm) ||
                 product.productPrice.product_unit_a.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.productPrice.product_price_unit_a.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.product_actual_size.toString().includes(lowerCaseSearchTerm) ||
-                product.product.product_types.toLowerCase().includes(lowerCaseSearchTerm) ||
-                product.product.alias_name.toString().includes(lowerCaseSearchTerm) ||
+                product.productPrice.product_price_unit_a?.toString().toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.product_actual_size?.toString().includes(lowerCaseSearchTerm) ||
+                productTypeState.find(type => type._id === product.product.product_type)?.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+                product.product.alias_name?.toString().includes(lowerCaseSearchTerm) ||
                 product.productPrice.project_names.some(projectName => 
                     projectName.toLowerCase().includes(lowerCaseSearchTerm)
                 )
@@ -115,8 +116,6 @@ const SupplierDetails = () => {
         dispatch(clearPurchaseOrderState())
         navigate(`/EmpirePMS/order/${id}`);
     }
-    
-    const handleBackClick = () => window.history.back();
 
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
@@ -414,6 +413,47 @@ const SupplierDetails = () => {
         };
         fetchAllProjects();
     }, [id, dispatch]);
+
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
     
     const selectProjectsBtn = (
         <div className='d-flex m-1 justify-content-end'>
@@ -448,30 +488,32 @@ const SupplierDetails = () => {
     );
 
     const supplierProjectsTable = (
-        <div className="card-body border-1 relative">
+        <div className="card-body border-1 relative text-xs sm:text-base">
             {selectProjectsBtn}
         
             {supplierState && supplierState.projects && supplierState.projects.length > 0 ? (
-            <table className="table table-bordered table-hover">
-                <thead className="thead-dark">
-                    <tr className="table-primary">
-                        <th scope="col">Id</th>
-                        <th scope="col">Project Name</th>
-                        <th scope="col">Project Address</th>
-                        <th scope="col">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {supplierState.projects.map((project, index) => (
-                            <tr className="cursor-pointer" key={`projectEmployeesTab-${project._id}`} onClick={() => handleTableClick('project', project._id)}>
-                                <th>{index + 1}</th>
-                                <td>{project.project_name} </td>
-                                <td>{project.project_address}</td>
-                                <td>{project.project_isarchived ? `Archived` : `Active`}</td>
-                            </tr>
-                            ))}
-                </tbody>
-            </table>
+            <div className='overflow-x-auto'>
+                <table className="table table-bordered table-hover">
+                    <thead className="thead-dark">
+                        <tr className="table-primary">
+                            <th scope="col" className="hidden sm:table-cell">Id</th>
+                            <th scope="col">Project Name</th>
+                            <th scope="col">Project Address</th>
+                            <th scope="col" className="hidden sm:table-cell">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {supplierState.projects.map((project, index) => (
+                                <tr className="cursor-pointer" key={`projectEmployeesTab-${project._id}`} onClick={() => handleTableClick('project', project._id)}>
+                                    <th className="hidden sm:table-cell">{index + 1}</th>
+                                    <td>{project.project_name} </td>
+                                    <td>{project.project_address}</td>
+                                    <td className="hidden sm:table-cell">{project.project_isarchived ? `Archived` : `Active`}</td>
+                                </tr>
+                                ))}
+                    </tbody>
+                </table>
+            </div>
     ) : (
         <div className='border'>No related Project</div>
     )}
@@ -479,41 +521,46 @@ const SupplierDetails = () => {
     );
 
     const addProjectsPopUp = (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-                <h4 className="font-bold mb-4">SELECT PROJECTS FOR THE {supplierState?.supplier_name?.toUpperCase() } SUPPLIER</h4>
-                <div style={{ gridTemplateColumns: `repeat(${numberOfProjectColumns}, minmax(0, 1fr))` }} className="grid gap-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-6 md:p-8 text-xs sm:text-base">
+            <div className="bg-white p-2 sm:p-5 rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl">
+                <h4 className="font-bold mb-1 sm:mb-4 text-center sm:text-left text-sm sm:text-lg md:text-xl sm:border-b-2">
+                    SELECT PROJECTS FOR THE {supplierState?.supplier_name?.toUpperCase()} SUPPLIER
+                </h4>
+                
+                <div 
+                    className="grid gap-0 sm:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                     {
                         Array.isArray(projectState) && projectState.map(project => (
-                            <div key={`addProjectsPopUp-${project._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
-                                <input className="form-checkbox h-5 w-5 text-blue-600"
+                            <div key={`addProjectsPopUp-${project._id}`}
+                                className="flex items-center space-x-0 sm:space-x-4 p-2 border-b border-gray-200">
+                                <input className="form-checkbox h-3 w-3 sm:h-5 sm:w-5 text-blue-600"
                                     type="checkbox" 
                                     checked={selectedProjects.has(project._id)}
                                     onChange={() => handleProjectCheckbox(project._id, true)}
                                     disabled={supplierState.projects?.some(p => p._id === project._id)}
-                                    />
+                                />
                                 <label className="flex-1 text-gray-800">
-                                    <span className="font-semibold">{project.project_name}</span>
-                                    <span className="ml-2 text-sm">
+                                    <span className="ml-2 font-semibold">{project.project_name}</span>
+                                    <span className="ml-2 text-xs sm:text-sm">
                                         {project.project_isarchived ? 
                                             (<label className="text-red-500">Archived</label>) : 
                                             (<label className="text-green-600">Active</label>)
-                                            }
+                                        }
                                     </span>
-                                    <span className="block text-sm text-gray-600">{project.project_address}</span>
-                            </label>
+                                    <span className="hidden sm:block text-sm text-gray-600">{project.project_address}</span>
+                                </label>
                             </div>
-                        ))}
+                        ))
+                    }
                 </div>
-                <div className="flex justify-end mt-5">
-                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
-                        onClick={() => setAddProjectListVisible(false)}
-                        >
+                
+                <div className="flex flex-col sm:flex-row justify-end mt-0 sm:mt-5 space-y-2 sm:space-y-0 sm:space-x-2 text-xs sm:text-base">
+                    <button className=" bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50 w-full sm:w-auto"
+                            onClick={() => setAddProjectListVisible(false)}>
                         Cancel
                     </button>
-                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
-                        onClick={handleAddProjectConfirm}
-                        >
+                    <button className=" bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50 w-full sm:w-auto"
+                            onClick={handleAddProjectConfirm}>
                         Confirm
                     </button>
                 </div>
@@ -522,30 +569,31 @@ const SupplierDetails = () => {
     );
 
     const removeProjectPopUp = (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-                <h4 className="font-bold mb-4">SELECT PROJECT TO <span className="text-red-500">REMOVE</span> FROM THE {supplierState?.supplier_name?.toUpperCase() } SUPPLIER</h4>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-6 md:p-8 text-xs sm:text-base">
+            <div className="bg-white p-2 sm:p-5 rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl">
+                <h4 className="font-bold mb-1 sm:mb-4 text-center sm:text-left text-sm sm:text-lg md:text-xl sm:border-b-2">SELECT PROJECT TO <span className="text-red-500">REMOVE</span> FROM THE {supplierState?.supplier_name?.toUpperCase() } SUPPLIER</h4>
+
                 {
                     supplierState?.projects && supplierState.projects.length > 0 ? (
-                        <div style={{ gridTemplateColumns: `repeat(${Math.ceil(supplierState.projects.length / 5)}, minmax(0, 1fr))`, }} className="grid gap-4">
+                        <div className="grid gap-0 sm:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                         {   
                             supplierState.projects.map((project) => (
-                            <div key={`removeProjectPopUp-${project._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                            <div key={`removeProjectPopUp-${project._id}`} className="flex items-center space-x-0 sm:space-x-4 p-2 border-b border-gray-200">
                                 <input
-                                    className="form-checkbox h-5 w-5 text-blue-600"
+                                    className="form-checkbox h-3 w-3 sm:h-5 sm:w-5 text-blue-600"
                                     type="checkbox"
                                     onChange={() => handleProjectCheckbox(project._id, false)}
                                 />
                                 <label className="flex-1 text-gray-800">
-                                    <span className="font-semibold">{project.project_name}</span>
-                                    <span className="ml-2 text-sm">
+                                    <span className="ml-2 font-semibold">{project.project_name}</span>
+                                    <span className="ml-2 text-xs sm:text-sm">
                                     {   project.project_isarchived ? (
                                         <label className="text-red-500">Archived</label>
                                     ) : (
                                         <label className="text-green-600">Active</label>
                                     )}
                                     </span>
-                                    <span className="block text-sm text-gray-600">{project.project_address}</span>
+                                    <span className="hidden sm:block text-sm text-gray-600">{project.project_address}</span>
                                 </label>
                             </div>
                             ))}
@@ -555,12 +603,12 @@ const SupplierDetails = () => {
                     )
                     }
                 
-                <div className="flex justify-end mt-5">
-                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                <div className="flex flex-col sm:flex-row justify-end mt-0 sm:mt-5 space-y-2 sm:space-y-0 sm:space-x-2 text-xs sm:text-base">
+                    <button className="bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50 w-full sm:w-auto"
                         onClick={() => setRemoveProjectListVisible(false)}>
                         Cancel
                     </button>
-                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                    <button className="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50 w-full sm:w-auto"
                         onClick={handleRemoveEmployeesConfirm }>
                             Confirm
                     </button>
@@ -570,7 +618,7 @@ const SupplierDetails = () => {
     );
 
     const supplierProductsTable = Array.isArray(productState) && productState.length > 0 ? (
-        <div>
+        <div className='text-xs sm:text-base'>
             <div className="flex justify-between">
                 <input
                     type="text"
@@ -584,22 +632,22 @@ const SupplierDetails = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
-                        <label>ADD PRODUCT</label>
+                        <label className='text-xs sm:text-base'>ADD PRODUCT</label>
                     </div>
                 </button>
             </div>
-            <table className="table table-bordered table-hover">
+            <table className="table table-bordered table-hover text-xs">
                 <thead className="thead-dark">
                     <tr className="table-primary">
                         <th scope="col">SKU</th>
                         <th scope="col">Name</th>
-                        <th scope="col">Number A</th>
-                        <th scope="col">Unit A</th>
-                        <th scope="col">Price A</th>
-                        <th scope="col">Actual M<span className='text-xs align-top'>2</span>/M</th>
-                        <th scope="col">Type</th>
-                        <th scope="col">Alias</th>
-                        <th scope="col">Project Name</th>
+                        <th scope="col" className="hidden sm:table-cell">Number A</th>
+                        <th scope="col" className="hidden sm:table-cell">Unit A</th>
+                        <th scope="col" className="hidden sm:table-cell">Price A</th>
+                        <th scope="col" className="hidden sm:table-cell">Actual M<span className='text-xs align-top'>2</span>/M</th>
+                        <th scope="col" className="hidden sm:table-cell">Type</th>
+                        <th scope="col" className="hidden sm:table-cell">Alias</th>
+                        <th scope="col" className="hidden sm:table-cell">Project Name</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -607,13 +655,13 @@ const SupplierDetails = () => {
                         <tr key={index} onClick={() => handleProductTableClick(product.product._id)} className='cursor-pointer'>
                             <th scope="row">{product.product.product_sku}</th>
                             <td>{product.product.product_name}</td>
-                            <td>{product.productPrice.product_number_a}</td>
-                            <td>{product.productPrice.product_unit_a}</td>
-                            <td>${product.productPrice.product_price_unit_a}</td>
-                            <td>{product.product.product_actual_size}</td>
-                            <td>{product.product.product_types}</td>
-                            <td>{product.product.alias_name}</td>
-                            <td>
+                            <td className="hidden sm:table-cell">{product.productPrice.product_number_a}</td>
+                            <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
+                            <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.productPrice.product_price_unit_a * 100) / 100)}</td>
+                            <td className="hidden sm:table-cell">{product.product.product_actual_size}</td>
+                            <td className="hidden sm:table-cell">{productTypeState.find(type => type._id === product.product.product_type)?.type_name || "Unknown"}</td>
+                            <td className="hidden sm:table-cell">{product.product.alias_name}</td>
+                            <td className="hidden sm:table-cell">
                                 {product.productPrice.project_names.map((project, index) => (
                                     <div key={index}>
                                         {project}
@@ -641,7 +689,7 @@ const SupplierDetails = () => {
         </div>
     );
     const supplierPurchaseOrdersTable = Array.isArray(purchaseOrderState) && purchaseOrderState.length > 0 ? (
-        <div>
+        <div className='text-xs'>
             <div className="flex justify-between">
                 <input
                     type="text"
@@ -655,60 +703,62 @@ const SupplierDetails = () => {
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
-                        <label>CREATE NEW ORDER</label>
+                        <label className='text-xs sm:text-base'>CREATE NEW ORDER</label>
                     </div>
                 </button>
             </div>
-            <table className="table table-bordered table-hover shadow-md">
-                <thead className="thead-dark text-center">
-                    <tr className="table-primary">
-                        <th scope="col">PO</th>
-                        <th scope="col">Order Date</th>
-                        <th scope="col">EST Date</th>
-                        <th scope="col">Project</th>
-                        <th scope="col">Supplier</th>
-                        <th scope="col">Products</th>
-                        <th scope="col">Gross Amount</th>
-                        <th scope="col">Status</th>
-                        {/* <th scope="col">Ordered By</th> */}
-                    </tr>
-                </thead>
-                <tbody>
-                    {filterOrders().filter(order => order.order_isarchived === false).map((order, index) => (
-                        <tr key={order._id} onClick={() => handleOrderTableClick(order._id)} className="cursor-pointer text-center">
-                            <th scope="row">{order.order_ref}</th>
-                            <td>{formatDate(order.order_date)}</td>
-                            <td>{formatDateTime(order.order_est_datetime)}</td>
-                            <td>{order.project.project_name}</td>
-                            <td>{order.supplier.supplier_name}</td>
-                            <td>{order.products.length + order.custom_products.length} products</td>
-                            <td>${(order.order_total_amount).toFixed(2)}</td>
-                            <td>
-                                {order.order_status && (
-                                <label
-                                    className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
-                                        order.order_status === "Cancelled"
-                                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
-                                            : order.order_status === "Pending"
-                                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
-                                            : order.order_status === "Approved"
-                                            ? "border-2 bg-transparent border-green-600 text-green-600"
-                                            : order.order_status === "Rejected"
-                                            ? "border-2 bg-transparent border-red-600 text-red-600"
-                                            : order.order_status === "Draft"
-                                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
-                                            : ""
-                                    }`}
-                                >
-                                    {order.order_status}
-                                </label>
-                                )}
-                            </td>
-                            {/* <td>To be developed using HISTORY table......</td> */}
+            <div className='overflow-x-auto'>
+                <table className="table table-bordered table-hover shadow-md">
+                    <thead className="thead-dark text-center">
+                        <tr className="table-primary">
+                            <th scope="col">PO</th>
+                            <th scope="col" className="hidden sm:table-cell">Order Date</th>
+                            <th scope="col" className="hidden sm:table-cell">EST Date</th>
+                            <th scope="col">Project</th>
+                            <th scope="col" className="hidden sm:table-cell">Supplier</th>
+                            <th scope="col" className="hidden sm:table-cell">Products</th>
+                            <th scope="col" className="hidden sm:table-cell">Gross Amount</th>
+                            <th scope="col">Status</th>
+                            {/* <th scope="col">Ordered By</th> */}
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {filterOrders().filter(order => order.order_isarchived === false).map((order, index) => (
+                            <tr key={order._id} onClick={() => handleOrderTableClick(order._id)} className="cursor-pointer text-center">
+                                <th scope="row">{order.order_ref}</th>
+                                <td className="hidden sm:table-cell">{formatDate(order.order_date)}</td>
+                                <td className="hidden sm:table-cell">{formatDateTime(order.order_est_datetime)}</td>
+                                <td>{order.project.project_name}</td>
+                                <td className="hidden sm:table-cell">{order.supplier.supplier_name}</td>
+                                <td className="hidden sm:table-cell">{order.products.length + order.custom_products.length} products</td>
+                                <td className="hidden sm:table-cell">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100 )}</td>
+                                <td>
+                                    {order.order_status && (
+                                    <label
+                                        className={`text-xs sm:text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
+                                            order.order_status === "Cancelled"
+                                                ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                                : order.order_status === "Pending"
+                                                ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                                : order.order_status === "Approved"
+                                                ? "border-2 bg-transparent border-green-600 text-green-600"
+                                                : order.order_status === "Rejected"
+                                                ? "border-2 bg-transparent border-red-600 text-red-600"
+                                                : order.order_status === "Draft"
+                                                ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                                                : ""
+                                        }`}
+                                    >
+                                        {order.order_status}
+                                    </label>
+                                    )}
+                                </td>
+                                {/* <td>To be developed using HISTORY table......</td> */}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     ) : (
         <div className='border p-2'>
@@ -748,7 +798,7 @@ const SupplierDetails = () => {
     )
 
     const supplierDetails = supplierState ? (
-        <div className="card-body border-1 relative">
+        <div className="card-body border-1 relative text-xs sm:text-base">
             <div className="absolute right-3">
                 <Dropdown>
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -777,65 +827,66 @@ const SupplierDetails = () => {
                 </Dropdown>
             </div>
             <div className="row">
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Name:</label>
                     <p className="form-label">{supplierState.supplier_name}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Address:</label>
                     <p className="form-label">{supplierState.supplier_address}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Term:</label>
                     <p className="form-label">{supplierState.supplier_payment_term}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Term Description:</label>
-                    <p className="form-label">{supplierState.supplier_term_description}</p>
+                    <p className="form-label">{supplierState?.supplier_term_description || 'None'}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Payment Method:</label>
                     <p className="form-label">{supplierState.supplier_payment_method_details}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Supplier Type:</label>
                     <p className="form-label">{supplierState.supplier_type}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Supplier Material Type:</label>
                     <p className="form-label">{supplierState.supplier_material_types}</p>
                 </div>
-                <div className="col-md-6 mb-3">
+                <div className="col-md-6 mb-0 sm:mb-3">
                     <label className="form-label fw-bold">Status:</label>
                     {supplierState.supplier_isarchived ? 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                        (<label className="text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
+                        (<label className="text-base sm:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
+                        (<label className="text-base sm:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
                     }
                 </div>
                 
                 <div>
-                    <h2 className='font-bold text-xl m-1'>Supplier Contacts</h2>
-                    <table className="table table-bordered">
-                        <thead className="thead-dark">
-                            
-                            <tr className="table-primary">
-                                <th scope="col">ID</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Phone</th>
-                                <th scope="col">Email</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {supplierState.supplier_contacts && supplierState.supplier_contacts.map((supplier,index) => (
-                                <tr key={index}>
-                                    <th scope="row">{index + 1}</th>
-                                    <td>{`${supplier.is_primary ? `*` : ``} ${supplier.name}`}</td>
-                                    <td>{supplier.phone}</td>
-                                    <td>{supplier.email}</td>
+                    <h2 className='font-bold text-sm sm:text-xl m-1'>Supplier Contacts</h2>
+                    <div className='overflow-x-auto'>
+                        <table className="table table-bordered">
+                            <thead className="thead-dark">
+                                <tr className="table-primary">
+                                    <th scope="col" className="hidden sm:table-cell">ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Phone</th>
+                                    <th scope="col">Email</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {supplierState.supplier_contacts && supplierState.supplier_contacts.map((supplier,index) => (
+                                    <tr key={index}>
+                                        <th scope="row" className="hidden sm:table-cell">{index + 1}</th>
+                                        <td>{`${supplier.is_primary ? `*` : ``} ${supplier.name}`}</td>
+                                        <td>{supplier.phone}</td>
+                                        <td>{supplier.email}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -853,27 +904,19 @@ const SupplierDetails = () => {
         return (<div>Error: {errorState}</div>);
     }
 
-    console.log("supplierState:", supplierState)
-    console.log("purchaseOrderState:", purchaseOrderState)
-
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
-                    <button onClick={handleBackClick}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
-                        </svg>
-                    </button>
-                    <h1 className='mx-auto uppercase font-bold text-xl'>Supplier: {supplierState.supplier_name}</h1>
+                    <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>Supplier: {supplierState?.supplier_name}</h1>
                 </div>
                 <div className="card-body">
                     <div>
-                        <button className={`${currentTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierDetails')}>Details</button>
-                        <button className={`${currentTab === 'supplierProductsTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierProductsTable')}>Products</button>
-                        <button className={`${currentTab === 'supplierPurchaseOrdersTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => {setCurrentTab('supplierPurchaseOrdersTable'); fetchOrdersBySupplier();}}>Purchase Orders</button>
-                        <button className={`${currentTab === 'supplierProjectsTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('supplierProjectsTable')}>Projects</button>
+                        <button className={`${currentTab === 'supplierDetails' ? 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`}  onClick={() => setCurrentTab('supplierDetails')}>Details</button>
+                        <button className={`${currentTab === 'supplierProductsTable' ? 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`}  onClick={() => setCurrentTab('supplierProductsTable')}>Products</button>
+                        <button className={`${currentTab === 'supplierPurchaseOrdersTable' ? 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`}  onClick={() => {setCurrentTab('supplierPurchaseOrdersTable'); fetchOrdersBySupplier();}}>Purchase Orders</button>
+                        <button className={`${currentTab === 'supplierProjectsTable' ? 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-1 sm:p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`}  onClick={() => setCurrentTab('supplierProjectsTable')}>Projects</button>
                     </div>
                     {/* SWITCH BETWEEN COMPONENTS HERE */}
                     {currentTab === 'supplierDetails' && supplierDetails}

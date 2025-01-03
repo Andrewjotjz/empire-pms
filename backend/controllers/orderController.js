@@ -91,7 +91,6 @@ const createNewOrder = async (req, res) => {
         //invoke 'res' object method: status() and json(), pass relevant data to them
         //! DESIGN 400 PAGE
         res.status(400).json({error: error.message})
-        console.log(error.message)
     }
 }
 

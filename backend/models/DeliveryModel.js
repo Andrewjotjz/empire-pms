@@ -46,6 +46,13 @@ const deliverySchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Supplier'
     },
+    delivery_isarchive: {
+        type: Boolean,
+        default: false
+    },
+    delivery_notes: {
+        type: String
+    }
 
 }, { timestamps: true });
 

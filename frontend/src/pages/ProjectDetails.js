@@ -28,8 +28,8 @@ const Project_Details = () => {
     const supplierState = useSelector((state) => state.supplierReducer.supplierState); 
 
 
-    const numberOfEmployeeColumns = Math.ceil(employeeState?.length / 10)
-    const numberOfSupplierColumns = Math.ceil(supplierState?.length / 10)
+    // const numberOfEmployeeColumns = Math.ceil(employeeState?.length / 10)
+    // const numberOfSupplierColumns = Math.ceil(supplierState?.length / 10)
 
 
     const [selectedEmployees, setSelectedEmployees] = useState(new Set());  // set select employees to add
@@ -44,6 +44,12 @@ const Project_Details = () => {
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [currentTab, setCurrentTab] = useState('projectDetails');
+
+    const [openId, setOpenId] = useState(null);
+    const toggleAccordion = (id) => {
+    setOpenId((prevId) => (prevId === id ? null : id));
+    };
+    const isOpen = (id) => openId === id;
 
     //Component hooks
     const { update } = useUpdateProject();
@@ -431,12 +437,12 @@ const Project_Details = () => {
         <div className='d-flex m-1 justify-content-end'>
             <button className="btn btn-primary" onClick={handleSelectSupplierClick}>
                 <div className='flex items-center'>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 sm:size-6 mr-1">
                         <path id="Vector" 
                         d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z"
                          stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <label>SELECT SUPPLIERS</label>
+                    <label className='text-xs sm:text-base'>SELECT SUPPLIERS</label>
                 </div>
             </button>
         </div>
@@ -497,6 +503,44 @@ const Project_Details = () => {
                     }
                 </div>
             </div>
+            
+            <div className="p-6 bg-gray-100 rounded-lg shadow-md space-y-4">
+                    <div className="border-b pb-2">
+                        <h2 className="text-lg font-semibold">Areas</h2>
+                    </div>
+                    <div className="space-y-2">
+                        {projectState.area_obj_ref?.map((areaObj) => (
+                        <div key={areaObj._id} className="w-full">
+                            <button
+                            className="w-full text-left text-sm font-semibold text-blue-600 py-2 px-2 bg-gray-50 rounded-lg shadow-sm flex justify-between"
+                            onClick={() => toggleAccordion(areaObj._id)} // Use state to toggle visibility
+                            >
+                            <label>{areaObj.areas.area_name}</label>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`${isOpen(areaObj._id) ? "hidden" : "block"} size-6`}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`${isOpen(areaObj._id) ? "block" : "hidden"} size-6`}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                            </svg>
+                            </button>
+                            <div className={`space-y-0 ${isOpen(areaObj._id) ? "block" : "hidden"}`}>
+                            {areaObj.areas.levels?.map((level) => (
+                                <div key={level._id} className="py-2 px-4 bg-white rounded-lg shadow-sm border">
+                                <label className="text-sm font-medium text-gray-800">{level.level_name}</label>
+                                {level.subareas.length > 0 && (
+                                    <ul className="list-disc list-inside mt-2 text-gray-700 text-xs">
+                                    {level.subareas?.map((subarea) => (
+                                        <li key={subarea._id}>{subarea.subarea_name}</li>
+                                    ))}
+                                    </ul>
+                                )}
+                                </div>
+                            ))}
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                </div>
         </div>
     ) : (
         <div className='border'>Project Detail API fetched successfully, but it might be empty...</div>
@@ -507,28 +551,30 @@ const Project_Details = () => {
             {selectEmployeesBtn}
         
             {projectState && projectState.employees && projectState.employees.length > 0 ? (
-            <table className="table table-bordered table-hover">
-                <thead className="thead-dark">
-                    <tr className="table-primary">
-                        <th scope="col">Id</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Role</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {projectState.employees.map((employee, index) => (
-                            <tr className="cursor-pointer" key={`projectEmployeesTab-${employee._id}`} onClick={() => handleTableClick('employee', employee._id)}>
-                                <th scope="row">{index + 1}</th>
-                                <td>{employee.employee_first_name} {employee.employee_last_name}</td>
-                                <td>{employee.employee_mobile_phone}</td>
-                                <td>{employee.employee_email}</td>
-                                <td>{employee.employee_roles}</td>
-                            </tr>
-                            ))}
-                </tbody>
-            </table>
+            <div className='overflow-x-auto'>
+                <table className="table table-bordered table-hover">
+                    <thead className="thead-dark">
+                        <tr className="table-primary">
+                            <th scope="col" className="hidden sm:table-cell">Id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col" className="hidden sm:table-cell">Phone</th>
+                            <th scope="col" className="hidden sm:table-cell">Email</th>
+                            <th scope="col">Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {projectState.employees.map((employee, index) => (
+                                <tr className="cursor-pointer" key={`projectEmployeesTab-${employee._id}`} onClick={() => handleTableClick('employee', employee._id)}>
+                                    <th scope="row" className="hidden sm:table-cell">{index + 1}</th>
+                                    <td>{employee.employee_first_name} {employee.employee_last_name}</td>
+                                    <td className="hidden sm:table-cell">{employee.employee_mobile_phone}</td>
+                                    <td className="hidden sm:table-cell">{employee.employee_email}</td>
+                                    <td>{employee.employee_roles}</td>
+                                </tr>
+                                ))}
+                    </tbody>
+                </table>
+            </div>
     ) : (
         <div className='border'>No related Employee</div>
     )}
@@ -540,30 +586,32 @@ const Project_Details = () => {
             {selectSuppliersBtn}
 
             {projectState && projectState.suppliers && projectState.suppliers.length > 0 ? (
-                <table className="table table-bordered table-hover">
-                    <thead className="thead-dark">
-                        <tr className="table-primary">
-                            <th scope="col">Id</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Address</th>
-                            <th scope="col">Material Type</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {projectState.suppliers.map((supplier, index) => (
-                        <tr className="cursor-pointer" key={`projectSuppliersTabKey-${supplier._id}`} onClick={() => handleTableClick('supplier', supplier._id)}>
-                                <th scope="row">{index + 1}</th>
-                                <td>{supplier.supplier_name}</td>
-                                <td>{supplier.supplier_address}</td>
-                                <td>{supplier.supplier_material_types}</td>
-                                <td>{supplier.supplier_type}</td>
-                                <td>{supplier.supplier_isarchived ? ("Archived") : ("Active")}</td>
+                <div className='overflow-x-auto'>
+                    <table className="table table-bordered table-hover">
+                        <thead className="thead-dark">
+                            <tr className="table-primary">
+                                <th scope="col" className="hidden sm:table-cell">Id</th>
+                                <th scope="col">Name</th>
+                                <th scope="col" className="hidden sm:table-cell">Address</th>
+                                <th scope="col">Material Type</th>
+                                <th scope="col" className="hidden sm:table-cell">Type</th>
+                                <th scope="col" className="hidden sm:table-cell">Status</th>
                             </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {projectState.suppliers.map((supplier, index) => (
+                            <tr className="cursor-pointer" key={`projectSuppliersTabKey-${supplier._id}`} onClick={() => handleTableClick('supplier', supplier._id)}>
+                                    <th scope="row" className="hidden sm:table-cell">{index + 1}</th>
+                                    <td>{supplier.supplier_name}</td>
+                                    <td className="hidden sm:table-cell">{supplier.supplier_address}</td>
+                                    <td>{supplier.supplier_material_types}</td>
+                                    <td className="hidden sm:table-cell">{supplier.supplier_type}</td>
+                                    <td className="hidden sm:table-cell">{supplier.supplier_isarchived ? ("Archived") : ("Active")}</td>
+                                </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
         ) : (
             <div className='border'>No related Supplier</div>
         )}
@@ -571,71 +619,102 @@ const Project_Details = () => {
     );
 
     const addEmployeesPopUp = (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-                <h4 className="font-bold mb-4">SELECT EMPLOYEES FOR THE {projectState?.project_name || 'UNKNOWN'} PROJECT</h4>
-                <div style={{ gridTemplateColumns: `repeat(${numberOfEmployeeColumns}, minmax(0, 1fr))` }} className="grid gap-4">
-                    {Array.isArray(employeeState) && employeeState
-                    // .filter(employee => employee.employee_isarchived === false)
-                    .map(employee => (
-                            <div key={`addEmployeesPopUp-${employee._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
-                                <input className="form-checkbox h-5 w-5 text-blue-600"
-                                    type="checkbox" checked={selectedEmployees.has(employee._id)}
-                                    onChange={() => handleEmployeeCheckbox(employee._id, true)}
-                                    disabled={projectState?.employees?.some(e => e._id === employee._id)}/>
-                                <label className="flex-1 text-gray-800">
-                                    <span className="font-semibold">{employee.employee_first_name} {employee.employee_last_name}</span>
-                                    <span className="ml-2 text-sm text-gray-600">{employee.employee_roles}</span>
-                                </label>
-                            </div>
-                        ))}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl mx-4">
+                {/* Modal Header */}
+                <h4 className="font-bold mb-0 sm:mb-4 text-center">
+                    SELECT EMPLOYEES FOR THE {projectState?.project_name || 'UNKNOWN'} PROJECT
+                </h4>
+                
+                {/* Employee Selection Grid */}
+                <div 
+                    style={{ gridTemplateColumns: `repeat(auto-fill, minmax(150px, 1fr))` }}
+                    className="grid gap-0 sm:gap-4 mb-0 sm:mb-4">
+                    {Array.isArray(employeeState) && employeeState.map((employee) => (
+                        <div 
+                            key={`addEmployeesPopUp-${employee._id}`}
+                            className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                            <input
+                                className="form-checkbox h-5 w-5 text-blue-600"
+                                type="checkbox"
+                                checked={selectedEmployees.has(employee._id)}
+                                onChange={() => handleEmployeeCheckbox(employee._id, true)}
+                                disabled={projectState?.employees?.some(e => e._id === employee._id)}
+                            />
+                            <label className="flex-1 text-gray-800">
+                                <span className="font-semibold">{employee.employee_first_name} {employee.employee_last_name}</span>
+                                <span className="ml-2 text-sm text-gray-600">{employee.employee_roles}</span>
+                            </label>
+                        </div>
+                    ))}
                 </div>
-                <div className="flex justify-end mt-5">
-                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end mt-0 sm:mt-5 space-x-3">
+                    <button 
+                        className="bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium"
                         onClick={() => setAddEmployeeListVisible(false)}>
                         Cancel
                     </button>
-                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                    <button 
+                        className="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium"
                         onClick={handleAddEmployeesConfirm}>
                         Confirm
                     </button>
                 </div>
             </div>
         </div>
+
     );
 
     const removeEmployeesPopUp = (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-                <h4 className="font-bold mb-4">SELECT EMPLOYEES TO <span className="text-red-500">REMOVE</span> FROM THE{projectState?.project_name} PROJECT</h4>
-                {
-                    projectState && projectState.employees && projectState.employees.length > 0 ? (
-                        <div style={{ gridTemplateColumns: `repeat(${Math.ceil(projectState.employees.length / 10)}, minmax(0, 1fr))`,}} className="grid gap-4">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl mx-4">
+                {/* Modal Header */}
+                <h4 className="font-bold mb-0 sm:mb-4 text-center">
+                    SELECT EMPLOYEES TO <span className="text-red-500">REMOVE</span> FROM THE {projectState?.project_name} PROJECT
+                </h4>
+                
+                {/* Employee Selection Grid */}
+                {projectState?.employees?.length > 0 ? (
+                    <div 
+                        style={{ gridTemplateColumns: `repeat(auto-fill, minmax(150px, 1fr))` }}
+                        className="grid gap-4 mb-0 sm:mb-4">
                         {projectState.employees.map((employee) => (
-                            <div key={`removeEmployeesPopUp-${employee._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+                            <div 
+                                key={`removeEmployeesPopUp-${employee._id}`}
+                                className="flex items-center space-x-4 p-2 border-b border-gray-200">
                                 <input
                                     className="form-checkbox h-5 w-5 text-blue-600"
                                     type="checkbox"
                                     onChange={() => handleEmployeeCheckbox(employee._id, false)}
                                 />
                                 <label className="flex-1 text-gray-800">
-                                    <span className="font-semibold"> {employee.employee_first_name} {employee.employee_last_name} </span>
+                                    <span className="font-semibold">{employee.employee_first_name} {employee.employee_last_name}</span>
                                     <span className="ml-2 text-sm text-gray-600">{employee.employee_roles}</span>
                                 </label>
                             </div>
                         ))}
-                        </div>
-                    ) : (
-                        <div className="border">No related Employee to Remove</div>
-                    )}
-                <div id = "removeEmployeesConfirmMessage"></div>
-                <div className="flex justify-end mt-5">
-                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                    </div>
+                ) : (
+                    <div className="text-center py-4 text-gray-600 border rounded-md">
+                        No related Employees to Remove
+                    </div>
+                )}
+                
+                {/* Confirmation Message */}
+                <div id="removeEmployeesConfirmMessage" className="text-center mt-4 text-red-500"></div>
+                
+                {/* Action Buttons */}
+                <div className="flex justify-end mt-0 sm:mt-5 space-x-3">
+                    <button 
+                        className="bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium"
                         onClick={() => setRemoveEmployeeListVisible(false)}>
                         Cancel
                     </button>
-                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
-                        onClick={handleRemoveEmployeesConfirm }>
+                    <button 
+                        className="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium"
+                        onClick={handleRemoveEmployeesConfirm}>
                         Confirm
                     </button>
                 </div>
@@ -644,33 +723,43 @@ const Project_Details = () => {
     );
 
     const selectSuppliersPopUp = (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-5 rounded-lg shadow-lg">
-                <h4 className="font-bold mb-4">SELECT SUPPLIERS : </h4>
-                <div style={{ gridTemplateColumns: `repeat(${numberOfSupplierColumns}, minmax(0, 1fr))` }} className="grid gap-4">
-                {   Array.isArray(supplierState) && supplierState
-                        // .sort((a, b) => a.supplier_type.localeCompare(b.supplier_type) || a.supplier_name.localeCompare(b.supplier_name)  )
-                        .map(supplier => (
-                        <div key={`selectSuppliersPopUp-${supplier._id}`} className="flex items-center space-x-4 p-2 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto text-xs sm:text-sm">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl mx-4">
+                {/* Modal Header */}
+                <h4 className="font-bold mb-0 sm:mb-4 text-center">SELECT SUPPLIERS</h4>
+
+                {/* Supplier Selection Grid */}
+                <div
+                    style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}
+                    className="grid gap-0 sm:gap-4 mb-0 sm:mb-4">
+                    {Array.isArray(supplierState) && supplierState.map((supplier) => (
+                        <div 
+                            key={`selectSuppliersPopUp-${supplier._id}`}
+                            className="flex items-center space-x-4 p-2 border-b border-gray-200">
                             <input 
-                                className="form-checkbox h-5 w-5 text-blue-600"
+                                className="form-checkbox h-3 w-3 sm:h-5 sm:w-5 text-blue-600"
                                 type="checkbox"
                                 checked={selectedSuppliers.has(supplier._id)}
                                 onChange={() => handleSupplierCheckbox(supplier._id)}
                             />
                             <label className="flex-1 text-gray-800">
                                 <span className="font-semibold">{supplier.supplier_name}</span>
-                                <span className="ml-2 text-sm text-gray-600">{supplier.supplier_type}</span>
+                                <span className="hidden ml-2 text-xs sm:text-sm sm:inline text-gray-600">{supplier.supplier_type}</span>
                             </label>
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-end mt-5">
-                    <button className="ml-2 btn btn-secondary bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+
+
+                {/* Action Buttons */}
+                <div className="flex justify-end mt-0 sm:mt-5 space-x-3">
+                    <button 
+                        className="bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium"
                         onClick={() => setSelectSupplierListVisible(false)}>
                         Cancel
                     </button>
-                    <button className="ml-2 btn btn-secondary bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                    <button 
+                        className="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium"
                         onClick={handleSelectSuppliersConfirm}>
                         Confirm
                     </button>
@@ -688,6 +777,7 @@ const Project_Details = () => {
         return (<div>Error: {errorState}</div>);
     }
     if (!projectState) return <p>No project details available</p>;
+
     
     return (
         localUser && Object.keys(localUser).length > 0 ? (
@@ -695,13 +785,13 @@ const Project_Details = () => {
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
                     <button onClick={() => window.history.back()}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-7 w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-8 sm:h-7 md:w-12 border-transparent bg-gray-700 rounded-md p-1 hover:bg-gray-500 hover:scale-95 ease-out duration-300">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"/>
                         </svg>
                     </button>
-                    <h1 className='mx-auto uppercase font-bold text-xl'>Project： {projectState.project_name}</h1>
+                    <h1 className='mx-auto uppercase font-bold text-sm md:text-xl'>Project： {projectState.project_name}</h1>
                 </div>
-                <div className="card-body">
+                <div className="card-body text-sm md:text-base">
                     <div>
                         <button className={`${currentTab === 'projectDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('projectDetails')}>Details</button>
                         <button className={`${currentTab === 'projectEmployeesTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('projectEmployeesTable')}>Employees</button>
@@ -720,6 +810,7 @@ const Project_Details = () => {
 
 
                 </div>
+
             </div>
             { archiveModal }
         </div> ) : ( <UnauthenticatedSkeleton /> )

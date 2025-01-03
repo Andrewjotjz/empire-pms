@@ -111,7 +111,6 @@ let totalQty = currentOrder.invoices.reduce((sum, invoice) => {
     return sum + invoiceProductQtySum;
 }, 0);
 
-console.log("Total quantity of matched products:", totalQty);
 
 
 // ! *****************************

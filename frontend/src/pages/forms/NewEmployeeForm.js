@@ -32,7 +32,7 @@ const NewEmployeeForm = () => {
         return pattern.test(email);
     };
 
-    const handleBackClick = () => navigate(`/EmpirePMS/employee/`);
+    const handleBackClick = () => navigate(`/EmpirePMS/employee`);
 
     const handleInputChange = (event) => {
         const { name, value } = event.target;

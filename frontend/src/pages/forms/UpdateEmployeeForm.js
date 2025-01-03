@@ -1,5 +1,6 @@
 // Import modules
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { setEmployeeDetails } from '../../redux/employeeSlice';
 import { useUpdateEmployee } from '../../hooks/useUpdateEmployee'; 
@@ -12,11 +13,14 @@ const UpdateEmployeeForm = () => {
     const location = useLocation();
     const retrieved_id = location.state;
     const navigate = useNavigate();
+    const {id} = useParams();
 
     // Component state declaration
     const employeeState = useSelector((state) => state.employeeReducer.employeeState);
     const dispatch = useDispatch();
     const { update, isLoadingState, errorState } = useUpdateEmployee();
+    const [isFetchEmployeeLoading, setFetchEmployeeLoading] = useState(true);
+    const [fetchEmployeeError, setFetchEmployeeError] = useState(null);
 
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -38,14 +42,43 @@ const UpdateEmployeeForm = () => {
         update(employeeState);
     };
 
+    const fetchEmployee = useCallback(async () => {
+        setFetchEmployeeLoading(true);
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/employee/${id}`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    } });
+                if (!res.ok) {
+                    throw new Error('Failed to fetch employee details');
+                }
+                const data = await res.json();
+    
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+    
+                dispatch(setEmployeeDetails(data));
+                setFetchEmployeeLoading(false);
+            } catch (err) {
+                setFetchEmployeeError(err.message);
+                setFetchEmployeeLoading(false);
+            }
+        }, [id, dispatch]);
+    
+        useEffect(() => {
+            fetchEmployee();
+        }, [fetchEmployee]);
+
     //Display DOM
-    if (isLoadingState) { return (<EmployeeDetailsSkeleton />); }
+    if (isLoadingState || isFetchEmployeeLoading) { return (<EmployeeDetailsSkeleton />); }
 
     if (errorState) {
         if (errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")) {
             return (<div><SessionExpired /></div>);
         }
-        return (<div>Error: {errorState}</div>);
+        return (<div>Error: {errorState || fetchEmployeeError}</div>);
     }
 
     return (
@@ -57,8 +90,8 @@ const UpdateEmployeeForm = () => {
                         <h1>EDIT ACCOUNT DETAILS</h1>
                     </div>
                     <form className="card-body" onSubmit={handleSubmit}>
-                        <div className="d-flex justify-content-end mb-3">
-                            <button type="button" className="btn btn-secondary bg" onClick={handleChangePasswordClick}>CHANGE PASSWORD</button>
+                        <div className="d-flex justify-content-end mb-3 hover:cursor-not-allowed">
+                            <button type="button" className="btn btn-secondary bg" onClick={handleChangePasswordClick} disabled>CHANGE PASSWORD</button>
                         </div>
                         <div className="row">
                             <div className="col-md-6 mb-3">

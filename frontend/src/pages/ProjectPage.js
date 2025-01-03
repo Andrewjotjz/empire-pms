@@ -95,26 +95,26 @@ const Project = () => {
         <table className="table table-bordered table-hover">
             <thead className="thead-dark">
                 <tr className="table-primary">
-                    <th scope="col">Id</th>
+                    <th scope="col" className="hidden sm:table-cell">Id</th>
                     <th scope="col">Name</th>
-                    <th scope="col">Address</th>
-                    <th scope="col" colSpan="2">Contact Person</th>
+                    <th scope="col" className="hidden sm:table-cell">Address</th>
+                    <th scope="col" colSpan="2" className="hidden sm:table-cell">Contact Person</th>
                 </tr>
             </thead>
             <tbody>
                 {filteredProjects.map((project, index) => (
                     <tr className="cursor-pointer" key={project._id} onClick={() => handleTableClick(project._id)} >
-                        <th scope="row">{index + 1}</th>
+                        <th scope="row" className="hidden sm:table-cell">{index + 1}</th>
                         <td>{project.project_name}</td>
-                        <td>{project.project_address}</td>
-                        <td>
+                        <td className="hidden sm:table-cell">{project.project_address}</td>
+                        <td className="hidden sm:table-cell">
                             {project.employees
                                 .filter(employee => employee.employee_roles === 'Foreman')
                                 .map((employee, index) => (
                                     <div key={index}> {employee.employee_first_name} {employee.employee_last_name}</div>
                                 ))}
                         </td>
-                        <td>
+                        <td className="hidden sm:table-cell">
                             {project.employees
                                 .filter(employee => employee.employee_roles === 'Foreman')
                                 .map((employee, index) => (
@@ -134,38 +134,49 @@ const Project = () => {
         <div className="container mt-5">
             <div className="card">
                 <div className="card-header bg-dark text-white">
-                    <h1 className='mx-auto uppercase font-bold text-xl'>PROJECTS</h1>
+                    <h1 className='mx-auto uppercase font-bold text-sm md:text-xl'>PROJECTS</h1>
                 </div>
                 <div className="card-body">
-                    <div className="row mb-3">
-                        <div className="col-md-6">
+                    {/* Search Input and Add Project Button Row */}
+                    <div className="flex flex-col md:flex-row mb-3 gap-2">
+                        {/* Search Input */}
+                        <div className="flex-1">
                             <input
                                 type="text"
                                 className="form-control"
-                                placeholder="Search by project name, or address ..."
+                                placeholder="Search by project name or address..."
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
                         </div>
-                        <div className="col-md-6 d-flex justify-content-end">
-                            <button className="btn btn-primary" onClick={handleAddClick}>
-                                <div className='flex items-center'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <label>ADD PROJECT</label>
-                                </div>
+                        {/* Add Project Button */}
+                        <div className="flex justify-end">
+                            <button className="btn btn-primary flex items-center" onClick={handleAddClick}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6 mr-1">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                <span>ADD PROJECT</span>
                             </button>
                         </div>
                     </div>
-                    <div className="col mb-6">
-                        <button 
-                            className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`} 
-                            onClick={() => setIsArchive(false)}>Current</button>
-                        <button 
-                            className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50'}`} 
-                            onClick={() => setIsArchive(true)}>Archived</button>
-                        <div className="border rounded-sm">{projectTable}</div>
+
+                    {/* Toggle Tabs for Current and Archived Projects */}
+                    <div>
+                        <button
+                            className={`${!isArchive ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                            onClick={() => setIsArchive(false)}>
+                            Current
+                        </button>
+                        <button
+                            className={`${isArchive ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                            onClick={() => setIsArchive(true)}>
+                            Archived
+                        </button>
+                    </div>
+
+                    {/* Project Table */}
+                    <div className="border rounded-md overflow-auto">
+                        {projectTable}
                     </div>
                 </div>
             </div>

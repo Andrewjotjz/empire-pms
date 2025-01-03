@@ -7,7 +7,6 @@ const sendEmail = require('../utils/sendEmailServices')
 
 //Handle employee login/signup errors
 const handleErrors = (err) => {
-    console.log(err.message, err.code);
     let errors = { email: '', password: '' };
   
     // incorrect email
@@ -28,10 +27,7 @@ const handleErrors = (err) => {
   
     // validation errors
     if (err.message.includes('user validation failed')) {
-      // console.log(err);
       Object.values(err.errors).forEach(({ properties }) => {
-        // console.log(val);
-        // console.log(properties);
         errors[properties.path] = properties.message;
       });
     }
@@ -377,7 +373,6 @@ const logoutEmployee = (req,res) => {
     //after log out, redirect user to login page
     // res.redirect('/');
     res.json({msg: "This employee has successfully logged out"})
-    console.log("Employee successfully logged out.")
 }
 
 

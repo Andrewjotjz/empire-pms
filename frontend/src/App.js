@@ -31,6 +31,20 @@ import NewInvoiceForm from "./pages/forms/NewInvoiceForm";
 import UpdateInvoiceForm from "./pages/forms/UpdateInvoiceForm";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import NotFoundPage from "./pages/loaders/NotFoundPage";
+import Breadcrumbs from "./components/Breadcrumbs";
+import ProductType from "./pages/ProductTypePage";
+import NewProductTypeForm from "./pages/forms/NewProductTypeForm";
+import UpdateProductTypeForm from "./pages/forms/UpdateProductTypeForm";
+import Budget from "./pages/BudgetPage";
+import BudgetDetails from "./pages/BudgetDetails";
+import NewBudgetForm from "./pages/forms/NewBudgetForm";
+import UpdateBudgetForm from "./pages/forms/UpdateBudgetForm";
+import Delivery from "./pages/DeliveryPage";
+import DeliveryDetails from "./pages/DeliveryDetails";
+import Payment from "./pages/PaymentPage";
+import PaymentDetails from "./pages/PaymentDetails";
+import NewPaymentForm from "./pages/forms/NewPaymentForm";
+import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 
 function App() {
 
@@ -40,6 +54,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Navbar />
+        <Breadcrumbs />
         <div className="pages">
           <Routes>
             <Route path="/EmpirePMS/login" element={<Login />} />
@@ -80,6 +95,23 @@ function App() {
             <Route path="/EmpirePMS/employee/:id/edit" element={<UpdateEmployeeForm />} />
             <Route path="/EmpirePMS/employee/create" element={<NewEmployeeForm />} />
             <Route path="/EmpirePMS/employee/reset-password" element={<PasswordReset />} />
+
+            <Route path="/EmpirePMS/product-type" element={<ProductType />} />
+            <Route path="/EmpirePMS/product-type/create" element={<NewProductTypeForm />} />
+            <Route path="/EmpirePMS/product-type/:id/edit" element={<UpdateProductTypeForm /> } />
+            
+            <Route path="/EmpirePMS/budget" element={<Budget />} />
+            <Route path="/EmpirePMS/budget/:id" element={<BudgetDetails />} />
+            <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
+            <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
+
+            <Route path="/EmpirePMS/delivery" element={<Delivery />} />
+            <Route path="/EmpirePMS/delivery/:id" element={<DeliveryDetails />} />
+
+            <Route path="/EmpirePMS/payment" element={<Payment />} />
+            <Route path="/EmpirePMS/payment/:id" element={<PaymentDetails />} />
+            <Route path="/EmpirePMS/payment/create" element={<NewPaymentForm />} />
+            <Route path="/EmpirePMS/payment/:id/edit" element={<UpdatePaymentForm /> } />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

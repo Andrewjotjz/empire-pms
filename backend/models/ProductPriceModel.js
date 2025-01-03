@@ -43,9 +43,17 @@ const productPriceSchema = new Schema({
         type: Boolean,
         default: false
     },
+    product_actual_rate: {
+        type: Number,
+        required: true,
+        min: 0
+    },
     product_effective_date: {
         type: Date,
         required: true
+    },
+    product_price_note: {
+        type: String
     },
     projects: [{
         type: Schema.Types.ObjectId,

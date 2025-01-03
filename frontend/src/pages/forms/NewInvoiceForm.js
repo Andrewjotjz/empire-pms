@@ -17,6 +17,7 @@ import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
+import { useUploadInvoice } from "../../hooks/useUploadInvoice";
 
 const NewInvoiceForm = () => {
   //Component's hook
@@ -24,6 +25,7 @@ const NewInvoiceForm = () => {
   const navigate = useNavigate();
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { addInvoice, addInvoiceError } = useAddInvoice();
+  const { uploadInvoice, uploadInvoiceError } = useUploadInvoice();
   const { fetchProductsBySupplier, fetchProductsErrorState } =
     useFetchProductsBySupplier();
   const { updatePurchaseOrder, updateOrderErrorState } =
@@ -39,6 +41,7 @@ const NewInvoiceForm = () => {
   const [newSupplier, setNewSupplier] = useState("");
   const [newProductId, setNewProductId] = useState("");
   const [targetIndex, setTargetIndex] = useState(null);
+  const [productTypeState, setProductTypeState] = useState([]);
 
   const [isToggled, setIsToggled] = useState(false);
   const [isToggleProjectDropdown, setIsToggleProjectDropdown] = useState(false);
@@ -63,6 +66,8 @@ const NewInvoiceForm = () => {
     useState(null);
   const [isFetchProjectLoading, setIsFetchProjectLoading] = useState(false);
   const [fetchProjectError, setFetchProjectError] = useState(null);
+  const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
+  const [fetchTypeError, setFetchTypeError] = useState(null);
 
   const supplierState = useSelector(
     (state) => state.supplierReducer.supplierState
@@ -83,8 +88,18 @@ const NewInvoiceForm = () => {
   const [newInvoice, setNewInvoice] = useState({
     invoice_ref: "",
     supplier: "",
-    invoice_issue_date: "",
-    invoice_received_date: new Date().toISOString().split("T")[0],
+    invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
+    invoice_received_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
     invoice_due_date: "",
     order: "",
     products: [],
@@ -102,8 +117,18 @@ const NewInvoiceForm = () => {
   const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({
     invoice_ref: "",
     supplier: "",
-    invoice_issue_date: "",
-    invoice_received_date: new Date().toISOString().split("T")[0],
+    invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
+    invoice_received_date: new Date().toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-"),
     invoice_due_date: "",
     order: null,
     products: [],
@@ -130,15 +155,18 @@ const NewInvoiceForm = () => {
   const [newProductPrice, setNewProductPrice] = useState({
     product_obj_ref: "",
     product_unit_a: "",
-    product_number_a: "",
-    product_price_unit_a: "",
+    product_number_a: 0,
+    product_price_unit_a: 0,
     product_unit_b: "",
-    product_number_b: "",
-    product_price_unit_b: "",
+    product_number_b: 0,
+    product_price_unit_b: 0,
     price_fixed: false,
     product_effective_date: "",
+    product_actual_rate: 0,
+    product_price_note: "",
     projects: [],
   });
+  const [files, setFiles] = useState([]);
 
   //Component's function and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -155,11 +183,28 @@ const NewInvoiceForm = () => {
 
   // Helper function to calculate the due date based on payment terms
   const calculateDueDate = (paymentTerm) => {
-    const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10); // Extract number from "Net 60"
+    const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10) || 30; // Default to 30 days if no term specified
     const issueDate = new Date(); // Get the current date
-    const dueDate = new Date(issueDate); // Create a copy of the current date
-    dueDate.setDate(dueDate.getDate() + daysToAdd); // Add the extracted days
-    return dueDate.toISOString().split("T")[0]; // Return formatted date as 'YYYY-MM-DD'
+    const interimDueDate = new Date(issueDate); // Create a copy of the current date
+
+    // Add the payment term days to get the interim due date
+    interimDueDate.setDate(interimDueDate.getDate() + daysToAdd);
+
+    // Find the end of the month of the interim due date
+    const month = interimDueDate.getMonth() + 1; // 0-based to 1-based month
+    const year = interimDueDate.getFullYear();
+    const lastDayOfMonth = new Date(year, month, 0).getDate(); // Get the last day of the month
+
+    // Set the due date to the last day of that month
+    const dueDate = new Date(year, month - 1, lastDayOfMonth);
+
+    // Format to 'YYYY-MM-DD' in Melbourne timezone
+    return dueDate.toLocaleDateString("en-AU", {
+      timeZone: "Australia/Melbourne",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).split("/").reverse().join("-");
   };
 
   const fetchSelectedPurchaseOrder = async (id) => {
@@ -267,7 +312,7 @@ const NewInvoiceForm = () => {
     setIsFetchProductDetailsLoading(true);
     try {
       const res = await fetch(
-        `/api/supplier/${supplierId}/products/${productId}`, { 
+        `${process.env.REACT_APP_API_BASE_URL}/supplier/${supplierId}/products/${productId}`, { 
           credentials: 'include',
           headers: {
               'Content-Type': 'application/json',
@@ -330,8 +375,18 @@ const NewInvoiceForm = () => {
       setNewInvoice({
         invoice_ref: "",
         supplier: newSupplier,
-        invoice_issue_date: "",
-        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
+        invoice_received_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
         invoice_due_date: formattedDueDate,
         order: "",
         products: [],
@@ -351,8 +406,18 @@ const NewInvoiceForm = () => {
       setNewInvoice({
         invoice_ref: "",
         supplier: "",
-        invoice_issue_date: "",
-        invoice_received_date: new Date().toISOString().split("T")[0],
+        invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
+        invoice_received_date: new Date().toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).split("/").reverse().join("-"),
         invoice_due_date: "",
         order: "",
         products: [],
@@ -383,12 +448,6 @@ const NewInvoiceForm = () => {
       projects: [],
     });
   };
-  let distinctProductTypes = [];
-  if (Array.isArray(productState) && (currentOrder?.project._id || false)) {
-    distinctProductTypes = [
-      ...new Set(productState.map((prod) => prod.product.product_types)),
-    ];
-  }
   const filterProductsBySearchTerm = () => {
     const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
 
@@ -413,13 +472,12 @@ const NewInvoiceForm = () => {
         product.product.product_actual_size
           .toString()
           .includes(lowerCaseSearchTerm) ||
-        product.product.product_types
-          .toLowerCase()
-          .includes(lowerCaseSearchTerm) ||
+        productTypeState
+          .find(type => type._id === product.product.product_type)?.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
         product.product.alias_name.toString().includes(lowerCaseSearchTerm);
 
       const matchesProductType = selectedProductType
-        ? product.product.product_types === selectedProductType
+        ? product.product.product_type === selectedProductType
         : true; // If no product type is selected, don't filter by type
 
       const matchesProjectId = product.productPrice.projects.some((projectId) =>
@@ -442,6 +500,10 @@ const NewInvoiceForm = () => {
   const handleTogglePriceModal = () =>
     setShowProductPriceModal(!showProductPriceModal);
 
+  const handleFileChange = (event) => {
+    const selectedFiles = Array.from(event.target.files); // Convert FileList to an array
+    setFiles([...files, ...selectedFiles]); // Append new files to the existing list
+  };
   const handleSupplierChange = (event) => {
     const targetSupplier = event.target.value;
 
@@ -458,8 +520,18 @@ const NewInvoiceForm = () => {
         setNewInvoice({
           invoice_ref: "",
           supplier: targetSupplier,
-          invoice_issue_date: "",
-          invoice_received_date: new Date().toISOString().split("T")[0],
+          invoice_issue_date: new Date().toLocaleDateString("en-AU", {
+            timeZone: "Australia/Melbourne",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).split("/").reverse().join("-"),
+          invoice_received_date: new Date().toLocaleDateString("en-AU", {
+            timeZone: "Australia/Melbourne",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+          }).split("/").reverse().join("-"),
           invoice_due_date: formattedDueDate,
           order: "",
           products: [],
@@ -511,7 +583,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * currentState.products[index]?.invoice_product_price_unit
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       }
@@ -524,7 +596,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * currentState.custom_products[index]?.custom_order_price
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       }
@@ -536,7 +608,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * currentState.custom_products[index]?.custom_order_qty
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       }
@@ -577,7 +649,7 @@ const NewInvoiceForm = () => {
         (Number(updatedState.invoiced_other_fee) || 0) +
         (Number(updatedState.invoiced_credit) || 0)) *
       1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Final update to the state with recalculated total amount
     updatedState = {
@@ -612,7 +684,7 @@ const NewInvoiceForm = () => {
             Number(
               (
                 value * updatedCustomProducts[index]?.custom_order_price
-              ).toFixed(2)
+              ).toFixed(4)
             ) || 0,
         };
       } else if (name === "custom_order_price") {
@@ -663,7 +735,7 @@ const NewInvoiceForm = () => {
         (Number(updatedState.invoiced_other_fee) || 0) +
         (Number(updatedState.invoiced_credit) || 0)) *
       1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Final update to the state with recalculated total amount
     updatedState = {
@@ -689,13 +761,13 @@ const NewInvoiceForm = () => {
   //             updatedCustomProducts[index] = {
   //                 ...updatedCustomProducts[index],
   //                 [name]: Number(value), // Convert to number here
-  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(2)) || 0,
+  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(4)) || 0,
   //             };
   //         } else if (name === "custom_order_price") {
   //             updatedCustomProducts[index] = {
   //                 ...updatedCustomProducts[index],
   //                 [name]: Number(value), // Convert to number here
-  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(2)) || 0,
+  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(4)) || 0,
   //             };
   //         }
   //         else {
@@ -734,6 +806,7 @@ const NewInvoiceForm = () => {
         "product_price_unit_a",
         "product_number_b",
         "product_price_unit_b",
+        "product_actual_rate"
       ].includes(name)
         ? Number(value)
         : value,
@@ -896,7 +969,7 @@ const NewInvoiceForm = () => {
           : value *
             updatedOrder.products[index].productprice_obj_ref
               .product_price_unit_a
-      ).toFixed(2);
+      ).toFixed(4);
     }
 
     // Handle `order_product_qty_b` changes
@@ -931,7 +1004,7 @@ const NewInvoiceForm = () => {
       updatedProducts[index].order_product_gross_amount = (
         value *
         updatedOrder.products[index].productprice_obj_ref.product_price_unit_b
-      ).toFixed(2);
+      ).toFixed(4);
     }
 
     // Calculate updatedTotalAmount using updatedProducts
@@ -940,7 +1013,7 @@ const NewInvoiceForm = () => {
         (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
         0
       ) * 1.1
-    ).toFixed(2);
+    ).toFixed(4);
 
     // Dispatch the updated state with a plain object
     setUpdatedOrder({
@@ -990,6 +1063,13 @@ const NewInvoiceForm = () => {
       });
     }
   };
+
+  const handleRemoveFile = (index) => {
+    const updatedFileList = files.filter((_, idx) => idx !== index);
+
+    setFiles(updatedFileList);
+  };
+
   const handleAddCustomItem = (noPO = false) => {
     if (noPO) {
       if (newInvoiceWithoutPO.custom_products.length < 15) {
@@ -1107,15 +1187,32 @@ const NewInvoiceForm = () => {
     // Step 3: Remove custom product from list
     handleRemoveCustomItem(targetIndex);
   };
-  const handleSubmitInvoice = (event) => {
+  const handleSubmitInvoice = async (event) => {
     event.preventDefault();
+
+    //! upload Invoice logic
+    // if (!files || files.length === 0) {
+    //   return alert("Please select at least one file.");
+    // }
+
+    // if (files.length > 10) {
+    //   return alert("You can only upload up to 10 files.")
+    // }
+
+    // const formData = new FormData();
+    // Array.from(files).forEach((file) => {
+    //     formData.append("invoices", file); // 'invoices' must match the backend key
+    // });
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
         alert(`Please select invoice status!`)
         return;
       }
-      addInvoice(newInvoice);
+
+      const invoice_id = await addInvoice(newInvoice);
+      // formData.append("id", invoice_id);
+      // await uploadInvoice(formData);
     }
 
     if (isToggled) {
@@ -1123,7 +1220,11 @@ const NewInvoiceForm = () => {
         alert(`Please select invoice status!`)
         return;
       }
-      addInvoice(newInvoiceWithoutPO);
+      
+      const invoice_id = await addInvoice(newInvoiceWithoutPO);
+      // formData.append("id", invoice_id);
+      // await uploadInvoice(formData);
+
     }
 
     navigate(`/EmpirePMS/invoice`)
@@ -1222,16 +1323,57 @@ const NewInvoiceForm = () => {
     }));
   }, [newInvoice]);
 
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchProductTypes = async () => {
+        setIsFetchTypeLoading(true); // Set loading state to true at the beginning
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                }});
+            if (!res.ok) {
+                throw new Error('Failed to fetch');
+            }
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError);
+            }
+            
+            setIsFetchTypeLoading(false);
+            setProductTypeState(data);
+            setFetchTypeError(null);
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                // do nothing
+            } else {
+                setIsFetchTypeLoading(false);
+                setFetchTypeError(error.message);
+            }
+        }
+    };
+
+    fetchProductTypes();
+
+    return () => {
+        abortController.abort(); // Cleanup
+    };
+}, []);
+
   //Component's modal
   const orderSelectionModal = (
     <div>
       {/* Modal overlay */}
       {showSelectionModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
+          <div className="bg-white w-[90vw] max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
             {/* Modal Header */}
-            <div className="flex justify-between items-center p-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">
+            <div className="flex justify-between items-center p-2 sm:p-4 border-b bg-slate-100">
+              <h2 className="text-sm sm:text-xl font-bold">
                 Select Purchase Order to Invoice
               </h2>
               <button
@@ -1244,7 +1386,7 @@ const NewInvoiceForm = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-6"
+                  className="w-6 h-6"
                 >
                   <path
                     strokeLinecap="round"
@@ -1254,14 +1396,13 @@ const NewInvoiceForm = () => {
                 </svg>
               </button>
             </div>
-
+        
             {/* Modal Body */}
             <div className="p-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
-              <div className="flex justify-between">
+              <div className="flex flex-col sm:flex-row justify-between gap-1 sm:gap-3">
                 <input
                   type="text"
-                  className="w-5/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  name=""
+                  className="w-full sm:w-5/12 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base"
                   value={searchOrderTerm}
                   onChange={(e) => setSearchOrderTerm(e.target.value)}
                   required
@@ -1269,65 +1410,28 @@ const NewInvoiceForm = () => {
                   onInput={(e) => e.target.setCustomValidity("")}
                   placeholder="Search purchase order..."
                 />
-                <div className="flex items-center">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <label className="font-bold">Supplier:</label>
-                  <label className="ml-2">
+                  <span>
                     {supplierState.length > 0
-                      ? // '?.supplier_name' to avoid potential undefined errors if the supplier is not found.
-                        // If find doesn't match any supplier, it returns undefined, so the fallback value "not selected" will be displayed.
-                        supplierState.find(
+                      ? supplierState.find(
                           (supplier) => supplier._id === newInvoice.supplier
                         )?.supplier_name || "not selected"
                       : "not selected"}
-                  </label>
+                  </span>
                 </div>
               </div>
-              <table className="mt-2 table-auto border-collapse border border-gray-300 w-full shadow-md">
+              <table className="mt-2 table-auto border-collapse border border-gray-300 w-full shadow-md text-xs sm:text-sm">
                 <thead className="bg-indigo-200 text-center">
                   <tr>
                     <th></th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      PO
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      Order Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      EST Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      Project
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      Products
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      Gross Amount
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-3 py-2"
-                    >
-                      Status
-                    </th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">PO</th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">Order Date</th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">EST Date</th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">Project</th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">Products</th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">Gross Amount</th>
+                    <th className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">Status</th>
                   </tr>
                 </thead>
                 <tbody className="text-center">
@@ -1340,16 +1444,14 @@ const NewInvoiceForm = () => {
                     purchaseOrderState
                       .filter(
                         (order) =>
-                          order.order_ref
-                            .toLowerCase()
-                            .includes(searchOrderTerm) &&
+                          order.order_ref.toLowerCase().includes(searchOrderTerm) &&
                           order.supplier._id === newInvoice.supplier
                       )
                       .map((order, index) => (
                         <tr key={index}>
-                          <td className="border border-gray-300 p-2">
+                          <td className="border border-gray-300 p-1 sm:p-2">
                             <input
-                              className="text-blue-600"
+                              className="text-blue-600 text-xs sm:text-base"
                               type="radio"
                               name="_id"
                               value={order._id}
@@ -1357,26 +1459,25 @@ const NewInvoiceForm = () => {
                               onChange={(e) => setSelectedOrder(e.target.value)}
                             />
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
                             {order.order_ref}
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">
                             {formatDate(order.order_date)}
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">
                             {formatDate(order.order_est_datetime)}
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
                             {order.project.project_name}
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
-                            {order.products.length +
-                              order.custom_products.length}
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
+                            {order.products.length + order.custom_products.length}
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
-                            ${order.order_total_amount.toFixed(2)}
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2 hidden sm:table-cell">
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}
                           </td>
-                          <td className="border border-gray-300 px-3 py-2">
+                          <td className="border border-gray-300 px-2 py-1 sm:px-3 sm:py-2">
                             {order.order_status}
                           </td>
                         </tr>
@@ -1391,12 +1492,12 @@ const NewInvoiceForm = () => {
                 </tbody>
               </table>
             </div>
-
+        
             {/* Modal Buttons */}
-            <div className="flex justify-end p-3">
+            <div className="flex justify-end p-3 gap-2">
               <button
                 onClick={handleToggleSelectionModal}
-                className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
+                className="bg-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-400 text-sm sm:text-base"
               >
                 Close
               </button>
@@ -1406,14 +1507,15 @@ const NewInvoiceForm = () => {
                   isFetchOrderLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-blue-600"
-                }`}
-                disabled={isFetchOrderLoading} // Disable button when loading
+                } text-sm sm:text-base`}
+                disabled={isFetchOrderLoading}
               >
                 {isFetchOrderLoading ? "Processing..." : "Add to Invoice"}
               </button>
             </div>
           </div>
         </div>
+      
       )}
     </div>
   );
@@ -1421,11 +1523,11 @@ const NewInvoiceForm = () => {
   const productPriceModal = (
     <div>
       {showProductPriceModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center px-4 sm:px-8">
+          <div className="bg-white w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
             {/* Modal Header */}
             <div className="flex justify-between items-center p-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">Product Prices</h2>
+              <h2 className="text-lg sm:text-xl font-bold">Product Prices</h2>
               <button
                 onClick={handleTogglePriceModal}
                 className="text-gray-500 hover:text-gray-800"
@@ -1436,111 +1538,72 @@ const NewInvoiceForm = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-6"
+                  className="w-6 h-6"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18 18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-
+        
             {/* Modal Body */}
             <div className="p-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
               {isFetchProductDetailsLoading ? (
                 <div>Loading...</div>
-              ) : Array.isArray(productPriceState) &&
-                productPriceState.length > 0 ? (
+              ) : Array.isArray(productPriceState) && productPriceState.length > 0 ? (
                 <>
-                  <h2 className="text-lg font-semibold mb-3 bg-indigo-50 px-2 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+                  <h2 className="text-base sm:text-lg font-semibold mb-3 bg-indigo-50 px-2 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
                     <span>{productPriceState[0].product.product_name}</span>
                     <span className="text-xs text-gray-500 ml-2">
                       [SKU: {productPriceState[0].product.product_sku}]
                     </span>
                   </h2>
-                  <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
+                  <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-xs sm:text-sm">
                     <thead className="bg-indigo-200 text-center">
                       <tr>
-                        <th
-                          scope="col"
-                          className="border border-gray-300 px-2 py-1"
-                        >
-                          Effective Date
-                        </th>
-                        <th
-                          scope="col"
-                          className="border border-gray-300 px-2 py-1"
-                        >
-                          Unit A
-                        </th>
-                        <th
-                          scope="col"
-                          className="border border-gray-300 px-2 py-1"
-                        >
-                          Unit B
-                        </th>
-                        <th
-                          scope="col"
-                          className="border border-gray-300 px-2 py-1"
-                        >
-                          Price Fixed (?)
-                        </th>
-                        <th
-                          scope="col"
-                          className="border border-gray-300 px-2 py-1"
-                        >
-                          Project
-                        </th>
+                        <th className="border border-gray-300 px-2 py-1">Effective Date</th>
+                        <th className="border border-gray-300 px-2 py-1">Unit A</th>
+                        <th className="border border-gray-300 px-2 py-1">Unit B</th>
+                        <th className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Price Fixed (?)</th>
+                        <th className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Actual Rate</th>
+                        <th className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Notes</th>
+                        <th className="border border-gray-300 px-2 py-1">Project</th>
                       </tr>
                     </thead>
                     <tbody className="text-center">
                       {productPriceState.map((item, index) => (
                         <tr key={index}>
                           <td className="border border-gray-300 px-2 py-1">
-                            {formatDate(
-                              item.productPrice.product_effective_date
-                            )}
+                            {formatDate(item.productPrice.product_effective_date)}
                           </td>
                           <td className="border border-gray-300 px-2 py-1">
                             <label>{item.productPrice.product_number_a}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                            <label className="ml-1 text-xs opacity-50 text-nowrap">
                               {item.productPrice.product_unit_a}
                             </label>
-                            <div className="mt-1">
-                              $
-                              {item.productPrice.product_price_unit_a.toFixed(
-                                2
-                              )}
-                            </div>
+                            <div className="mt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_a * 100) / 100)}</div>
                           </td>
                           <td className="border border-gray-300 px-2 py-1">
                             <label>{item.productPrice.product_number_b}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                            <label className="ml-1 text-xs opacity-50 text-nowrap">
                               {item.productPrice.product_unit_b}
                             </label>
-                            <div className="mt-1">
-                              $
-                              {item.productPrice.product_price_unit_b.toFixed(
-                                2
-                              )}
-                            </div>
+                            <div className="mt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_b * 100) / 100)}</div>
                           </td>
-                          <td className="border border-gray-300 px-2 py-1">
+                          <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
                             {item.productPrice.price_fixed ? "Yes" : "No"}
                           </td>
+                          <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
+                            {item.productPrice.product_actual_rate}
+                          </td>
+                          <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
+                            {item.productPrice?.product_price_note || "None"}
+                          </td>
                           <td className="border border-gray-300 px-1 py-1">
-                            {item.productPrice.project_names.map(
-                              (project, index) => (
-                                <label
-                                  key={index}
-                                  className="ml-1 p-1 border-2 rounded-md"
-                                >
-                                  {project}
-                                </label>
-                              )
-                            )}
+                            {item.productPrice.project_names.map((project, index) => (
+                              <label key={index} className="ml-1 p-1 border-2 rounded-md">
+                                {project}
+                              </label>
+                            ))}
                           </td>
                         </tr>
                       ))}
@@ -1549,16 +1612,16 @@ const NewInvoiceForm = () => {
                 </>
               ) : (
                 <div>
-                  Product Price API fetched successfully, but it might be
-                  empty...
+                  Product Price API fetched successfully, but it might be empty...
                 </div>
               )}
             </div>
+        
             {/* Modal Buttons */}
-            <div className="flex justify-end p-3">
+            <div className="flex justify-end p-3 space-x-2">
               <button
                 onClick={handleTogglePriceModal}
-                className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
+                className="bg-gray-300 text-gray-700 px-3 py-2 rounded hover:bg-gray-400"
               >
                 Close
               </button>
@@ -1571,6 +1634,7 @@ const NewInvoiceForm = () => {
             </div>
           </div>
         </div>
+      
       )}
     </div>
   );
@@ -1582,7 +1646,7 @@ const NewInvoiceForm = () => {
           <div className="bg-white max-w-[90vh] max-h-[90vh] overflow-y-auto rounded-lg shadow-lg">
             {/* Modal Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">
+              <h2 className="text-sm md:text-xl font-bold">
                 {updatedOrder.supplier.supplier_name}: NEW PRODUCT
               </h2>
               <button
@@ -1626,7 +1690,7 @@ const NewInvoiceForm = () => {
   const editOrderModal = (
     <div>
       {showEditOrderModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-5">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-1 lg:p-5 text-xs lg:text-base">
           <form
             className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg"
             onSubmit={() => {
@@ -1636,8 +1700,8 @@ const NewInvoiceForm = () => {
             }}
           >
             {/* Modal Header */}
-            <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">
+            <div className="flex justify-between items-center px-2 py-1 sm:px-4 sm:py-3 border-b bg-slate-100">
+              <h2 className="text-sm sm:text-xl font-bold">
                 EDIT PURCHASE ORDER: {updatedOrder.order_ref}
               </h2>
               <button
@@ -1650,7 +1714,7 @@ const NewInvoiceForm = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-6"
+                  className="size-5 sm:size-6"
                 >
                   <path
                     strokeLinecap="round"
@@ -1662,10 +1726,10 @@ const NewInvoiceForm = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-2 grid grid-cols-2">
+            <div className="py-1 px-4 lg:p-2 grid grid-cols-1 lg:grid-cols-2">
               <div className="p-2 max-h-[70vh] overflow-y-auto thin-scrollbar">
                 {/* disabled details */}
-                <div className="grid grid-cols-3 text-sm">
+                <div className="grid grid-cols-1 lg:grid-cols-3 text-xs sm:text-sm">
                   <div>
                     <span className="font-bold">Purchase Order No:</span>{" "}
                     {updatedOrder.order_ref}
@@ -1681,45 +1745,51 @@ const NewInvoiceForm = () => {
                 </div>
                 {/* products selection */}
                 <div className="container p-0 border-2 shadow-md bg-slate-50">
-                  <div className="grid grid-cols-3 m-2 gap-x-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 m-2 gap-x-1">
                     <input
                       type="text"
-                      className="form-control text-xs mb-1 col-span-2"
+                      className="form-control text-xs md:text-base mb-1 col-span-2"
                       placeholder="Search products..."
                       value={searchProductTerm}
                       onChange={(e) => setSearchProductTerm(e.target.value)}
                     />
                     <div>
                       <select
-                        className="form-control text-xs shadow-sm cursor-pointer opacity-95"
-                        name="product_types"
+                        className="form-control md:text-base text-xs shadow-sm cursor-pointer opacity-95"
+                        name="product_type"
                         value={selectedProductType}
                         onChange={(e) => setSelectedProductType(e.target.value)}
                       >
                         <option value="">Filter by Product Type...</option>
-                        {distinctProductTypes.map((productType, index) => (
-                          <option key={index} value={productType}>
-                            {productType}
+                        {productTypeState
+                        .filter(type =>
+                          productState.some(
+                            object => object.product.product_type === type._id
+                          )
+                        )
+                        .map((productType, index) => (
+                          <option key={index} value={productType._id}>
+                            {productType.type_name}
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-xs">
+                  <div className="grid grid-cols-3 lg:grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-xs">
                     <div className="p-1">
                       <label>SKU</label>
                     </div>
                     <div className="p-1">
                       <label>Name</label>
                     </div>
-                    <div className="p-1">
+                    <div className="p-1 hidden lg:inline-block">
                       <label>Unit A</label>
                     </div>
-                    <div className="p-1">
+                    <div className="p-1 hidden lg:inline-block">
                       <label>Unit B</label>
                     </div>
-                    <div className="grid grid-cols-3 gap-2 p-1">
-                      <label className="col-span-2">Type</label>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-1">
+                      <label className="col-span-1 lg:col-span-2">Type</label>
                     </div>
                   </div>
                   {productState ? (
@@ -1734,26 +1804,26 @@ const NewInvoiceForm = () => {
                       .map((product, index) => (
                         <div
                           key={index}
-                          className="grid grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100"
+                          className="grid grid-cols-3 lg:grid-cols-5 gap-1 p-1 border-b text-xs text-center hover:bg-slate-100"
                           title="Add to order"
                         >
                           <div>{product.product.product_sku}</div>
                           <div>{product.product.product_name}</div>
-                          <div>
+                          <div className="hidden lg:inline-block">
                             {product.productPrice.product_number_a}
                             <span className="ml-2 opacity-50">
                               {product.productPrice.product_unit_a}
                             </span>
                           </div>
-                          <div>
+                          <div className="hidden lg:inline-block">
                             {product.productPrice.product_number_b}
                             <span className="ml-2 opacity-50">
                               {product.productPrice.product_unit_b}
                             </span>
                           </div>
-                          <div className="grid grid-cols-3 gap-2 p-1">
-                            <label className="col-span-2">
-                              {product.product.product_types}
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 p-1">
+                            <label className="col-span-1 lg:col-span-2">
+                              {productTypeState.find(type => type._id === product.product.product_type)?.type_name || 'Unknown'}
                             </label>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -1783,7 +1853,7 @@ const NewInvoiceForm = () => {
               <div className="p-2 mt-3 max-h-[70vh] overflow-y-auto thin-scrollbar">
                 {/* added products */}
                 <div className="bg-gray-100 border rounded-lg shadow-sm">
-                  <div className="border-0 rounded-lg">
+                  <div className="border-0 rounded-lg overflow-x-auto">
                     <table className="table m-0 text-xs">
                       <thead className="thead-dark text-center">
                         <tr className="table-primary">
@@ -1793,7 +1863,7 @@ const NewInvoiceForm = () => {
                           <th scope="col">Qty A</th>
                           <th scope="col">Qty B</th>
                           <th scope="col">Price A</th>
-                          <th scope="col">Net Amount</th>
+                          <th scope="col" className="hidden sm:table-cell">Net Amount</th>
                           <th scope="col"></th>
                         </tr>
                       </thead>
@@ -1814,7 +1884,7 @@ const NewInvoiceForm = () => {
                               <td>
                                 <input
                                   type="text"
-                                  className="form-control text-xs px-1 py-0.5"
+                                  className="form-control md:text-base text-xs px-1 py-0.5"
                                   name="order_product_location"
                                   value={prod.order_product_location}
                                   onChange={(e) =>
@@ -1884,7 +1954,7 @@ const NewInvoiceForm = () => {
                               </td>
                               <td className="relative">
                                 <label>
-                                  ${prod.order_product_price_unit_a}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}
                                 </label>
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -1908,17 +1978,16 @@ const NewInvoiceForm = () => {
                                   />
                                 </svg>
                               </td>
-                              <td>
+                              <td className="hidden sm:table-cell">
                                 <label>
-                                  $
-                                  {(prod.productprice_obj_ref
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((prod.productprice_obj_ref
                                     .product_number_a === 1
                                     ? prod.order_product_qty_a *
                                       (prod.order_product_price_unit_a || 0) *
                                       prod.productprice_obj_ref.product_number_a
                                     : prod.order_product_qty_a *
                                       (prod.order_product_price_unit_a || 0)
-                                  ).toFixed(2)}
+                                  ) * 100) / 100)}
                                 </label>
                               </td>
                               <td>
@@ -1976,7 +2045,7 @@ const NewInvoiceForm = () => {
                             <td>
                               <input
                                 type="text"
-                                className="form-control px-1 py-0.5 text-xs"
+                                className="form-control md:text-base px-1 py-0.5 text-xs"
                                 name="custom_product_name"
                                 value={cproduct.custom_product_name}
                                 onChange={(e) =>
@@ -1995,7 +2064,7 @@ const NewInvoiceForm = () => {
                             <td>
                               <input
                                 type="text"
-                                className="form-control px-1 py-0.5 text-xs"
+                                className="form-control md:text-base px-1 py-0.5 text-xs"
                                 name="custom_product_location"
                                 value={cproduct.custom_product_location}
                                 onChange={(e) =>
@@ -2038,7 +2107,7 @@ const NewInvoiceForm = () => {
                             </td>
                             <td>-</td>
                             <td>-</td>
-                            <td>-</td>
+                            <td className="hidden sm:table-cell">-</td>
                             <td>
                               <button
                                 type="button"
@@ -2097,7 +2166,7 @@ const NewInvoiceForm = () => {
                 </div>
 
                 {/* more disabled details */}
-                <div className="grid grid-cols-2 text-sm mt-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 text-sm mt-1">
                   <div>
                     <span className="font-bold">Internal Comments:</span>
                   </div>
@@ -2137,14 +2206,14 @@ const NewInvoiceForm = () => {
   const createPriceModal = (
     <div>
       {showCreatePriceModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2">
           <form
             className="bg-white w-auto rounded-lg shadow-lg"
             onSubmit={handleSubmitNewPrice}
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-              <h2 className="text-xl font-bold">CREATE NEW PRICE</h2>
+              <h2 className="text-sm sm:text-xl font-bold">CREATE NEW PRICE</h2>
               <button
                 onClick={handleToggleCreatePriceModal}
                 className="text-gray-500 hover:text-gray-800"
@@ -2173,21 +2242,21 @@ const NewInvoiceForm = () => {
               )
               .map((prod) => (
                 <div className="p-2">
-                  <h2 className="text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+                  <h2 className="text-xs sm:text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
                     <span>{prod.product_obj_ref.product_name}</span>
                     <span className="text-xs text-gray-500 ml-2">
                       [SKU: {prod.product_obj_ref.product_sku}]
                     </span>
                   </h2>
-                  <div className="grid grid-cols-3 gap-x-10 gap-y-4 p-3 mb-1">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-1 md:gap-x-10 gap-y-1 md:gap-y-4 p-3 mb-1">
                     <div className="border-2 rounded p-2">
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Number-A:
                         </label>
                         <input
                           type="number"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_number_a"
                           value={newProductPrice.product_number_a}
                           onChange={handleNewProductPriceInput}
@@ -2204,11 +2273,11 @@ const NewInvoiceForm = () => {
                           }
                         />
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">*Unit-A:</label>
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">*Unit-A:</label>
                         <input
                           type="text"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_unit_a"
                           value={newProductPrice.product_unit_a}
                           onChange={handleNewProductPriceInput}
@@ -2219,12 +2288,12 @@ const NewInvoiceForm = () => {
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={prod.productprice_obj_ref.product_unit_a}
                         />
-                        <label className="text-xs italic text-gray-400">
+                        <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: Box, Pack, Carton
                         </label>
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Unit-A Price:
                         </label>
                         <div className="flex items-center border rounded">
@@ -2244,7 +2313,7 @@ const NewInvoiceForm = () => {
                           </svg>
                           <input
                             type="number"
-                            className="form-control placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
+                            className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
                             name="product_price_unit_a"
                             value={newProductPrice.product_price_unit_a}
                             onChange={handleNewProductPriceInput}
@@ -2263,13 +2332,13 @@ const NewInvoiceForm = () => {
                       </div>
                     </div>
                     <div className="border-2 rounded p-2">
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Number-B:
                         </label>
                         <input
                           type="number"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_number_b"
                           value={newProductPrice.product_number_b}
                           onChange={handleNewProductPriceInput}
@@ -2286,11 +2355,11 @@ const NewInvoiceForm = () => {
                           }
                         />
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">*Unit-B:</label>
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">*Unit-B:</label>
                         <input
                           type="text"
-                          className="form-control placeholder-gray-400 placeholder-opacity-50"
+                          className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
                           name="product_unit_b"
                           value={newProductPrice.product_unit_b}
                           onChange={handleNewProductPriceInput}
@@ -2301,12 +2370,12 @@ const NewInvoiceForm = () => {
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={prod.productprice_obj_ref.product_unit_b}
                         />
-                        <label className="text-xs italic text-gray-400">
+                        <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: units, length, each, sheet
                         </label>
                       </div>
-                      <div className="mb-3">
-                        <label className="form-label font-bold">
+                      <div className="mb-0 md:mb-3">
+                        <label className="form-label font-bold text-xs md:text-base">
                           *Unit-B Price:
                         </label>
                         <div className="flex items-center border rounded">
@@ -2326,7 +2395,7 @@ const NewInvoiceForm = () => {
                           </svg>
                           <input
                             type="number"
-                            className="form-control placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
+                            className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
                             name="product_price_unit_b"
                             value={newProductPrice.product_price_unit_b}
                             onChange={handleNewProductPriceInput}
@@ -2346,11 +2415,11 @@ const NewInvoiceForm = () => {
                     </div>
                     {/* **** PROJECT DROPDOWN START **** */}
                     <div>
-                      <label className="block font-bold mb-2">*Project:</label>
+                      <label className="block font-bold mb-0 md:mb-2 text-xs md:text-base">*Project:</label>
                       <div>
                         <button
                           type="button"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
                           onClick={() =>
                             setIsToggleProjectDropdown(!isToggleProjectDropdown)
                           }
@@ -2391,32 +2460,49 @@ const NewInvoiceForm = () => {
                           </div>
                         )}
                       </div>
-                      <p className="text-xs italic text-gray-400 mt-2">
+                      <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
                         Select one or more projects that this new product
                         applies to
                       </p>
                     </div>
                     {/* **** PRICE EFFECTIVE DATE **** */}
                     <div>
-                      <label className="form-label font-bold">
+                      <label className="form-label font-bold text-xs md:text-base">
                         *Price effective date:
                       </label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="form-control text-xs md:text-base"
                         name="product_effective_date"
                         value={newProductPrice.product_effective_date}
                         onChange={handleNewProductPriceInput}
                         required
                       />
-                      <p className="text-xs italic text-gray-400 mt-2">
+                      <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
                         Product price will take effect before order date:{" "}
                         {formatDate(newProductPrice.product_effective_date)}
                       </p>
                     </div>
+                    {/* **** PRICE ACTUAL RATE **** */}
+                    <div>
+                      <label className="form-label font-bold text-xs md:text-base">
+                        *Price actual price/rate:
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control text-xs md:text-base"
+                        name="product_actual_rate"
+                        value={newProductPrice.product_actual_rate}
+                        onChange={handleNewProductPriceInput}
+                        required
+                      />
+                      <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
+                        The price/rate of the product's actual size.
+                      </p>
+                    </div>
                     {/* **** PRICE FIXED (?) **** */}
                     <div>
-                      <label className="form-label font-bold">
+                      <label className="form-label font-bold text-xs md:text-base">
                         Price fixed(?):
                       </label>
                       <input
@@ -2434,6 +2520,18 @@ const NewInvoiceForm = () => {
                         }
                       />
                     </div>
+                    {/* **** PRODUCT PRICE NOTE **** */}
+                    <div className="col-span-3">
+                      <label className="form-label font-bold text-xs md:text-base">
+                        Price notes:
+                      </label>
+                      <textarea
+                        className="form-control text-xs md:text-base"
+                        name="product_price_note"
+                        value={newProductPrice.product_price_note}
+                        onChange={handleNewProductPriceInput}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2444,13 +2542,13 @@ const NewInvoiceForm = () => {
                   handleTogglePriceModal();
                   handleToggleCreatePriceModal();
                 }}
-                className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400"
+                className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400 text-sm md:text-base"
               >
                 BACK
               </button>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600"
+                className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm md:text-base"
               >
                 SUBMIT NEW PRICE
               </button>
@@ -2580,7 +2678,7 @@ const NewInvoiceForm = () => {
     fetchProjectError ||
     fetchProductsErrorState ||
     updateOrderErrorState ||
-    addInvoiceError
+    addInvoiceError || uploadInvoiceError
   ) {
     const errorMessages = [
       fetchSupplierError,
@@ -2591,6 +2689,7 @@ const NewInvoiceForm = () => {
       fetchProductsErrorState,
       updateOrderErrorState,
       addInvoiceError,
+      uploadInvoiceError
     ];
 
     const isSessionExpired = errorMessages.some((error) =>
@@ -2634,7 +2733,7 @@ const NewInvoiceForm = () => {
               fetchProjectError ||
               fetchProductsErrorState ||
               updateOrderErrorState ||
-              addInvoiceError}
+              addInvoiceError || uploadInvoiceError}
           </p>
           <button
             onClick={() => window.location.reload()}
@@ -2653,17 +2752,17 @@ const NewInvoiceForm = () => {
     <div>
       <div className="w-screen bg-neutral-50 items-center justify-center">
         {/* HEADER */}
-        <div className="mx-3 mt-3 p-2 text-center font-bold text-xl bg-slate-800 text-white rounded-t-lg">
+        <div className="mx-3 mt-3 p-2 text-center font-bold text-sm sm:text-xl bg-slate-800 text-white rounded-t-lg">
           <label>NEW INVOICE</label>
         </div>
         {/* BODY */}
         <form onSubmit={handleSubmitInvoice}>
           {/* Invoice Details */}
-          <div className="mx-3 p-2 grid grid-cols-4 gap-x-4 gap-y-2 border-2">
+          <div className="mx-3 p-2 grid grid-cols-1 sm:grid-cols-4 gap-x-1 gap-y-1 sm:gap-x-4 sm:gap-y-2 border-2">
             <div>
-              <label className="font-bold">*Supplier:</label>
+              <label className="font-bold text-sm sm:text-base">*Supplier:</label>
               <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                 name="supplier_name"
                 value={newInvoice.supplier}
                 onChange={handleSupplierChange}
@@ -2684,10 +2783,10 @@ const NewInvoiceForm = () => {
               </select>
             </div>
             <div>
-              <label className="font-bold">*Invoice Ref:</label>
+              <label className="font-bold text-sm sm:text-base">*Invoice Ref:</label>
               <input
                 type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base"
                 name="invoice_ref"
                 value={newInvoice.invoice_ref}
                 onChange={handleInputChange}
@@ -2699,10 +2798,10 @@ const NewInvoiceForm = () => {
               />
             </div>
             <div>
-              <label className="font-bold">*Invoice Issue Date:</label>
+              <label className="font-bold text-sm sm:text-base">*Invoice Issue Date:</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                 name="invoice_issue_date"
                 value={newInvoice.invoice_issue_date}
                 onChange={handleInputChange}
@@ -2713,11 +2812,12 @@ const NewInvoiceForm = () => {
                 onInput={(e) => e.target.setCustomValidity("")}
               />
             </div>
-            <div>
-              <label className="font-bold">*Invoice Received Date:</label>
+            {/* TEMPORARILY REMOVED as it's not required - Feedback from Office team */}
+            {/* <div>
+              <label className="font-bold text-sm sm:text-base">*Invoice Received Date:</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                 name="invoice_received_date"
                 value={newInvoice.invoice_received_date}
                 onChange={handleInputChange}
@@ -2727,12 +2827,12 @@ const NewInvoiceForm = () => {
                 }
                 onInput={(e) => e.target.setCustomValidity("")}
               />
-            </div>
+            </div> */}
             <div>
-              <label className="font-bold">Invoice Due Date:</label>
+              <label className="font-bold text-sm sm:text-base">Invoice Due Date:</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                 name="invoice_due_date"
                 value={newInvoice.invoice_due_date}
                 onChange={handleInputChange}
@@ -2744,18 +2844,18 @@ const NewInvoiceForm = () => {
               />
             </div>
             <div>
-              <label className="font-bold">Invoice Without PO:</label>
+              <label className="font-bold text-sm sm:text-base">Invoice Without PO:</label>
               {/* toggle button */}
               <div className="flex items-center px-1 py-1">
                 <div
                   onClick={handleToggle}
-                  className={`w-14 h-8 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition-colors duration-300 ease-in-out ${
+                  className={`w-7 sm:w-14 h-4 sm:h-8 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer transition-colors duration-300 ease-in-out ${
                     isToggled ? "bg-green-500" : ""
                   }`}
                 >
                   <div
-                    className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
-                      isToggled ? "translate-x-6" : ""
+                    className={`bg-white w-3 h-3 sm:w-6 sm:h-6 rounded-full shadow-md transform transition-transform duration-300 ease-in-out ${
+                      isToggled ? "translate-x-3 sm:translate-x-6" : ""
                     }`}
                   ></div>
                 </div>
@@ -2770,7 +2870,7 @@ const NewInvoiceForm = () => {
             <div className="mx-3 p-2 border-2">
               {/* header */}
               <div className="flex justify-between">
-                <div className="font-bold flex justify-center">
+                <div className="font-bold flex justify-center text-xs sm:text-base">
                   <label>
                     Purchase Order:{" "}
                     {currentOrder ? currentOrder.order_ref : `not selected`}
@@ -2782,7 +2882,7 @@ const NewInvoiceForm = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="ml-2 size-4 cursor-pointer"
+                      className="ml-2 size-5 sm:size-4 cursor-pointer"
                       onClick={() => {
                         handleToggleEditOrderModal();
                         setUpdatedOrder(currentOrder);
@@ -2797,7 +2897,7 @@ const NewInvoiceForm = () => {
                     </svg>
                   )}
                 </div>
-                <div className="font-bold italic text-sm">
+                <div className="font-bold italic text-xs sm:text-sm">
                   Order Date:{" "}
                   {currentOrder
                     ? formatDate(currentOrder.order_date)
@@ -2805,258 +2905,183 @@ const NewInvoiceForm = () => {
                 </div>
               </div>
               {/* items */}
-              <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
-                <thead className="bg-indigo-200 text-center">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-12"
-                    >
-                      SKU
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-96"
-                    >
-                      Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-40"
-                    >
-                      Location
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-20"
-                    >
-                      Previously invoiced
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Qty Ordered
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Current Invoice Qty
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Unit Price
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Expected Amount
-                    </th>
-                    <th
-                      scope="col"
-                      className="border border-gray-300 px-1 py-2 w-16"
-                    >
-                      Current Invoice Amount
-                    </th>
-                  </tr>
-                </thead>
-                {currentOrder ? (
-                  <tbody className="text-center">
-                    {/* registered products */}
-                    {currentOrder.products &&
-                      currentOrder.products.map((prod, index) => (
-                        <tr key={index}>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {prod.product_obj_ref.product_sku}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {prod.product_obj_ref.product_name}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {prod.order_product_location}
-                          </td>
+              <div className="overflow-x-auto">
+                <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-xs sm:text-sm">
+                  <thead className="bg-indigo-200 text-center">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-12 "
+                      >
+                        SKU
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-96"
+                      >
+                        Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-40 "
+                      >
+                        Location
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-20"
+                      >
+                        Previously invoiced
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Qty Ordered
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Current Invoice Qty
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Unit Price
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16 "
+                      >
+                        Expected Amount
+                      </th>
+                      <th
+                        scope="col"
+                        className="border border-gray-300 px-1 py-2 w-16"
+                      >
+                        Current Invoice Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  {currentOrder ? (
+                    <tbody className="text-center">
+                      {/* registered products */}
+                      {currentOrder.products &&
+                        currentOrder.products.map((prod, index) => (
+                          <tr key={index}>
+                            <td className="border border-gray-300 px-1 py-2 ">
+                              {prod.product_obj_ref.product_sku}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {prod.product_obj_ref.product_name}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 ">
+                              {prod.order_product_location}
+                            </td>
 
-                          {/* Based on previous invoice */}
-                          <td className="border border-gray-300 px-1 py-2 bg-gray-100">
-                            <label>
-                              {currentOrder.invoices.reduce((sum, invoice) => {
-                                // Reduce over each invoice to accumulate the quantities
-                                const invoiceProductQtySum =
-                                  invoice.products.reduce(
-                                    (invoiceSum, invoiceProduct) => {
-                                      // Check if the current product's _id matches the invoice product's _id
-                                      if (prod._id === invoiceProduct._id) {
-                                        // Add the invoice product quantity to the sum if there's a match
-                                        return (
-                                          invoiceSum +
-                                          invoiceProduct.invoice_product_qty_a
-                                        );
-                                      }
-                                      return invoiceSum;
-                                    },
-                                    0
-                                  );
+                            {/* Based on previous invoice */}
+                            <td className="border border-gray-300 px-1 py-2 bg-gray-100">
+                              <label>
+                                {currentOrder.invoices.reduce((sum, invoice) => {
+                                  // Reduce over each invoice to accumulate the quantities
+                                  const invoiceProductQtySum =
+                                    invoice.products.reduce(
+                                      (invoiceSum, invoiceProduct) => {
+                                        // Check if the current product's _id matches the invoice product's _id
+                                        if (prod._id === invoiceProduct._id) {
+                                          // Add the invoice product quantity to the sum if there's a match
+                                          return (
+                                            invoiceSum +
+                                            invoiceProduct.invoice_product_qty_a
+                                          );
+                                        }
+                                        return invoiceSum;
+                                      },
+                                      0
+                                    );
 
-                                return sum + invoiceProductQtySum;
-                              }, 0)}
-                            </label>
+                                  return sum + invoiceProductQtySum;
+                                }, 0)}
+                              </label>
 
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              {prod.productprice_obj_ref.product_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            <label>{prod.order_product_qty_a}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              {prod.productprice_obj_ref.product_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 items-center">
-                            <input
-                              type="number"
-                              name="invoice_product_qty_a"
-                              value={
-                                newInvoice.products[index].invoice_product_qty_a
-                              }
-                              onChange={(e) => handleInputChange(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter invoice quantity"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                            />
-                            <label className="ml-2 text-xs opacity-50 text-nowrap">
-                              {prod.productprice_obj_ref.product_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            <label>
-                              $ {prod.productprice_obj_ref.product_price_unit_a}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-end">
-                            ${" "}
-                            {(
-                              prod.order_product_qty_a *
-                              prod.productprice_obj_ref.product_price_unit_a
-                            ).toFixed(2)}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-end">
-                            ${" "}
-                            {
-                              newInvoice.products[index]
-                                .invoice_product_gross_amount_a
-                            }
-                          </td>
-                        </tr>
-                      ))}
-                    {/* custom products */}
-                    {currentOrder.custom_products &&
-                      currentOrder.custom_products.map((cusprod, index) => (
-                        <tr key={index}>
-                          <td className="border border-gray-300 px-1 py-2">
-                            -
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {cusprod.custom_product_name}
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            {cusprod.custom_product_location}
-                          </td>
-                          {/* Based on previous invoice */}
-                          <td className="border border-gray-300 px-1 py-2 bg-gray-100">
-                            <label>
-                              {currentOrder.invoices.reduce((sum, invoice) => {
-                                // Reduce over each invoice to accumulate the quantities
-                                const invoiceCtmProdQtySum =
-                                  invoice.custom_products.reduce(
-                                    (invoiceSum, invoiceCtmProd) => {
-                                      // Check if the current product's _id matches the invoice product's _id
-                                      if (cusprod._id === invoiceCtmProd._id) {
-                                        // Add the invoice product quantity to the sum if there's a match
-                                        return (
-                                          invoiceSum +
-                                          invoiceCtmProd.custom_order_qty
-                                        );
-                                      }
-                                      return invoiceSum;
-                                    },
-                                    0
-                                  );
-
-                                return sum + invoiceCtmProdQtySum;
-                              }, 0)}
-                            </label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              {`unit`}
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            <label>{cusprod.custom_order_qty}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
-                              unit
-                            </label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 items-center">
-                            <input
-                              type="number"
-                              name="custom_order_qty"
-                              value={
-                                newInvoice.custom_products[index]
-                                  .custom_order_qty
-                              }
-                              onChange={(e) => handleInputChange(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter invoice quantity"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                            />
-                            <label className="ml-2 text-xs opacity-50 text-nowrap">{`unit`}</label>
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2">
-                            $
-                            <input
-                              type="number"
-                              name="custom_order_price"
-                              value={
-                                newInvoice.custom_products[index]
-                                  .custom_order_price
-                              }
-                              onChange={(e) => handleInputChange(e, index)}
-                              step={0.0001}
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity("Enter custom price")
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                              className="px-1 py-0.5 text-xs border rounded-md w-20"
-                              disabled={
-                                currentOrder.invoices.reduce((sum, invoice) => {
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                {prod.productprice_obj_ref.product_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              <label>{prod.order_product_qty_a}</label>
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                {prod.productprice_obj_ref.product_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 items-center">
+                              <input
+                                type="number"
+                                name="invoice_product_qty_a"
+                                value={
+                                  newInvoice.products[index].invoice_product_qty_a
+                                }
+                                onChange={(e) => handleInputChange(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity(
+                                    "Enter invoice quantity"
+                                  )
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                              />
+                              <label className="ml-2 text-xs opacity-50 text-nowrap">
+                                {prod.productprice_obj_ref.product_unit_a}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              <label>
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.productprice_obj_ref.product_price_unit_a * 100) / 100)}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-end ">
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                                prod.order_product_qty_a *
+                                prod.productprice_obj_ref.product_price_unit_a
+                              ) * 100) / 100)}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-end">
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.products[index]
+                                  .invoice_product_gross_amount_a * 100) / 100)}
+                            </td>
+                          </tr>
+                        ))}
+                      {/* custom products */}
+                      {currentOrder.custom_products &&
+                        currentOrder.custom_products.map((cusprod, index) => (
+                          <tr key={index}>
+                            <td className="border border-gray-300 px-1 py-2 ">
+                              -
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              {cusprod.custom_product_name}
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 ">
+                              {cusprod.custom_product_location}
+                            </td>
+                            {/* Based on previous invoice */}
+                            <td className="border border-gray-300 px-1 py-2 bg-gray-100">
+                              <label>
+                                {currentOrder.invoices.reduce((sum, invoice) => {
                                   // Reduce over each invoice to accumulate the quantities
                                   const invoiceCtmProdQtySum =
                                     invoice.custom_products.reduce(
                                       (invoiceSum, invoiceCtmProd) => {
                                         // Check if the current product's _id matches the invoice product's _id
-                                        if (
-                                          cusprod._id === invoiceCtmProd._id
-                                        ) {
+                                        if (cusprod._id === invoiceCtmProd._id) {
                                           // Add the invoice product quantity to the sum if there's a match
                                           return (
                                             invoiceSum +
-                                            invoiceCtmProd.custom_order_price
+                                            invoiceCtmProd.custom_order_qty
                                           );
                                         }
                                         return invoiceSum;
@@ -3065,202 +3090,278 @@ const NewInvoiceForm = () => {
                                     );
 
                                   return sum + invoiceCtmProdQtySum;
-                                }, 0) > 0
-                                  ? true
-                                  : false
-                              }
-                            />
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-center">
-                            -
-                          </td>
-                          <td className="border border-gray-300 px-1 py-2 text-end">
-                            ${" "}
-                            {
-                              newInvoice.custom_products[index]
-                                .custom_order_gross_amount
-                            }
-                          </td>
-                        </tr>
-                      ))}
-                    {/* calculation table */}
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Delivery fee:
-                      </td>
-                      <td
-                        className="border border-gray-300 px-3 py-2 text-center"
-                        colSpan={2}
-                      >
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_delivery_fee"
-                          value={newInvoice.invoiced_delivery_fee}
-                          onChange={(e) => handleInputChange(e)}
-                          min={0}
-                          step={0.0001}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Strapping/Pallet/Cutting fee:
-                      </td>
-                      <td
-                        className="border border-gray-300 px-3 py-2 text-center"
-                        colSpan={2}
-                      >
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_other_fee"
-                          value={newInvoice.invoiced_other_fee}
-                          onChange={(e) => handleInputChange(e)}
-                          min={0}
-                          step={0.0001}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Credit:
-                      </td>
-                      <td
-                        className="border border-gray-300 px-3 py-2 text-center"
-                        colSpan={2}
-                      >
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_credit"
-                          value={newInvoice.invoiced_credit}
-                          onChange={(e) => handleInputChange(e)}
-                          step={0.01}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Total Gross Amount:
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        ${" "}
-                        {(
-                          currentOrder.products.reduce(
-                            (total, prod) =>
-                              total +
-                              (Number(prod.order_product_gross_amount) ||
-                                0),
-                            0
-                          ) +
-                          (Number(newInvoice.invoiced_delivery_fee) || 0) +
-                          (Number(newInvoice.invoiced_other_fee) || 0) +
-                          (Number(newInvoice.invoiced_credit) || 0)
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        ${" "}
-                        {(
-                          newInvoice.invoiced_calculated_total_amount_incl_gst /
-                          1.1
-                        ).toFixed(2)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={5}></td>
-                      <td
-                        className="border border-gray-300 px-2 py-2 font-bold text-end"
-                        colSpan={2}
-                      >
-                        Total Gross Amount (incl GST):
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        ${" "}
-                        {(
-                          (currentOrder.products.reduce(
-                            (total, prod) =>
-                              total +
-                              (Number(prod.order_product_gross_amount) ||
-                                0),
-                            0
-                          ) +
+                                }, 0)}
+                              </label>
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                {`unit`}
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              <label>{cusprod.custom_order_qty}</label>
+                              <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
+                                unit
+                              </label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 items-center">
+                              <input
+                                type="number"
+                                name="custom_order_qty"
+                                value={
+                                  newInvoice.custom_products[index]
+                                    .custom_order_qty
+                                }
+                                onChange={(e) => handleInputChange(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity(
+                                    "Enter invoice quantity"
+                                  )
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                              />
+                              <label className="ml-2 text-xs opacity-50 text-nowrap">{`unit`}</label>
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2">
+                              $
+                              <input
+                                type="number"
+                                name="custom_order_price"
+                                value={
+                                  newInvoice.custom_products[index]
+                                    .custom_order_price
+                                }
+                                onChange={(e) => handleInputChange(e, index)}
+                                step={0.0001}
+                                required
+                                onInvalid={(e) =>
+                                  e.target.setCustomValidity("Enter custom price")
+                                }
+                                onInput={(e) => e.target.setCustomValidity("")}
+                                className="px-1 py-0.5 text-xs border rounded-md w-20"
+                                disabled={
+                                  currentOrder.invoices.reduce((sum, invoice) => {
+                                    // Reduce over each invoice to accumulate the quantities
+                                    const invoiceCtmProdQtySum =
+                                      invoice.custom_products.reduce(
+                                        (invoiceSum, invoiceCtmProd) => {
+                                          // Check if the current product's _id matches the invoice product's _id
+                                          if (
+                                            cusprod._id === invoiceCtmProd._id
+                                          ) {
+                                            // Add the invoice product quantity to the sum if there's a match
+                                            return (
+                                              invoiceSum +
+                                              invoiceCtmProd.custom_order_price
+                                            );
+                                          }
+                                          return invoiceSum;
+                                        },
+                                        0
+                                      );
+
+                                    return sum + invoiceCtmProdQtySum;
+                                  }, 0) > 0
+                                    ? true
+                                    : false
+                                }
+                              />
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-center ">
+                              -
+                            </td>
+                            <td className="border border-gray-300 px-1 py-2 text-end">
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.custom_products[index]
+                                  .custom_order_gross_amount * 100) / 100)}
+                            </td>
+                          </tr>
+                        ))}
+                      {/* calculation table */}
+                      <tr>
+                        <td colSpan={5}  className=""></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Delivery fee:
+                        </td>
+                        <td
+                          className="border border-gray-300 px-3 py-2 text-center"
+                          colSpan={2}
+                        >
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_delivery_fee"
+                            value={newInvoice.invoiced_delivery_fee}
+                            onChange={(e) => handleInputChange(e)}
+                            min={0}
+                            step={0.0001}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}  className=""></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Strapping/Pallet/Cutting fee:
+                        </td>
+                        <td
+                          className="border border-gray-300 px-3 py-2 text-center"
+                          colSpan={2}
+                        >
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_other_fee"
+                            value={newInvoice.invoiced_other_fee}
+                            onChange={(e) => handleInputChange(e)}
+                            min={0}
+                            step={0.0001}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}  className=""></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Credit:
+                        </td>
+                        <td
+                          className="border border-gray-300 px-3 py-2 text-center"
+                          colSpan={2}
+                        >
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_credit"
+                            value={newInvoice.invoiced_credit}
+                            onChange={(e) => handleInputChange(e)}
+                            step={0.01}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 w-32 px-1 py-0.5 border"
+                          />
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}  className=""></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Total Gross Amount:
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                            currentOrder.products.reduce(
+                              (total, prod) =>
+                                total +
+                                (Number(prod.order_product_gross_amount) ||
+                                  0),
+                              0
+                            ) +
                             (Number(newInvoice.invoiced_delivery_fee) || 0) +
                             (Number(newInvoice.invoiced_other_fee) || 0) +
-                            (Number(newInvoice.invoiced_credit) || 0)) *
-                          1.1
-                        ).toFixed(2)}
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-end">
-                        $ {newInvoice.invoiced_calculated_total_amount_incl_gst}
-                      </td>
-                    </tr>
-                    <tr className="bg-indigo-100">
-                      <td colSpan={5}></td>
-                      <td
-                        className="px-2 py-2 font-bold text-end border border-gray-400"
-                        colSpan={2}
-                      >
-                        Total Raw Amount (incl GST):
-                      </td>
-                      <td className="px-3 py-2 text-center" colSpan={2}>
-                        $
-                        <input
-                          type="number"
-                          name="invoiced_raw_total_amount_incl_gst"
-                          value={newInvoice.invoiced_raw_total_amount_incl_gst}
-                          onChange={(e) => handleInputChange(e)}
-                          min={0}
-                          step={0.01}
-                          required
-                          onInvalid={(e) => e.target.setCustomValidity("")}
-                          onInput={(e) => e.target.setCustomValidity("")}
-                          className="rounded-lg ml-1 bg-white w-32 px-1 py-0.5 border"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                ) : (
-                  <tbody>
-                    <tr>
-                      <td
-                        colSpan="9"
-                        className="border border-gray-300 p-2 text-center"
-                      >
-                        Purchase order not selected...
-                      </td>
-                    </tr>
-                  </tbody>
-                )}
-              </table>
+                            (Number(newInvoice.invoiced_credit) || 0)
+                          ) * 100) / 100)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                            newInvoice.invoiced_calculated_total_amount_incl_gst /
+                            1.1
+                          ) * 100) / 100)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colSpan={5}  className=""></td>
+                        <td
+                          className="border border-gray-300 px-2 py-2 font-bold text-end"
+                          colSpan={2}
+                        >
+                          Total Gross Amount (incl GST):
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                            (currentOrder.products.reduce(
+                              (total, prod) =>
+                                total +
+                                (Number(prod.order_product_gross_amount) ||
+                                  0),
+                              0
+                            ) +
+                              (Number(newInvoice.invoiced_delivery_fee) || 0) +
+                              (Number(newInvoice.invoiced_other_fee) || 0) +
+                              (Number(newInvoice.invoiced_credit) || 0)) *
+                            1.1
+                          ) * 100) / 100)}
+                        </td>
+                        <td className="border border-gray-300 px-3 py-2 text-end">
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}
+                        </td>
+                      </tr>
+                      <tr className="bg-indigo-100">
+                        <td colSpan={5}></td>
+                        <td
+                          className="px-2 py-2 font-bold text-end border border-gray-400"
+                          colSpan={2}
+                        >
+                          Total Raw Amount (incl GST):
+                        </td>
+                        <td className="px-3 py-2 text-center" colSpan={2}>
+                          $
+                          <input
+                            type="number"
+                            name="invoiced_raw_total_amount_incl_gst"
+                            value={newInvoice.invoiced_raw_total_amount_incl_gst}
+                            onChange={(e) => handleInputChange(e)}
+                            min={0}
+                            step={0.01}
+                            required
+                            onInvalid={(e) => e.target.setCustomValidity("")}
+                            onInput={(e) => e.target.setCustomValidity("")}
+                            className="rounded-lg ml-1 bg-white w-32 px-1 py-0.5 border"
+                          />
+                          {(
+                            newInvoice.invoiced_raw_total_amount_incl_gst - (Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
+                          (<span className="text-xs text-red-600 ml-2 font-bold">+
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((newInvoice.invoiced_raw_total_amount_incl_gst - newInvoice.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                            </span>) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 inline-block font-bold ml-2">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                            ))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  ) : (
+                    <tbody>
+                      <tr>
+                        <td
+                          colSpan="9"
+                          className="border border-gray-300 p-2 text-center"
+                        >
+                          Purchase order not selected...
+                        </td>
+                      </tr>
+                    </tbody>
+                  )}
+                </table>
+              </div>
               {/* Select PO button */}
               <div className="bg-transparent border-b-2">
                 <div className="flex justify-center p-2">
@@ -3469,11 +3570,8 @@ const NewInvoiceForm = () => {
                             />
                           </td>
                           <td className="border border-gray-300 px-3 py-2 text-end">
-                            ${" "}
-                            {
-                              newInvoiceWithoutPO.custom_products[index]
-                                .custom_order_gross_amount
-                            }
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoiceWithoutPO.custom_products[index]
+                                .custom_order_gross_amount * 100) / 100)}
                           </td>
                         </tr>
                       )
@@ -3558,8 +3656,7 @@ const NewInvoiceForm = () => {
                       Total Gross Amount:
                     </td>
                     <td className="border border-gray-300 px-3 py-2 text-end">
-                      ${" "}
-                      {(
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                         newInvoiceWithoutPO.custom_products.reduce(
                           (total, prod) =>
                             total +
@@ -3570,7 +3667,7 @@ const NewInvoiceForm = () => {
                           0) +
                         (Number(newInvoiceWithoutPO.invoiced_other_fee) || 0) +
                         (Number(newInvoiceWithoutPO.invoiced_credit) || 0)
-                      ).toFixed(2)}
+                      ) * 100) / 100)}
                     </td>
                   </tr>
                   <tr>
@@ -3579,8 +3676,7 @@ const NewInvoiceForm = () => {
                       Total Gross Amount (incl GST):
                     </td>
                     <td className="border border-gray-300 px-3 py-2 text-end">
-                      ${" "}
-                      {(
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
                         (newInvoiceWithoutPO.custom_products.reduce(
                           (total, prod) =>
                             total +
@@ -3593,7 +3689,7 @@ const NewInvoiceForm = () => {
                             0) +
                           (Number(newInvoiceWithoutPO.invoiced_credit) || 0)) *
                         1.1
-                      ).toFixed(2)}
+                      ) * 100) / 100)}
                     </td>
                   </tr>
                   <tr className="bg-indigo-100">
@@ -3628,9 +3724,9 @@ const NewInvoiceForm = () => {
 
             <div className="flex justify-between mb-2">
               <div>
-                <label className="font-bold">*Invoice status:</label>
+                <label className="font-bold text-sm sm:text-base">*Invoice status:</label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                   name="invoice_status"
                   value={newInvoice.invoice_status}
                   onChange={handleInputChange}
@@ -3649,15 +3745,92 @@ const NewInvoiceForm = () => {
 
             <div>
               <div className="mb-2">
-                <label className="font-bold">Internal Comments:</label>
+                <label className="font-bold text-sm sm:text-base">Internal Comments:</label>
                 <textarea
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base"
                   name="invoice_internal_comments"
                   value={newInvoice.invoice_internal_comments}
                   onChange={handleInputChange}
                 />
               </div>
+              
+              {/* File Upload Input */}
+              <div className="flex flex-col items-center w-full p-1">
+                <label
+                  for="file-upload"
+                  className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-10 h-10 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 16l4-4m0 0l4-4m-4 4v12M16 5l4 4m0 0l-4 4m4-4H8"
+                    />
+                  </svg>
+                  <p className="mt-2 text-sm text-gray-500">
+                    <span className="font-medium">Click to upload</span> or drag and drop files
+                  </p>
+                  <p className="text-xs text-gray-400">PNG, JPG, GIF, PDF up to 10MB</p>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    name="invoices"
+                    multiple
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+                {/* Display Selected Files */}
+                <ul className="mt-2 w-full max-w-md space-y-2">
+                  {files.length > 0 ? (
+                    files.map((file, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center justify-between p-2 text-sm text-gray-700 bg-gray-100 rounded-lg"
+                      >
+                        <span>{file.name}</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-gray-500 mr-1 text-nowrap">
+                            {(file.size / 1024).toFixed(1)} KB
+                          </span>
+                          <button
+                              type="button"
+                              onClick={() => handleRemoveFile(index)}
+                              className="btn btn-danger p-1"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="h-4 w-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                      </li>
+                    ))
+                  ) : (
+                    <p class="text-gray-500 text-sm">No files selected</p>
+                  )}
+                </ul>
+              </div>
+
+              {/* SUBMIT INVOICE BUTTON */}
               <div>
                 <button
                   type="submit"
@@ -3668,8 +3841,6 @@ const NewInvoiceForm = () => {
               </div>
             </div>
           </div>
-          {/* Invoice File Upload */}
-          <div></div>
         </form>
         {orderSelectionModal}
         {editOrderModal}
@@ -3683,3 +3854,4 @@ const NewInvoiceForm = () => {
 };
 
 export default NewInvoiceForm;
+

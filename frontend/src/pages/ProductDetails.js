@@ -15,19 +15,18 @@ const ProductDetails = () => {
     const dispatch = useDispatch()
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
+    const [productTypeState, setProductTypeState] = useState([]);
     const location = useLocation();
-    const supplierId = location.state;
 
     //Component router
-    const { productId } = useParams();
+    const { id, productId } = useParams();
+    const supplierId = location.state || id;
     const navigate = useNavigate();
 
     //Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
     const handlePriceTableClick = (priceId) => { return }
-
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`);
 
     const handleEditProductClick = () => {
         // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
@@ -70,7 +69,7 @@ const ProductDetails = () => {
         }
     };
     
-    //Render component
+    // Fetch product details
     useEffect(() => {
         const fetchProductDetails = async () => {
             try {
@@ -99,46 +98,94 @@ const ProductDetails = () => {
         fetchProductDetails();
     }, [supplierId, productId, dispatch]);
 
+    // Fetch product types
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
+
     //Display DOM
     const productPriceTable = Array.isArray(productState) && productState.length > 0 ? (
-        <div className='container'>
+        <div>
             <h2 className='font-bold'>Product Prices:</h2>
-            <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
-                <thead className="bg-indigo-200 text-center">
-                    <tr>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Effective Date</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Unit A</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Unit B</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Price Fixed (?)</th>
-                        <th scope="col" className="border border-gray-300 px-2 py-1">Project</th>
-                    </tr>
-                </thead>
-                <tbody className='text-center'>
-                {productState.map((item, index) => (
-                    <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
-                        <td className="border border-gray-300 px-2 py-1">{formatDate(item.productPrice.product_effective_date)}</td>
-                        <td className="border border-gray-300 px-2 py-1">
-                            <label>{item.productPrice.product_number_a}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_a}</label>
-                            <div className='mt-1'>${(item.productPrice.product_price_unit_a).toFixed(2)}</div>
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1">
-                            <label>{item.productPrice.product_number_b}</label>
-                            <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_b}</label>
-                            <div className='mt-1'>${(item.productPrice.product_price_unit_b).toFixed(2)}</div>
-                        </td>
-                        <td className="border border-gray-300 px-2 py-1">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
-                        <td className="border border-gray-300 px-1 py-1">
-                            {item.productPrice.project_names.map((project, index) => (
-                                <label key={index} className='ml-1 p-1 border-2 rounded-md'>
-                                    {project}
-                                </label>
-                            ))}
-                        </td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+            <div className='overflow-x-auto'>
+                <table className="table-auto border-collapse border border-gray-300 w-full shadow-md text-sm">
+                    <thead className="bg-indigo-200 text-center">
+                        <tr>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Effective Date</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1">Unit A</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1">Unit B</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Price Fixed (?)</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Actual Rate</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1 hidden sm:table-cell">Notes</th>
+                            <th scope="col" className="border border-gray-300 px-2 py-1">Project</th>
+                        </tr>
+                    </thead>
+                    <tbody className='text-center'>
+                    {productState.map((item, index) => (
+                        <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{formatDate(item.productPrice.product_effective_date)}</td>
+                            <td className="border border-gray-300 px-2 py-1">
+                                <label>{item.productPrice.product_number_a}</label>
+                                <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_a}</label>
+                                <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_a * 100) / 100)}</div>
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1">
+                                <label>{item.productPrice.product_number_b}</label>
+                                <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">{item.productPrice.product_unit_b}</label>
+                                <div className='mt-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_b * 100) / 100)}</div>
+                            </td>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice.price_fixed ? 'Yes' : 'No'}</td>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice.product_actual_rate}</td>
+                            <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{item.productPrice?.product_price_note || 'None'}</td>
+                            <td className="border border-gray-300 px-1 py-1">
+                                {item.productPrice.project_names.map((project, index) => (
+                                    <label key={index} className='ml-1 p-1 border-2 rounded-md text-xs sm:text-base'>
+                                        {project}
+                                    </label>
+                                ))}
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     ) : (
         <div>Product Price API fetched successfully, but it might be empty...</div>
@@ -162,7 +209,7 @@ const ProductDetails = () => {
                 </div>
                 <div className="card-body">
                     <div className="d-flex justify-content-between mb-3">
-                        <button className="btn btn-secondary" onClick={handleBackClick}>BACK</button>
+                        <div></div>
                         <Dropdown>
                             <Dropdown.Toggle variant="success" id="dropdown-basic">
                                 ACTIONS
@@ -191,31 +238,35 @@ const ProductDetails = () => {
                     </div>
                     {Array.isArray(productState) && productState.length > 0 ? (
                         <div className="row">
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">SKU:</label>
                                 <p className="form-label">{productState[0].product.product_sku}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Name:</label>
                                 <p className="form-label">{productState[0].product.product_name}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Type:</label>
-                                <p className="form-label">{productState[0].product.product_types}</p>
+                                <p className="form-label">{productTypeState.find(type => type._id === productState[0].product.product_type)?.type_name || "Unknown"}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Actual Size:</label>
                                 <p className="form-label">{productState[0].product.product_actual_size}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Alias:</label>
                                 <p className="form-label">{productState[0].product.alias_name}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">Next available stock date:</label>
                                 <p className="form-label">{productState[0].product.product_next_available_stock_date || 'In-stock now'}</p>
                             </div>
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
+                                <label className="form-label fw-bold">Notes:</label>
+                                <p className="form-label">{productState[0].product?.product_note || 'None'}</p>
+                            </div>
+                            <div className="col-md-6 mb-0 sm:mb-3 text-sm sm:text-base">
                                 <label className="form-label fw-bold">isArchived:</label>
                                 <p className="form-label">{productState[0].product.product_isarchived ? 'Yes' : 'No'}</p>
                             </div>

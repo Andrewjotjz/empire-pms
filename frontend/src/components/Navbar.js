@@ -2,10 +2,12 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLogout } from '../hooks/useLogout';
 import NavbarSkeleton  from '../pages/loaders/NavbarSkeleton'
+import { useState } from 'react';
 
 const Navbar = () => {
   //Component state declaration
   const localUser = JSON.parse(localStorage.getItem('localUser'))
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   //Component router
   const location = useLocation();
@@ -40,12 +42,16 @@ const Navbar = () => {
   return (
     localUser && Object.keys(localUser).length > 0 ? (
       <header>
-        <nav className="bg-gray-900 p-2 w-screen px-4">
+        <nav className="bg-gray-900 p-2 w-full px-4">
           <div className="flex justify-between items-center">
+            {/* Logo */}
             <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">
               EmpirePMS
             </Link>
-            <div className="flex items-center space-x-4">
+            
+            {/* Desktop Links */}
+            <div className="hidden md:flex items-center space-x-4">
+              <span className='text-blue-950'>T{Math.floor((new Date() - new Date('2024-12-16T00:00:00+11:00')) / (1000 * 60 * 60 * 24)) } days left</span>
               {localUser && (
                 <span className="text-white cursor-pointer" onClick={handleAccountClick}>
                   {localUser.employee_email}
@@ -65,10 +71,46 @@ const Navbar = () => {
                 </Link>
               )}
             </div>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className="md:hidden text-white"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden mt-2 space-y-2">
+              {localUser && (
+                <span className="text-white block cursor-pointer" onClick={handleAccountClick}>
+                  {localUser.employee_email}
+                </span>
+              )}
+              {localUser && (
+                <button
+                  className="bg-gray-900 text-white border border-white w-full px-4 py-2 rounded hover:bg-red-700 hover:scale-95 ease-out duration-75 hover:font-bold"
+                  onClick={handleLogOutClick}
+                >
+                  Logout
+                </button>
+              )}
+              {!localUser && (
+                <Link className="text-white block" to="/EmpirePMS/login">
+                  Sign In
+                </Link>
+              )}
+            </div>
+          )}
         </nav>
       </header>
-    ) : ( <NavbarSkeleton /> )
+    ) : (
+      <NavbarSkeleton />
+    )
   );
 }
 

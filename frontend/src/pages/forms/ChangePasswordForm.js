@@ -1,6 +1,6 @@
 // Import modules
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useChangePassword } from '../../hooks/useChangePassword'; 
 import SessionExpired from '../../components/SessionExpired';
@@ -11,7 +11,6 @@ const ChangePasswordForm = () => {
     // Component router
     const location = useLocation();
     const retrieved_id = location.state;
-    const navigate = useNavigate();
 
     // Component state declaration
     const employeeState = useSelector((state) => state.employeeReducer.employeeState);
@@ -23,7 +22,7 @@ const ChangePasswordForm = () => {
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleBackClick = (employee_id) => navigate(`/EmpirePMS/employee/${employee_id}`);
+    const handleBackClick = () => window.history.back();
         
     const checkPassword = () => {
         if (newPassword !== confirmPassword){

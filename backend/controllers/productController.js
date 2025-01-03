@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 // Helper function to fetch products by type
 const fetchProductsByType = async (productType) => {
     const matchCondition = {
-        'product_types': productType
+        'product_type': productType
     };
 
     const Products = await productModel.aggregate([
@@ -28,7 +28,7 @@ const fetchProductsByType = async (productType) => {
                 _id: 1,
                 product_sku: 1,
                 product_name: 1,
-                product_types: 1,
+                product_type: 1,
                 product_actual_size: 1,
                 product_next_available_stock_date: 1,
                 supplier: 1,
@@ -100,14 +100,14 @@ const getProductsByType = async (req, res) => {
 
 // Controller method to get filtered products
 const getFilteredProducts = async (req, res) => {
-    const { type } = req.params;
+    const { id } = req.params;
 
-    if (!type) {
-        return res.status(400).json({ error: 'Product type is required' });
+    if (!id) {
+        return res.status(400).json({ error: 'Product type ID is required' });
     }
 
     try {
-        const products = await productModel.find({ product_types: type })
+        const products = await productModel.find({ product_type: id })
             .populate('alias')
             .exec();
 
@@ -118,24 +118,36 @@ const getFilteredProducts = async (req, res) => {
     }
 };
 
+
 //Controller function - POST to create a new Product
 const createNewProduct = async (req, res) => {
     // retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
     // destructure all relevant attributes in new Product object
-    const { product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
+    const { product_sku, product_name, product_type, product_actual_size, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
 
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-        if (!mongoose.Types.ObjectId.isValid(alias)){
-            const newAlias = new aliasModel({
-                alias_name: alias
-            })
-            await newAlias.save({session});
+        if (!mongoose.Types.ObjectId.isValid(alias)){ // if alias is not an ObjectId
+            // create a variable
+            let targetAlias = null; 
 
-            const newProduct = new productModel({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
-                supplier, alias: newAlias._id, price_fixed, product_isarchived })
+            // check if the custom alias string exists in the database
+            const existingId = await aliasModel.findOne({ alias_name: alias });
+
+            // if exists, get the object from the database and assign to variable
+            if (existingId) {
+                targetAlias = existingId
+            } else { // if not exists, create a new Alias Object and assign to variable
+                targetAlias = new aliasModel({
+                    alias_name: alias
+                })
+                await targetAlias.save({session});
+            }
+
+            const newProduct = new productModel({ product_sku, product_name, product_type, product_actual_size, product_next_available_stock_date,
+                supplier, alias: targetAlias._id, price_fixed, product_isarchived })
             await newProduct.save({session})
 
             const newProductPrice = new productPriceModel({ product_obj_ref: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
@@ -148,7 +160,7 @@ const createNewProduct = async (req, res) => {
             res.status(200).json({ newProduct, newProductPrice });
         }
         else {
-            const newProduct = new productModel({ product_sku, product_name, product_types, product_actual_size, product_next_available_stock_date,
+            const newProduct = new productModel({ product_sku, product_name, product_type, product_actual_size, product_next_available_stock_date,
                 supplier, alias, price_fixed, product_isarchived })
             await newProduct.save({session})
 
@@ -240,7 +252,7 @@ const deleteSingleProduct = async (req,res) => {
 
 
     // At the same time need to delete related product Prices
-    const ProductPrices =await productPriceModel.deleteMany({ product_obj_ref: id });
+    const ProductPrices = await productPriceModel.deleteMany({ product_obj_ref: id });
 
 
     //check if there's 'null' or 'undefined' in 'Product'.

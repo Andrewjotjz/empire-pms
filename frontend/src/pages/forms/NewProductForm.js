@@ -1,6 +1,6 @@
 // Import modules
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
  
 import { useAddProduct } from '../../hooks/useAddProduct'; 
@@ -16,7 +16,9 @@ const NewProductForm = () => {
     // Component router
     const navigate = useNavigate();
     const location = useLocation();
-    const {supplierId, supplierName}  = location.state;
+    const { id } = useParams();
+    const { supplierId = null, supplierName = '' } = location.state || {};
+
 
     // Component hook
     const dispatch = useDispatch();
@@ -34,11 +36,11 @@ const NewProductForm = () => {
     const [productDetailsState, setProductDetailsState] = useState({
         product_sku: '',
         product_name: '',
-        product_types: '',
-        product_actual_size: '',
+        product_type: '',
+        product_actual_size: 0,
         product_next_available_stock_date: '',
         product_isarchived: false,
-        supplier: supplierId,
+        supplier: supplierId || id,
         alias: '',
         product_unit_a: '',
         product_number_a: 1,
@@ -46,16 +48,23 @@ const NewProductForm = () => {
         product_unit_b: '',
         product_number_b: '',
         product_price_unit_b: '',
+        product_actual_rate: 0,
+        product_note: '',
+        product_price_note: '',
         price_fixed: false,
         product_effective_date: '',
         projects: []
 
     });
+    const [productTypeState, setProductTypeState] = useState([]);
 
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleBackClick = () => navigate(`/EmpirePMS/supplier/${supplierId}`, {state: supplierId});
+    const handleBackClick = () => {
+        const idToUse = supplierId || id; // Use `id` if `supplierId` is null or undefined
+        navigate(`/EmpirePMS/supplier/${idToUse}`, { state: idToUse });
+      };      
 
     const handleInputCustomToggle = () => {
         setIsInputCustomOpen(!isInputCustomOpen)
@@ -67,7 +76,7 @@ const NewProductForm = () => {
 
     const handleProductInputChange = (event) => {
         const { name, value } = event.target;
-        if (name === 'product_types'){
+        if (name === 'product_type'){
             if (value !== ''){
                 fetchAliasesByProductType(value)
                 setAliasFieldToggle(false);
@@ -100,9 +109,10 @@ const NewProductForm = () => {
             alert(`You must select one or more projects that this new product applies to`)
             return;
         }
+        const idToUse = supplierId || id; // Use `id` if `supplierId` is null or undefined
 
-        addProduct(productDetailsState, supplierId);
-        navigate(`/EmpirePMS/supplier/${supplierId}`);
+        addProduct(productDetailsState, idToUse);
+        navigate(`/EmpirePMS/supplier/${idToUse}`);
     };
     
     //Render component
@@ -147,6 +157,47 @@ const NewProductForm = () => {
         };
     }, [dispatch]);
 
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
+
 
     // Display DOM
     if (productTypeIsLoadingState || productIsLoadingState) {
@@ -171,7 +222,7 @@ const NewProductForm = () => {
 
     return (
         localUser && Object.keys(localUser).length > 0 ? (
-        <div className="container mt-5"> 
+        <div className="container mt-2 sm:mt-5"> 
             <div className="card">
                 <div className="card-header bg-dark text-white flex justify-between items-center">
                     <button onClick={handleBackClick}>
@@ -181,14 +232,14 @@ const NewProductForm = () => {
                     </button>
                     <h1 className='mx-auto uppercase font-bold text-base'>{supplierName}: NEW PRODUCT</h1>
                 </div>
-                <form className="card-body" onSubmit={handleSubmit}>
+                <form className="card-body text-xs sm:text-base" onSubmit={handleSubmit}>
                     <div className="row">
                         {/* PRODUCT TABLE */}
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label font-bold">*Product SKU:</label>
+                        <div className="col-md-6 mb-0 sm:mb-3">
+                            <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Product SKU:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control text-xs sm:text-base" 
                                 name="product_sku" 
                                 value={productDetailsState.product_sku} 
                                 onChange={handleProductInputChange}
@@ -196,13 +247,13 @@ const NewProductForm = () => {
                                 onInvalid={(e) => e.target.setCustomValidity('Enter SKU')}
                                 onInput={(e) => e.target.setCustomValidity('')}
                             />
-                            <label className='text-xs italic text-gray-400'>Ex: 13RE1236</label>
+                            <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: 13RE1236</label>
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label font-bold">*Name:</label>
+                        <div className="col-md-6 mb-0 sm:mb-3">
+                            <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Name:</label>
                             <input 
                                 type='text'
-                                className="form-control" 
+                                className="form-control text-xs sm:text-base" 
                                 name="product_name" 
                                 value={productDetailsState.product_name} 
                                 onChange={handleProductInputChange}
@@ -210,50 +261,34 @@ const NewProductForm = () => {
                                 onInvalid={(e) => e.target.setCustomValidity('Enter product name')}
                                 onInput={(e) => e.target.setCustomValidity('')}
                             />
-                            <label className='text-xs italic text-gray-400'>Ex: 16mm SHEETROCK 1200mm x 3600mm</label>
+                            <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: 16mm SHEETROCK 1200mm x 3600mm</label>
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label font-bold">*Type:</label>
+                        <div className="col-md-6 mb-0 sm:mb-3">
+                            <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Type:</label>
                             <select 
-                                className="form-control shadow-sm cursor-pointer"
-                                name="product_types" 
-                                value={productDetailsState.product_types} 
+                                className="form-control text-xs sm:text-base shadow-sm cursor-pointer"
+                                name="product_type" 
+                                value={productDetailsState.product_type} 
                                 onChange={handleProductInputChange}
                                 required
-                            >                                
+                            >
                                 <option value="">Select Product Type</option>
-                                <option value="Compound">Compound</option>
-                                <option value="Access Panel">Access Panel</option>
-                                <option value="Framing Ceiling">Framing Ceiling</option>
-                                <option value="Framing Wall">Framing Wall</option>
-                                <option value="Batt Insulation">Batt Insulation</option>
-                                <option value="Rigid Insulation">Rigid Insulation</option>
-                                <option value="Plasterboard">Plasterboard</option>
-                                <option value="External Cladding">External Cladding</option>
-                                <option value="SpeedPanel">SpeedPanel</option>
-                                <option value="Timber">Timber</option>
-                                <option value="Acoustic Ceiling Panels">Acoustic Ceiling Panels</option>
-                                <option value="Ceiling Tiles">Ceiling Tiles</option>
-                                <option value="Others">Others</option>
-                                <option value="Tools">Tools</option>
-                                <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
-                                <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
-                                <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
-                                <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
-                                <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
-                                <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>
-                                <option value="SpeedPanel(Accessories)">SpeedPanel(Accessories)</option>
+                                {productTypeState.filter(type => !type.type_isarchived).map(type => (
+                                    <>
+                                    <option value={type._id}>{type.type_name}</option>
+                                    </>
+                                ))}
                             </select>
-                            <label className='text-xs italic text-gray-400'>Alias is based on the product type you select</label>
+                            <label className='hidden sm:inline-block text-xs italic text-gray-400'>Alias is based on the product type you select</label>
                         </div>
                         
 
                         {/***************************** ALIAS TABLE *************************/}
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label font-bold">*Alias:</label>
+                        <div className="col-md-6 mb-0 sm:mb-3">
+                            <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Alias:</label>
                             { !isInputCustomOpen && <div>
                                 <select 
-                                    className="form-control shadow-sm cursor-pointer"
+                                    className="form-control text-xs sm:text-base shadow-sm cursor-pointer"
                                     name="alias"
                                     onChange={handleProductInputChange}
                                     disabled={aliasFieldToggle}
@@ -274,7 +309,7 @@ const NewProductForm = () => {
                             { isInputCustomOpen && <div>
                                 <input 
                                     type='text'
-                                    className="form-control placeholder-gray-400 placeholder-opacity-50" 
+                                    className="form-control text-xs sm:text-base placeholder-gray-400 placeholder-opacity-50" 
                                     name="alias" 
                                     value={productDetailsState.alias} 
                                     placeholder='custom alias...'
@@ -288,13 +323,13 @@ const NewProductForm = () => {
                         {/***************************** ALIAS TABLE END *************************/}
 
                         {/* ********************************************* PRODUCT PRICE TABLE *********************************************** */}
-                        <div className='grid grid-cols-3 gap-x-10 gap-y-4 border-4 rounded p-3 mb-1'>
+                        <div className='grid grid-cols-1 sm:grid-cols-3 gap-x-1 sm:gap-x-10 gap-y-1 sm:gap-y-4 border-4 rounded p-1 sm:p-3 mb-0 sm:mb-1'>
                             <div className='border-2 rounded p-2'>
-                                <div className="mb-3">
-                                    <label className="form-label font-bold">*Number-A:</label>
+                                <div className="mb-0 sm:mb-3">
+                                    <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Number-A:</label>
                                     <input 
                                         type='number'
-                                        className="form-control" 
+                                        className="form-control text-xs sm:text-base" 
                                         name="product_number_a" 
                                         value={productDetailsState.product_number_a} 
                                         onChange={handleProductInputChange}
@@ -306,11 +341,11 @@ const NewProductForm = () => {
                                         onInput={(e) => e.target.setCustomValidity('')}
                                     />
                                 </div>
-                                <div className="mb-3">
-                                    <label className="form-label font-bold">*Unit-A:</label>
+                                <div className="mb-0 sm:mb-3">
+                                    <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Unit-A:</label>
                                     <input 
                                         type='text'
-                                        className="form-control" 
+                                        className="form-control text-xs sm:text-base" 
                                         name="product_unit_a" 
                                         value={productDetailsState.product_unit_a} 
                                         onChange={handleProductInputChange}
@@ -318,17 +353,17 @@ const NewProductForm = () => {
                                         onInvalid={(e) => e.target.setCustomValidity('Enter unit-A')}
                                         onInput={(e) => e.target.setCustomValidity('')}
                                     />
-                                    <label className='text-xs italic text-gray-400'>Ex: Box, Pack, Carton</label>
+                                    <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: Box, Pack, Carton</label>
                                 </div>
-                                <div className="mb-3">
-                                    <label className="form-label font-bold">*Unit-A Price:</label>
+                                <div className="mb-0 sm:mb-3">
+                                    <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Unit-A Price:</label>
                                     <div className='flex items-center border rounded'>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 ml-2">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                         </svg>
                                         <input 
                                             type='number'
-                                            className="form-control flex-1 pl-2 border-0" 
+                                            className="form-control text-xs sm:text-base flex-1 pl-2 border-0" 
                                             name="product_price_unit_a" 
                                             value={productDetailsState.product_price_unit_a} 
                                             onChange={handleProductInputChange}
@@ -342,11 +377,11 @@ const NewProductForm = () => {
                                 </div>
                             </div>
                             <div className='border-2 rounded p-2'>
-                                <div className="mb-3">
-                                    <label className="form-label font-bold">*Number-B:</label>
+                                <div className="mb-0 sm:mb-3">
+                                    <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Number-B:</label>
                                     <input 
                                         type='number'
-                                        className="form-control" 
+                                        className="form-control text-xs sm:text-base" 
                                         name="product_number_b" 
                                         value={productDetailsState.product_number_b} 
                                         onChange={handleProductInputChange}
@@ -358,11 +393,11 @@ const NewProductForm = () => {
                                         onInput={(e) => e.target.setCustomValidity('')}
                                     />
                                 </div>
-                                <div className="mb-3">
-                                    <label className="form-label font-bold">*Unit-B:</label>
+                                <div className="mb-0 sm:mb-3">
+                                    <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Unit-B:</label>
                                     <input 
                                         type='text'
-                                        className="form-control" 
+                                        className="form-control text-xs sm:text-base" 
                                         name="product_unit_b" 
                                         value={productDetailsState.product_unit_b} 
                                         onChange={handleProductInputChange}
@@ -370,17 +405,17 @@ const NewProductForm = () => {
                                         onInvalid={(e) => e.target.setCustomValidity('Enter unit-B')}
                                         onInput={(e) => e.target.setCustomValidity('')}
                                     />
-                                    <label className='text-xs italic text-gray-400'>Ex: units, length, each, sheet</label>
+                                    <label className='hidden sm:inline-block text-xs italic text-gray-400'>Ex: units, length, each, sheet</label>
                                 </div>
-                                <div className="mb-3">
-                                    <label className="form-label font-bold">*Unit-B Price:</label>
+                                <div className="mb-0 sm:mb-3">
+                                    <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Unit-B Price:</label>
                                     <div className='flex items-center border rounded'>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 ml-2">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                         </svg>
                                         <input 
                                             type='number'
-                                            className="form-control flex-1 pl-2 border-0" 
+                                            className="form-control text-xs sm:text-base flex-1 pl-2 border-0" 
                                             name="product_price_unit_b" 
                                             value={productDetailsState.product_price_unit_b} 
                                             onChange={handleProductInputChange}
@@ -394,7 +429,7 @@ const NewProductForm = () => {
                                 </div>
                             </div>
                             {/* ***** PROJECT DROPDOWN START ****** */}
-                            <div className="mb-3">
+                            <div className="mb-0 sm:mb-3">
                                 <label className="block font-bold mb-2">*Project:</label>
                                 <div>
                                     <button
@@ -427,14 +462,14 @@ const NewProductForm = () => {
                                         </div>
                                     )}
                                 </div>
-                                <p className='text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product price applies to</p>
+                                <p className='hidden sm:inline-block text-xs italic text-gray-400 mt-2'>Select one or more projects that this new product price applies to</p>
                             </div>
                             {/* ***** PRICE FIXED? START ****** */}
                             <div>
-                                <label className="form-label font-bold">*Price effective date:</label>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price effective date:</label>
                                 <input 
                                     type='date'
-                                    className="form-control" 
+                                    className="form-control text-xs sm:text-base" 
                                     name="product_effective_date" 
                                     value={productDetailsState.product_effective_date}
                                     onChange={handleProductInputChange}
@@ -442,7 +477,18 @@ const NewProductForm = () => {
                                 />
                             </div>
                             <div>
-                                <label className="form-label font-bold">Price fixed(?):</label>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price actual price/rate:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_actual_rate" 
+                                    value={productDetailsState.product_actual_rate}
+                                    onChange={handleProductInputChange}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Price fixed(?):</label>
                                 <input 
                                         type="checkbox"
                                         className="form-check-input m-1" 
@@ -451,14 +497,24 @@ const NewProductForm = () => {
                                         onChange={(e) => handleProductInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
                                     />
                             </div>
+                            <div className='col-span-3'>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price notes:</label>
+                                <textarea
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_price_note"
+                                    value={productDetailsState.product_price_note}
+                                    onChange={handleProductInputChange}
+                                    required
+                                />
+                            </div>
                         </div>
                         {/* ********************************************* PRODUCT PRICE END *********************************************** */}
-                        <div>
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label font-bold">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
+                        <div className='grid grid-cols-2 gap-x-4'>
+                            <div className="mb-0 sm:mb-3">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Actual Size (M<span className='text-xs align-top'>2</span>/LENGTH):</label>
                                 <input 
                                     type='number'
-                                    className="form-control" 
+                                    className="form-control text-xs sm:text-base" 
                                     name="product_actual_size" 
                                     value={productDetailsState.product_actual_size} 
                                     onChange={handleProductInputChange}
@@ -469,22 +525,36 @@ const NewProductForm = () => {
                                 />
                             </div>
 
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label font-bold">Next available stock date:</label>
+                            <div className="mb-0 sm:mb-3">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Next available stock date:</label>
                                 <input 
                                     type='date'
-                                    className="form-control" 
+                                    className="form-control text-xs sm:text-base" 
                                     name="product_next_available_stock_date" 
                                     value={productDetailsState.product_next_available_stock_date}
                                     onChange={handleProductInputChange}
                                 />
                             </div>
+
+                            <div className="mb-0 sm:mb-3 col-span-2">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Product notes:</label>
+                                <textarea 
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_note" 
+                                    value={productDetailsState.product_note} 
+                                    onChange={handleProductInputChange}
+                                    step="0.001"  // Allows input with up to three decimal places
+                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
+                                    min={1}
+                                    required
+                                />
+                            </div>
                         </div>
 
                         {/* ******************************************* END OF FORM ********************************************************** */}
-                        <div className="d-flex justify-content-between mb-3">
-                            <button type="button" onClick={handleBackClick} className="btn btn-secondary">CANCEL</button>
-                            <button className="btn btn-primary" type="submit">ADD TO SUPPLIER</button>
+                        <div className="d-flex justify-content-between mb-0 sm:mb-3 mt-2 sm:mt-0">
+                            <button type="button" onClick={handleBackClick} className="btn btn-secondary text-xs sm:text-base">CANCEL</button>
+                            <button className="btn btn-primary text-xs sm:text-base" type="submit">ADD TO SUPPLIER</button>
                         </div>
                     </div>
                 </form>
