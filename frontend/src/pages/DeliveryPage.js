@@ -293,7 +293,7 @@ export default function DeliveryPage() {
                 )}
               </th>
               <th className="p-3 cursor-pointer" onClick={() => requestSort('delivery_status')}>
-                Status
+                Receiving
                 {sortConfig.key === 'delivery_status' && (
                   sortConfig.direction === 'ascending' ? 
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
@@ -318,10 +318,10 @@ export default function DeliveryPage() {
                   <td className="p-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       item.delivery_status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                      item.delivery_status === 'Partially delivered' ? 'bg-yellow-100 text-yellow-800' :
+                      item.delivery_status === 'Partially delivered' ? 'bg-lime-100 text-lime-800' :
                       'bg-red-100 text-red-800'
                     }`}>
-                      {item.delivery_status}
+                      {item.delivery_status === 'Delivered' ? 'Full' : 'Partial'}
                     </span>
                   </td>
                   <td className="p-3">

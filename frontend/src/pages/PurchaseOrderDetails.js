@@ -1,6 +1,6 @@
 //import modules
 import { useParams, useNavigate, Link} from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { setPurchaseOrderState } from '../redux/purchaseOrderSlice';
@@ -45,8 +45,11 @@ const PurchaseOrderDetails = () => {
         supplier: '',
         delivery_notes: ''
       });
+    const [deliveries, setDeliveries] = useState([]);
     const deliveryType = ['Delivery Docket', 'Invoice'];
     const deliveryStatus = ['Partially delivered', 'Delivered'];
+    const [expandedRow, setExpandedRow] = useState(null);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
     
     // {
@@ -60,6 +63,7 @@ const PurchaseOrderDetails = () => {
     const notesToSupplierRef = useRef(null);
     const internalCommentsRef = useRef(null);
     const supplierDetailsRef = useRef(null);
+    const deliveriesTableRef = useRef(null);
     const invoicesTableRef = useRef(null);
 
     //Component functions and variables
@@ -210,14 +214,57 @@ const PurchaseOrderDetails = () => {
         postDelivery();
     }
 
-    const handleSubmit = () => {
+    const requestSort = (key) => {
+        let direction = 'ascending';
+        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+          direction = 'descending';
+        }
+        setSortConfig({ key, direction });
+      };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+      
+        // Check for duplicate evidence reference
+        if (
+          deliveries.some(
+            (delivery) =>
+              delivery.delivery_evidence_reference ===
+              deliveryState.delivery_evidence_reference
+          )
+        ) {
+          alert("The evidence reference already exists. Please provide a unique reference.");
+          return; // Prevent submission
+        }
+      
+        // Check other fields if necessary (optional)
+        if (!deliveryState.delivery_evidence_reference) {
+          alert("Evidence Reference is required.");
+          return;
+        }
+        if (!deliveryState.delivery_receiving_date) {
+          alert("Receiving Date is required.");
+          return;
+        }
+        if (!deliveryState.delivery_evidence_type) {
+          alert("Evidence Type is required.");
+          return;
+        }
+        if (!deliveryState.delivery_status) {
+          alert("Delivery Status is required.");
+          return;
+        }
+      
+        // Perform submission logic
         createDelivery(deliveryState);
         setIsDeliveryModalOpen(false);
         window.location.reload();
-    }
+      };
+      
     
-    //Render component
+    // Fetch Order details
     useEffect(() => {
+        setIsLoadingState(true);
         const fetchPurchaseOrderDetails = async () => {
             try {
                 const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, { credentials: 'include',
@@ -248,6 +295,36 @@ const PurchaseOrderDetails = () => {
         fetchPurchaseOrderDetails();
     }, [id, dispatch]);
 
+    // Fetch deliveries
+    useEffect(() => {
+        const fetchDeliveries = async () => {
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/delivery`, { credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch deliveries');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+
+                setDeliveries(data);
+                setIsLoadingState(false);
+            } catch (err) {
+                setErrorState(err.message);
+                setIsLoadingState(false);
+            }
+        };
+
+        fetchDeliveries();
+    }, []);
+
+    // automatically scroll to target div
     useEffect(() => {
         // If a targetRef is stored and it is now rendered, scroll to it
         if (targetRef && targetRef.current) {
@@ -259,13 +336,10 @@ const PurchaseOrderDetails = () => {
     // Display DOM
     if (isLoadingState || isUpdateLoadingState || isFetchSupplierLoading || isFetchProductsLoadingState) { return (<EmployeeDetailsSkeleton />); }
 
-    if (errorState || updateErrorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
-            return(<div><SessionExpired /></div>)
-        }
+    if (errorState || updateErrorState || addDeliveryError) {
         return (
             <div>
-                Error: {errorState || updateErrorState}
+                Error: {errorState || updateErrorState || addDeliveryError}
             </div>
         );
     }
@@ -311,20 +385,20 @@ const PurchaseOrderDetails = () => {
                 <p className="form-label">{formatDateTime(purchaseOrderState.updatedAt)}</p>
             </div>
             <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold">Order Status:</label>
+                <label className="form-label fw-bold mr-1">Order Status:</label>
                 {purchaseOrderState.order_status && (
                 <label
-                    className={`text-sm md:text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${
                         purchaseOrderState.order_status === "Cancelled"
-                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                            ? "bg-gray-100 text-gray-800"
                             : purchaseOrderState.order_status === "Pending"
-                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                            ? "bg-yellow-100 text-yellow-800"
                             : purchaseOrderState.order_status === "Approved"
-                            ? "border-2 bg-transparent border-green-600 text-green-600"
+                            ? "bg-green-100 text-green-800"
                             : purchaseOrderState.order_status === "Rejected"
-                            ? "border-2 bg-transparent border-red-600 text-red-600"
+                            ? "bg-red-100 text-red-800"
                             : purchaseOrderState.order_status === "Draft"
-                            ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                            ? "bg-gray-100 text-gray-800"
                             : ""
                     }`}
                 >
@@ -332,12 +406,37 @@ const PurchaseOrderDetails = () => {
                 </label>
                 )}
             </div>
+            <div className="col-md-6 md:mb-3">
+                <label className="form-label fw-bold mr-1">Delivery:</label>
+
+                {(() => {
+                    // Calculate total delivered quantity across all products
+                    const totalDelivered = purchaseOrderState.deliveries
+                    .flatMap((delivery) => delivery.products.map((product) => product.delivered_qty_a || 0))
+                    .reduce((totalSum, qty) => totalSum + qty, 0);
+
+                    // Calculate total order quantity across all products
+                    const totalOrderQuantity = purchaseOrderState.products
+                    .reduce((totalSum, product) => totalSum + (product.order_product_qty_a || 0), 0);
+
+                    // Render appropriate label based on delivery status
+                    if (totalDelivered >= totalOrderQuantity) {
+                        return <label className={`px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800`}>Fully delivered</label>;
+                        } else if (totalDelivered === 0) {
+                        return <label className={`px-2 py-1 rounded-full text-xs font-medium bg-grey-100 text-grey-800`}>Nothing delivered</label>;
+                        } else if (totalDelivered < totalOrderQuantity) {
+                        return <label className={`px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800`}>Partially delivered</label>;
+                        } else {
+                        return null; // In case no condition matches
+                    }
+                })()}
+            </div>
         </div>
     ) : (
         <div className='border'>Purchase Order API fetched successfully, but it might be empty...</div>
     );
 
-    const productsTable = purchaseOrderState.products.length > 0 || purchaseOrderState.custom_products.length > 0 ? (
+    const productsTable = purchaseOrderState && (purchaseOrderState.products.length > 0 || purchaseOrderState.custom_products.length > 0) ? (
         <div className="container p-0 bg-slate-50 mb-4 shadow-md text-xs md:text-sm">
             <div className="table-responsive">
                 <table className="table table-bordered table-hover m-0">
@@ -364,9 +463,17 @@ const PurchaseOrderDetails = () => {
                                     <td>{product.product_obj_ref.product_name}</td>
                                     <td>{product.order_product_location}</td>
                                     <td>
-                                        {Number.isInteger(product.order_product_qty_a)
+                                        {
+                                        Number.isInteger(product.order_product_qty_a)
                                             ? product.order_product_qty_a
-                                            : parseFloat(product.order_product_qty_a).toFixed(4)}
+                                            : parseFloat(product.order_product_qty_a).toFixed(4)
+                                        }
+                                        <label className='text-xs text-gray-400 block'>
+                                            Delivered: {purchaseOrderState.deliveries
+                                                .map(delivery =>
+                                                    delivery.products[index].delivered_qty_a
+                                                ).reduce((totalSum, product) => totalSum + (product || 0), 0)}
+                                        </label>
                                     </td>
                                     <td>
                                         {Number.isInteger(product.order_product_qty_b)
@@ -469,7 +576,7 @@ const PurchaseOrderDetails = () => {
         <div className='border'>Purchase Order's products fetched successfully, but it might be empty...</div>
     );
 
-    const internalComments = purchaseOrderState.order_internal_comments !== '' ? (
+    const internalComments = purchaseOrderState && purchaseOrderState.order_internal_comments !== '' ? (
         <div className="card-body border-1 relative shadow-md p-2 text-xs md:text-sm" ref={internalCommentsRef}>
             <div className='border rounded-md bg-blue-100 p-2 h-auto'>
                 <p>{purchaseOrderState.order_internal_comments}</p>
@@ -479,7 +586,7 @@ const PurchaseOrderDetails = () => {
         <div className='border shadow-sm'><p className='m-2 p-1 text-xs sm:text-base'>There are no internal comments...</p></div>
     )
 
-    const invoicesTable = purchaseOrderState.invoices.length > 0 ? (
+    const invoicesTable = purchaseOrderState && purchaseOrderState.invoices.length > 0 ? (
         <>
         <div ref={invoicesTableRef} className='overflow-x-auto text-xs md:text-sm'>
             <table className="table table-bordered table-hover text-xs shadow-sm">
@@ -597,7 +704,138 @@ const PurchaseOrderDetails = () => {
         <div className='border shadow-sm'><p className='m-2 p-1 text-xs sm:text-base'>Purchase Order's invoices fetched successfully, but it might be empty...</p></div>
     );
 
-    const supplierDetails = purchaseOrderState.supplier ? (
+    const deliveriesTable = deliveries.length > 0 ? (
+        <>
+        <div ref={deliveriesTableRef} className="overflow-x-auto card-body border-1 shadow-md text-xs md:text-sm">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="w-full">
+                <thead>
+                <tr className="bg-gray-100 text-left text-gray-600 text-sm uppercase">
+                    <th className="p-3 cursor-pointer" onClick={() => requestSort('delivery_evidence_reference')}>
+                    Reference
+                    {sortConfig.key === 'delivery_evidence_reference' && (
+                        sortConfig.direction === 'ascending' ? 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg> : 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    )}
+                    </th>
+                    <th className="p-3 cursor-pointer" onClick={() => requestSort('delivery_receiving_date')}>
+                    Date
+                    {sortConfig.key === 'delivery_receiving_date' && (
+                        sortConfig.direction === 'ascending' ? 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg> : 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    )}
+                    </th>
+                    <th className="p-3 cursor-pointer" onClick={() => requestSort('order_ref')}>
+                    Order No.
+                    {sortConfig.key === 'order_ref' && (
+                        sortConfig.direction === 'ascending' ? 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg> : 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    )}
+                    </th>
+                    <th className="p-3 cursor-pointer" onClick={() => requestSort('supplier_name')}>
+                    Supplier
+                    {sortConfig.key === 'supplier_name' && (
+                        sortConfig.direction === 'ascending' ? 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg> : 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    )}
+                    </th>
+                    <th className="p-3 cursor-pointer" onClick={() => requestSort('delivery_status')}>
+                    Receiving
+                    {sortConfig.key === 'delivery_status' && (
+                        sortConfig.direction === 'ascending' ? 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                        </svg> : 
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    )}
+                    </th>
+                    <th className="p-3">Products</th>
+                </tr>
+                </thead>
+                <tbody>
+                {deliveries.filter(delivery => delivery.order._id === id).map((item) => (
+                    <React.Fragment key={item._id}>
+                    <tr className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150">
+                        <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/delivery/${item._id}`)}>{item.delivery_evidence_reference}</td>
+                        <td className="p-3 text-gray-600">{item.delivery_receiving_date}</td>
+                        <td className="p-3 text-gray-600">{item.order.order_ref}</td>
+                        <td className="p-3 text-gray-600">{item.supplier.supplier_name}</td>
+                        <td className="p-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            item.delivery_status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                            item.delivery_status === 'Partially delivered' ? 'bg-lime-100 text-lime-800' :
+                            'bg-red-100 text-red-800'
+                        }`}>
+                            {item.delivery_status === 'Delivered' ? 'Full' : 'Partial'}
+                        </span>
+                        </td>
+                        <td className="p-3">
+                        <button
+                            onClick={() => setExpandedRow(expandedRow === item._id ? null : item._id)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
+                        >
+                            {item.products.filter(p => p.delivered_qty_a > 0).length} products
+                            {expandedRow === item._id ? 
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
+                            </svg> : 
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>}
+                        </button>
+                        </td>
+                    </tr>
+                    {expandedRow === item._id && (
+                        <tr>
+                        <td colSpan="6" className="p-3 bg-gray-50">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {item.products.filter(p => p.delivered_qty_a > 0).map((product, index) => (
+                                <div key={index} className="bg-white p-3 rounded shadow-sm">
+                                <p className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{purchaseOrderState.products.find(prod => prod.product_obj_ref._id === product.product_obj_ref)?.product_obj_ref.product_sku || 'Loading...'}</p>
+                                <p className="font-medium text-gray-700 text-sm">
+                                    {purchaseOrderState.products.find(prod => prod.product_obj_ref._id === product.product_obj_ref)?.product_obj_ref.product_name || 'Loading...'}
+                                </p>
+                                <p className="text-gray-600 text-xs">Quantity: {product.delivered_qty_a}</p>
+                                </div>
+                            ))}
+                            </div>
+                        </td>
+                        </tr>
+                    )}
+                    </React.Fragment>
+                ))}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        </>
+    ) : (
+        <div className='border shadow-sm'><p className='m-2 p-1 text-xs sm:text-base'>Deliveries fetched successfully, but it might be empty...</p></div>
+    );
+
+    const supplierDetails = purchaseOrderState && purchaseOrderState.supplier ? (
         <div className="card-body border-1 relative shadow-md text-xs md:text-sm" ref={supplierDetailsRef}>
             <div className="row">
                 <div className="col-md-6 mb-3">
@@ -670,7 +908,7 @@ const PurchaseOrderDetails = () => {
         <div className='border'>Purchase Order's supplier fetched successfully, but it might be empty...</div>
     );
 
-    const notesToSupplier = purchaseOrderState.order_notes_to_supplier !== '' ? (
+    const notesToSupplier = purchaseOrderState && purchaseOrderState.order_notes_to_supplier !== '' ? (
         <div className="card-body border-1 relative shadow-md p-2 text-xs md:text-sm" ref={notesToSupplierRef}>
             <div className='border rounded-md bg-yellow-200 p-2 h-auto'>
                 <p>{purchaseOrderState.order_notes_to_supplier}</p>
@@ -731,6 +969,7 @@ const PurchaseOrderDetails = () => {
                                 onChange={handleInputChange}
                                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             />
+                            {deliveries.some((delivery) =>delivery.delivery_evidence_reference === deliveryState.delivery_evidence_reference) && (<label className="text-red-500 ml-1">Reference already exists</label>)}
                         </div>
         
                         <div>
@@ -762,7 +1001,7 @@ const PurchaseOrderDetails = () => {
                         </div>                            
             
                         <div>
-                            <label className="block mb-1 font-medium text-gray-700">* Delivery Status:</label>
+                            <label className="block mb-1 font-medium text-gray-700">* Receiving Status:</label>
                             <select
                                 required
                                 name="delivery_status"
@@ -770,9 +1009,9 @@ const PurchaseOrderDetails = () => {
                                 onChange={handleInputChange}
                                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             >
-                                <option value="">Select Status</option>
+                                <option value="" disabled>Select Status</option>
                                 {deliveryStatus.map(status => (
-                                <option key={status} value={status}>{status}</option>
+                                <option key={status} value={status}>{status === 'Partially delivered' ? 'Partial' : 'Full'}</option>
                                 ))}
                             </select>
                         </div>
@@ -857,11 +1096,9 @@ const PurchaseOrderDetails = () => {
         </div>
       );
 
-    console.log(deliveryState)
-    console.log(purchaseOrderState)
 
     return (
-        localUser && Object.keys(localUser).length > 0 ? (
+        purchaseOrderState && localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">
             <div className="card">
                 {/* CARD HEADER */}
@@ -925,6 +1162,11 @@ const PurchaseOrderDetails = () => {
                                     Invoices
                                 </button>
                                 <button 
+                                    className={`${currentLeftTab === 'deliveriesTable' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
+                                    onClick={() => { setCurrentLeftTab('deliveriesTable'); scrollToDiv(deliveriesTableRef); }}>
+                                    Deliveries
+                                </button>
+                                <button 
                                     className={`${currentLeftTab === 'supplierDetails' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
                                     onClick={() => { setCurrentLeftTab('supplierDetails'); scrollToDiv(supplierDetailsRef); }}>
                                     Supplier Details
@@ -933,6 +1175,7 @@ const PurchaseOrderDetails = () => {
                             {/* Conditional Rendering for Left Tab Content */}
                             <div>
                                 {currentLeftTab === 'invoicesTable' && invoicesTable}
+                                {currentLeftTab === 'deliveriesTable' && deliveriesTable}
                                 {currentLeftTab === 'supplierDetails' && supplierDetails}
                             </div>
                         </div>
