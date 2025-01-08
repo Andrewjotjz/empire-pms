@@ -214,7 +214,7 @@ const DeliveryDetails = () => {
     };
     }, [deliveryState]);
 
-    if (isLoadingState)  { return (<LoadingOverlay />); }
+    if (isLoadingState)  { return (<LoadingOverlay isLoading={isLoadingState} />); }
 
     if (errorState) {
         if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
@@ -390,7 +390,7 @@ const DeliveryDetails = () => {
       );
 
     if (isUpdateLoading) (
-        <LoadingOverlay />
+        <LoadingOverlay isLoading={isUpdateLoading} />
     )
 
     return (

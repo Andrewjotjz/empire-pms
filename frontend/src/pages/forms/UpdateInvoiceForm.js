@@ -16,7 +16,6 @@ import { useUpdateInvoice } from "../../hooks/useUpdateInvoice";
 
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
-import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
 
 const UpdateInvoiceForm = () => {
@@ -1026,14 +1025,27 @@ const UpdateInvoiceForm = () => {
   const handleSubmitInvoice = (event) => {
     event.preventDefault();
 
+    // logic for invoice with PO
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
         alert(`Please select invoice status!`)
         return;
       }
       updateInvoice(newInvoice, invoiceId);
+
+    if (currentOrder.order_status !== "Approved") {
+        if (newInvoice.invoice_status === "Reviewed" || newInvoice.invoice_status === "Settled") {
+          let updatedOrder = { ...currentOrder };
+          updatedOrder = {
+            ...updatedOrder,
+            order_status: "Approved"
+          }
+          updatePurchaseOrder(updatedOrder);
+        }
+      }
     }
 
+    // logic for invoice without PO
     if (isToggled) {
       if (newInvoice.invoice_status === "") {
         alert(`Please select invoice status!`)
@@ -1044,6 +1056,8 @@ const UpdateInvoiceForm = () => {
 
     navigate(`/EmpirePMS/invoice/${invoiceId}`)
   };
+  console.log("purchaseOrderState", purchaseOrderState)
+  console.log("currentOrder", currentOrder)
 
   // Fetch suppliers
   useEffect(() => {
@@ -2742,7 +2756,6 @@ const UpdateInvoiceForm = () => {
   //     );
   //   }
   // }
-
 
   return localUser && Object.keys(localUser).length > 0 ? (
     <div>

@@ -314,6 +314,7 @@ const PurchaseOrder = () => {
         return (<div>Error: {errorState}</div>);
     }
 
+    
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5"><div className="card">

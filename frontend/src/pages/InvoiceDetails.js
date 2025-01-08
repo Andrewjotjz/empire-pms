@@ -299,7 +299,19 @@ const InvoiceDetails = () => {
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={2}><span className='text-red-700'>Raw Total Amount (incl. GST):</span></td>
-                            <td className='pt-1 font-bold text-end px-2 py-1'><span className='text-red-700'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span></td>
+                            <td className='pt-1 font-bold text-end px-2 py-1'>
+                                <span className='text-red-700'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
+                            {(
+                            invoiceState.invoiced_raw_total_amount_incl_gst - (Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
+                            (<span className="text-xs text-red-600 ml-2 font-bold">+
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_raw_total_amount_incl_gst - invoiceState.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                                </span>
+                                ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 font-bold ml-2 inline-block text-end">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            ))}
+                            </td>
                         </tr>
                     </tbody>
                 </table>

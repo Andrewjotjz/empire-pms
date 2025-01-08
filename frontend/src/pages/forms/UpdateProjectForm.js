@@ -240,7 +240,6 @@ const UpdateProjectForm = () => {
       return <div>Error: {errorState}</div>;
     }
     
-    console.log("projectState", projectState)
       return (
         localUser && Object.keys(localUser).length > 0 ? (
           <div className="container mx-auto mt-4 sm:mt-10 px-4 sm:px-6 lg:px-8">

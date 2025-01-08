@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
 
 import { setSupplierState } from "../../redux/supplierSlice";
@@ -23,6 +23,8 @@ const NewInvoiceForm = () => {
   //Component's hook
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const state = location.state;
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { addInvoice, addInvoiceError } = useAddInvoice();
   const { uploadInvoice, uploadInvoiceError } = useUploadInvoice();
@@ -84,10 +86,9 @@ const NewInvoiceForm = () => {
   const productState = useSelector(
     (state) => state.productReducer.productState
   );
-
   const [newInvoice, setNewInvoice] = useState({
     invoice_ref: "",
-    supplier: "",
+    supplier: state ? state.suppId : "",
     invoice_issue_date: new Date().toLocaleDateString("en-AU", {
       timeZone: "Australia/Melbourne",
       year: "numeric",
@@ -560,6 +561,40 @@ const NewInvoiceForm = () => {
     resetForm();
     setShowConfirmationModal(false);
   };
+  const handleIssueDateChange = (event) => {
+      const { name, value } = event.target;
+
+      // Get payment term and format it to Integer
+      const paymentTerm = supplierState.find(supplier => supplier._id === newInvoice.supplier)?.supplier_payment_term || "Net 30"
+      const formattedPaymentTerm = parseInt(paymentTerm.split(" ")[1], 10);
+
+      // Parse the input date (value) into a Date object
+      const issueDate = new Date(value);
+
+      // Add one month to the issue date to get the target month. Ex: 60 / 30 = 2 , then 2 + 1 = 3
+      const targetMonth = issueDate.getMonth() + (formattedPaymentTerm / 30 + 1); // JavaScript months are zero-indexed
+
+      // Set the date to the first day of the next month
+      const targetDate = new Date(issueDate.getFullYear(), targetMonth, 1);
+
+      // Move back one day to get the last day of the target month
+      const lastDayOfMonth = new Date(targetDate - 1);
+
+      // Format the newDueDate to "YYYY-MM-DD"
+      const newDueDate = lastDayOfMonth.toLocaleDateString("en-AU", {
+          timeZone: "Australia/Melbourne",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+      }).split("/").reverse().join("-");
+
+      // Update the state with the newDueDate
+      let updatedState = { ...newInvoice, [name]: value, invoice_due_date: newDueDate };
+
+      // You can then update the state using your state management function
+      setNewInvoice(updatedState);
+  };
+
   const handleInputChange = (event, index = null) => {
     const { name, value } = event.target;
 
@@ -1190,19 +1225,19 @@ const NewInvoiceForm = () => {
   const handleSubmitInvoice = async (event) => {
     event.preventDefault();
 
-    //! upload Invoice logic
-    // if (!files || files.length === 0) {
-    //   return alert("Please select at least one file.");
-    // }
+    // upload Invoice logic
+    if (!files || files.length === 0) {
+      return alert("Please select at least one file.");
+    }
 
-    // if (files.length > 10) {
-    //   return alert("You can only upload up to 10 files.")
-    // }
+    if (files.length > 10) {
+      return alert("You can only upload up to 10 files.")
+    }
 
-    // const formData = new FormData();
-    // Array.from(files).forEach((file) => {
-    //     formData.append("invoices", file); // 'invoices' must match the backend key
-    // });
+    const formData = new FormData();
+    Array.from(files).forEach((file) => {
+        formData.append("invoices", file); // 'invoices' must match the backend key
+    });
 
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
@@ -1211,8 +1246,8 @@ const NewInvoiceForm = () => {
       }
 
       const invoice_id = await addInvoice(newInvoice);
-      // formData.append("id", invoice_id);
-      // await uploadInvoice(formData);
+      formData.append("id", invoice_id);
+      await uploadInvoice(formData);
     }
 
     if (isToggled) {
@@ -1222,8 +1257,8 @@ const NewInvoiceForm = () => {
       }
       
       const invoice_id = await addInvoice(newInvoiceWithoutPO);
-      // formData.append("id", invoice_id);
-      // await uploadInvoice(formData);
+      formData.append("id", invoice_id);
+      await uploadInvoice(formData);
 
     }
 
@@ -1363,6 +1398,26 @@ const NewInvoiceForm = () => {
         abortController.abort(); // Cleanup
     };
 }, []);
+
+useEffect(() => {
+  const fetchOrder = async () => {
+      if (state?.orderId) {
+          await fetchSelectedPurchaseOrder(state.orderId);
+      }
+  };
+
+  fetchOrder();
+
+  if (state?.suppId) {
+      setNewInvoice((prevState) => ({
+          ...prevState,
+          supplier: state.suppId,
+      }));
+  }
+}, [state]);
+
+
+
 
   //Component's modal
   const orderSelectionModal = (
@@ -2804,7 +2859,7 @@ const NewInvoiceForm = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                 name="invoice_issue_date"
                 value={newInvoice.invoice_issue_date}
-                onChange={handleInputChange}
+                onChange={handleIssueDateChange}
                 required
                 onInvalid={(e) =>
                   e.target.setCustomValidity("Enter invoice issue date")

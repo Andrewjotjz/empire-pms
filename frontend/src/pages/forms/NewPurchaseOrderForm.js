@@ -218,6 +218,9 @@ const NewPurchaseOrderForm = () => {
         }));
 
         setAddedProductState((prevProducts) => [...prevProducts, product])
+
+        // clear search after adding
+        setSearchProductTerm('');
     };
 
     const handleAddCustomItem = () => {
@@ -275,7 +278,7 @@ const NewPurchaseOrderForm = () => {
                 updatedProducts[index] = {
                     ...updatedProducts[index],
                     [name]: value,
-                };    
+                };
                 
                 return {
                     ...prevState,
@@ -293,7 +296,24 @@ const NewPurchaseOrderForm = () => {
                     custom_products: updatedCustomProducts,
                 };
             }
-    
+            
+            // Handle order_date changes
+            if (name === 'order_date') {
+                // Parse the order_date value as a Date and add 3 days
+                const orderDate = new Date(value);
+                const orderEstDate = new Date(orderDate);
+                orderEstDate.setDate(orderDate.getDate() + 2); // Add 3 days
+
+                // Format as 'YYYY-MM-DDTHH:mm' for datetime-local input
+                const formattedOrderEstDate = orderEstDate.toISOString().slice(0, 16);
+
+                return {
+                    ...prevState,
+                    order_date: value,
+                    order_est_datetime: formattedOrderEstDate,
+                };
+            }
+
             // Handle other updates
             return {
                 ...prevState,
@@ -305,57 +325,125 @@ const NewPurchaseOrderForm = () => {
     const handleQtyChange = (event, index) => {
         const { name, value } = event.target;
     
+        // Convert value to a number or set to 0 if invalid
+        const numericValue = isNaN(Number(value)) ? 0 : Number(value);
+    
         setOrderState((prevState) => {
             let updatedProducts = [...prevState.products];
-            
+    
             updatedProducts[index] = {
                 ...updatedProducts[index],
-                [name]: Number(value),
+                [name]: numericValue,
             };
-
+    
             if (name === 'order_product_qty_a') {
-                //Few criterias here:
-                // - Multiply if 1, otherwise divide.
-                // - If calculation results a non-integer, make it 4 decimal points.
+                // Determine order_product_qty_b
                 if (addedProductState[index].productPrice.product_number_a === 1) {
-                    updatedProducts[index].order_product_qty_b = Number.isInteger(value * addedProductState[index].productPrice.product_number_b) ? value * addedProductState[index].productPrice.product_number_b : parseFloat(value * addedProductState[index].productPrice.product_number_b).toFixed(4)
+                    updatedProducts[index].order_product_qty_b = Number.isInteger(
+                        numericValue * addedProductState[index].productPrice.product_number_b
+                    )
+                        ? numericValue * addedProductState[index].productPrice.product_number_b
+                        : Number(
+                              (numericValue * addedProductState[index].productPrice.product_number_b).toFixed(4)
+                          );
+                } else {
+                    updatedProducts[index].order_product_qty_b = Number.isInteger(
+                        numericValue / addedProductState[index].productPrice.product_number_a
+                    )
+                        ? numericValue / addedProductState[index].productPrice.product_number_a
+                        : Number(
+                              (numericValue / addedProductState[index].productPrice.product_number_a).toFixed(4)
+                          );
                 }
-                else {
-                    updatedProducts[index].order_product_qty_b = Number.isInteger(value / addedProductState[index].productPrice.product_number_a) ? value / addedProductState[index].productPrice.product_number_a : parseFloat(value / addedProductState[index].productPrice.product_number_a).toFixed(4)
-                }
-
-                updatedProducts[index].order_product_gross_amount = (addedProductState[index].productPrice.product_number_a === 1 
-                    ? (value * addedProductState[index].productPrice.product_price_unit_a * addedProductState[index].productPrice.product_number_a) 
-                    : value * addedProductState[index].productPrice.product_price_unit_a
-                  ).toFixed(4);
-                  
+    
+                // Calculate order_product_gross_amount
+                updatedProducts[index].order_product_gross_amount = Number(
+                    (
+                        addedProductState[index].productPrice.product_number_a === 1
+                            ? numericValue *
+                              addedProductState[index].productPrice.product_price_unit_a *
+                              addedProductState[index].productPrice.product_number_a
+                            : numericValue * addedProductState[index].productPrice.product_price_unit_a
+                    ).toFixed(4)
+                );
             }
+    
             if (name === 'order_product_qty_b') {
+                // Determine order_product_qty_a
                 if (addedProductState[index].productPrice.product_number_b === 1) {
-                    updatedProducts[index].order_product_qty_a = Number.isInteger(value * addedProductState[index].productPrice.product_number_a) ? value * addedProductState[index].productPrice.product_number_a : parseFloat(value * addedProductState[index].productPrice.product_number_a).toFixed(4)
+                    updatedProducts[index].order_product_qty_a = Number.isInteger(
+                        numericValue * addedProductState[index].productPrice.product_number_a
+                    )
+                        ? numericValue * addedProductState[index].productPrice.product_number_a
+                        : Number(
+                              (numericValue * addedProductState[index].productPrice.product_number_a).toFixed(4)
+                          );
+                } else {
+                    updatedProducts[index].order_product_qty_a = Number.isInteger(
+                        numericValue / addedProductState[index].productPrice.product_number_b
+                    )
+                        ? numericValue / addedProductState[index].productPrice.product_number_b
+                        : Number(
+                              (numericValue / addedProductState[index].productPrice.product_number_b).toFixed(4)
+                          );
                 }
-                else {
-                    updatedProducts[index].order_product_qty_a = Number.isInteger(value / addedProductState[index].productPrice.product_number_b) ? value / addedProductState[index].productPrice.product_number_b : parseFloat(value / addedProductState[index].productPrice.product_number_b).toFixed(4)
-                }
-                updatedProducts[index].order_product_gross_amount = (value * addedProductState[index].productPrice.product_price_unit_b).toFixed(4)
+    
+                // Calculate order_product_gross_amount
+                updatedProducts[index].order_product_gross_amount = Number(
+                    (numericValue * addedProductState[index].productPrice.product_price_unit_b).toFixed(4)
+                );
             }
-
-            // Calculate updatedTotalAmount using updatedProducts from prevState
-            let updatedTotalAmount = (updatedProducts.reduce((total, prod) => (
-                total + (Number(prod.order_product_gross_amount) || 0)
-            ), 0) * 1.1).toFixed(4);
-            
+    
+            // Calculate updatedTotalAmount using updatedProducts
+            let updatedTotalAmount = Number(
+                (
+                    updatedProducts.reduce(
+                        (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
+                        0
+                    ) * 1.1
+                ).toFixed(4)
+            );
+    
             return {
                 ...prevState,
-                order_total_amount: Number(updatedTotalAmount),
+                order_total_amount: updatedTotalAmount,
                 products: updatedProducts,
             };
         });
     };
+    
 
     const handleSearchChange = (e) => {
         setOrderState({...orderState, order_ref: e.target.value});
     };
+
+    const handleApplyLocationToAll = (index, isCustom = false) => {
+        let copyText = '';
+    
+        // Determine the source of copyText based on isCustom
+        if (isCustom) {
+            copyText = orderState.custom_products[index]?.custom_product_location || '';
+        } else {
+            copyText = orderState.products[index]?.order_product_location || '';
+        }
+    
+        const updatedProducts = orderState.products.map(product => ({
+            ...product,
+            order_product_location: copyText, // Set all product locations to the copied location
+        }));
+
+        const updatedCustomProducts = orderState.custom_products.map(cproduct => ({
+            ...cproduct,
+            custom_product_location: copyText
+        }))
+        
+        setOrderState((prevState) => ({
+            ...prevState,
+            products: updatedProducts, // Update the products in state
+            custom_products: updatedCustomProducts
+        }));
+    }; 
+
     
     const filterPurchaseOrderNumber = () => {
         return purchaseOrderState.filter(order => {
@@ -418,7 +506,7 @@ const NewPurchaseOrderForm = () => {
         }
     };
     
-    //Render component
+    // Fetch project
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -460,6 +548,7 @@ const NewPurchaseOrderForm = () => {
         };
     }, [dispatch]);
 
+    // Fetch Product Types
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -503,7 +592,7 @@ const NewPurchaseOrderForm = () => {
 
     // Display DOM
     if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading) {
-        return <NewPurchaseOrderSkeleton />;
+        return <NewPurchaseOrderSkeleton/>;
     }
 
     if (fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError) {
@@ -609,6 +698,7 @@ const NewPurchaseOrderForm = () => {
                                     ))}
                                 </select>
                             </div>
+
                             <div className="mb-1 lg:hidden">
                                 <label className="form-label font-bold">*Purchase Order No:</label>
                                 <input
@@ -622,9 +712,10 @@ const NewPurchaseOrderForm = () => {
                                 onInput={(e) => e.target.setCustomValidity('')}
                                 />
                             </div>
-                            <div className='lg:col-span-2 lg:mb-3'>
+
+                            <div className='lg:mb-3 p-1'>
                                 <label className="text-xs italic text-gray-400 mb-2">
-                                    Previous order numbers:
+                                    Previous PO:
                                     {purchaseOrderState?.slice(0, 3).map((order, index) => (
                                         <div key={index} className="inline-block ml-1 border rounded-lg px-1">
                                         {order.order_ref}
@@ -632,7 +723,7 @@ const NewPurchaseOrderForm = () => {
                                     ))}
                                 </label>
                                 <div className="text-xs italic text-gray-400">
-                                Based on your search:
+                                Based on search:
                                 {purchaseOrderState && filterPurchaseOrderNumber()
                                     .filter((order) => order.order_isarchived === false)
                                     .slice(0, 3)
@@ -643,6 +734,36 @@ const NewPurchaseOrderForm = () => {
                                     ))}
                                 </div>
                             </div>
+                            
+                            {/* ***** ORDER DATE ****** */}
+                            <div>
+                                <label className="form-label font-bold">*Order Date:</label>
+                                <input
+                                type="date"
+                                className="form-control text-xs lg:text-base"
+                                name="order_date"
+                                value={orderState.order_date}
+                                onChange={handleInputChange}
+                                required
+                                onInvalid={(e) => e.target.setCustomValidity('Enter Order Date')}
+                                onInput={(e) => e.target.setCustomValidity('')}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="form-label font-bold">EST Date and Time:</label>
+                                <input
+                                type="datetime-local"
+                                className="form-control text-xs lg:text-base"
+                                name="order_est_datetime"
+                                value={orderState.order_est_datetime}
+                                onChange={handleInputChange}
+                                onInvalid={(e) => e.target.setCustomValidity('Enter EST Date and Time')}
+                                onInput={(e) => e.target.setCustomValidity('')}
+                                />
+                                <label className="hidden lg:inline-block text-xs italic text-gray-400">(EST) - Delivery estimate time of arrival</label>
+                            </div>
+                            
                         </div>
 
                         {/* ***** SEARCH ITEM TABLE ****** */}
@@ -737,18 +858,40 @@ const NewPurchaseOrderForm = () => {
                                         <td>
                                             <label>{addedProductState[index].product.product_name}</label>
                                         </td>
-                                        <td>
-                                            <input
-                                            type="text"
-                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50" 
-                                            name="order_product_location" 
-                                            value={prod.order_product_location} 
-                                            onChange={(e) => handleInputChange(e, index, true)}
-                                            placeholder="Ex: Level 2"
-                                            required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                            />
+                                        <td class="whitespace-nowrap">
+                                            <div class="inline-block align-middle">
+                                                <input
+                                                    type="text"
+                                                    class="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
+                                                    name="order_product_location"
+                                                    value={prod.order_product_location}
+                                                    onChange={(e) => handleInputChange(e, index, true)}
+                                                    placeholder="Ex: Level 2"
+                                                    required
+                                                    onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
+                                                    onInput={(e) => e.target.setCustomValidity('')}
+                                                />
+                                            </div>
+                                            <div
+                                                class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                                title='Paste location to all'
+                                                onClick={() => handleApplyLocationToAll(index)}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="1.5"
+                                                    stroke="currentColor"
+                                                    class="w-4 h-4 inline-block"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                                    />
+                                                </svg>
+                                            </div>
                                         </td>
                                         <td>
                                             <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -822,17 +965,39 @@ const NewPurchaseOrderForm = () => {
                                             required
                                         />
                                     </td>
-                                    <td>
-                                        <input
-                                            type="text"
-                                            className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50"  
-                                            name="custom_product_location" 
-                                            value={cproduct.custom_product_location} 
-                                            onChange={(e) => handleInputChange(e, index, false, true)}
-                                            placeholder="Ex: Level 2"
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
-                                            onInput={(e) => e.target.setCustomValidity('')}
-                                        />
+                                    <td class="whitespace-nowrap">
+                                        <div class="inline-block align-middle">
+                                            <input
+                                                type="text"
+                                                className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"  
+                                                name="custom_product_location" 
+                                                value={cproduct.custom_product_location} 
+                                                onChange={(e) => handleInputChange(e, index, false, true)}
+                                                placeholder="Ex: Level 2"
+                                                onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
+                                                onInput={(e) => e.target.setCustomValidity('')}
+                                            />
+                                        </div>
+                                        <div
+                                            class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                            title='Paste location to all'
+                                            onClick={() => handleApplyLocationToAll(index, true)}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                strokeWidth="1.5"
+                                                stroke="currentColor"
+                                                class="w-4 h-4 inline-block"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                                />
+                                            </svg>
+                                        </div>
                                     </td>
                                     <td>
                                         <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -914,38 +1079,6 @@ const NewPurchaseOrderForm = () => {
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* ***** ORDER DATE ****** */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 my-2">
-                        <div>
-                            <label className="form-label font-bold">*Order Date:</label>
-                            <input
-                            type="date"
-                            className="form-control text-xs lg:text-base"
-                            name="order_date"
-                            value={orderState.order_date}
-                            onChange={handleInputChange}
-                            required
-                            onInvalid={(e) => e.target.setCustomValidity('Enter Order Date')}
-                            onInput={(e) => e.target.setCustomValidity('')}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="form-label font-bold">*EST Date and Time:</label>
-                            <input
-                            type="datetime-local"
-                            className="form-control text-xs lg:text-base"
-                            name="order_est_datetime"
-                            value={orderState.order_est_datetime}
-                            onChange={handleInputChange}
-                            required
-                            onInvalid={(e) => e.target.setCustomValidity('Enter EST Date and Time')}
-                            onInput={(e) => e.target.setCustomValidity('')}
-                            />
-                            <label className="hidden lg:inline-block text-xs italic text-gray-400">(EST) - Delivery estimate time of arrival</label>
                         </div>
                     </div>
 

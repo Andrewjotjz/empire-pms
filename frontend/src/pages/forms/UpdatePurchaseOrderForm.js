@@ -199,6 +199,9 @@ const UpdatePurchaseOrderForm = () => {
         products: updatedProducts,
       })
     );
+    
+    // clear search after adding
+    setSearchProductTerm('');
   };
 
   const handleAddCustomItem = () => {
@@ -256,12 +259,7 @@ const UpdatePurchaseOrderForm = () => {
     );
   };
 
-  const handleInputChange = (
-    event,
-    index = null,
-    isProduct = false,
-    isCustomProduct = false
-  ) => {
+  const handleInputChange = (event, index = null, isProduct = false, isCustomProduct = false) => {
     const { name, value } = event.target;
 
     // Get the current state
@@ -300,6 +298,25 @@ const UpdatePurchaseOrderForm = () => {
         custom_products: updatedCustomProducts,
       };
     }
+
+    // Handle order_date changes
+    else if (name === 'order_date' && !isProduct && !isCustomProduct && index === null) {
+      // Parse the order_date value as a Date and add 3 days
+      const orderDate = new Date(value);
+      const orderEstDate = new Date(orderDate);
+      orderEstDate.setDate(orderDate.getDate() + 2); // Add 3 days
+
+      // Format as 'YYYY-MM-DDTHH:mm' for datetime-local input
+      const formattedOrderEstDate = orderEstDate.toISOString().slice(0, 16);
+
+      updatedState = {
+          ...currentState,
+          order_date: value,
+          order_est_datetime: formattedOrderEstDate,
+      };
+  }
+
+
     // Handle other updates
     else {
       updatedState = {
@@ -312,123 +329,170 @@ const UpdatePurchaseOrderForm = () => {
     dispatch(setPurchaseOrderState(updatedState));
   };
 
+
   const handleQtyChange = (event, index) => {
-    const { name, value } = event.target;
+      const { name, value } = event.target;
 
-    // Create a copy of the current state outside of the dispatch
-    let updatedProducts = [...purchaseOrderState.products];
+      // Create a copy of the current state outside of the dispatch
+      let updatedProducts = [...purchaseOrderState.products];
 
-    updatedProducts[index] = {
-      ...updatedProducts[index],
-      [name]: Number(value),
-    };
+      updatedProducts[index] = {
+          ...updatedProducts[index],
+          [name]: Number(value),
+      };
 
-    // Handle `order_product_qty_a` changes
-    if (name === "order_product_qty_a") {
-      if (
-        purchaseOrderState.products[index].productprice_obj_ref
-          .product_number_a === 1
-      ) {
-        updatedProducts[index].order_product_qty_b = Number.isInteger(
-          value *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_b
-        )
-          ? value *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_b
-          : parseFloat(
-              value *
-                purchaseOrderState.products[index].productprice_obj_ref
-                  .product_number_b
-            ).toFixed(4);
-      } else {
-        updatedProducts[index].order_product_qty_b = Number.isInteger(
-          value /
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_a
-        )
-          ? value /
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_a
-          : parseFloat(
-              value /
-                purchaseOrderState.products[index].productprice_obj_ref
-                  .product_number_a
-            ).toFixed(4);
+      // Handle `order_product_qty_a` changes
+      if (name === "order_product_qty_a") {
+          if (
+              purchaseOrderState.products[index].productprice_obj_ref
+                  .product_number_a === 1
+          ) {
+              updatedProducts[index].order_product_qty_b = Number.isInteger(
+                  value *
+                      purchaseOrderState.products[index].productprice_obj_ref
+                          .product_number_b
+              )
+                  ? value *
+                    purchaseOrderState.products[index].productprice_obj_ref
+                        .product_number_b
+                  : Number(
+                        (
+                            value *
+                            purchaseOrderState.products[index].productprice_obj_ref
+                                .product_number_b
+                        ).toFixed(4)
+                    );
+          } else {
+              updatedProducts[index].order_product_qty_b = Number.isInteger(
+                  value /
+                      purchaseOrderState.products[index].productprice_obj_ref
+                          .product_number_a
+              )
+                  ? value /
+                    purchaseOrderState.products[index].productprice_obj_ref
+                        .product_number_a
+                  : Number(
+                        (
+                            value /
+                            purchaseOrderState.products[index].productprice_obj_ref
+                                .product_number_a
+                        ).toFixed(4)
+                    );
+          }
+          updatedProducts[index].order_product_gross_amount = Number(
+              (
+                  purchaseOrderState.products[index].productprice_obj_ref
+                      .product_price_unit_a === 1
+                      ? value *
+                        purchaseOrderState.products[index].productprice_obj_ref
+                            .product_price_unit_a *
+                        purchaseOrderState.products[index].productprice_obj_ref
+                            .product_number_a
+                      : value *
+                        purchaseOrderState.products[index].productprice_obj_ref
+                            .product_price_unit_a
+              ).toFixed(4)
+          );
       }
-      updatedProducts[index].order_product_gross_amount = (
-        purchaseOrderState.products[index].productprice_obj_ref
-          .product_price_unit_a === 1
-          ? value *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_price_unit_a *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_a
-          : value *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_price_unit_a
-      ).toFixed(4);
-    }
 
-    // Handle `order_product_qty_b` changes
-    if (name === "order_product_qty_b") {
-      if (
-        purchaseOrderState.products[index].productprice_obj_ref
-          .product_number_b === 1
-      ) {
-        updatedProducts[index].order_product_qty_a = Number.isInteger(
-          value *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_a
-        )
-          ? value *
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_a
-          : parseFloat(
-              value *
-                purchaseOrderState.products[index].productprice_obj_ref
-                  .product_number_a
-            ).toFixed(4);
-      } else {
-        updatedProducts[index].order_product_qty_a = Number.isInteger(
-          value /
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_b
-        )
-          ? value /
-            purchaseOrderState.products[index].productprice_obj_ref
-              .product_number_b
-          : parseFloat(
-              value /
-                purchaseOrderState.products[index].productprice_obj_ref
-                  .product_number_b
-            ).toFixed(4);
+      // Handle `order_product_qty_b` changes
+      if (name === "order_product_qty_b") {
+          if (
+              purchaseOrderState.products[index].productprice_obj_ref
+                  .product_number_b === 1
+          ) {
+              updatedProducts[index].order_product_qty_a = Number.isInteger(
+                  value *
+                      purchaseOrderState.products[index].productprice_obj_ref
+                          .product_number_a
+              )
+                  ? value *
+                    purchaseOrderState.products[index].productprice_obj_ref
+                        .product_number_a
+                  : Number(
+                        (
+                            value *
+                            purchaseOrderState.products[index].productprice_obj_ref
+                                .product_number_a
+                        ).toFixed(4)
+                    );
+          } else {
+              updatedProducts[index].order_product_qty_a = Number.isInteger(
+                  value /
+                      purchaseOrderState.products[index].productprice_obj_ref
+                          .product_number_b
+              )
+                  ? value /
+                    purchaseOrderState.products[index].productprice_obj_ref
+                        .product_number_b
+                  : Number(
+                        (
+                            value /
+                            purchaseOrderState.products[index].productprice_obj_ref
+                                .product_number_b
+                        ).toFixed(4)
+                    );
+          }
+          updatedProducts[index].order_product_gross_amount = Number(
+              (
+                  value *
+                  purchaseOrderState.products[index].productprice_obj_ref
+                      .product_price_unit_b
+              ).toFixed(4)
+          );
       }
-      updatedProducts[index].order_product_gross_amount = (
-        value *
-        purchaseOrderState.products[index].productprice_obj_ref
-          .product_price_unit_b
-      ).toFixed(4);
-    }
 
-    // Calculate updatedTotalAmount using updatedProducts
-    let updatedTotalAmount = (
-      updatedProducts.reduce(
-        (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
-        0
-      ) * 1.1
-    ).toFixed(4);
+      // Calculate updatedTotalAmount using updatedProducts
+      let updatedTotalAmount = Number(
+          (
+              updatedProducts.reduce(
+                  (total, prod) =>
+                      total + (Number(prod.order_product_gross_amount) || 0),
+                  0
+              ) * 1.1
+          ).toFixed(4)
+      );
 
-    // Dispatch the updated state with a plain object
+
+      // Dispatch the updated state with a plain object
+      dispatch(
+          setPurchaseOrderState({
+              ...purchaseOrderState,
+              order_total_amount: updatedTotalAmount,
+              products: updatedProducts,
+          })
+      );
+  };
+
+  const handleApplyLocationToAll = (index, isCustom = false) => {
+      let copyText = '';
+
+      // Determine the source of copyText based on isCustom
+      if (isCustom) {
+          copyText = purchaseOrderState.custom_products[index]?.custom_product_location || '';
+      } else {
+          copyText = purchaseOrderState.products[index]?.order_product_location || '';
+      }
+
+      const updatedProducts = purchaseOrderState.products.map(product => ({
+          ...product,
+          order_product_location: copyText, // Set all product locations to the copied location
+      }));
+
+      const updatedCustomProducts = purchaseOrderState.custom_products.map(cproduct => ({
+          ...cproduct,
+          custom_product_location: copyText
+      }))
+      
+      // Dispatch the updated state
     dispatch(
       setPurchaseOrderState({
-        ...purchaseOrderState,
-        order_total_amount: Number(updatedTotalAmount),
-        products: updatedProducts,
+          ...purchaseOrderState,
+          products: updatedProducts, // Update the products in state
+          custom_products: updatedCustomProducts
       })
     );
-  };
+  }; 
 
   const filterProductsBySearchTerm = () => {
     const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
@@ -763,6 +827,45 @@ const UpdatePurchaseOrderForm = () => {
                       ))}
                 </select>
               </div>
+
+              
+
+              {/* ***** ORDER DATE ****** */}
+              <div>
+                <label className="form-label font-bold">*Order Date:</label>
+                <input
+                  type="date"
+                  className="form-control text-xs lg:text-base"
+                  name="order_date"
+                  value={purchaseOrderState.order_date.split("T")[0]}
+                  onChange={handleInputChange}
+                  required
+                  onInvalid={(e) =>
+                    e.target.setCustomValidity("Enter Order Date")
+                  }
+                  onInput={(e) => e.target.setCustomValidity("")}
+                />
+              </div>
+
+              <div>
+                <label className="form-label font-bold">
+                  EST Date and Time:
+                </label>
+                <input
+                  type="datetime-local"
+                  className="form-control text-xs lg:text-base"
+                  name="order_est_datetime"
+                  value={purchaseOrderState.order_est_datetime.slice(0, 16)}
+                  onChange={handleInputChange}
+                  onInvalid={(e) =>
+                    e.target.setCustomValidity("Enter EST Date and Time")
+                  }
+                  onInput={(e) => e.target.setCustomValidity("")}
+                />
+                <label className="hidden lg:inline-block text-xs italic text-gray-400">
+                  (EST) - Delivery estimate time of arrival
+                </label>
+              </div>
             </div>
 
             {/* ***** SEARCH ITEM TABLE ****** */}
@@ -902,25 +1005,41 @@ const UpdatePurchaseOrderForm = () => {
                         <tr key={index}>
                           <td className='hidden lg:table-cell'>{prod.product_obj_ref.product_sku}</td>
                           <td>{prod.product_obj_ref.product_name}</td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control text-xs lg:text-base px-1 py-0.5"
-                              name="order_product_location"
-                              value={prod.order_product_location}
-                              onChange={(e) =>
-                                handleInputChange(e, index, true)
-                              }
-                              placeholder="Ex: Level 2"
-                              required
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter item location"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                            />
-                          </td>
+                          <td class="whitespace-nowrap">
+                            <div class="inline-block align-middle">
+                                <input
+                                    type="text"
+                                    class="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
+                                    name="order_product_location"
+                                    value={prod.order_product_location}
+                                    onChange={(e) => handleInputChange(e, index, true)}
+                                    placeholder="Ex: Level 2"
+                                    required
+                                    onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
+                                    onInput={(e) => e.target.setCustomValidity('')}
+                                />
+                            </div>
+                            <div
+                                class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                title='Paste location to all'
+                                onClick={() => handleApplyLocationToAll(index)}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    class="w-4 h-4 inline-block"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                    />
+                                </svg>
+                            </div>
+                        </td>
                           <td>
                             <div className="grid grid-cols-3 items-center border rounded w-28">
                               <input
@@ -1032,23 +1151,39 @@ const UpdatePurchaseOrderForm = () => {
                               required
                             />
                           </td>
-                          <td>
-                            <input
-                              type="text"
-                              className="form-control text-xs lg:text-base px-1 py-0.5"
-                              name="custom_product_location"
-                              value={cproduct.custom_product_location}
-                              onChange={(e) =>
-                                handleInputChange(e, index, false, true)
-                              }
-                              placeholder="Ex: Level 2"
-                              onInvalid={(e) =>
-                                e.target.setCustomValidity(
-                                  "Enter custom item location"
-                                )
-                              }
-                              onInput={(e) => e.target.setCustomValidity("")}
-                            />
+                          <td class="whitespace-nowrap">
+                              <div class="inline-block align-middle">
+                                  <input
+                                      type="text"
+                                      className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"  
+                                      name="custom_product_location" 
+                                      value={cproduct.custom_product_location} 
+                                      onChange={(e) => handleInputChange(e, index, false, true)}
+                                      placeholder="Ex: Level 2"
+                                      onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
+                                      onInput={(e) => e.target.setCustomValidity('')}
+                                  />
+                              </div>
+                              <div
+                                  class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                  title='Paste location to all'
+                                  onClick={() => handleApplyLocationToAll(index, true)}
+                              >
+                                  <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth="1.5"
+                                      stroke="currentColor"
+                                      class="w-4 h-4 inline-block"
+                                  >
+                                      <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                      />
+                                  </svg>
+                              </div>
                           </td>
                           <td>
                             <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -1181,46 +1316,6 @@ const UpdatePurchaseOrderForm = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-
-            {/* ***** ORDER DATE ****** */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 my-2">
-              <div>
-                <label className="form-label font-bold">*Order Date:</label>
-                <input
-                  type="date"
-                  className="form-control text-xs lg:text-base"
-                  name="order_date"
-                  value={purchaseOrderState.order_date.split("T")[0]}
-                  onChange={handleInputChange}
-                  required
-                  onInvalid={(e) =>
-                    e.target.setCustomValidity("Enter Order Date")
-                  }
-                  onInput={(e) => e.target.setCustomValidity("")}
-                />
-              </div>
-
-              <div>
-                <label className="form-label font-bold">
-                  *EST Date and Time:
-                </label>
-                <input
-                  type="datetime-local"
-                  className="form-control text-xs lg:text-base"
-                  name="order_est_datetime"
-                  value={purchaseOrderState.order_est_datetime.slice(0, 16)}
-                  onChange={handleInputChange}
-                  required
-                  onInvalid={(e) =>
-                    e.target.setCustomValidity("Enter EST Date and Time")
-                  }
-                  onInput={(e) => e.target.setCustomValidity("")}
-                />
-                <label className="hidden lg:inline-block text-xs italic text-gray-400">
-                  (EST) - Delivery estimate time of arrival
-                </label>
               </div>
             </div>
 
