@@ -18,9 +18,7 @@ const FileUpload = ({invoice_id}) => {
     
         const formData = new FormData();
         Array.from(files).forEach((file) => {
-            console.log("formData object showing:", formData)
             formData.append("invoices", file); // 'invoices' must match the backend key
-            console.log("After appending file, formData object showing:", formData)
         });
 
         formData.append("id", invoice_id);
@@ -41,9 +39,8 @@ const FileUpload = ({invoice_id}) => {
             }
     
             const data = await res.json();
-            // console.log("Response data:", data);
 
-            alert(`${data.message}\n${data.urls.join("\n")}`);
+            alert(`${data.message}`);
         } catch (error) {
             alert(error.message);
         }

@@ -1056,9 +1056,7 @@ const UpdateInvoiceForm = () => {
 
     navigate(`/EmpirePMS/invoice/${invoiceId}`)
   };
-  console.log("purchaseOrderState", purchaseOrderState)
-  console.log("currentOrder", currentOrder)
-
+  
   // Fetch suppliers
   useEffect(() => {
     const abortController = new AbortController();

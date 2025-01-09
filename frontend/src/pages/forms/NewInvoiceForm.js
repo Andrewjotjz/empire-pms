@@ -28,10 +28,8 @@ const NewInvoiceForm = () => {
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { addInvoice, addInvoiceError } = useAddInvoice();
   const { uploadInvoice, uploadInvoiceError } = useUploadInvoice();
-  const { fetchProductsBySupplier, fetchProductsErrorState } =
-    useFetchProductsBySupplier();
-  const { updatePurchaseOrder, updateOrderErrorState } =
-    useUpdatePurchaseOrder();
+  const { fetchProductsBySupplier, fetchProductsErrorState } = useFetchProductsBySupplier();
+  const { updatePurchaseOrder, updateOrderErrorState } = useUpdatePurchaseOrder();
 
   //Component's state declaration
   const [searchOrderTerm, setSearchOrderTerm] = useState("");
@@ -53,19 +51,15 @@ const NewInvoiceForm = () => {
   const [showEditOrderModal, setShowEditOrderModal] = useState(false);
   const [showCreatePriceModal, setShowCreatePriceModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] =
-    useState(false);
-  const [showRegisterConfirmationModal, setShowRegisterConfirmationModal] =
-    useState(false);
+  const [showUpdateConfirmationModal, setShowUpdateConfirmationModal] = useState(false);
+  const [showRegisterConfirmationModal, setShowRegisterConfirmationModal] = useState(false);
 
   const [isFetchSupplierLoading, setIsFetchSupplierLoading] = useState(true);
   const [fetchSupplierError, setFetchSupplierError] = useState(null);
   const [isFetchOrderLoading, setIsFetchOrderLoading] = useState(false);
   const [fetchOrderError, setFetchOrderError] = useState(null);
-  const [isFetchProductDetailsLoading, setIsFetchProductDetailsLoading] =
-    useState(false);
-  const [fetchProductDetailsError, setFetchProductDetailsError] =
-    useState(null);
+  const [isFetchProductDetailsLoading, setIsFetchProductDetailsLoading] = useState(false);
+  const [fetchProductDetailsError, setFetchProductDetailsError] = useState(null);
   const [isFetchProjectLoading, setIsFetchProjectLoading] = useState(false);
   const [fetchProjectError, setFetchProjectError] = useState(null);
   const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
@@ -168,6 +162,7 @@ const NewInvoiceForm = () => {
     projects: [],
   });
   const [files, setFiles] = useState([]);
+
 
   //Component's function and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -1225,20 +1220,23 @@ const NewInvoiceForm = () => {
   const handleSubmitInvoice = async (event) => {
     event.preventDefault();
 
-    // upload Invoice logic
+    // check if user has uploaded the attachment
     if (!files || files.length === 0) {
       return alert("Please select at least one file.");
     }
 
+    // check if there's more than 10 attachment
     if (files.length > 10) {
       return alert("You can only upload up to 10 files.")
     }
 
+    // create FormData object
     const formData = new FormData();
     Array.from(files).forEach((file) => {
         formData.append("invoices", file); // 'invoices' must match the backend key
     });
 
+    //Invoice with PO
     if (!isToggled) {
       if (newInvoice.invoice_status === "") {
         alert(`Please select invoice status!`)
@@ -1250,6 +1248,7 @@ const NewInvoiceForm = () => {
       await uploadInvoice(formData);
     }
 
+    // Invoice without PO
     if (isToggled) {
       if (newInvoice.invoice_status === "") {
         alert(`Please select invoice status!`)
@@ -3831,9 +3830,9 @@ useEffect(() => {
                     />
                   </svg>
                   <p className="mt-2 text-sm text-gray-500">
-                    <span className="font-medium">Click to upload</span> or drag and drop files
+                    <span className="font-medium">Click to upload</span>
                   </p>
-                  <p className="text-xs text-gray-400">PNG, JPG, GIF, PDF up to 10MB</p>
+                  <p className="text-xs text-gray-400">PNG, JPG, WORD, PDF, EXCEL and TXT up to 10MB</p>
                   <input
                     id="file-upload"
                     type="file"
