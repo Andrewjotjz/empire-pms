@@ -34,7 +34,8 @@ const app = express();
 app.use(cors({
     origin: 'https://empirecbs.onrender.com',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Disposition'], // Expose the Content-Disposition header for Download Invoice Attachment
 }))
 //create middleware - Access to 'req' object and logs request url, request path and request method
 app.use((req,res,next) => {

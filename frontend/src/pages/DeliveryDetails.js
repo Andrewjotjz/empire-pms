@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom'
-import LoadingOverlay from './loaders/LoadingScreen';
+import LoadingScreen from './loaders/LoadingScreen';
 import UnauthenticatedSkeleton from "./loaders/UnauthenticateSkeleton";
 import SessionExpired from '../components/SessionExpired';
 
@@ -214,7 +214,7 @@ const DeliveryDetails = () => {
     };
     }, [deliveryState]);
 
-    if (isLoadingState)  { return (<LoadingOverlay />); }
+    if (isLoadingState)  { return (<LoadingScreen isLoading={isLoadingState} />); }
 
     if (errorState) {
         if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
@@ -341,7 +341,7 @@ const DeliveryDetails = () => {
                                 {prod.order_product_qty_a}
                                 </td>
                               </tr>
-                            ))) : (<LoadingOverlay />)}
+                            ))) : (<LoadingScreen />)}
                           </tbody>
                         </table>
                       </div>
@@ -390,7 +390,7 @@ const DeliveryDetails = () => {
       );
 
     if (isUpdateLoading) (
-        <LoadingOverlay />
+        <LoadingScreen isLoading={isUpdateLoading} />
     )
 
     return (

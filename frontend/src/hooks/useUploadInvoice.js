@@ -8,7 +8,7 @@ export const useUploadInvoice = () => {
     const [uploadInvoiceError, setUploadInvoiceError] = useState(null);
 
     //Component's function
-    const uploadInvoice = async (formData, invoice_id) => {
+    const uploadInvoice = async (formData) => {
         setUploadInvoiceLoading(true)
         setUploadInvoiceError(null)
 
@@ -30,7 +30,7 @@ export const useUploadInvoice = () => {
         
                 const data = await res.json();
     
-                alert(`${data.message}\n${data.urls.join("\n")}`);
+                alert(`${data.message}\n${data.files}`);
             } catch (error) {
                 alert(error.message);
             }

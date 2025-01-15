@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LoadingOverlay = ({ isLoading }) => {
+const LoadingScreen = ({ isLoading }) => {
   if (!isLoading) return null;
 
   return (
@@ -13,5 +13,5 @@ const LoadingOverlay = ({ isLoading }) => {
   );
 };
 
-export default LoadingOverlay;
+export default LoadingScreen;
 

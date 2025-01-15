@@ -9,14 +9,14 @@ const NewBudgetForm = () => {
 
   const [budget, setBudget] = useState({
     budget_name: '',
-    project: '',
-    budget_area: '',
-    budget_area_level: '',
-    budget_area_subarea: '',
+    project: null,
+    budget_area: null,
+    budget_area_level: null,
+    budget_area_subarea: null,
     entries: [
       {
         product_type_obj_ref: {
-          type_id: '',
+          type_id: null,
           type_total_m2: 0,
           type_rate: 0,
           type_total_amount: 0,
@@ -279,11 +279,14 @@ const NewBudgetForm = () => {
 
 if (isFetchTypeLoading || isFetchProjectLoading || isAddBudgetLoading) { return (<LoadingScreen />); }
 
-if (fetchTypeError || fetchProjectError || addBudgetError) {
+if (fetchTypeError) {
     if(fetchTypeError.includes("Session expired") || fetchTypeError.includes("jwt expired") || fetchTypeError.includes("jwt malformed")){
         return(<div><SessionExpired /></div>)
     }
     return (<div>Error: {fetchTypeError || fetchProjectError || addBudgetError}</div>);
+}
+if (fetchProjectError || addBudgetError) {
+    return (<div>Error: {fetchProjectError || addBudgetError }</div>);
 }
 
   return (

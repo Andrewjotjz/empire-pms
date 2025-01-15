@@ -657,6 +657,7 @@ if (fetchTypeError || fetchProjectError || addBudgetError || fetchBudgetError) {
                             />
                             <button
                               disabled
+                              hidden
                               type="button"
                               title="Remove subcategory"
                               onClick={() => removeSubcategory(entryIndex, categoryIndex, subcategoryIndex)}
@@ -671,6 +672,7 @@ if (fetchTypeError || fetchProjectError || addBudgetError || fetchBudgetError) {
                       </div>
                     </div>
                   ))}
+                  {/* <div>testttttttttttttt</div> */}
                   <button
                     type="button"
                     onClick={() => addSubcategory(entryIndex, categoryIndex, entry, category)}

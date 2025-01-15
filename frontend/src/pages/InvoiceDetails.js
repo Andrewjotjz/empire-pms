@@ -2,18 +2,21 @@
 import { useParams, useNavigate, Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { DownloadIcon } from 'lucide-react';
 
 import { setInvoiceState } from '../redux/invoiceSlice';
 import { clearProductState } from '../redux/productSlice';
 
 import { useUpdateInvoice } from '../hooks/useUpdateInvoice';
+import { useFetchInvoiceFiles } from '../hooks/useFetchInvoiceFiles';
+import { useDownloadInvoiceFile } from '../hooks/useDownloadInvoiceFile';
 
 import SessionExpired from "../components/SessionExpired";
 import EmployeeDetailsSkeleton from "./loaders/EmployeeDetailsSkeleton";
 import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 import { Modal, Button } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-
+import FileTypeIcon from '../components/FileTypeIcon';
 
 const InvoiceDetails = () => {
     //Component router
@@ -29,9 +32,12 @@ const InvoiceDetails = () => {
     const [currentRightTab, setCurrentRightTab] = useState('internalComments');
     const [showLastDiv, setShowLastDiv] = useState(false);
     const [targetRef, setTargetRef] = useState(null);
+    const [files, setFiles] = useState([]);
 
     //Component hooks
     const { updateInvoice, isUpdateLoadingState, updateErrorState } = useUpdateInvoice();
+    const { fetchInvoiceFiles } = useFetchInvoiceFiles();
+    const { downloadInvoiceFile } = useDownloadInvoiceFile();
     const dispatch = useDispatch();
     const internalCommentsRef = useRef(null);
     const supplierDetailsRef = useRef(null);
@@ -107,8 +113,16 @@ const InvoiceDetails = () => {
           setShowLastDiv(true);
         }
       };
+
+    const downloadFile = async (fileId) => {
+        try {
+            await downloadInvoiceFile(fileId); // Use your downloadSpecificFile function
+        } catch (error) {
+            console.error("Error downloading file:", error);
+        }
+    };
     
-    //Render component
+    // Fetch invoice details
     useEffect(() => {
         const fetchInvoiceDetails = async () => {
             try {
@@ -138,6 +152,7 @@ const InvoiceDetails = () => {
         fetchInvoiceDetails();
     }, [id, dispatch]);
 
+    // Scroll to div
     useEffect(() => {
         // If a targetRef is stored and it is now rendered, scroll to it
         if (targetRef && targetRef.current) {
@@ -145,6 +160,20 @@ const InvoiceDetails = () => {
           setTargetRef(null); // Clear the targetRef once scrolled
         }
       }, [showLastDiv, targetRef]);
+
+    // Fetch all invoice related files
+    useEffect(() => {
+        const fetchFiles = async () => {
+            try {
+                const fetchedFiles = await fetchInvoiceFiles(invoiceState?._id); // Use your fetchInvoiceFiles function
+                setFiles(fetchedFiles);
+            } catch (error) {
+                console.error("Error fetching invoice files:", error);
+            }
+        };
+
+        fetchFiles();
+    }, [invoiceState?._id]);
 
     // Display DOM
     if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }
@@ -299,7 +328,19 @@ const InvoiceDetails = () => {
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={2}><span className='text-red-700'>Raw Total Amount (incl. GST):</span></td>
-                            <td className='pt-1 font-bold text-end px-2 py-1'><span className='text-red-700'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span></td>
+                            <td className='pt-1 font-bold text-end px-2 py-1'>
+                                <span className='text-red-700'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
+                            {(
+                            invoiceState.invoiced_raw_total_amount_incl_gst - (Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
+                            (<span className="text-xs text-red-600 ml-2 font-bold">+
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_raw_total_amount_incl_gst - invoiceState.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                                </span>
+                                ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 font-bold ml-2 inline-block text-end">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            ))}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -312,6 +353,7 @@ const InvoiceDetails = () => {
 
     const internalComments = invoiceState.invoice_internal_comments !== '' ? (
         <div className="card-body border-1 relative shadow-md p-2" ref={internalCommentsRef}>
+            {/* Internal comments */}
             <div className='border rounded-md bg-blue-100 p-2 h-auto'>
                 <p>{invoiceState.invoice_internal_comments}</p>
             </div>
@@ -589,6 +631,34 @@ const InvoiceDetails = () => {
                                 </div>
                                 {/* NOTES TO SUPPLIER */}
                                 {currentRightTab === 'internalComments' && internalComments}
+                                
+            
+                                {/* Invoice files */}
+                                {files && <div className="container px-2 py-8">
+                                <h1 className="text-lg font-bold mb-2">Attachment</h1>
+                                {files.length === 0 ? (
+                                    <p className="text-gray-500">No invoice files found.</p>
+                                ) : (
+                                    <ul className="space-y-4">
+                                    {files.map((file) => (
+                                        <li key={file.id} className="bg-white shadow rounded-lg p-4 flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <FileTypeIcon mimeType={file.mimeType} />
+                                            <div className="ml-4">
+                                            <label className="font-semibold text-center justify-center align-middle items-center">{file.originalName}</label>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => downloadFile(file.id)}
+                                            className="hover:bg-gray-100 text-gray-400 font-bold py-2 px-2 rounded inline-flex items-center"
+                                        >
+                                            <DownloadIcon className="w-4 h-4" />
+                                        </button>
+                                        </li>
+                                    ))}
+                                    </ul>
+                                )}
+                                </div>}
                             </div>
                         </div>
                     </div>

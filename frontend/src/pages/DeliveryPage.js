@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
 import SessionExpired from "../components/SessionExpired";
-import LoadingOverlay from "./loaders/LoadingScreen";
+import LoadingScreen from "./loaders/LoadingScreen";
 import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
 
 const itemsPerPage = 10;
