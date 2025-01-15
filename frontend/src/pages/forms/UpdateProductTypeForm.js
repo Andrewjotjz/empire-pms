@@ -5,7 +5,7 @@ import { useUpdateProductType } from '../../hooks/useUpdateProductType';
  
 import SessionExpired from '../../components/SessionExpired';
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
-import LoadingOverlay from '../loaders/LoadingScreen';
+import LoadingScreen from '../loaders/LoadingScreen';
 
 const UpdateProductTypeForm = () => {
     // router

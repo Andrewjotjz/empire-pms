@@ -1,7 +1,7 @@
 // Import modules
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySupplier';
 import { useFetchSupplierByProject } from '../../hooks/useFetchSupplierByProject';
@@ -17,11 +17,11 @@ import NewPurchaseOrderSkeleton from '../loaders/NewPurchaseOrderSkeleton';
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
 const NewPurchaseOrderForm = () => {
-    // Component router
+    // Hooks
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     // Component hook
-    const dispatch = useDispatch();
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
     const { fetchSupplierByProject, isFetchSupplierLoading, fetchSupplierError } = useFetchSupplierByProject();
     const { addPurchaseOrder, isAddOrderLoadingState, addOrderErrorState } = useAddPurchaseOrder();
@@ -30,9 +30,15 @@ const NewPurchaseOrderForm = () => {
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
     const productState = useSelector((state) => state.productReducer.productState)
     const projectState = useSelector((state) => state.projectReducer.projectState)
-    const purchaseOrderState = useSelector((state) => state.purchaseOrderReducer.purchaseOrderState)
+    const [purchaseOrderState, setPurchaseOrderState] = useState(null);
+
     const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
     const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
+    const [isFetchOrderLoadingState, setIsFetchOrderLoadingState] = useState(true);
+    const [fetchOrderErrorState, setFetchOrderErrorState] = useState(null);
+    const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
+    const [fetchTypeError, setFetchTypeError] = useState(null);
+
     const [selectedSupplier, setSelectedSupplier] = useState('');
     const [selectedProject, setSelectedProject] = useState('');
     const [selectedProductType, setSelectedProductType] = useState('')
@@ -69,8 +75,6 @@ const NewPurchaseOrderForm = () => {
         project: '',
         order_status: 'Pending'
     })
-    const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
-    const [fetchTypeError, setFetchTypeError] = useState(null);
     
     // Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -111,7 +115,7 @@ const NewPurchaseOrderForm = () => {
             setShowConfirmationModal(true);
         } else if (targetProject === '' && selectedProject !== '') {
             setSelectedProject(targetProject)
-            dispatch(clearSupplierState())
+            dispatch(clearSupplierState());
             setSelectedSupplier('')
         }
     };
@@ -529,7 +533,7 @@ const NewPurchaseOrderForm = () => {
                 }
                 
                 setIsFetchProjectLoadingState(false);
-                dispatch(setProjectState(data))
+                dispatch(setProjectState(data));
                 setFetchProjectErrorState(null);
             } catch (error) {
                 if (error.name === 'AbortError') {
@@ -547,7 +551,47 @@ const NewPurchaseOrderForm = () => {
             abortController.abort(); // Cleanup
         };
     }, [dispatch]);
+    // Fetch Purchase Order
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
 
+        const fetchOrders = async () => {
+            setIsFetchOrderLoadingState(true);
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsFetchOrderLoadingState(false);
+                setPurchaseOrderState(data)
+                setFetchOrderErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsFetchOrderLoadingState(false);
+                    setFetchOrderErrorState(error.message);
+                }
+            }
+        };
+
+        fetchOrders();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
     // Fetch Product Types
     useEffect(() => {
         const abortController = new AbortController();
@@ -590,22 +634,27 @@ const NewPurchaseOrderForm = () => {
         };
     }, []);
 
-    // Display DOM
-    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading) {
+    // Display Loading
+    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading || isFetchOrderLoadingState || isFetchTypeLoading) {
         return <NewPurchaseOrderSkeleton/>;
     }
 
-    if (fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError) {
-        if (fetchProjectErrorState.includes("Session expired") ) {
+    // Display Error
+    const renderErrorState = (errorState) => {
+        if (!errorState) return null;
+        if (errorState.includes("jwt expired")) {
             return <div><SessionExpired /></div>;
         }
         return (
-        <div>
-            <p>Error: {fetchProjectErrorState || fetchProductsErrorState || addOrderErrorState || fetchSupplierError}</p>
-        </div>
+            <div>
+                <p>Error: {errorState}</p>
+            </div>
         );
-    }
+    };
+    const errorComponent = renderErrorState(fetchProductsErrorState) || renderErrorState(fetchSupplierError) || renderErrorState(addOrderErrorState) || renderErrorState(fetchOrderErrorState) || renderErrorState(fetchProjectErrorState) || renderErrorState(fetchTypeError);
+    if (errorComponent) return errorComponent;
 
+    // Confirmation Modal
     const confirmationModal = (
         <Modal show={showConfirmationModal} onHide={() => setShowConfirmationModal(false)}>
             <Modal.Header closeButton>
@@ -626,7 +675,6 @@ const NewPurchaseOrderForm = () => {
             </Modal.Footer>
         </Modal>
     );
-
 
     return (
         localUser && Object.keys(localUser).length > 0 ? (
@@ -784,16 +832,10 @@ const NewPurchaseOrderForm = () => {
                                     onChange={(e) => setSelectedProductType(e.target.value)}
                                     >
                                     <option value="">Filter by Product Type...</option>
-                                    {productTypeState
-                                    .filter(type =>
-                                    productState?.some(
-                                        object => object.product.product_type === type._id
-                                    )
-                                    )
-                                    .map((productType, index) => (
-                                    <option key={index} value={productType._id}>
-                                        {productType.type_name}
-                                    </option>
+                                    {productTypeState.filter(type => productState?.some(object => object.product.product_type === type._id)).map((productType, index) => (
+                                        <option key={index} value={productType._id}>
+                                            {productType.type_name}
+                                        </option>
                                     ))}
                                     </select>
                                 </div>
