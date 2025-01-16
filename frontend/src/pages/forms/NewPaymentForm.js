@@ -149,22 +149,22 @@ const NewPaymentForm = () => {
         });
       };      
     
-      const addPaymentTerm = () => {
-        setPaymentState({
-          ...paymentState,
-          payment_term: [
-            ...paymentState.payment_term,
-            { payment_datetime: '', payment_amount_paid: 0 }
-          ]
-        });
-      };
+    const addPaymentTerm = () => {
+    setPaymentState({
+        ...paymentState,
+        payment_term: [
+        ...paymentState.payment_term,
+        { payment_datetime: '', payment_amount_paid: 0 }
+        ]
+    });
+    };
     
-      const removePaymentTerm = (id) => {
-        setPaymentState({
-          ...paymentState,
-          payment_term: paymentState.payment_term.filter((_, idx) => idx !== id)
-        });
-      };
+    const removePaymentTerm = (id) => {
+    setPaymentState({
+        ...paymentState,
+        payment_term: paymentState.payment_term.filter((_, idx) => idx !== id)
+    });
+    };
 
     const handleInvoiceChange = (e) => {
         const { value } = e.target; // This will be the invoice ID (_id)
@@ -257,7 +257,7 @@ const NewPaymentForm = () => {
     
         if (hasUnreviewedInvoices) {
             const userConfirmed = window.confirm(
-                'You have unreviewed invoice(s). Are you sure you want to create this payment?'
+                'You have unapproved invoice(s). Are you sure you want to create this payment?'
             );
             if (!userConfirmed) {
                 return;
@@ -293,10 +293,7 @@ const NewPaymentForm = () => {
         addPayment(updatedPaymentState);
     };
     
-    
-    
-    
-    // Fetch data
+    // Fetch suppliers
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -338,6 +335,7 @@ const NewPaymentForm = () => {
         };
     }, []);
 
+    // Fetch projects
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -379,6 +377,7 @@ const NewPaymentForm = () => {
         };
     }, []);
 
+    // Fetch invoices
     useEffect(() => {
         const abortController = new AbortController();
         const signal = abortController.signal;
@@ -420,6 +419,17 @@ const NewPaymentForm = () => {
         };
     }, []);
 
+    // Render changes for filtering
+    useEffect(() => {
+        if (paymentState.period_start_date) {
+            let filteredInvoices = invoiceState.filter(invoice => invoice.supplier._id === paymentState.supplier && invoice.invoice_issue_date.split('T')[0] >= paymentState.period_start_date && invoice.invoice_issue_date.split('T')[0] <= paymentState.period_end_date);
+            setTargetInvoices(filteredInvoices)
+        }
+        if (paymentState.period_end_date) {
+            let filteredInvoices = invoiceState.filter(invoice => invoice.supplier._id === paymentState.supplier && invoice.invoice_issue_date.split('T')[0] >= paymentState.period_start_date && invoice.invoice_issue_date.split('T')[0] <= paymentState.period_end_date)
+            setTargetInvoices(filteredInvoices)
+        }
+    }, [invoiceState, paymentState.supplier, paymentState.period_start_date, paymentState.period_end_date])
 
     if (isFetchInvoiceLoading || isFetchProjectLoading || isFetchSupplierLoading || isAddPaymentLoading) { return (<LoadingScreen />); }
 
@@ -428,6 +438,28 @@ const NewPaymentForm = () => {
             return(<div><SessionExpired /></div>)
         }
         return (<div>Error: {fetchSupplierError}</div>);
+    }
+
+    // Display error
+    if (fetchProjectError) {
+        if(fetchProjectError.includes("Session expired") || fetchProjectError.includes("jwt expired") || fetchProjectError.includes("jwt malformed")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {fetchProjectError}</div>);
+    }
+    // Display error
+    if (fetchInvoiceError) {
+        if(fetchInvoiceError.includes("Session expired") || fetchInvoiceError.includes("jwt expired") || fetchInvoiceError.includes("jwt malformed")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {fetchInvoiceError}</div>);
+    }
+    // Display error
+    if (addPaymentError) {
+        if(addPaymentError.includes("Session expired") || addPaymentError.includes("jwt expired") || addPaymentError.includes("jwt malformed")){
+            return(<div><SessionExpired /></div>)
+        }
+        return (<div>Error: {addPaymentError}</div>);
     }
 
     return ( 
@@ -550,7 +582,7 @@ const NewPaymentForm = () => {
                         </thead>
                         <tbody>
                             {/* Target Invoices */}
-                            {targetInvoices && targetInvoices.map((invoice, ivcIndex) => (
+                            {targetInvoices.length > 0 ? (targetInvoices.map((invoice, ivcIndex) => (
                             <tr key={ivcIndex} className="border-b hover:bg-gray-50">
                                 <td className="hidden lg:table-cell px-6 py-4 font-medium text-gray-900 hover:cursor-pointer hover:text-blue-500 hover:underline" onClick={() => window.open(`/EmpirePMS/invoice/${invoice._id}`, '_blank')}>{invoice.invoice_ref}</td>
                                 <td className="px-6 py-4">{formatDate(invoice.invoice_issue_date)}</td>
@@ -610,7 +642,11 @@ const NewPaymentForm = () => {
                                     </button>
                                 </td>
                             </tr>
-                            ))}
+                            ))) : (
+                                <tr>
+                                    <td colSpan={9} className='px-6 py-4 text-center text-md'>No invoices found for the selected date range. To select invoices outside this range, please select 'Add other invoice' below.</td>
+                                </tr>
+                            )}
                             {/* Amount Calculation */}
                             <tr className="border-b bg-gray-50">
                                 <td colSpan={6} className="px-6 py-3"></td>

@@ -15,7 +15,8 @@ const InvoicePage2 = () => {
     const [errorState, setErrorState] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const [dateFilter, setDateFilter] = useState('');
+    const [startDateFilter, setStartDateFilter] = useState('');
+    const [endDateFilter, setEndDateFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
     const [supplierFilter, setSupplierFilter] = useState('');
     const [typeFilter, setTypeFilter] = useState('');
@@ -242,45 +243,65 @@ const InvoicePage2 = () => {
         }
 
         // Filter by date
-        if (dateFilter) {
-            const selectedDate = new Date(dateFilter);
-
-            // Filter by invoice_issue_date
-            let filteredResult = result.filter(invoice => {
+        if (startDateFilter && endDateFilter) {
+            const startDate = new Date(startDateFilter);
+            const endDate = new Date(endDateFilter);
+        
+            // Filter invoices that fall within the range for any of the date fields
+            const filteredResult = result.filter(invoice => {
                 const issueDate = new Date(invoice.invoice_issue_date);
+                const receivedDate = new Date(invoice.invoice_received_date);
+                const dueDate = new Date(invoice.invoice_due_date);
+        
+                // Check if any date is within the range [startDate, endDate]
                 return (
-                    issueDate.getFullYear() === selectedDate.getFullYear() &&
-                    issueDate.getMonth() === selectedDate.getMonth() &&
-                    issueDate.getDate() === selectedDate.getDate()
+                    (issueDate >= startDate && issueDate <= endDate) ||
+                    (receivedDate >= startDate && receivedDate <= endDate) ||
+                    (dueDate >= startDate && dueDate <= endDate)
                 );
             });
-
-            // If no results, filter by invoice_received_date
-            if (filteredResult.length === 0) {
-                filteredResult = result.filter(invoice => {
-                    const receivedDate = new Date(invoice.invoice_received_date);
-                    return (
-                        receivedDate.getFullYear() === selectedDate.getFullYear() &&
-                        receivedDate.getMonth() === selectedDate.getMonth() &&
-                        receivedDate.getDate() === selectedDate.getDate()
-                    );
-                });
-            }
-
-            // If no results again, filter by invoice_due_date
-            if (filteredResult.length === 0) {
-                filteredResult = result.filter(invoice => {
-                    const dueDate = new Date(invoice.invoice_due_date);
-                    return (
-                        dueDate.getFullYear() === selectedDate.getFullYear() &&
-                        dueDate.getMonth() === selectedDate.getMonth() &&
-                        dueDate.getDate() === selectedDate.getDate()
-                    );
-                });
-            }
-
+        
             result = filteredResult; // Update result with the filtered data
-        }
+        }        
+        // if (startDateFilter) {
+        //     const selectedDate = new Date(startDateFilter);
+
+        //     // Filter by invoice_issue_date
+        //     let filteredResult = result.filter(invoice => {
+        //         const issueDate = new Date(invoice.invoice_issue_date);
+        //         return (
+        //             issueDate.getFullYear() === selectedDate.getFullYear() &&
+        //             issueDate.getMonth() === selectedDate.getMonth() &&
+        //             issueDate.getDate() === selectedDate.getDate()
+        //         );
+        //     });
+
+        //     // If no results, filter by invoice_received_date
+        //     if (filteredResult.length === 0) {
+        //         filteredResult = result.filter(invoice => {
+        //             const receivedDate = new Date(invoice.invoice_received_date);
+        //             return (
+        //                 receivedDate.getFullYear() === selectedDate.getFullYear() &&
+        //                 receivedDate.getMonth() === selectedDate.getMonth() &&
+        //                 receivedDate.getDate() === selectedDate.getDate()
+        //             );
+        //         });
+        //     }
+
+        //     // If no results again, filter by invoice_due_date
+        //     if (filteredResult.length === 0) {
+        //         filteredResult = result.filter(invoice => {
+        //             const dueDate = new Date(invoice.invoice_due_date);
+        //             return (
+        //                 dueDate.getFullYear() === selectedDate.getFullYear() &&
+        //                 dueDate.getMonth() === selectedDate.getMonth() &&
+        //                 dueDate.getDate() === selectedDate.getDate()
+        //             );
+        //         });
+        //     }
+
+        //     result = filteredResult; // Update result with the filtered data
+        // }
 
         // Filter by tab (current/archive)
         result = result.filter(invoice => {
@@ -343,7 +364,7 @@ const InvoicePage2 = () => {
 
         setFilteredData(result);
         setCurrentPage(1);
-    }, [invoiceState, activeTab, searchTerm, projectFilter, supplierFilter, statusFilter, dateFilter, typeFilter, projectState, productTypeState, sortConfig]);
+    }, [invoiceState, activeTab, searchTerm, projectFilter, supplierFilter, statusFilter, startDateFilter, endDateFilter, typeFilter, projectState, productTypeState, sortConfig]);
 
     // Display Loading
     if (isLoadingState) {
@@ -357,6 +378,8 @@ const InvoicePage2 = () => {
         }
         return (<div>Error: {errorState}</div>);
     };
+
+    console.log("paginatedData", paginatedData)
 
     return (
         localUser && Object.keys(localUser).length > 0 ? (
@@ -481,13 +504,27 @@ const InvoicePage2 = () => {
                                 ))}
                             </select>
                         </div>
-                        {/* date filter */}
+                        {/* start date filter */}
                         <div className="relative">
                         <input
                             type="date"
-                            className={`p-2 pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${dateFilter === '' ? 'bg-white' : 'bg-blue-100'}`}
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
+                            className={`p-2 pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${startDateFilter === '' ? 'bg-white' : 'bg-blue-100'}`}
+                            value={startDateFilter}
+                            onChange={(e) => setStartDateFilter(e.target.value)}
+                        />
+                        </div>
+                        <div className="relative self-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                            </svg>
+                        </div>
+                        {/* end date filter */}
+                        <div className="relative">
+                        <input
+                            type="date"
+                            className={`p-2 pl-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${endDateFilter === '' ? 'bg-white' : 'bg-blue-100'}`}
+                            value={endDateFilter}
+                            onChange={(e) => setEndDateFilter(e.target.value)}
                         />
                         </div>
                     </div>
@@ -648,7 +685,7 @@ const InvoicePage2 = () => {
                                     <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/invoice/${invoice._id}`)}>{invoice.invoice_ref}</td>
                                     <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/supplier/${invoice.supplier._id}`)}>{invoice.supplier.supplier_name}</td>
                                     <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/project/${invoice.order.project}`)}>{projectState.find(project => project._id === invoice.order.project)?.project_name || 'Not found'}</td>
-                                    <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/order/${invoice.order.order_ref}`)}>{invoice.order.order_ref}</td>
+                                    <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/order/${invoice.order._id}`)}>{invoice.order.order_ref}</td>
                                     <td className="p-3 text-gray-600">{formatDate(invoice.invoice_issue_date)}</td>
                                     <td className="p-3 text-gray-600">{formatDate(invoice.invoice_received_date)}</td>
                                     <td className="p-3 text-gray-600">{formatDate(invoice.invoice_due_date)}</td>
@@ -680,7 +717,16 @@ const InvoicePage2 = () => {
                                         </svg>}
                                         </button>
                                     </td>
-                                    <td className="p-3 text-gray-600">not linked</td>
+                                    <td 
+                                        className={`p-3 font-medium ${
+                                            invoice?.payment?.payment_ref 
+                                            ? "text-black hover:cursor-pointer hover:underline" 
+                                            : "text-gray-600 font-normal"
+                                        }`} 
+                                        onClick={() => invoice?.payment?._id && navigate(`/EmpirePMS/payment/${invoice.payment._id}`)}
+                                        >
+                                        {invoice?.payment?.payment_ref || "None"}
+                                    </td>
                                 </tr>
                                 {expandedRow === invoice._id && (
                                 <tr>
@@ -704,6 +750,7 @@ const InvoicePage2 = () => {
                         </tbody>
                         </table>
                     </div>
+                    
             
                     {/* Pagination */}
                     <div className="mt-6 flex justify-between items-center">

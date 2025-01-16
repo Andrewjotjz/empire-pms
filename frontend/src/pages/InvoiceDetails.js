@@ -249,6 +249,7 @@ const InvoiceDetails = () => {
         <div className="border">Invoice API fetched successfully, but it might be empty...</div>
     );
     
+    console.log("invoiceState", invoiceState)
 
     const productsTable = invoiceState.products.length > 0 || invoiceState.custom_products.length > 0 ? (
         <div className="container p-0 bg-slate-50 mb-4 shadow-md text-sm">
