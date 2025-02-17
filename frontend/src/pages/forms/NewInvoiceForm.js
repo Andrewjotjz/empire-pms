@@ -96,7 +96,7 @@ const NewInvoiceForm = () => {
       day: "2-digit"
     }).split("/").reverse().join("-"),
     invoice_due_date: "",
-    order: "",
+    order: null,
     products: [],
     custom_products: [],
     invoiced_delivery_fee: 0,
@@ -107,11 +107,11 @@ const NewInvoiceForm = () => {
     invoice_is_stand_alone: false,
     invoice_internal_comments: "",
     invoice_status: "",
-    payment: "",
+    payment: null,
   });
   const [newInvoiceWithoutPO, setNewInvoiceInvoiceWithoutPO] = useState({
     invoice_ref: "",
-    supplier: "",
+    supplier: null,
     invoice_issue_date: new Date().toLocaleDateString("en-AU", {
       timeZone: "Australia/Melbourne",
       year: "numeric",
@@ -148,7 +148,7 @@ const NewInvoiceForm = () => {
     payment: null,
   });
   const [newProductPrice, setNewProductPrice] = useState({
-    product_obj_ref: "",
+    product_obj_ref: null,
     product_unit_a: "",
     product_number_a: 0,
     product_price_unit_a: 0,
@@ -176,6 +176,9 @@ const NewInvoiceForm = () => {
       return date.toLocaleDateString("en-AU", options);
     }
   };
+
+  console.log("invoiceState", newInvoice);
+  console.log("fileState", files);
 
   // Helper function to calculate the due date based on payment terms
   const calculateDueDate = (paymentTerm) => {
@@ -240,27 +243,13 @@ const NewInvoiceForm = () => {
               _id: product._id,
               product_obj_ref: product.product_obj_ref._id,
               invoice_product_location: product.order_product_location,
-              invoice_product_qty_a:
-                newInvoice?.products[index]?.invoice_product_qty_a || 0,
+              // invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
+              invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || product.order_product_qty_a,
               invoice_product_price_unit: product.order_product_price_unit_a,
-              invoice_product_gross_amount_a:
-                product.order_product_gross_amount *
-                (newInvoice?.products[index]?.invoice_product_qty_a || 0),
+              // invoice_product_gross_amount_a: product.order_product_gross_amount * (newInvoice?.products[index]?.invoice_product_qty_a || 0),
+              invoice_product_gross_amount_a: Number((product.order_product_qty_a * product.order_product_price_unit_a).toFixed(4)),
             })) || [];
 
-          // const formattedCustomProducts =
-          //   data.custom_products?.map((customProduct, index) => ({
-          //     _id: customProduct._id,
-          //     custom_product_name: customProduct.custom_product_name,
-          //     custom_product_location: customProduct.custom_product_location,
-          //     custom_order_qty:
-          //       newInvoice?.custom_products[index]?.custom_order_qty || 0,
-          //     custom_order_price: '',// apply code here
-          //     custom_order_gross_amount:
-          //       (Number(customProduct.custom_order_gross_amount) || 0) *
-          //       (Number(newInvoice?.custom_products[index]?.custom_order_qty) ||
-          //         0),
-          //   })) || [];
           const formattedCustomProducts =
             data.custom_products?.map((customProduct, index) => {
               // Find if the customProduct exists in the invoices' custom_products
@@ -276,14 +265,9 @@ const NewInvoiceForm = () => {
                 _id: customProduct._id,
                 custom_product_name: customProduct.custom_product_name,
                 custom_product_location: customProduct.custom_product_location,
-                custom_order_qty:
-                  newInvoice?.custom_products[index]?.custom_order_qty || 0,
-                custom_order_price: matchingCustomProduct
-                  ? matchingCustomProduct.custom_order_price
-                  : 0, // Set custom_order_price from matching invoice or empty string
-                custom_order_gross_amount:
-                  (Number(customProduct.custom_order_gross_amount) || 0) *
-                  (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
+                custom_order_qty: newInvoice?.custom_products[index]?.custom_order_qty || customProduct.custom_order_qty,
+                custom_order_price: matchingCustomProduct ? matchingCustomProduct.custom_order_price : 0, // Set custom_order_price from matching invoice or empty string
+                custom_order_gross_amount: (Number(customProduct.custom_order_gross_amount) || 0) * (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
               };
             }) || [];
 
@@ -529,7 +513,7 @@ const NewInvoiceForm = () => {
             day: "2-digit"
           }).split("/").reverse().join("-"),
           invoice_due_date: formattedDueDate,
-          order: "",
+          order: null,
           products: [],
           custom_products: [],
           invoiced_delivery_fee: 0,
@@ -540,6 +524,7 @@ const NewInvoiceForm = () => {
           invoice_is_stand_alone: false,
           invoice_internal_comments: "",
           invoice_status: "",
+          payment: null
         });
         return;
       }
@@ -617,7 +602,6 @@ const NewInvoiceForm = () => {
             ) || 0,
         };
       }
-
       if (name === "custom_order_qty") {
         updatedCustomProducts[index] = {
           ...updatedCustomProducts[index],
@@ -1155,6 +1139,7 @@ const NewInvoiceForm = () => {
     handleTogglePriceModal();
     fetchProductDetails(supplierId, targetProductId);
   };
+
   const handleAutomation = (updatedProductId) => {
     // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
     const updatedItems = updatedOrder.products.filter(
@@ -1217,8 +1202,16 @@ const NewInvoiceForm = () => {
     // Step 3: Remove custom product from list
     handleRemoveCustomItem(targetIndex);
   };
+  console.log("currentOrder", currentOrder)
   const handleSubmitInvoice = async (event) => {
     event.preventDefault();
+
+    // check if user has registered all custom products
+    if (newInvoice.custom_products.length > 0) {
+      if (newInvoice.custom_products.some(cprod => cprod.custom_order_qty > 0)) {
+        return alert("Unable to proceed. You must register custom products before invoice submission.");
+      }
+    }
 
     // check if user has uploaded the attachment
     if (!files || files.length === 0) {
@@ -1398,23 +1391,31 @@ const NewInvoiceForm = () => {
     };
 }, []);
 
-useEffect(() => {
-  const fetchOrder = async () => {
+  useEffect(() => {
+    const fetchOrder = async () => {
       if (state?.orderId) {
-          await fetchSelectedPurchaseOrder(state.orderId);
+        await fetchSelectedPurchaseOrder(state.orderId);
       }
-  };
+    };
 
-  fetchOrder();
+    fetchOrder();
 
-  if (state?.suppId) {
-      setNewInvoice((prevState) => ({
+    if (state?.suppId && supplierState?.length) { 
+      // Ensure supplierState has data before proceeding
+      const supplier = supplierState.find(supplier => supplier._id === state.suppId);
+      
+      if (supplier) { 
+        const paymentTerm = supplier.supplier_payment_term; // e.g., "Net 60"
+        const formattedDueDate = calculateDueDate(paymentTerm);
+
+        setNewInvoice((prevState) => ({
           ...prevState,
           supplier: state.suppId,
-      }));
-  }
-}, [state]);
-
+          invoice_due_date: formattedDueDate
+        }));
+      }
+    }
+  }, [state, supplierState]); // Ensure effect runs when supplierState updates
 
 
 

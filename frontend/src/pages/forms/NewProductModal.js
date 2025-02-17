@@ -46,6 +46,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         projects: []
 
     });
+    const [productTypeState, setProductTypeState] = useState([]);
 
     // Component functions and variables
     const handleInputCustomToggle = () => {
@@ -57,7 +58,14 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
     }
 
     const handleProductInputChange = (event) => {
-        const { name, value } = event.target;
+        const { name, value, type } = event.target;
+
+        let newValue = value;
+    
+        if (type === "number") {
+            newValue = value === "" ? "" : parseFloat(value); // Convert to number, but keep empty string for controlled input
+        }
+
         if (name === 'product_type'){
             if (value !== ''){
                 fetchAliasesByProductType(value)
@@ -70,7 +78,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         }
         setProductDetailsState((prevState) => ({
             ...prevState,
-            [name]: value,
+            [name]: newValue,
         }));
     };
 
@@ -83,6 +91,8 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
             return { ...prevState, projects: updatedProjects };
         });
     };
+    
+    console.log("productDetailsState", productDetailsState)
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -147,6 +157,47 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
             abortController.abort(); // Cleanup
         };
     }, [dispatch]);
+
+    useEffect(() => {
+        const abortController = new AbortController();
+        const signal = abortController.signal;
+
+        const fetchProductTypes = async () => {
+            setIsLoadingState(true); // Set loading state to true at the beginning
+            try {
+                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                    }});
+                if (!res.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await res.json();
+
+                if (data.tokenError) {
+                    throw new Error(data.tokenError);
+                }
+                
+                setIsLoadingState(false);
+                setProductTypeState(data);
+                setErrorState(null);
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    // do nothing
+                } else {
+                    setIsLoadingState(false);
+                    setErrorState(error.message);
+                }
+            }
+        };
+
+        fetchProductTypes();
+
+        return () => {
+            abortController.abort(); // Cleanup
+        };
+    }, []);
 
 
     // Display DOM
@@ -214,27 +265,11 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                 required
                             >                                
                                 <option value="">Select Product Type</option>
-                                <option value="Compound">Compound</option>
-                                <option value="Access Panel">Access Panel</option>
-                                <option value="Framing Ceiling">Framing Ceiling</option>
-                                <option value="Framing Wall">Framing Wall</option>
-                                <option value="Batt Insulation">Batt Insulation</option>
-                                <option value="Rigid Insulation">Rigid Insulation</option>
-                                <option value="Plasterboard">Plasterboard</option>
-                                <option value="External Cladding">External Cladding</option>
-                                <option value="SpeedPanel">SpeedPanel</option>
-                                <option value="Timber">Timber</option>
-                                <option value="Acoustic Ceiling Panels">Acoustic Ceiling Panels</option>
-                                <option value="Ceiling Tiles">Ceiling Tiles</option>
-                                <option value="Others">Others</option>
-                                <option value="Tools">Tools</option>
-                                <option value="Plastering(Fixings/Screws)">Plastering(Fixings/Screws)</option>
-                                <option value="Framing Ceiling(Accessories)">Framing Ceiling(Accessories)</option>
-                                <option value="Framing Wall(Accessories)">Framing Wall(Accessories)</option>
-                                <option value="Rigid Insulation(Accessories)">Rigid Insulation(Accessories)</option>
-                                <option value="Plasterboard(Accessories)">Plasterboard(Accessories)</option>
-                                <option value="External Cladding(Accessories)">External Cladding(Accessories)</option>
-                                <option value="SpeedPanel(Accessories)">SpeedPanel(Accessories)</option>
+                                {productTypeState.filter(type => !type.type_isarchived).map(type => (
+                                    <>
+                                    <option value={type._id}>{type.type_name}</option>
+                                    </>
+                                ))}
                             </select>
                             <label className='hidden md:inline-block text-xs italic text-gray-400'>Alias is based on the product type you select</label>
                         </div>

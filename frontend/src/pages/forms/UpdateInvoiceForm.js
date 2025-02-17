@@ -2755,6 +2755,8 @@ const UpdateInvoiceForm = () => {
   //   }
   // }
 
+  console.log("newInvoice", newInvoice)
+
   return localUser && Object.keys(localUser).length > 0 ? (
     <div>
       <div className="w-screen bg-neutral-50 items-center justify-center">
@@ -3028,7 +3030,7 @@ const UpdateInvoiceForm = () => {
                                 type="number"
                                 name="invoice_product_qty_a"
                                 value={
-                                  newInvoice.products[index].invoice_product_qty_a
+                                  newInvoice.products?.[index]?.invoice_product_qty_a || 0
                                 }
                                 onChange={(e) => handleInputChange(e, index)}
                                 step={0.0001}
@@ -3057,8 +3059,9 @@ const UpdateInvoiceForm = () => {
                               ) * 100) / 100)}
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.products[index]
-                                  .invoice_product_gross_amount_a * 100) / 100)}
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                Math.floor((newInvoice.products?.[index]?.invoice_product_gross_amount_a || 0) * 100) / 100
+                              )}
                             </td>
                           </tr>
                         ))}

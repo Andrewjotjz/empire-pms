@@ -509,6 +509,8 @@ const NewPurchaseOrderForm = () => {
             addPurchaseOrder(orderState); 
         }
     };
+
+    console.log("orderState", orderState)
     
     // Fetch project
     useEffect(() => {
@@ -1095,27 +1097,24 @@ const NewPurchaseOrderForm = () => {
                                             <td className='pt-1'>{orderState.products.length + orderState.custom_products.length} </td>
                                         </tr>
                                         <tr>
-                                            <td className='pt-1'>Total Net Amount:</td>
-                                            <td className='pt-1'>
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(orderState.products && orderState.products.length > 0 ? (
-                                                    orderState.products.reduce((total, prod) => (
-                                                        total + (Number(prod.order_product_gross_amount) || 0)
-                                                    ), 0)
-                                                ) : (
-                                                    ' 0.00'
-                                                ) * 100) / 100)}
+                                            <td className="pt-1">Total Net Amount:</td>
+                                            <td className="pt-1">
+                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                                Math.floor(
+                                                    (orderState.products?.reduce((total, prod) => total + (Number(prod.order_product_gross_amount) || 0), 0) || 0) * 100
+                                                ) / 100
+                                                )}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td className='pt-1'>Total Net Amount (incl. GST):</td>
-                                            <td className='pt-1'>
-                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(orderState.products && orderState.products.length > 0 ? (
-                                                    (orderState.products.reduce((total, prod) => (
-                                                        total + (Number(prod.order_product_gross_amount) || 0)
-                                                    ), 0) * 1.1)
-                                                ) : (
-                                                    ' 0.00'
-                                                ) * 100) / 100)}
+                                            <td className="pt-1">
+                                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                                    Math.floor(
+                                                    ((orderState.products?.reduce((total, prod) => 
+                                                        total + (Number(prod.order_product_gross_amount) || 0), 0) * 1.1) || 0) * 100
+                                                    ) / 100
+                                                )}
                                             </td>
                                         </tr>
                                     </tbody>
