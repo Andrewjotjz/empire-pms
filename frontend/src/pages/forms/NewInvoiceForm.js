@@ -177,9 +177,6 @@ const NewInvoiceForm = () => {
     }
   };
 
-  console.log("invoiceState", newInvoice);
-  console.log("fileState", files);
-
   // Helper function to calculate the due date based on payment terms
   const calculateDueDate = (paymentTerm) => {
     const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10) || 30; // Default to 30 days if no term specified
@@ -1202,7 +1199,7 @@ const NewInvoiceForm = () => {
     // Step 3: Remove custom product from list
     handleRemoveCustomItem(targetIndex);
   };
-  console.log("currentOrder", currentOrder)
+  
   const handleSubmitInvoice = async (event) => {
     event.preventDefault();
 
@@ -1413,11 +1410,10 @@ const NewInvoiceForm = () => {
           supplier: state.suppId,
           invoice_due_date: formattedDueDate
         }));
+        setSelectedOrder(state?.orderId);
       }
     }
   }, [state, supplierState]); // Ensure effect runs when supplierState updates
-
-
 
   //Component's modal
   const orderSelectionModal = (

@@ -91,8 +91,6 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
             return { ...prevState, projects: updatedProjects };
         });
     };
-    
-    console.log("productDetailsState", productDetailsState)
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -265,9 +263,9 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                 required
                             >                                
                                 <option value="">Select Product Type</option>
-                                {productTypeState.filter(type => !type.type_isarchived).map(type => (
+                                {productTypeState.filter(type => !type.type_isarchived).map((type,index) => (
                                     <>
-                                    <option value={type._id}>{type.type_name}</option>
+                                    <option key={index} value={type._id}>{type.type_name}</option>
                                     </>
                                 ))}
                             </select>

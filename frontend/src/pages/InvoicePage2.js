@@ -379,8 +379,6 @@ const InvoicePage2 = () => {
         return (<div>Error: {errorState}</div>);
     };
 
-    console.log("paginatedData", paginatedData)
-
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="bg-gray-100 min-h-screen">

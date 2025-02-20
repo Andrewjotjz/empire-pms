@@ -509,8 +509,6 @@ const NewPurchaseOrderForm = () => {
             addPurchaseOrder(orderState); 
         }
     };
-
-    console.log("orderState", orderState)
     
     // Fetch project
     useEffect(() => {

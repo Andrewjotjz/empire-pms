@@ -81,7 +81,6 @@ const PurchaseOrderDetails = () => {
         }));
     };
 
-
     const handleProductTableClick = (productId) => { 
         dispatch(clearProductState());
         navigate(`/EmpirePMS/supplier/${purchaseOrderState.supplier._id}/products/${productId}`, {state: purchaseOrderState.supplier._id})
@@ -91,34 +90,94 @@ const PurchaseOrderDetails = () => {
         navigate(`/EmpirePMS/order/${id}/edit`)
     }
 
-    const handleNewDelivery = () => {
+    // const handleNewDelivery = () => {
 
-        //logic when user clicks 'Receiving Items', it will auto calculate the initial value for receiving qty.
-        const currentProducts = purchaseOrderState.products.map((product,index) => ({
-            ...product,
-            delivered_qty_a: product.order_product_qty_a - purchaseOrderState.deliveries
-            .map(delivery => delivery.products[index]?.delivered_qty_a)
-            .reduce((totalSum, product) => totalSum + (product || 0), 0)
-        }));
+    //     //logic when user clicks 'Receiving Items', it will auto calculate the initial value for receiving qty. (registered products)
+    //     const currentProducts = purchaseOrderState.products.map((product,index) => ({
+    //         ...product,
+    //         delivered_qty_a: purchaseOrderState.deliveries.some(delivery => delivery.products.some(product => product.product_obj_ref === product.product_obj_ref._id)) ? (product.order_product_qty_a - purchaseOrderState.deliveries
+    //         .map(delivery => delivery.products[index]?.delivered_qty_a || 0)
+    //         .reduce((totalSum, product) => totalSum + (product || 0), 0))
+    //         : (0)
+    //     }));
 
-        //logic when user clicks 'Receiving Items', it will auto calculate the initial value for receiving qty.
-        const updatedProducts = purchaseOrderState.custom_products.map((cproduct,index) => ({
-            product_obj_ref: cproduct._id,
-            custom_order_qty: cproduct.custom_order_qty,
-            custom_product_location: cproduct.custom_product_location,
-            custom_product_name: cproduct.custom_product_name,
-            delivered_qty_a: cproduct.custom_order_qty - purchaseOrderState.deliveries
-            .map(delivery => delivery.products[index+purchaseOrderState.products.length].delivered_qty_a)
-            .reduce((totalSum, product) => totalSum + (product || 0), 0)
-        }))
+    //     //logic when user clicks 'Receiving Items', it will auto calculate the initial value for receiving qty. (custom products)
+    //     const updatedProducts = purchaseOrderState.custom_products.map((cproduct,index) => ({
+    //         product_obj_ref: cproduct._id,
+    //         custom_order_qty: cproduct.custom_order_qty,
+    //         custom_product_location: cproduct.custom_product_location,
+    //         custom_product_name: cproduct.custom_product_name,
+    //         delivered_qty_a: purchaseOrderState.deliveries.some(delivery => delivery.products.some(product => product._id === cproduct._id)) ? (cproduct.custom_order_qty - purchaseOrderState.deliveries
+    //         .map(delivery => delivery.products[index+purchaseOrderState.products.length]?.delivered_qty_a || 0)
+    //         .reduce((totalSum, product) => totalSum + (product || 0), 0))
+    //         : (0)
+    //     }))
     
+    //     setDeliveryState((prevDelivery) => ({
+    //         ...prevDelivery, // Spread the previous state
+    //         products: [...currentProducts, ...updatedProducts], // Updated products with delivered_qty_a
+    //         order: purchaseOrderState._id,
+    //         supplier: purchaseOrderState.supplier._id
+    //     }));
+
+    //     setIsDeliveryModalOpen(true);
+    // };
+    const handleNewDelivery = () => {
+        // Logic to calculate delivered_qty_a for registered products
+        const currentProducts = purchaseOrderState.products.map((product) => {
+            // Check if product exists in deliveries
+            const productExists = purchaseOrderState.deliveries.some(delivery =>
+                delivery.products.some(p => p.product_obj_ref === product.product_obj_ref._id)
+            );
+    
+            // Calculate total delivered quantity
+            const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                const deliveredProduct = delivery.products.find(p => p.product_obj_ref === product.product_obj_ref._id);
+                return total + (deliveredProduct?.delivered_qty_a || 0);
+            }, 0);
+    
+            return {
+                ...product,
+                delivered_qty_a: productExists ? 
+                // (product.order_product_qty_a - deliveredQty)
+                (product.order_product_qty_a - deliveredQty)
+                 : product.order_product_qty_a
+            };
+        });
+    
+        // Logic to calculate delivered_qty_a for custom products
+        const updatedProducts = purchaseOrderState.custom_products.map((cproduct) => {
+            // Check if custom product exists in deliveries
+            const productExists = purchaseOrderState.deliveries.some(delivery =>
+                delivery.products.some(p => p.product_obj_ref === cproduct._id)
+            );
+    
+            // Calculate total delivered quantity
+            const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                const deliveredProduct = delivery.products.find(p => p.product_obj_ref === cproduct._id);
+                return total + (deliveredProduct?.delivered_qty_a || 0);
+            }, 0);
+    
+            return {
+                product_obj_ref: cproduct._id,
+                custom_order_qty: cproduct.custom_order_qty,
+                custom_product_location: cproduct.custom_product_location,
+                custom_product_name: cproduct.custom_product_name,
+                delivered_qty_a: productExists ? 
+                // (cproduct.custom_order_qty - deliveredQty)
+                (cproduct.custom_order_qty - deliveredQty)
+                 : cproduct.custom_order_qty
+            };
+        });
+    
+        // Update delivery state
         setDeliveryState((prevDelivery) => ({
-            ...prevDelivery, // Spread the previous state
-            products: [...currentProducts, ...updatedProducts], // Updated products with delivered_qty_a
+            ...prevDelivery,
+            products: [...currentProducts, ...updatedProducts],
             order: purchaseOrderState._id,
             supplier: purchaseOrderState.supplier._id
         }));
-
+    
         setIsDeliveryModalOpen(true);
     };
     
@@ -447,8 +506,6 @@ const PurchaseOrderDetails = () => {
         <div className='border'>Purchase Order API fetched successfully, but it might be empty...</div>
     );
 
-    console.log("purchaseOrderState", purchaseOrderState)
-
     const productsTable = purchaseOrderState && (purchaseOrderState?.products.length > 0 || purchaseOrderState?.custom_products.length > 0) ? (
         <div className="container p-0 bg-slate-50 mb-4 shadow-md text-xs md:text-sm">
             <div className="table-responsive">
@@ -466,44 +523,52 @@ const PurchaseOrderDetails = () => {
                     </thead>
                     <tbody className="text-center">
                         {purchaseOrderState.products &&
-                            purchaseOrderState.products.map((product, index) => (
-                                <tr
-                                    key={`${product.product_obj_ref._id}-${index}`}
-                                    className="cursor-pointer"
-                                    onClick={() => handleProductTableClick(product.product_obj_ref._id)}
-                                >
-                                    <td>{product.product_obj_ref.product_sku}</td>
-                                    <td>{product.product_obj_ref.product_name}</td>
-                                    <td>{product.order_product_location}</td>
-                                    <td>
-                                        {
-                                        Number.isInteger(product.order_product_qty_a)
-                                            ? product.order_product_qty_a
-                                            : parseFloat(product.order_product_qty_a).toFixed(4)
-                                        }
-                                        <label className='text-xs text-gray-400 block'>
-                                            Delivered: {purchaseOrderState?.deliveries
-                                                .map(delivery =>
-                                                    delivery.products[index]?.delivered_qty_a
-                                                ).reduce((totalSum, product) => totalSum + (product || 0), 0)}
-                                        </label>
-                                    </td>
-                                    <td>
-                                        {Number.isInteger(product.order_product_qty_b)
-                                            ? product.order_product_qty_b
-                                            : parseFloat(product.order_product_qty_b).toFixed(4)}
-                                    </td>
-                                    <td>
-                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.order_product_price_unit_a * 100) / 100)}
-                                    </td>
-                                    <td className="text-end">
-                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.order_product_gross_amount * 100) / 100)}
-                                    </td>
-                                </tr>
-                            ))}
+                            purchaseOrderState.products.map((product, index) => {
+                                // Calculate total delivered quantity
+                                const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                                    const deliveredProduct = delivery.products.find(p => p.product_obj_ref === product.product_obj_ref._id);
+                                    return total + (deliveredProduct?.delivered_qty_a || 0);
+                                }, 0);
+
+                                return (
+                                    <tr
+                                        key={`${product.product_obj_ref._id}-${index}`}
+                                        className="cursor-pointer"
+                                        onClick={() => handleProductTableClick(product.product_obj_ref._id)}
+                                    >
+                                        <td>{product.product_obj_ref.product_sku}</td>
+                                        <td>{product.product_obj_ref.product_name}</td>
+                                        <td>{product.order_product_location}</td>
+                                        <td>
+                                            {Number.isInteger(product.order_product_qty_a)
+                                                ? product.order_product_qty_a
+                                                : parseFloat(product.order_product_qty_a).toFixed(4)}
+                                            <label className="text-xs text-gray-400 block">
+                                                Delivered: {deliveredQty}
+                                            </label>
+                                        </td>
+                                        <td>
+                                            {Number.isInteger(product.order_product_qty_b)
+                                                ? product.order_product_qty_b
+                                                : parseFloat(product.order_product_qty_b).toFixed(4)}
+                                        </td>
+                                        <td>
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                                Math.floor(product.order_product_price_unit_a * 100) / 100
+                                            )}
+                                        </td>
+                                        <td className="text-end">
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                                Math.floor(product.order_product_gross_amount * 100) / 100
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+
                         {purchaseOrderState.custom_products &&
                             purchaseOrderState.custom_products.map((cusProduct, index) => (
-                                <tr key={index} className="cursor-default">
+                                <tr key={cusProduct._id || `custom-${index}`} className="cursor-default">
                                     <td>CUSTOM {index + 1}</td>
                                     <td>{cusProduct.custom_product_name}</td>
                                     <td>{cusProduct.custom_product_location}</td>
@@ -1045,62 +1110,73 @@ const PurchaseOrderDetails = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {purchaseOrderState.products.map((prod, index) => (
-                              <tr key={index} className="hover:bg-gray-50">
-                                <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_sku}</td>
-                                <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_name}</td>
-                                <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}</td>
-                                <td className="border-b p-1.5">
-                                  <input
-                                    required
-                                    min="0"
-                                    type="number"
-                                    value={deliveryState.products?.[index]?.delivered_qty_a ?? ''}
-                                    onChange={(e) => handleProductChange(index, 'delivered_qty_a', parseFloat(e.target.value))}
-                                    className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </td>
-                                <td className="border-b p-1.5 text-gray-800">
-                                    {
-                                        purchaseOrderState.deliveries
-                                            .map(delivery => delivery.products?.[index]?.delivered_qty_a || 0) // Safe access
-                                            .reduce((totalSum, qty) => totalSum + qty, 0) // Sum the values safely
-                                    }
-                                    /
-                                    {prod.order_product_qty_a}
-                                </td>
-                              </tr>
-                            ))}
-                            {purchaseOrderState.custom_products.length > 0 && purchaseOrderState.custom_products.map((cprod, index) => (
-                              <tr key={index} className="hover:bg-gray-50">
-                                <td className="border-b p-1.5 text-gray-800">CUSTOM {index + 1}</td>
-                                <td className="border-b p-1.5 text-gray-800">{cprod.custom_product_name}</td>
-                                <td className="border-b p-1.5 text-gray-800">{cprod.custom_order_qty}</td>
-                                <td className="border-b p-1.5">
-                                  <input
-                                    required
-                                    min="0"
-                                    type="number"
-                                    value={deliveryState.products[purchaseOrderState.products.length + index]?.delivered_qty_a ?? ''}
-                                    onChange={(e) => handleProductChange(purchaseOrderState.products.length + index, 'delivered_qty_a', parseFloat(e.target.value))}
-                                    className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </td>
-                                <td className="border-b p-1.5 text-gray-800">
-                                {
-                                    purchaseOrderState.deliveries
-                                    .map(delivery =>
-                                        delivery.products[purchaseOrderState.products.length + index].delivered_qty_a
-                                        // .reduce((totalSum, product) => totalSum + (product.delivered_qty_a || 0), 0)
-                                    ).reduce((totalSum, product) => totalSum + (product || 0), 0)
-                                    // .reduce((grandTotal, deliveryTotal) => grandTotal + deliveryTotal, 0)
-                                }
-                                /
-                                {cprod.custom_order_qty}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
+                            {purchaseOrderState.products.map((prod, index) => {
+                                // Check if the product exists in deliveries
+                                const productExists = purchaseOrderState.deliveries.some(delivery =>
+                                delivery.products.some(p => p.product_obj_ref === prod.product_obj_ref._id)
+                                );
+
+                                // Calculate total delivered quantity
+                                const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                                const deliveredProduct = delivery.products.find(p => p.product_obj_ref === prod.product_obj_ref._id);
+                                return total + (deliveredProduct?.delivered_qty_a || 0);
+                                }, 0);
+
+                                return (
+                                <tr key={prod.product_obj_ref._id} className="hover:bg-gray-50">
+                                    <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_sku}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_name}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}</td>
+                                    <td className="border-b p-1.5">
+                                    <input
+                                        required
+                                        min="0"
+                                        type="number"
+                                        value={deliveryState.products?.[index]?.delivered_qty_a ?? ''}
+                                        onChange={(e) => handleProductChange(index, 'delivered_qty_a', parseFloat(e.target.value))}
+                                        className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                    </td>
+                                    <td className="border-b p-1.5 text-gray-800">
+                                    {deliveredQty} / {prod.order_product_qty_a}
+                                    </td>
+                                </tr>
+                                );
+                            })}
+
+                            {purchaseOrderState.custom_products.length > 0 &&
+                                purchaseOrderState.custom_products.map((cprod, index) => {
+                                const customIndex = purchaseOrderState.products.length + index;
+
+                                // Calculate total delivered quantity for custom products
+                                const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                                    const deliveredProduct = delivery.products.find(p => p.product_obj_ref === cprod._id);
+                                    return total + (deliveredProduct?.delivered_qty_a || 0);
+                                }, 0);
+
+                                return (
+                                    <tr key={cprod._id} className="hover:bg-gray-50">
+                                    <td className="border-b p-1.5 text-gray-800">CUSTOM {index + 1}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{cprod.custom_product_name}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{cprod.custom_order_qty}</td>
+                                    <td className="border-b p-1.5">
+                                        <input
+                                        required
+                                        min="0"
+                                        type="number"
+                                        value={deliveryState.products[customIndex]?.delivered_qty_a ?? ''}
+                                        onChange={(e) => handleProductChange(customIndex, 'delivered_qty_a', parseFloat(e.target.value))}
+                                        className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </td>
+                                    <td className="border-b p-1.5 text-gray-800">
+                                        {deliveredQty} / {cprod.custom_order_qty}
+                                    </td>
+                                    </tr>
+                                );
+                                })}
+                            </tbody>
+
                         </table>
                       </div>
                     </div>
@@ -1136,9 +1212,6 @@ const PurchaseOrderDetails = () => {
           )}
         </div>
       );
-
-      console.log("purchase order state:", purchaseOrderState)
-      console.log("delivery state:", deliveryState)
 
     return (
         purchaseOrderState && localUser && Object.keys(localUser).length > 0 ? (

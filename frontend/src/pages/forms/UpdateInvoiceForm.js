@@ -1878,7 +1878,7 @@ const UpdateInvoiceForm = () => {
                         {/* ***** REGISTERED ITEMS ***** */}
                         {updatedOrder.products &&
                           updatedOrder.products.map((prod, index) => (
-                            <tr
+                            <tr key={index}
                               className={
                                 prod.product_obj_ref._id ===
                                 newProductPrice.product_obj_ref
@@ -2002,7 +2002,8 @@ const UpdateInvoiceForm = () => {
                                   type="button"
                                   onClick={() => handleRemoveItem(index)}
                                   className="btn btn-danger p-1"
-                                  hidden={prod._id}
+                                  // hidden={prod._id}
+                                  hidden={updatedOrder.invoices.flatMap(invoice => invoice.products.map(product => product._id)).includes(prod._id)}
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -2754,8 +2755,6 @@ const UpdateInvoiceForm = () => {
   //     );
   //   }
   // }
-
-  console.log("newInvoice", newInvoice)
 
   return localUser && Object.keys(localUser).length > 0 ? (
     <div>
