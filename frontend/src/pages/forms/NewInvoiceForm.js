@@ -3799,6 +3799,7 @@ const NewInvoiceForm = () => {
                 <label className="font-bold text-sm sm:text-base">Internal Comments:</label>
                 <textarea
                   rows={4}
+                  required={newInvoice.invoiced_raw_total_amount_incl_gst - (Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-base"
                   name="invoice_internal_comments"
                   value={newInvoice.invoice_internal_comments}

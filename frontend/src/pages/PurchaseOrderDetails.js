@@ -567,17 +567,28 @@ const PurchaseOrderDetails = () => {
                             })}
 
                         {purchaseOrderState.custom_products &&
-                            purchaseOrderState.custom_products.map((cusProduct, index) => (
+                            purchaseOrderState.custom_products.map((cusProduct, index) => {
+                                // Calculate total delivered quantity
+                                const deliveredQty2 = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                                    const deliveredProduct = delivery.products.find(p => p.product_obj_ref === cusProduct._id);
+                                    return total + (deliveredProduct?.delivered_qty_a || 0);
+                                }, 0);
+
+                                return (
                                 <tr key={cusProduct._id || `custom-${index}`} className="cursor-default">
                                     <td>CUSTOM {index + 1}</td>
                                     <td>{cusProduct.custom_product_name}</td>
                                     <td>{cusProduct.custom_product_location}</td>
-                                    <td>{cusProduct.custom_order_qty}</td>
+                                    <td>{cusProduct.custom_order_qty}
+                                        <label className="text-xs text-gray-400 block">
+                                            Delivered: {deliveredQty2}
+                                        </label>
+                                    </td>
                                     <td>-</td>
                                     <td>-</td>
                                     <td>-</td>
-                                </tr>
-                            ))}
+                                </tr>)
+                            })}
                     </tbody>
                 </table>
             </div>
@@ -891,10 +902,10 @@ const PurchaseOrderDetails = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                             {item.products.filter(p => p.delivered_qty_a > 0).map((product, index) => (
                                 <div key={index} className="bg-white p-3 rounded shadow-sm">
-                                <p className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{purchaseOrderState.products.find(prod => prod.product_obj_ref._id === product.product_obj_ref)?.product_obj_ref.product_sku || purchaseOrderState.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Loading...'}</p>
+                                <p className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{purchaseOrderState.products.find(prod => prod.product_obj_ref._id === product.product_obj_ref)?.product_obj_ref.product_sku || purchaseOrderState.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Not found...'}</p>
                                 <p className="font-medium text-gray-700 text-sm">
                                     {purchaseOrderState.products.find(prod => prod.product_obj_ref._id === product.product_obj_ref)?.product_obj_ref.product_name || 
-                                    purchaseOrderState.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Loading...'}
+                                    purchaseOrderState.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Not found...'}
                                 </p>
                                 <p className="text-gray-600 text-xs">Quantity: {product.delivered_qty_a}</p>
                                 </div>

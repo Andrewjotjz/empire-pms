@@ -705,7 +705,7 @@ const InvoicePage2 = () => {
                                         onClick={() => setExpandedRow(expandedRow === invoice._id ? null : invoice._id)}
                                         className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
                                         >
-                                        {invoice.products.length} products
+                                        {invoice.products.length + invoice.custom_products.length} products
                                         {expandedRow === invoice._id ? 
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
@@ -737,6 +737,15 @@ const InvoicePage2 = () => {
                                                 {product.product_obj_ref.product_name}
                                                 </p>
                                                 <p title='product.invoice_product_qty_a' className="text-gray-600 text-xs">Invoiced Qty: {product.invoice_product_qty_a}</p>
+                                            </div>
+                                            ))}
+                                            {invoice.custom_products.map((cusProduct, index) => (
+                                            <div key={index} className="bg-white p-3 rounded shadow-sm">
+                                                <p title='custom_product_name' className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{cusProduct?.custom_product_name || 'Not found'}</p>
+                                                <p title='custom_product_name' className="font-medium text-gray-700 text-sm">
+                                                {cusProduct.custom_product_name}
+                                                </p>
+                                                <p title='cusProduct.custom_order_qty' className="text-gray-600 text-xs">Invoiced Qty: {cusProduct.custom_order_qty}</p>
                                             </div>
                                             ))}
                                         </div>
