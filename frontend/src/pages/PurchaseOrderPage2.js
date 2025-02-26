@@ -609,11 +609,20 @@ const PurchaseOrder2 = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                         {order.products.map((product, index) => (
                                         <div key={index} className="bg-white p-3 rounded shadow-sm">
-                                            <p title='product_sku' className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{productState?.filter(prod => prod.supplier === order.supplier._id).find(prod => prod._id === product.product_obj_ref._id)?.product_sku || 'Loading...'}</p>
+                                            <p title='product_sku' className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{productState?.filter(prod => prod.supplier === order.supplier._id).find(prod => prod._id === product.product_obj_ref._id)?.product_sku || 'Not found...'}</p>
                                             <p title='product_name' className="font-medium text-gray-700 text-sm">
-                                            {productState?.filter(prod => prod.supplier === order.supplier._id).find(prod => prod._id === product.product_obj_ref._id)?.product_name || 'Loading...'}
+                                            {productState?.filter(prod => prod.supplier === order.supplier._id).find(prod => prod._id === product.product_obj_ref._id)?.product_name || 'Not found...'}
                                             </p>
                                             <p title='product.order_product_qty_a' className="text-gray-600 text-xs">Ordered: {product.order_product_qty_a}</p>
+                                        </div>
+                                        ))}
+                                        {order.custom_products.map((cusProd, index) => (
+                                        <div key={index} className="bg-white p-3 rounded shadow-sm">
+                                            <p title='product_sku' className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{cusProd.custom_product_name || 'Not found...'}</p>
+                                            <p title='product_name' className="font-medium text-gray-700 text-sm">
+                                            {cusProd.custom_product_name || 'Not found...'}
+                                            </p>
+                                            <p title='cusProd.order_product_qty_a' className="text-gray-600 text-xs">Ordered: {cusProd.custom_order_qty}</p>
                                         </div>
                                         ))}
                                     </div>

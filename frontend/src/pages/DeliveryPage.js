@@ -313,7 +313,7 @@ export default function DeliveryPage() {
                 <tr className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150">
                   <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/delivery/${item._id}`)}>{item.delivery_evidence_reference}</td>
                   <td className="p-3 text-gray-600">{item.delivery_receiving_date}</td>
-                  <td className="p-3 text-gray-600">{item.order.order_ref}</td>
+                  <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/order/${item.order._id}`)}>{item.order.order_ref}</td>
                   <td className="p-3 text-gray-600">{item.supplier.supplier_name}</td>
                   <td className="p-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -346,9 +346,10 @@ export default function DeliveryPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {item.products.filter(p => p.delivered_qty_a > 0).map((product, index) => (
                           <div key={index} className="bg-white p-3 rounded shadow-sm">
-                            <p className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{productState?.filter(prod => prod.supplier === item.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_sku || 'Loading...'}</p>
+                            <p className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{productState?.filter(prod => prod.supplier === item.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_sku || "CUSTOM - " + item.order.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Not found...'}
+                            </p>
                             <p className="font-medium text-gray-700 text-sm">
-                              {productState?.filter(prod => prod.supplier === item.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_name || 'Loading...'}
+                              {productState?.filter(prod => prod.supplier === item.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_name || item.order.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Not found...'}
                             </p>
                             <p className="text-gray-600 text-xs">Quantity: {product.delivered_qty_a}</p>
                           </div>

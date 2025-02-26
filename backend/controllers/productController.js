@@ -123,7 +123,7 @@ const getFilteredProducts = async (req, res) => {
 const createNewProduct = async (req, res) => {
     // retrieve incoming request (along with new Product object) by using 'req' object property 'body', which stores new Product object.
     // destructure all relevant attributes in new Product object
-    const { product_sku, product_name, product_type, product_actual_size, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
+    const { product_sku, product_name, product_type, product_actual_size, product_actual_rate, product_next_available_stock_date, product_isarchived, supplier, alias, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, product_price_unit_b, price_fixed, product_effective_date, projects} = req.body;
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -145,13 +145,14 @@ const createNewProduct = async (req, res) => {
                 })
                 await targetAlias.save({session});
             }
+            console.log("targetAlias", targetAlias)
 
             const newProduct = new productModel({ product_sku, product_name, product_type, product_actual_size, product_next_available_stock_date,
-                supplier, alias: targetAlias._id, price_fixed, product_isarchived })
+                supplier, alias: targetAlias._id, product_isarchived })
             await newProduct.save({session})
 
             const newProductPrice = new productPriceModel({ product_obj_ref: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-                product_price_unit_b, price_fixed, product_effective_date, projects })
+                product_price_unit_b, price_fixed, product_actual_rate,  product_effective_date, projects })
             await newProductPrice.save({session})
             
             await session.commitTransaction();
@@ -161,11 +162,11 @@ const createNewProduct = async (req, res) => {
         }
         else {
             const newProduct = new productModel({ product_sku, product_name, product_type, product_actual_size, product_next_available_stock_date,
-                supplier, alias, price_fixed, product_isarchived })
+                supplier, alias, product_isarchived })
             await newProduct.save({session})
 
             const newProductPrice = new productPriceModel({ product_obj_ref: newProduct._id, product_number_a, product_unit_a, product_price_unit_a, product_number_b, product_unit_b, 
-                product_price_unit_b, price_fixed, product_effective_date, projects })
+                product_price_unit_b, price_fixed, product_actual_rate, product_effective_date, projects })
             await newProductPrice.save({session})
             
             await session.commitTransaction();
@@ -179,6 +180,7 @@ const createNewProduct = async (req, res) => {
         session.endSession();
 
         //! DESIGN 400 PAGE
+        console.log("error", error)
         res.status(400).json({error: error.message});
     }
 }

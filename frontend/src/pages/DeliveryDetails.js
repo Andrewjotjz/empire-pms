@@ -6,6 +6,7 @@ import SessionExpired from '../components/SessionExpired';
 
 const DeliveryDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
     const [deliveryState, setDeliveryState] = useState({});
@@ -314,35 +315,75 @@ const DeliveryDetails = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {purchaseOrderState && Object.keys(purchaseOrderState).length > 0 ? (purchaseOrderState.products.map((prod, index) => (
-                              <tr key={index} className="hover:bg-gray-50">
-                                <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_sku}</td>
-                                <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_name}</td>
-                                <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}</td>
-                                <td className="border-b p-1.5">
-                                  <input
-                                    required
-                                    type="number"
-                                    value={updatedDeliveryState.products[index]?.delivered_qty_a || ''}
-                                    onChange={(e) => handleProductChange(index, 'delivered_qty_a', parseInt(e.target.value))}
-                                    className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                  />
-                                </td>
-                                <td className="border-b p-1.5 text-gray-800">
-                                {
-                                    purchaseOrderState.deliveries
-                                    .map(delivery =>
-                                        delivery.products[index].delivered_qty_a
-                                        // .reduce((totalSum, product) => totalSum + (product.delivered_qty_a || 0), 0)
-                                    ).reduce((totalSum, product) => totalSum + (product || 0), 0)
-                                    // .reduce((grandTotal, deliveryTotal) => grandTotal + deliveryTotal, 0)
-                                }
-                                /
-                                {prod.order_product_qty_a}
-                                </td>
-                              </tr>
-                            ))) : (<LoadingScreen />)}
-                          </tbody>
+                            {purchaseOrderState && purchaseOrderState.products && purchaseOrderState.custom_products ? (
+                                <>
+                                {purchaseOrderState.products.map((prod, index) => {
+                                    const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                                    const deliveredProduct = delivery.products.find(p => p.product_obj_ref === prod.product_obj_ref._id);
+                                    return total + (deliveredProduct?.delivered_qty_a || 0);
+                                    }, 0);
+
+                                    return (
+                                    <tr key={`product-${index}`} className="hover:bg-gray-50">
+                                        <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_sku}</td>
+                                        <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_name}</td>
+                                        <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}</td>
+                                        <td className="border-b p-1.5">
+                                        <input
+                                            required
+                                            min="0"
+                                            type="number"
+                                            value={updatedDeliveryState.products?.[index]?.delivered_qty_a ?? ''}
+                                            onChange={(e) => handleProductChange(index, 'delivered_qty_a', parseFloat(e.target.value))}
+                                            className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                            disabled={updatedDeliveryState.products?.[index]?.delivered_qty_a === undefined}
+                                        />
+                                        </td>
+                                        <td className="border-b p-1.5 text-gray-800">
+                                        {deliveredQty} / {prod.order_product_qty_a}
+                                        </td>
+                                    </tr>
+                                    );
+                                })}
+
+                                {purchaseOrderState.custom_products.length > 0 &&
+                                purchaseOrderState.custom_products.map((cprod, index) => {
+                                const customIndex = purchaseOrderState.products.length + index;
+
+                                // Calculate total delivered quantity for custom products
+                                const deliveredQty = purchaseOrderState.deliveries.reduce((total, delivery) => {
+                                    const deliveredProduct = delivery.products.find(p => p.product_obj_ref === cprod._id);
+                                    return total + (deliveredProduct?.delivered_qty_a || 0);
+                                }, 0);
+
+                                return (
+                                    <tr key={cprod._id} className="hover:bg-gray-50">
+                                    <td className="border-b p-1.5 text-gray-800">CUSTOM {index + 1}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{cprod.custom_product_name}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{cprod.custom_order_qty}</td>
+                                    <td className="border-b p-1.5">
+                                        <input
+                                        required
+                                        min="0"
+                                        type="number"
+                                        value={deliveryState.products[customIndex]?.delivered_qty_a ?? ''}
+                                        onChange={(e) => handleProductChange(customIndex, 'delivered_qty_a', parseFloat(e.target.value))}
+                                        className="w-full p-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={deliveryState.products[customIndex]?.delivered_qty_a === undefined}
+                                        />
+                                    </td>
+                                    <td className="border-b p-1.5 text-gray-800">
+                                        {deliveredQty} / {cprod.custom_order_qty}
+                                    </td>
+                                    </tr>
+                                );
+                                })}
+                                </>
+                            ) : (
+                                <LoadingScreen />
+                            )}
+                        </tbody>
+
                         </table>
                       </div>
                     </div>
@@ -457,7 +498,9 @@ const DeliveryDetails = () => {
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                                 </svg>
-                                <span className="font-medium mr-2 text-gray-600">Order:</span> {deliveryState?.order?.order_ref}</p>
+                                <span className="font-medium mr-2 text-gray-600">Order:</span>
+                                <span className="text-blue-600 font-medium hover:cursor-pointer hover:underline"  onClick={() => navigate(`/EmpirePMS/order/${deliveryState?.order._id}`)}>{deliveryState?.order?.order_ref}</span>
+                            </p>
                             <p className="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
@@ -514,8 +557,8 @@ const DeliveryDetails = () => {
                             <tbody className="divide-y divide-gray-200">
                                 {deliveryState && deliveryState?.products?.map((product,index) => (
                                 <tr key={index} className="hover:bg-gray-50 transition-colors duration-200">
-                                    <td className="py-4 px-4 text-sm text-gray-900">{productState?.filter(prod => prod.supplier === deliveryState.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_sku || 'Loading...'}</td>
-                                    <td className="py-4 px-4 text-sm text-gray-900">{productState?.filter(prod => prod.supplier === deliveryState.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_name || 'Loading...'}</td>
+                                    <td className="py-4 px-4 text-sm text-gray-900">{productState?.filter(prod => prod.supplier === deliveryState.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_sku || "CUSTOM - " + deliveryState.order.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Not found...'}</td>
+                                    <td className="py-4 px-4 text-sm text-gray-900">{productState?.filter(prod => prod.supplier === deliveryState.supplier._id).find(prod => prod._id === product.product_obj_ref)?.product_name  || deliveryState.order.custom_products.find(cprod => cprod._id === product.product_obj_ref)?.custom_product_name || 'Not found...'}</td>
                                     <td className="py-4 px-4 text-sm text-gray-900">
                                     <span className={`px-2 py-1 rounded-full ${product?.delivered_qty_a > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                                         {product?.delivered_qty_a}

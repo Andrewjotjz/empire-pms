@@ -1878,7 +1878,7 @@ const UpdateInvoiceForm = () => {
                         {/* ***** REGISTERED ITEMS ***** */}
                         {updatedOrder.products &&
                           updatedOrder.products.map((prod, index) => (
-                            <tr
+                            <tr key={index}
                               className={
                                 prod.product_obj_ref._id ===
                                 newProductPrice.product_obj_ref
@@ -2002,7 +2002,8 @@ const UpdateInvoiceForm = () => {
                                   type="button"
                                   onClick={() => handleRemoveItem(index)}
                                   className="btn btn-danger p-1"
-                                  hidden={prod._id}
+                                  // hidden={prod._id}
+                                  hidden={updatedOrder.invoices.flatMap(invoice => invoice.products.map(product => product._id)).includes(prod._id)}
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -3028,7 +3029,7 @@ const UpdateInvoiceForm = () => {
                                 type="number"
                                 name="invoice_product_qty_a"
                                 value={
-                                  newInvoice.products[index].invoice_product_qty_a
+                                  newInvoice.products?.[index]?.invoice_product_qty_a || 0
                                 }
                                 onChange={(e) => handleInputChange(e, index)}
                                 step={0.0001}
@@ -3057,8 +3058,9 @@ const UpdateInvoiceForm = () => {
                               ) * 100) / 100)}
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.products[index]
-                                  .invoice_product_gross_amount_a * 100) / 100)}
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                Math.floor((newInvoice.products?.[index]?.invoice_product_gross_amount_a || 0) * 100) / 100
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -3730,6 +3732,7 @@ const UpdateInvoiceForm = () => {
                 <label className="font-bold text-xs md:text-base">Internal Comments:</label>
                 <textarea
                   rows={4}
+                  required={newInvoice.invoiced_raw_total_amount_incl_gst - (Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
                   name="invoice_internal_comments"
                   value={newInvoice.invoice_internal_comments}

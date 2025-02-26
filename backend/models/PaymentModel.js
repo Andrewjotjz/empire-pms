@@ -66,8 +66,8 @@ const paymentSchema = new Schema({
     payment_status: {
         type: String,
         required: true,
-        enum: ["Draft","Reviewed","Fully Settled","Partially Settled"],
-        default: "Draft"
+        enum: ["In Review","Statement Checked","Fully Settled","Partially Settled"],
+        default: "In Review"
     },
     employees: [{
         type: Schema.Types.ObjectId,

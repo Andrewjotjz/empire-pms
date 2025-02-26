@@ -185,8 +185,8 @@ const UpdatePurchaseOrderForm = () => {
         },
         productprice_obj_ref: product.productPrice,
         order_product_location: "",
-        order_product_qty_a: '', // Ensure all fields are initialized properly
-        order_product_qty_b: '',
+        order_product_qty_a: 0, // Ensure all fields are initialized properly
+        order_product_qty_b: 0,
         order_product_price_unit_a: product.productPrice.product_price_unit_a,
         order_product_gross_amount: 0,
       },
@@ -1005,11 +1005,11 @@ const UpdatePurchaseOrderForm = () => {
                         <tr key={index}>
                           <td className='hidden lg:table-cell'>{prod.product_obj_ref.product_sku}</td>
                           <td>{prod.product_obj_ref.product_name}</td>
-                          <td class="whitespace-nowrap">
-                            <div class="inline-block align-middle">
+                          <td className="whitespace-nowrap">
+                            <div className="inline-block align-middle">
                                 <input
                                     type="text"
-                                    class="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
+                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
                                     name="order_product_location"
                                     value={prod.order_product_location}
                                     onChange={(e) => handleInputChange(e, index, true)}
@@ -1020,7 +1020,7 @@ const UpdatePurchaseOrderForm = () => {
                                 />
                             </div>
                             <div
-                                class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
                                 title='Paste location to all'
                                 onClick={() => handleApplyLocationToAll(index)}
                             >
@@ -1030,7 +1030,7 @@ const UpdatePurchaseOrderForm = () => {
                                     viewBox="0 0 24 24"
                                     strokeWidth="1.5"
                                     stroke="currentColor"
-                                    class="w-4 h-4 inline-block"
+                                    className="w-4 h-4 inline-block"
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -1151,8 +1151,8 @@ const UpdatePurchaseOrderForm = () => {
                               required
                             />
                           </td>
-                          <td class="whitespace-nowrap">
-                              <div class="inline-block align-middle">
+                          <td className="whitespace-nowrap">
+                              <div className="inline-block align-middle">
                                   <input
                                       type="text"
                                       className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"  
@@ -1165,7 +1165,7 @@ const UpdatePurchaseOrderForm = () => {
                                   />
                               </div>
                               <div
-                                  class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                  className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
                                   title='Paste location to all'
                                   onClick={() => handleApplyLocationToAll(index, true)}
                               >
@@ -1175,7 +1175,7 @@ const UpdatePurchaseOrderForm = () => {
                                       viewBox="0 0 24 24"
                                       strokeWidth="1.5"
                                       stroke="currentColor"
-                                      class="w-4 h-4 inline-block"
+                                      className="w-4 h-4 inline-block"
                                   >
                                       <path
                                           strokeLinecap="round"

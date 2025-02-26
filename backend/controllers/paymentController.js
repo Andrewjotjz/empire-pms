@@ -1,5 +1,6 @@
 //import modules
 const paymentModel = require('../models/PaymentModel');
+const invoiceModel = require('../models/InvoiceModel');
 const mongoose = require('mongoose');
 
 //Controller function - GET all Payments
@@ -51,13 +52,26 @@ const createNewPayment = async (req, res) => {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
         const Payment = await paymentModel.create({ payment_type, payment_ref, supplier, payment_method, payment_term, payment_raw_total_amount_incl_gst, 
             period_start_date, period_end_date, invoices, payment_status, employees, payment_internal_comments } )
+        
+        //extract the newly created payment ID
+        const paymentId = Payment._id;
+
+        // Convert the 'invoices' id array to an array of ObjectId
+        const invoiceIds = invoices.map((id) => new mongoose.Types.ObjectId(id));
+
+        //Update all invoices in the invoices array with the new payment ID
+        await invoiceModel.updateMany(
+            { _id: { $in: invoiceIds } }, // Match all invoices with IDs in the 'invoices' array
+            { $set: { payment: paymentId }} // Set the payment_id field to the new payment ID
+        );
+
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Payment)
     }
     catch (error) {
         //if Company creation has error, pass error object and 400 page details
         //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
+        console.log(error)
         res.status(400).json({error: error.message})
     }
 }
