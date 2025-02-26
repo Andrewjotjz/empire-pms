@@ -59,11 +59,40 @@ const NewPurchaseOrderForm = () => {
             day: "2-digit"
           }).split("/").reverse().join("-");
     };
+    const getTomorrowDateTime = () => {
+        const today = new Date();
+    
+        // Add one day to get tomorrow
+        today.setDate(today.getDate() + 1);
+    
+        // Convert to Melbourne timezone
+        const options = {
+            timeZone: "Australia/Melbourne",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        };
+    
+        // Format the date to match the required format YYYY-MM-DDTHH:MM
+        const formatter = new Intl.DateTimeFormat("en-CA", options); // "en-CA" gives YYYY-MM-DD format
+        const parts = formatter.formatToParts(today);
+    
+        const year = parts.find(p => p.type === "year").value;
+        const month = parts.find(p => p.type === "month").value;
+        const day = parts.find(p => p.type === "day").value;
+        const hour = parts.find(p => p.type === "hour").value.padStart(2, '0');
+        const minute = parts.find(p => p.type === "minute").value.padStart(2, '0');
+    
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+    };
     const [orderState, setOrderState] = useState({
         supplier: '',
         order_ref: '',
         order_date:  getCurrentDate(),
-        order_est_datetime: '',
+        order_est_datetime: getTomorrowDateTime(),
         products: [],
         custom_products: [],
         order_total_amount: 0,
@@ -92,7 +121,7 @@ const NewPurchaseOrderForm = () => {
                     supplier: '',
                     order_ref: orderState.order_ref,
                     order_date:  getCurrentDate(),
-                    order_est_datetime: '',
+                    order_est_datetime: getTomorrowDateTime(),
                     products: [],
                     custom_products: [],
                     order_total_amount: 0,
@@ -130,7 +159,7 @@ const NewPurchaseOrderForm = () => {
                     supplier: targetSupplier,
                     order_ref: orderState.order_ref,
                     order_date:  getCurrentDate(),
-                    order_est_datetime: '',
+                    order_est_datetime: getTomorrowDateTime(),
                     products: [],
                     custom_products: [],
                     order_total_amount: 0,
@@ -164,7 +193,7 @@ const NewPurchaseOrderForm = () => {
                 supplier: newSupplier,
                 order_ref: orderState.order_ref,
                 order_date:  getCurrentDate(),
-                order_est_datetime: '',
+                order_est_datetime: getTomorrowDateTime(),
                 products: [],
                 custom_products: [],
                 order_total_amount: 0,
@@ -186,7 +215,7 @@ const NewPurchaseOrderForm = () => {
                 supplier: '',
                 order_ref: orderState.order_ref,
                 order_date:  getCurrentDate(),
-                order_est_datetime: '',
+                order_est_datetime: getTomorrowDateTime(),
                 products: [],
                 custom_products: [],
                 order_total_amount: 0,
@@ -214,8 +243,8 @@ const NewPurchaseOrderForm = () => {
                 product_obj_ref: product.product._id,
                 productprice_obj_ref: product.productPrice._id,
                 order_product_location: '',
-                order_product_qty_a: '', // Ensure all fields are initialized properly
-                order_product_qty_b: '',
+                order_product_qty_a: 0, // Ensure all fields are initialized properly
+                order_product_qty_b: 0,
                 order_product_price_unit_a: product.productPrice.product_price_unit_a,
                 order_product_gross_amount: 0
             }]

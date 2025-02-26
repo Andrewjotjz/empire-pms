@@ -1,5 +1,7 @@
 //import modules
 const projectModel = require('../models/ProjectModel');
+const productModel = require('../models/ProductModel');
+const productPriceModel = require('../models/ProductPriceModel');
 const employeeModel = require('../models/EmployeeModel');
 
 const mongoose = require('mongoose');
@@ -87,53 +89,76 @@ const getSingleProject = async (req, res) => {
 
 //Controller function - POST to create a new Project
 const createNewProject = async (req, res) => {
-    //retrieve incoming request (along with new Project object) by using 'req' object property 'body', which stores new Project object.
-    //destructure all relevant attributes in new Project object
+    // Retrieve incoming request data
     const { project_name, project_address, suppliers, area_obj_ref } = req.body;
 
     try {
-        //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Project = await projectModel.create({ project_name, project_address, suppliers, area_obj_ref })
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        res.status(200).json(Project)
+        // Create new project
+        const newProject = await projectModel.create({ project_name, project_address, suppliers, area_obj_ref });
+
+        // Step 2: Find all products belonging to the selected suppliers
+        const products = await productModel.find({ supplier: { $in: suppliers } }).select('_id');
+
+        // Step 3: Find all product prices for those products
+        const productPrices = await productPriceModel.find({ product_obj_ref: { $in: products.map(p => p._id) } });
+
+        // Step 4: Update product prices to include the new project
+        await Promise.all(productPrices.map(async (price) => {
+            price.projects.push(newProject._id); 
+            await price.save();
+        }));
+
+        // Send response with the newly created project
+        res.status(200).json(newProject);
+    } catch (error) {
+        console.error('Error creating project:', error);
+        res.status(500).json({ error: "Internal server error. Please try again later." });
     }
-    catch (error) {
-        //if Company creation has error, pass error object and 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(400).json({error: error.message})
-    }
-}
+};
+
 
 
 //Controller function - PUT to update a single Project
-const updateSingleProject = async (req,res) => {
-    //retrieve incoming request id by using 'req' object property 'params', which stores 'id' object
+const updateSingleProject = async (req, res) => {
     const { id } = req.params;
-    //check if the ID object exists in mongoDB database
-    if (!mongoose.Types.ObjectId.isValid(id)){
-        //if ID doesn't exist, return error 404 details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(404).json({msg: "ID exists, however there is no such Project."});
-    }        
-    //if ID exists in mongoDB database
-    //create a new model called Company, await for database operation, which is find Company document using id (1st param), 
-    //and update with relevant data retrieved using 'req' object 'body' property (2nd param).
-    const Project = await projectModel.findByIdAndUpdate({_id: id}, {...req.body});
+    const { suppliers } = req.body; // Get the new supplier list
 
-    //check if there's 'null' or 'undefined' in 'Project'.
-    if (!Project) {
-        //if Project doesn't exist, return error 400 page details
-        //invoke 'res' object method: status() and json(), pass relevant data to them
-        //! DESIGN 400 PAGE
-        res.status(400).json({msg: "ID exists, however there is no such Project"});
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(404).json({ msg: "ID exists, however there is no such Project." });
     }
-    else {
-        //if Project does exists, pass new Company object to 'res' object method
-        res.status(200).json(Project);
+
+    try {
+        // Step 1: Find the existing project
+        const existingProject = await projectModel.findById(id);
+        if (!existingProject) {
+            return res.status(400).json({ msg: "ID exists, however there is no such Project." });
+        }
+
+        // Step 2: Update the project with new supplier selection
+        existingProject.suppliers = suppliers;
+        const updatedProject = await existingProject.save();
+
+        // Step 3: Find all products that belong to the new suppliers
+        const products = await productModel.find({ supplier: { $in: suppliers } }).select('_id');
+
+        // Step 4: Remove this project ID from ProductPrice entries that no longer match
+        await productPriceModel.updateMany(
+            { projects: id },
+            { $pull: { projects: id } }
+        );
+
+        // Step 5: Add the project ID to ProductPrice entries that match the new suppliers
+        await productPriceModel.updateMany(
+            { product_obj_ref: { $in: products.map(p => p._id) } },
+            { $addToSet: { projects: id } }
+        );
+
+        return res.status(200).json(updatedProject);
+    } catch (error) {
+        console.error('Error updating project:', error);
+        return res.status(500).json({ error: "Internal server error. Please try again later." });
     }
-}
+};
 
 
 //Controller function - DELETE to delete a single Project

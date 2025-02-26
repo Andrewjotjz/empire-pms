@@ -30,17 +30,19 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         product_name: '',
         product_type: '',
         product_actual_size: 0,
-        product_actual_rate: 0,
         product_next_available_stock_date: '',
         product_isarchived: false,
         supplier: supplierId,
         alias: '',
         product_unit_a: '',
         product_number_a: 1,
-        product_price_unit_a: '',
+        product_price_unit_a: 0,
         product_unit_b: '',
-        product_number_b: '',
-        product_price_unit_b: '',
+        product_number_b: 0,
+        product_price_unit_b: 0,
+        product_actual_rate: 0,
+        product_note: '',
+        product_price_note: '',
         price_fixed: false,
         product_effective_date: '',
         projects: []
@@ -325,7 +327,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                         step="0.001"  // Allows input with up to three decimal places
                                         pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
                                         required
-                                        onInvalid={(e) => e.target.setCustomValidity('Enter number-A')}
+                                        onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                         onInput={(e) => e.target.setCustomValidity('')}
                                     />
                                 </div>
@@ -358,7 +360,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                             step="0.001"  // Allows input with up to three decimal places
                                             min={1}
                                             required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter unit-A price')}
+                                            onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                             onInput={(e) => e.target.setCustomValidity('')}
                                         />
                                     </div>
@@ -377,7 +379,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                         pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
                                         min={1}
                                         required
-                                        onInvalid={(e) => e.target.setCustomValidity('Enter number-B')}
+                                        onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                         onInput={(e) => e.target.setCustomValidity('')}
                                     />
                                 </div>
@@ -410,7 +412,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                             step="0.001"  // Allows input with up to three decimal places
                                             min={1}
                                             required
-                                            onInvalid={(e) => e.target.setCustomValidity('Enter unit-B price')}
+                                            onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                             onInput={(e) => e.target.setCustomValidity('')}
                                         />
                                     </div>
@@ -465,6 +467,17 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                 />
                             </div>
                             <div>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price actual price/rate:</label>
+                                <input 
+                                    type='number'
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_actual_rate" 
+                                    value={productDetailsState.product_actual_rate}
+                                    onChange={handleProductInputChange}
+                                    required
+                                />
+                            </div>
+                            <div>
                                 <label className="form-label font-bold text-xs md:text-base">Price fixed(?):</label>
                                 <input 
                                         type="checkbox"
@@ -474,46 +487,54 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                         onChange={(e) => handleProductInputChange({ target: { name: 'price_fixed', value: e.target.checked }})}
                                     />
                             </div>
-                        </div>
-                        {/* ********************************************* PRODUCT PRICE END *********************************************** */}
-                        <div>
-                            <div className="col-md-6 mb-0 md:mb-3">
-                                <label className="form-label font-bold text-xs md:text-base">*Actual M<span className='text-xs align-top'>2</span>/M:</label>
-                                <input 
-                                    type='number'
-                                    className="form-control text-xs md:text-base" 
-                                    name="product_actual_size" 
-                                    value={productDetailsState.product_actual_size} 
+                            <div className='col-span-3'>
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Price notes:</label>
+                                <textarea
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_price_note"
+                                    value={productDetailsState.product_price_note}
                                     onChange={handleProductInputChange}
-                                    step="0.001"  // Allows input with up to three decimal places
-                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                    min={1}
                                     required
                                 />
                             </div>
-                            <div className="col-md-6 mb-0 md:mb-3">
-                                <label className="form-label font-bold text-xs md:text-base">*Actual Rate:</label>
+                        </div>
+                        {/* ********************************************* PRODUCT PRICE END *********************************************** */}
+                        <div className='grid grid-cols-2 gap-x-4'>
+                            <div className="mb-0 sm:mb-3">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">*Actual Size (M<span className='text-xs align-top'>2</span>/LENGTH):</label>
                                 <input 
                                     type='number'
-                                    className="form-control text-xs md:text-base" 
-                                    name="product_actual_rate" 
-                                    value={productDetailsState.product_actual_rate} 
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_actual_size" 
+                                    value={productDetailsState.product_actual_size} 
                                     onChange={handleProductInputChange}
-                                    step="0.001"  // Allows input with up to three decimal places
-                                    pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
+                                    step="0.0001"  // Allows input with up to four decimal places
                                     min={1}
                                     required
                                 />
                             </div>
 
-                            <div className="col-md-6 mb-2 md:mb-3">
-                                <label className="form-label font-bold text-xs md:text-base">Next available stock date:</label>
+                            <div className="mb-0 sm:mb-3">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Next available stock date:</label>
                                 <input 
                                     type='date'
-                                    className="form-control text-xs md:text-base" 
+                                    className="form-control text-xs sm:text-base" 
                                     name="product_next_available_stock_date" 
                                     value={productDetailsState.product_next_available_stock_date}
                                     onChange={handleProductInputChange}
+                                />
+                            </div>
+
+                            <div className="mb-0 sm:mb-3 col-span-2">
+                                <label className="form-label font-bold text-xs sm:text-base mb-1 sm:mb-2">Product notes:</label>
+                                <textarea 
+                                    className="form-control text-xs sm:text-base" 
+                                    name="product_note" 
+                                    value={productDetailsState.product_note} 
+                                    onChange={handleProductInputChange}
+                                    step="0.0001"  // Allows input with up to four decimal places
+                                    min={1}
+                                    required
                                 />
                             </div>
                         </div>

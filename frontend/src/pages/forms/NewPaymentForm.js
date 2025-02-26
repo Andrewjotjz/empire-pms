@@ -100,7 +100,7 @@ const NewPaymentForm = () => {
                 gross_total_amount: 0
             }
         ],
-        payment_status: 'Draft',
+        payment_status: 'In Review',
         employees: ['66833b93269c01bc18cc6223'],
         payment_internal_comments: ''
     });
@@ -272,10 +272,10 @@ const NewPaymentForm = () => {
             ? "Fully Settled"
             : totalBalance > 0 && totalBalance < paymentState.payment_raw_total_amount_incl_gst
             ? "Partially Settled"
-            : totalBalance === paymentState.payment_raw_total_amount_incl_gst && paymentState.payment_status !== "Draft"
-            ? "Reviewed"
-            : paymentState.payment_status === "Draft" && !(totalBalance < 0)
-            ? "Draft"
+            : totalBalance === paymentState.payment_raw_total_amount_incl_gst && paymentState.payment_status !== "In Review"
+            ? "Statement Checked"
+            : paymentState.payment_status === "In Review" && !(totalBalance < 0)
+            ? "In Review"
             : totalBalance < 0
             ? "Overpaid" : "Overpaid" ;
     
@@ -593,9 +593,9 @@ const NewPaymentForm = () => {
                                         ? 'bg-green-100 text-green-800' 
                                         : invoice.invoice_status === 'Pending' 
                                         ? 'bg-yellow-100 text-yellow-800' 
-                                        : invoice.invoice_status === 'Draft' 
+                                        : invoice.invoice_status === 'In Review' 
                                         ? 'bg-blue-100 text-blue-800' 
-                                        : invoice.invoice_status === 'Reviewed' 
+                                        : invoice.invoice_status === 'Statement Checked' 
                                         ? 'bg-purple-100 text-purple-800' 
                                         : invoice.invoice_status === 'Fully Settled' 
                                         ? 'bg-teal-100 text-teal-800' 
@@ -617,7 +617,7 @@ const NewPaymentForm = () => {
                                         ? 'bg-green-100 text-green-800' 
                                         : invoice.order.order_status === 'Pending' 
                                         ? 'bg-yellow-100 text-yellow-800' 
-                                        : invoice.order.order_status === 'Draft' 
+                                        : invoice.order.order_status === 'In Review' 
                                         ? 'bg-blue-100 text-blue-800' 
                                         : invoice.order.order_status === 'Cancelled' 
                                         ? 'bg-gray-100 text-gray-800' 
@@ -804,10 +804,10 @@ const NewPaymentForm = () => {
                         className="w-full flex justify-center items-center py-2 px-4 border border-gray-500 rounded-md shadow-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out text-sm"
                         onClick={() => setPaymentState((prevState) => ({
                             ...prevState,
-                            payment_status: "Draft"
+                            payment_status: "In Review"
                         }))}
                     >
-                        Draft
+                        In Review
                     </button>
                     <button
                         type="submit"
