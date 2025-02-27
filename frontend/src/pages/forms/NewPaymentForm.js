@@ -250,9 +250,24 @@ const NewPaymentForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
     
+        // Check for invoices that already existed in other statements
+        const hasExistedInvoices = targetInvoices.some(
+            invoice => invoice.payment !== ''
+        );
+
+        if (hasExistedInvoices) {
+            const existedInvoices = targetInvoices
+                .filter(invoice => invoice.payment !== '') // Ensure only relevant invoices are included
+                .map(invoice => `• ${invoice.invoice_ref}`) // Add bullet points for better readability
+                .join("\n"); // Join items with a new line
+        
+            alert(`Unable to proceed. These invoices already exist in other statements:\n\n${existedInvoices}`);
+            return;
+        }
+        
         // Check for unreviewed invoices
         const hasUnreviewedInvoices = targetInvoices.some(
-            invoice => invoice.invoice_status === "To reconcile" || invoice.invoice_status === "Cancelled"
+            invoice => invoice.invoice_status === "To reconcile" || invoice.invoice_status === "To review" || invoice.invoice_status === "Cancelled"
         );
     
         if (hasUnreviewedInvoices) {
@@ -398,9 +413,12 @@ const NewPaymentForm = () => {
                 if (data.tokenError) {
                     throw new Error(data.tokenError);
                 }
+
+                //Filter invoices that are archived.
+                const filteredData = data.filter(invoice => invoice.invoice_isarchived === false)
                 
                 setIsFetchInvoiceLoading(false);
-                setInvoiceState(data);
+                setInvoiceState(filteredData);
                 setFetchInvoiceError(null);
             } catch (error) {
                 if (error.name === 'AbortError') {
