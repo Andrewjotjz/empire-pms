@@ -90,6 +90,20 @@ const PurchaseOrderDetails = () => {
         navigate(`/EmpirePMS/order/${id}/edit`)
     }
 
+    const handleCopyToNewOrder = () => {
+        const products = purchaseOrderState.products
+        const newProducts = products.map(prod => ({
+            ...prod, // Copy existing properties
+            product_obj_ref: prod.product_obj_ref._id, // Modify this property
+            productprice_obj_ref: prod.productprice_obj_ref._id
+        }));
+        const newPurchaseOrderState = {
+            ...purchaseOrderState,
+            products: newProducts
+        };
+        navigate(`/EmpirePMS/order/create`, {state: newPurchaseOrderState})
+    }
+    
     // const handleNewDelivery = () => {
 
     //     //logic when user clicks 'Receiving Items', it will auto calculate the initial value for receiving qty. (registered products)
@@ -424,61 +438,56 @@ const PurchaseOrderDetails = () => {
     }
 
     const purchaseOrderDetails = purchaseOrderState ? (
-        <div className="row text-xs md:text-sm">
-            <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold">Supplier:</label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs md:text-sm">
+            <div>
+                <label className="form-label font-bold">Supplier:</label>
                 <p className="form-label">{purchaseOrderState?.supplier?.supplier_name}</p>
             </div>
-            <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold">Archived (?):</label>
-                {purchaseOrderState.order_isarchived ? 
-                    (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                    (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</label>)
-                }
+            <div>
+                <label className="form-label font-bold">Project:</label>
+                <p className="form-label">{purchaseOrderState?.project?.project_name}</p>
             </div>
-            <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold">Order Date:</label>
+            <div>
+                <label className="form-label font-bold">Order Date:</label>
                 <p className="form-label">{formatDate(purchaseOrderState.order_date)}</p>
             </div>
-            <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold">EST Date/Time:</label>
+            <div>
+                <label className="form-label font-bold">EST Date/Time:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.order_est_datetime)}</p>
             </div>
-            <div className="col-md-6 md:mb-3 text-sm opacity-50">
-                <label className="form-label fw-bold">Created on:</label>
+            <div className="text-sm">
+                <label className="form-label font-bold">Created on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.createdAt)}</p>
             </div>
-            <div className="col-md-6 md:mb-3 text-sm opacity-50">
-                <label className="form-label fw-bold">Last Updated on:</label>
+            <div className="text-sm">
+                <label className="form-label font-bold">Last Updated on:</label>
                 <p className="form-label">{formatDateTime(purchaseOrderState.updatedAt)}</p>
             </div>
-            <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold mr-1">Order Status:</label>
+            <div>
+                <label className="form-label font-bold mr-1">Order Status:</label>
                 {purchaseOrderState.order_status && (
-                <label
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        purchaseOrderState.order_status === "Cancelled"
-                            ? "bg-gray-100 text-gray-800"
-                            : purchaseOrderState.order_status === "Pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : purchaseOrderState.order_status === "Approved"
-                            ? "bg-green-100 text-green-800"
-                            : purchaseOrderState.order_status === "Rejected"
-                            ? "bg-red-100 text-red-800"
-                            : purchaseOrderState.order_status === "Draft"
-                            ? "bg-gray-100 text-gray-800"
-                            : ""
-                    }`}
-                >
-                    {purchaseOrderState.order_status}
-                </label>
+                    <label
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            purchaseOrderState.order_status === "Cancelled"
+                                ? "bg-gray-100 text-gray-800"
+                                : purchaseOrderState.order_status === "Pending"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : purchaseOrderState.order_status === "Approved"
+                                ? "bg-green-100 text-green-800"
+                                : purchaseOrderState.order_status === "Rejected"
+                                ? "bg-red-100 text-red-800"
+                                : purchaseOrderState.order_status === "Draft"
+                                ? "bg-gray-100 text-gray-800"
+                                : ""
+                        }`}
+                    >
+                        {purchaseOrderState.order_status}
+                    </label>
                 )}
             </div>
-            <div className="col-md-6 md:mb-3">
-                <label className="form-label fw-bold mr-1">Delivery:</label>
-
+            <div>
+                <label className="form-label font-bold mr-1">Delivery:</label>
                 {(() => {
-                    // Ensure deliveries and products exist before accessing them
                     const totalDelivered = purchaseOrderState.deliveries?.flatMap((delivery) => 
                         delivery.products?.map((product) => product.delivered_qty_a || 0) || []
                     )?.reduce((totalSum, qty) => totalSum + qty, 0) || 0;
@@ -488,7 +497,6 @@ const PurchaseOrderDetails = () => {
                         0
                     ) || 0;
 
-                    // Render appropriate label based on delivery status
                     if (totalDelivered >= totalOrderQuantity && totalOrderQuantity > 0) {
                         return <label className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Fully delivered</label>;
                     } else if (totalDelivered === 0) {
@@ -496,10 +504,23 @@ const PurchaseOrderDetails = () => {
                     } else if (totalDelivered < totalOrderQuantity) {
                         return <label className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Partially delivered</label>;
                     } else {
-                        return null; // In case no condition matches
+                        return null;
                     }
                 })()}
-
+            </div>
+            <div>
+                <label className="form-label font-bold mr-1">Archived (?):</label>
+                {purchaseOrderState.order_isarchived !== null && purchaseOrderState.order_isarchived !== undefined && (
+                    <label
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            purchaseOrderState.order_isarchived
+                                ? "bg-red-100 text-red-800"  // Archived
+                                : "bg-green-100 text-green-800" // Available
+                        }`}
+                    >
+                        {purchaseOrderState.order_isarchived ? "Archived" : "Available"}
+                    </label>
+                )}
             </div>
         </div>
     ) : (
@@ -1248,6 +1269,15 @@ const PurchaseOrderDetails = () => {
                                             <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
                                         </svg>
                                         <label>EDIT ORDER</label>
+                                    </div>
+                                </Dropdown.Item>
+                                <Dropdown.Item onClick={handleCopyToNewOrder}>
+                                    <div className='flex items-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 mr-2">
+                                            <path fillRule="evenodd" d="M7.502 6h7.128A3.375 3.375 0 0 1 18 9.375v9.375a3 3 0 0 0 3-3V6.108c0-1.505-1.125-2.811-2.664-2.94a48.972 48.972 0 0 0-.673-.05A3 3 0 0 0 15 1.5h-1.5a3 3 0 0 0-2.663 1.618c-.225.015-.45.032-.673.05C8.662 3.295 7.554 4.542 7.502 6ZM13.5 3A1.5 1.5 0 0 0 12 4.5h4.5A1.5 1.5 0 0 0 15 3h-1.5Z" clipRule="evenodd" />
+                                            <path fillRule="evenodd" d="M3 9.375C3 8.339 3.84 7.5 4.875 7.5h9.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625V9.375ZM6 12a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V12Zm2.25 0a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75ZM6 15a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V15Zm2.25 0a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75ZM6 18a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V18Zm2.25 0a.75.75 0 0 1 .75-.75h3.75a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75Z" clipRule="evenodd" />
+                                        </svg>
+                                        <label>COPY TO NEW ORDER</label>
                                     </div>
                                 </Dropdown.Item>
                                 <Dropdown.Item onClick={handleNewDelivery}>

@@ -1,6 +1,6 @@
 // Import modules
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { useFetchProductsBySupplier } from '../../hooks/useFetchProductsBySupplier';
@@ -20,6 +20,7 @@ const NewPurchaseOrderForm = () => {
     // Hooks
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const location = useLocation();
 
     // Component hook
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
@@ -29,8 +30,10 @@ const NewPurchaseOrderForm = () => {
     // Component state
     const supplierState = useSelector((state) => state.supplierReducer.supplierState)
     const productState = useSelector((state) => state.productReducer.productState)
-    const projectState = useSelector((state) => state.projectReducer.projectState)
+    // const projectState = useSelector((state) => state.projectReducer.projectState)
+    const [projectState, setProjectState] = useState([])
     const [purchaseOrderState, setPurchaseOrderState] = useState(null);
+    const copiedState = location.state;
 
     const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
     const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
@@ -39,8 +42,8 @@ const NewPurchaseOrderForm = () => {
     const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
     const [fetchTypeError, setFetchTypeError] = useState(null);
 
-    const [selectedSupplier, setSelectedSupplier] = useState('');
-    const [selectedProject, setSelectedProject] = useState('');
+    const [selectedSupplier, setSelectedSupplier] = useState(copiedState !== null ? copiedState.supplier._id : '');
+    const [selectedProject, setSelectedProject] = useState(copiedState !== null ? copiedState.project._id : '');
     const [selectedProductType, setSelectedProductType] = useState('')
     const [addedProductState, setAddedProductState] = useState([]);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -49,6 +52,7 @@ const NewPurchaseOrderForm = () => {
     const [pendingAction, setPendingAction] = useState(null);
     const [searchProductTerm, setSearchProductTerm] = useState('');
     const [productTypeState, setProductTypeState] = useState([]);
+    const [copiedProducts, setCopiedProducts] = useState([]);
     const getCurrentDate = () => {
         const today = new Date();
         // Format the date as YYYY-MM-DD
@@ -89,19 +93,19 @@ const NewPurchaseOrderForm = () => {
         return `${year}-${month}-${day}T${hour}:${minute}`;
     };
     const [orderState, setOrderState] = useState({
-        supplier: '',
+        supplier: copiedState !== null ? copiedState.supplier._id : '',
         order_ref: '',
         order_date:  getCurrentDate(),
         order_est_datetime: getTomorrowDateTime(),
-        products: [],
-        custom_products: [],
-        order_total_amount: 0,
+        products: copiedState !== null ? copiedState.products : [],
+        custom_products: copiedState !== null ? copiedState.custom_products : [],
+        order_total_amount: copiedState !== null ? copiedState.order_total_amount : 0,
         order_internal_comments: '',
-        order_notes_to_supplier: '',
+        order_notes_to_supplier: copiedState !== null ? copiedState.order_notes_to_supplier : '',
         order_isarchived: false,
         deliveries: [],
         invoices: [],
-        project: '',
+        project: copiedState !== null ? copiedState.project._id : '',
         order_status: 'Pending'
     })
     
@@ -562,7 +566,7 @@ const NewPurchaseOrderForm = () => {
                 }
                 
                 setIsFetchProjectLoadingState(false);
-                dispatch(setProjectState(data));
+                setProjectState(data);
                 setFetchProjectErrorState(null);
             } catch (error) {
                 if (error.name === 'AbortError') {
@@ -661,7 +665,15 @@ const NewPurchaseOrderForm = () => {
         return () => {
             abortController.abort(); // Cleanup
         };
-    }, []);
+    }, []);   
+
+    useEffect(() => {
+        setAddedProductState(
+            copiedState?.products.map(product => ({
+                ...productState.find(p => p.product._id === product.product_obj_ref)
+            }))
+        );
+    }, [copiedState]);
 
     // Display Loading
     if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading || isFetchOrderLoadingState || isFetchTypeLoading) {
@@ -727,7 +739,10 @@ const NewPurchaseOrderForm = () => {
                                 value={orderState.order_ref}
                                 onChange={handleSearchChange}
                                 required
-                                onInvalid={(e) => e.target.setCustomValidity('Please enter purchase order number')}
+                                onInvalid={(e) => {
+                                    e.target.setCustomValidity('Please enter purchase order number');
+                                    e.target.closest('div').classList.remove('hidden'); // Make it visible
+                                  }}
                                 onInput={(e) => e.target.setCustomValidity('')}
                                 />
                             </div>
@@ -929,11 +944,11 @@ const NewPurchaseOrderForm = () => {
                                         <td>
                                             <label>{addedProductState[index].product.product_name}</label>
                                         </td>
-                                        <td class="whitespace-nowrap">
-                                            <div class="inline-block align-middle">
+                                        <td className="whitespace-nowrap">
+                                            <div className="inline-block align-middle">
                                                 <input
                                                     type="text"
-                                                    class="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
+                                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
                                                     name="order_product_location"
                                                     value={prod.order_product_location}
                                                     onChange={(e) => handleInputChange(e, index, true)}
@@ -944,7 +959,7 @@ const NewPurchaseOrderForm = () => {
                                                 />
                                             </div>
                                             <div
-                                                class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                                className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
                                                 title='Paste location to all'
                                                 onClick={() => handleApplyLocationToAll(index)}
                                             >
@@ -954,7 +969,7 @@ const NewPurchaseOrderForm = () => {
                                                     viewBox="0 0 24 24"
                                                     strokeWidth="1.5"
                                                     stroke="currentColor"
-                                                    class="w-4 h-4 inline-block"
+                                                    className="w-4 h-4 inline-block"
                                                 >
                                                     <path
                                                         strokeLinecap="round"
@@ -1036,8 +1051,8 @@ const NewPurchaseOrderForm = () => {
                                             required
                                         />
                                     </td>
-                                    <td class="whitespace-nowrap">
-                                        <div class="inline-block align-middle">
+                                    <td className="whitespace-nowrap">
+                                        <div className="inline-block align-middle">
                                             <input
                                                 type="text"
                                                 className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"  
@@ -1050,7 +1065,7 @@ const NewPurchaseOrderForm = () => {
                                             />
                                         </div>
                                         <div
-                                            class="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                            className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
                                             title='Paste location to all'
                                             onClick={() => handleApplyLocationToAll(index, true)}
                                         >
@@ -1060,7 +1075,7 @@ const NewPurchaseOrderForm = () => {
                                                 viewBox="0 0 24 24"
                                                 strokeWidth="1.5"
                                                 stroke="currentColor"
-                                                class="w-4 h-4 inline-block"
+                                                className="w-4 h-4 inline-block"
                                             >
                                                 <path
                                                     strokeLinecap="round"

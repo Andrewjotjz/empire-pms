@@ -252,6 +252,21 @@ const UpdatePaymentForm = () => {
     
     const handleUpdatePayment = (e) => {
         e.preventDefault();
+
+        // Check for invoices that already existed in other statements
+        const hasExistedInvoices = targetInvoices.some(
+            invoice => invoice.payment !== ''
+        );
+
+        if (hasExistedInvoices) {
+            const existedInvoices = targetInvoices
+                .filter(invoice => invoice.payment !== '') // Ensure only relevant invoices are included
+                .map(invoice => `• ${invoice.invoice_ref}`) // Add bullet points for better readability
+                .join("\n"); // Join items with a new line
+        
+            alert(`Unable to proceed. These invoices already exist in other statements:\n\n${existedInvoices}`);
+            return;
+        }
     
         // Check for unreviewed invoices
         const hasUnreviewedInvoices = targetInvoices.some(
