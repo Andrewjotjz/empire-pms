@@ -35,7 +35,7 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-const maxAge = 30 * 60; //60 minutes in seconds
+const maxAge = 60 * 60; //60 minutes in seconds
 // Middleware to refresh token
 const refreshToken = (req, res, next) => {
     const token = req.cookies.jwt;

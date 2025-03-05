@@ -960,46 +960,97 @@ const UpdateInvoiceForm = () => {
     handleTogglePriceModal();
     fetchProductDetails(supplierId, targetProductId);
   };
+  // const handleAutomation = (updatedProductId) => {
+  //   // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
+  //   const updatedItems = updatedOrder.products.filter(
+  //     (item) => item.product_obj_ref._id !== updatedProductId
+  //   );
+
+  //   const getItem = updatedOrder.products.filter(
+  //     (item) => item.product_obj_ref._id === updatedProductId
+  //   );
+
+  //   // Step 2: Find the product that needs to be re-added (optimized filtering)
+  //   const product = filterProductsBySearchTerm().find(
+  //     (product) => product.product._id === updatedProductId
+  //   );
+
+  //   if (!product) {
+  //     alert("Automation failed. Please contact IT support");
+  //     return;
+  //   }
+
+  //   // Step 3: Create the new product object with required details
+  //   const newProduct = {
+  //     product_obj_ref: {
+  //       _id: product.product._id,
+  //       product_name: product.product.product_name,
+  //       product_sku: product.product.product_sku,
+  //     },
+  //     productprice_obj_ref: product.productPrice,
+  //     order_product_location: getItem[0].order_product_location,
+  //     order_product_qty_a: getItem[0].order_product_qty_a,
+  //     order_product_qty_b: getItem[0].order_product_qty_b,
+  //     order_product_price_unit_a: product.productPrice.product_price_unit_a,
+  //     order_product_gross_amount:
+  //       getItem[0].order_product_qty_a *
+  //       product.productPrice.product_price_unit_a,
+  //   };
+
+  //   // Step 4: Update the products list with the new product
+  //   const updatedProducts = [...updatedItems, newProduct];
+
+  //   setUpdatedOrder({
+  //     ...updatedOrder,
+  //     products: updatedProducts,
+  //   });
+  // };
+  
   const handleAutomation = (updatedProductId) => {
     // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
-    const updatedItems = updatedOrder.products.filter(
-      (item) => item.product_obj_ref._id !== updatedProductId
-    );
-
+    const updatedItems = updatedOrder.products.map((item) => {
+      if (item.product_obj_ref._id === updatedProductId) {
+        return null; // Mark items to be replaced
+      }
+      return item;
+    });
+  
+    // Step 2: Find all occurrences of the product in the order
     const getItem = updatedOrder.products.filter(
       (item) => item.product_obj_ref._id === updatedProductId
     );
-
-    // Step 2: Find the product that needs to be re-added (optimized filtering)
+  
+    // Step 3: Find the product that needs to be re-added (optimized filtering)
     const product = filterProductsBySearchTerm().find(
       (product) => product.product._id === updatedProductId
     );
-
+  
     if (!product) {
-      alert("Automation failed. Please contact IT support");
+      alert("Product not found in table. Automation failed. Please contact IT support");
       return;
     }
-
-    // Step 3: Create the new product object with required details
-    const newProduct = {
+  
+    // Step 4: Create new product objects for each occurrence in getItem
+    const newProducts = getItem.map((item) => ({
       product_obj_ref: {
         _id: product.product._id,
         product_name: product.product.product_name,
         product_sku: product.product.product_sku,
       },
       productprice_obj_ref: product.productPrice,
-      order_product_location: getItem[0].order_product_location,
-      order_product_qty_a: getItem[0].order_product_qty_a,
-      order_product_qty_b: getItem[0].order_product_qty_b,
+      order_product_location: item.order_product_location,
+      order_product_qty_a: item.order_product_qty_a,
+      order_product_qty_b: item.order_product_qty_b,
       order_product_price_unit_a: product.productPrice.product_price_unit_a,
-      order_product_gross_amount:
-        getItem[0].order_product_qty_a *
-        product.productPrice.product_price_unit_a,
-    };
-
-    // Step 4: Update the products list with the new product
-    const updatedProducts = [...updatedItems, newProduct];
-
+      order_product_gross_amount: item.order_product_qty_a * product.productPrice.product_price_unit_a,
+    }));
+  
+    // Step 5: Replace null values in updatedItems with new products while preserving index
+    let newProductIndex = 0;
+    const updatedProducts = updatedItems.map((item) =>
+      item === null ? newProducts[newProductIndex++] : item
+    );
+  
     setUpdatedOrder({
       ...updatedOrder,
       products: updatedProducts,
@@ -1022,6 +1073,34 @@ const UpdateInvoiceForm = () => {
     // Step 3: Remove custom product from list
     handleRemoveCustomItem(targetIndex);
   };
+
+  const handleApplyLocationToAll = (index, isCustom = false) => {
+      let copyText = '';
+
+      // Determine the source of copyText based on isCustom
+      if (isCustom) {
+          copyText = updatedOrder.custom_products[index]?.custom_product_location || '';
+      } else {
+          copyText = updatedOrder.products[index]?.order_product_location || '';
+      }
+
+      const updatedProducts = updatedOrder.products.map(product => ({
+          ...product,
+          order_product_location: copyText, // Set all product locations to the copied location
+      }));
+
+      const updatedCustomProducts = updatedOrder.custom_products.map(cproduct => ({
+          ...cproduct,
+          custom_product_location: copyText
+      }))
+      
+      setUpdatedOrder((prevState) => ({
+          ...prevState,
+          products: updatedProducts, // Update the products in state
+          custom_products: updatedCustomProducts
+      }));
+  };
+  
   const handleSubmitInvoice = (event) => {
     event.preventDefault();
 
@@ -1888,26 +1967,48 @@ const UpdateInvoiceForm = () => {
                             >
                               <td>{prod.product_obj_ref.product_sku}</td>
                               <td>{prod.product_obj_ref.product_name}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  className="form-control text-xs px-1 py-0.5"
-                                  name="order_product_location"
-                                  value={prod.order_product_location}
-                                  onChange={(e) =>
-                                    handleEditInputChange(e, index)
-                                  }
-                                  placeholder="Ex: Level 2"
-                                  required
-                                  onInvalid={(e) =>
-                                    e.target.setCustomValidity(
-                                      "Enter item location"
-                                    )
-                                  }
-                                  onInput={(e) =>
-                                    e.target.setCustomValidity("")
-                                  }
-                                />
+                              <td className="whitespace-nowrap">
+                                <div className="inline-block align-middle">
+                                  <input
+                                    type="text"
+                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"
+                                    name="order_product_location"
+                                    value={prod.order_product_location}
+                                    onChange={(e) =>
+                                      handleEditInputChange(e, index)
+                                    }
+                                    placeholder="Ex: Level 2"
+                                    required
+                                    onInvalid={(e) =>
+                                      e.target.setCustomValidity(
+                                        "Enter item location"
+                                      )
+                                    }
+                                    onInput={(e) =>
+                                      e.target.setCustomValidity("")
+                                    }
+                                  />
+                                </div>
+                                <div
+                                    className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                    title='Paste location to all'
+                                    onClick={() => handleApplyLocationToAll(index)}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="1.5"
+                                        stroke="currentColor"
+                                        className="w-4 h-4 inline-block"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                        />
+                                    </svg>
+                                </div>
                               </td>
                               <td>
                                 <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -2069,23 +2170,45 @@ const UpdateInvoiceForm = () => {
                                 required
                               />
                             </td>
-                            <td>
-                              <input
-                                type="text"
-                                className="form-control px-1 py-0.5 text-xs"
-                                name="custom_product_location"
-                                value={cproduct.custom_product_location}
-                                onChange={(e) =>
-                                  handleEditInputChange(e, index, true)
-                                }
-                                placeholder="Ex: Level 2"
-                                onInvalid={(e) =>
-                                  e.target.setCustomValidity(
-                                    "Enter custom item location"
-                                  )
-                                }
-                                onInput={(e) => e.target.setCustomValidity("")}
-                              />
+                            <td className="whitespace-nowrap">
+                              <div className="inline-block align-middle">
+                                <input
+                                  type="text"
+                                  className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"
+                                  name="custom_product_location"
+                                  value={cproduct.custom_product_location}
+                                  onChange={(e) =>
+                                    handleEditInputChange(e, index, true)
+                                  }
+                                  placeholder="Ex: Level 2"
+                                  onInvalid={(e) =>
+                                    e.target.setCustomValidity(
+                                      "Enter custom item location"
+                                    )
+                                  }
+                                  onInput={(e) => e.target.setCustomValidity("")}
+                                />
+                              </div>
+                              <div
+                                  className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                  title='Paste location to all'
+                                  onClick={() => handleApplyLocationToAll(index, true)}
+                              >
+                                  <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth="1.5"
+                                      stroke="currentColor"
+                                      className="w-4 h-4 inline-block"
+                                  >
+                                      <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                      />
+                                  </svg>
+                              </div>
                             </td>
                             <td>
                               <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -2211,10 +2334,368 @@ const UpdateInvoiceForm = () => {
     </div>
   );
 
+  const selectedProduct = updatedOrder?.products.find((prod) => prod.product_obj_ref._id === newProductPrice.product_obj_ref);
+
+  // const createPriceModal = (
+  //   <div>
+  //     {showCreatePriceModal && (
+  //       <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 overflow-y-auto">
+  //         <form
+  //           className="bg-white w-auto rounded-lg shadow-lg"
+  //           onSubmit={handleSubmitNewPrice}
+  //         >
+  //           {/* Modal Header */}
+  //           <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
+  //             <h2 className="text-sm sm:text-xl font-bold">CREATE NEW PRICE</h2>
+  //             <button
+  //               onClick={handleToggleCreatePriceModal}
+  //               className="text-gray-500 hover:text-gray-800"
+  //             >
+  //               <svg
+  //                 xmlns="http://www.w3.org/2000/svg"
+  //                 fill="none"
+  //                 viewBox="0 0 24 24"
+  //                 strokeWidth={1.5}
+  //                 stroke="currentColor"
+  //                 className="size-6"
+  //               >
+  //                 <path
+  //                   strokeLinecap="round"
+  //                   strokeLinejoin="round"
+  //                   d="M6 18 18 6M6 6l12 12"
+  //                 />
+  //               </svg>
+  //             </button>
+  //           </div>
+  //           {/* Modal Body */}
+  //           {updatedOrder.products
+  //             .filter(
+  //               (prod) =>
+  //                 prod.product_obj_ref._id === newProductPrice.product_obj_ref
+  //             )
+  //             .map((prod) => (
+  //               <div className="p-2">
+  //                 <h2 className="text-xs sm:text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
+  //                   <span>{prod.product_obj_ref.product_name}</span>
+  //                   <span className="text-xs text-gray-500 ml-2">
+  //                     [SKU: {prod.product_obj_ref.product_sku}]
+  //                   </span>
+  //                 </h2>
+  //                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-1 md:gap-x-10 gap-y-1 md:gap-y-4 p-3 mb-1">
+  //                   <div className="border-2 rounded p-2">
+  //                     <div className="mb-0 md:mb-3">
+  //                       <label className="form-label font-bold text-xs md:text-base">
+  //                         *Number-A:
+  //                       </label>
+  //                       <input
+  //                         type="number"
+  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
+  //                         name="product_number_a"
+  //                         value={newProductPrice.product_number_a}
+  //                         onChange={handleNewProductPriceInput}
+  //                         min={0}
+  //                         step="0.001" // Allows input with up to three decimal places
+  //                         pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
+  //                         required
+  //                         onInvalid={(e) =>
+  //                           e.target.setCustomValidity("Enter number-A")
+  //                         }
+  //                         onInput={(e) => e.target.setCustomValidity("")}
+  //                         placeholder={
+  //                           prod.productprice_obj_ref.product_number_a
+  //                         }
+  //                       />
+  //                     </div>
+  //                     <div className="mb-0 md:mb-3">
+  //                       <label className="form-label font-bold text-xs md:text-base">*Unit-A:</label>
+  //                       <input
+  //                         type="text"
+  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
+  //                         name="product_unit_a"
+  //                         value={newProductPrice.product_unit_a}
+  //                         onChange={handleNewProductPriceInput}
+  //                         required
+  //                         onInvalid={(e) =>
+  //                           e.target.setCustomValidity("Enter unit-A")
+  //                         }
+  //                         onInput={(e) => e.target.setCustomValidity("")}
+  //                         placeholder={prod.productprice_obj_ref.product_unit_a}
+  //                       />
+  //                       <label className="hidden text-xs italic text-gray-400 md:inline-block">
+  //                         Ex: Box, Pack, Carton
+  //                       </label>
+  //                     </div>
+  //                     <div className="mb-0 md:mb-3">
+  //                       <label className="form-label font-bold text-xs md:text-base">
+  //                         *Unit-A Price:
+  //                       </label>
+  //                       <div className="flex items-center border rounded">
+  //                         <svg
+  //                           xmlns="http://www.w3.org/2000/svg"
+  //                           fill="none"
+  //                           viewBox="0 0 24 24"
+  //                           strokeWidth={1.5}
+  //                           stroke="currentColor"
+  //                           className="size-6 ml-2"
+  //                         >
+  //                           <path
+  //                             strokeLinecap="round"
+  //                             strokeLinejoin="round"
+  //                             d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+  //                           />
+  //                         </svg>
+  //                         <input
+  //                           type="number"
+  //                           className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
+  //                           name="product_price_unit_a"
+  //                           value={newProductPrice.product_price_unit_a}
+  //                           onChange={handleNewProductPriceInput}
+  //                           step="0.001" // Allows input with up to three decimal places
+  //                           min={0}
+  //                           required
+  //                           onInvalid={(e) =>
+  //                             e.target.setCustomValidity("Enter unit-A price")
+  //                           }
+  //                           onInput={(e) => e.target.setCustomValidity("")}
+  //                           placeholder={
+  //                             prod.productprice_obj_ref.product_price_unit_a
+  //                           }
+  //                         />
+  //                       </div>
+  //                     </div>
+  //                   </div>
+  //                   <div className="border-2 rounded p-2">
+  //                     <div className="mb-0 md:mb-3">
+  //                       <label className="form-label font-bold text-xs md:text-base">
+  //                         *Number-B:
+  //                       </label>
+  //                       <input
+  //                         type="number"
+  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
+  //                         name="product_number_b"
+  //                         value={newProductPrice.product_number_b}
+  //                         onChange={handleNewProductPriceInput}
+  //                         step="0.001" // Allows input with up to three decimal places
+  //                         pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
+  //                         min={0}
+  //                         required
+  //                         onInvalid={(e) =>
+  //                           e.target.setCustomValidity("Enter number-B")
+  //                         }
+  //                         onInput={(e) => e.target.setCustomValidity("")}
+  //                         placeholder={
+  //                           prod.productprice_obj_ref.product_number_b
+  //                         }
+  //                       />
+  //                     </div>
+  //                     <div className="mb-0 md:mb-3">
+  //                       <label className="form-label font-bold text-xs md:text-base">*Unit-B:</label>
+  //                       <input
+  //                         type="text"
+  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
+  //                         name="product_unit_b"
+  //                         value={newProductPrice.product_unit_b}
+  //                         onChange={handleNewProductPriceInput}
+  //                         required
+  //                         onInvalid={(e) =>
+  //                           e.target.setCustomValidity("Enter unit-B")
+  //                         }
+  //                         onInput={(e) => e.target.setCustomValidity("")}
+  //                         placeholder={prod.productprice_obj_ref.product_unit_b}
+  //                       />
+  //                       <label className="hidden text-xs italic text-gray-400 md:inline-block">
+  //                         Ex: units, length, each, sheet
+  //                       </label>
+  //                     </div>
+  //                     <div className="mb-0 md:mb-3">
+  //                       <label className="form-label font-bold text-xs md:text-base">
+  //                         *Unit-B Price:
+  //                       </label>
+  //                       <div className="flex items-center border rounded">
+  //                         <svg
+  //                           xmlns="http://www.w3.org/2000/svg"
+  //                           fill="none"
+  //                           viewBox="0 0 24 24"
+  //                           strokeWidth={1.5}
+  //                           stroke="currentColor"
+  //                           className="size-6 ml-2"
+  //                         >
+  //                           <path
+  //                             strokeLinecap="round"
+  //                             strokeLinejoin="round"
+  //                             d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+  //                           />
+  //                         </svg>
+  //                         <input
+  //                           type="number"
+  //                           className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
+  //                           name="product_price_unit_b"
+  //                           value={newProductPrice.product_price_unit_b}
+  //                           onChange={handleNewProductPriceInput}
+  //                           step="0.001" // Allows input with up to three decimal places
+  //                           min={0}
+  //                           required
+  //                           onInvalid={(e) =>
+  //                             e.target.setCustomValidity("Enter unit-B price")
+  //                           }
+  //                           onInput={(e) => e.target.setCustomValidity("")}
+  //                           placeholder={
+  //                             prod.productprice_obj_ref.product_price_unit_b
+  //                           }
+  //                         />
+  //                       </div>
+  //                     </div>
+  //                   </div>
+  //                   {/* **** PROJECT DROPDOWN START **** */}
+  //                   <div>
+  //                     <label className="block font-bold mb-0 md:mb-2 text-xs md:text-base">*Project:</label>
+  //                     <div>
+  //                       <button
+  //                         type="button"
+  //                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
+  //                         onClick={() =>
+  //                           setIsToggleProjectDropdown(!isToggleProjectDropdown)
+  //                         }
+  //                       >
+  //                         {newProductPrice.projects.length > 0
+  //                           ? `x${newProductPrice.projects.length} Projects Selected`
+  //                           : `Select Projects`}
+  //                       </button>
+  //                       {isToggleProjectDropdown && (
+  //                         <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar text-xs md:text-base">
+  //                           <ul className="py-1">
+  //                             {projectState &&
+  //                               projectState.length > 0 &&
+  //                               projectState.map((project, index) => (
+  //                                 <li
+  //                                   key={index}
+  //                                   className="flex items-center px-4 py-2 hover:bg-gray-100"
+  //                                 >
+  //                                   <input
+  //                                     type="checkbox"
+  //                                     id={`project-${project._id}`}
+  //                                     value={project._id}
+  //                                     checked={newProductPrice.projects.includes(
+  //                                       project._id
+  //                                     )}
+  //                                     onChange={handleCheckboxChangeNewPrice}
+  //                                     className="mr-2"
+  //                                   />
+  //                                   <label
+  //                                     htmlFor={`project-${project._id}`}
+  //                                     className="text-gray-900"
+  //                                   >
+  //                                     {project.project_name}
+  //                                   </label>
+  //                                 </li>
+  //                               ))}
+  //                           </ul>
+  //                         </div>
+  //                       )}
+  //                     </div>
+  //                     <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
+  //                       Select one or more projects that this new product
+  //                       applies to
+  //                     </p>
+  //                   </div>
+  //                   {/* **** PRICE EFFECTIVE DATE **** */}
+  //                   <div>
+  //                     <label className="form-label font-bold text-xs md:text-base">
+  //                       *Price effective date:
+  //                     </label>
+  //                     <input
+  //                       type="date"
+  //                       className="form-control text-xs md:text-base"
+  //                       name="product_effective_date"
+  //                       value={newProductPrice.product_effective_date}
+  //                       onChange={handleNewProductPriceInput}
+  //                       required
+  //                     />
+  //                     <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
+  //                       Product price will take effect before order date:{" "}
+  //                       {formatDate(newProductPrice.product_effective_date)}
+  //                     </p>
+  //                   </div>
+  //                   {/* **** PRICE ACTUAL RATE **** */}
+  //                   <div>
+  //                     <label className="form-label font-bold text-xs md:text-base">
+  //                       *Price actual price/rate:
+  //                     </label>
+  //                     <input
+  //                       type="number"
+  //                       className="form-control text-xs md:text-base"
+  //                       name="product_actual_rate"
+  //                       value={newProductPrice.product_actual_rate}
+  //                       onChange={handleNewProductPriceInput}
+  //                       required
+  //                     />
+  //                     <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
+  //                       The price/rate of the product's actual size.
+  //                     </p>
+  //                   </div>
+  //                   {/* **** PRICE FIXED (?) **** */}
+  //                   <div>
+  //                     <label className="form-label font-bold text-xs md:text-base">
+  //                       Price fixed(?):
+  //                     </label>
+  //                     <input
+  //                       type="checkbox"
+  //                       className="form-check-input m-1"
+  //                       name="price_fixed"
+  //                       checked={newProductPrice.price_fixed}
+  //                       onChange={(e) =>
+  //                         handleNewProductPriceInput({
+  //                           target: {
+  //                             name: "price_fixed",
+  //                             value: e.target.checked,
+  //                           },
+  //                         })
+  //                       }
+  //                     />
+  //                   </div>
+  //                   {/* **** PRODUCT PRICE NOTE **** */}
+  //                   <div className="col-span-3">
+  //                     <label className="form-label font-bold text-xs md:text-base">
+  //                       Price notes:
+  //                     </label>
+  //                     <textarea
+  //                       className="form-control text-xs md:text-base"
+  //                       name="product_price_note"
+  //                       value={newProductPrice.product_price_note}
+  //                       onChange={handleNewProductPriceInput}
+  //                     />
+  //                   </div>
+  //                 </div>
+  //               </div>
+  //             ))}
+  //           {/* Modal Buttons */}
+  //           <div className="flex justify-end p-3 border-t">
+  //             <button
+  //               onClick={() => {
+  //                 handleTogglePriceModal();
+  //                 handleToggleCreatePriceModal();
+  //               }}
+  //               className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400 text-sm md:text-base"
+  //             >
+  //               BACK
+  //             </button>
+  //             <button
+  //               type="submit"
+  //               className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm md:text-base"
+  //             >
+  //               SUBMIT NEW PRICE
+  //             </button>
+  //           </div>
+  //         </form>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
+
   const createPriceModal = (
     <div>
       {showCreatePriceModal && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 overflow-y-auto">
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2">
           <form
             className="bg-white w-auto rounded-lg shadow-lg"
             onSubmit={handleSubmitNewPrice}
@@ -2243,17 +2724,12 @@ const UpdateInvoiceForm = () => {
               </button>
             </div>
             {/* Modal Body */}
-            {updatedOrder.products
-              .filter(
-                (prod) =>
-                  prod.product_obj_ref._id === newProductPrice.product_obj_ref
-              )
-              .map((prod) => (
+            { selectedProduct && (
                 <div className="p-2">
                   <h2 className="text-xs sm:text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
-                    <span>{prod.product_obj_ref.product_name}</span>
+                    <span>{selectedProduct.product_obj_ref.product_name}</span>
                     <span className="text-xs text-gray-500 ml-2">
-                      [SKU: {prod.product_obj_ref.product_sku}]
+                      [SKU: {selectedProduct.product_obj_ref.product_sku}]
                     </span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-1 md:gap-x-10 gap-y-1 md:gap-y-4 p-3 mb-1">
@@ -2268,8 +2744,8 @@ const UpdateInvoiceForm = () => {
                           name="product_number_a"
                           value={newProductPrice.product_number_a}
                           onChange={handleNewProductPriceInput}
-                          min={1}
-                          step="0.001" // Allows input with up to three decimal places
+                          min={0}
+                          step="0.0001" // Allows input with up to three decimal places
                           pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
                           required
                           onInvalid={(e) =>
@@ -2277,7 +2753,7 @@ const UpdateInvoiceForm = () => {
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={
-                            prod.productprice_obj_ref.product_number_a
+                            selectedProduct.productprice_obj_ref.product_number_a
                           }
                         />
                       </div>
@@ -2294,7 +2770,7 @@ const UpdateInvoiceForm = () => {
                             e.target.setCustomValidity("Enter unit-A")
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
-                          placeholder={prod.productprice_obj_ref.product_unit_a}
+                          placeholder={selectedProduct.productprice_obj_ref.product_unit_a}
                         />
                         <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: Box, Pack, Carton
@@ -2325,15 +2801,15 @@ const UpdateInvoiceForm = () => {
                             name="product_price_unit_a"
                             value={newProductPrice.product_price_unit_a}
                             onChange={handleNewProductPriceInput}
-                            step="0.001" // Allows input with up to three decimal places
-                            min={1}
+                            step="0.0001" // Allows input with up to three decimal places
+                            min={0}
                             required
                             onInvalid={(e) =>
                               e.target.setCustomValidity("Enter unit-A price")
                             }
                             onInput={(e) => e.target.setCustomValidity("")}
                             placeholder={
-                              prod.productprice_obj_ref.product_price_unit_a
+                              selectedProduct.productprice_obj_ref.product_price_unit_a
                             }
                           />
                         </div>
@@ -2350,16 +2826,16 @@ const UpdateInvoiceForm = () => {
                           name="product_number_b"
                           value={newProductPrice.product_number_b}
                           onChange={handleNewProductPriceInput}
-                          step="0.001" // Allows input with up to three decimal places
+                          step="0.0001" // Allows input with up to three decimal places
                           pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
-                          min={1}
+                          min={0}
                           required
                           onInvalid={(e) =>
                             e.target.setCustomValidity("Enter number-B")
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={
-                            prod.productprice_obj_ref.product_number_b
+                            selectedProduct.productprice_obj_ref.product_number_b
                           }
                         />
                       </div>
@@ -2376,7 +2852,7 @@ const UpdateInvoiceForm = () => {
                             e.target.setCustomValidity("Enter unit-B")
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
-                          placeholder={prod.productprice_obj_ref.product_unit_b}
+                          placeholder={selectedProduct.productprice_obj_ref.product_unit_b}
                         />
                         <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: units, length, each, sheet
@@ -2407,15 +2883,15 @@ const UpdateInvoiceForm = () => {
                             name="product_price_unit_b"
                             value={newProductPrice.product_price_unit_b}
                             onChange={handleNewProductPriceInput}
-                            step="0.001" // Allows input with up to three decimal places
-                            min={1}
+                            step="0.0001" // Allows input with up to three decimal places
+                            min={0}
                             required
                             onInvalid={(e) =>
                               e.target.setCustomValidity("Enter unit-B price")
                             }
                             onInput={(e) => e.target.setCustomValidity("")}
                             placeholder={
-                              prod.productprice_obj_ref.product_price_unit_b
+                              selectedProduct.productprice_obj_ref.product_price_unit_b
                             }
                           />
                         </div>
@@ -2437,7 +2913,7 @@ const UpdateInvoiceForm = () => {
                             : `Select Projects`}
                         </button>
                         {isToggleProjectDropdown && (
-                          <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar text-xs md:text-base">
+                          <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar">
                             <ul className="py-1">
                               {projectState &&
                                 projectState.length > 0 &&
@@ -2488,7 +2964,7 @@ const UpdateInvoiceForm = () => {
                       />
                       <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
                         Product price will take effect before order date:{" "}
-                        {formatDate(newProductPrice.product_effective_date)}
+                        {formatDate(updatedOrder.order_date)}
                       </p>
                     </div>
                     {/* **** PRICE ACTUAL RATE **** */}
@@ -2542,7 +3018,7 @@ const UpdateInvoiceForm = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
             {/* Modal Buttons */}
             <div className="flex justify-end p-3 border-t">
               <button
@@ -2566,7 +3042,7 @@ const UpdateInvoiceForm = () => {
       )}
     </div>
   );
-
+  
   const confirmationModal = (
     <Modal
       show={showConfirmationModal}

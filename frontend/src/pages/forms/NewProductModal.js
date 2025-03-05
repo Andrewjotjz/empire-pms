@@ -323,7 +323,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                         name="product_number_a" 
                                         value={productDetailsState.product_number_a} 
                                         onChange={handleProductInputChange}
-                                        min={1}
+                                        min={0}
                                         step="0.001"  // Allows input with up to three decimal places
                                         pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
                                         required
@@ -358,7 +358,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                             value={productDetailsState.product_price_unit_a} 
                                             onChange={handleProductInputChange}
                                             step="0.001"  // Allows input with up to three decimal places
-                                            min={1}
+                                            min={0}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                             onInput={(e) => e.target.setCustomValidity('')}
@@ -377,7 +377,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                         onChange={handleProductInputChange}
                                         step="0.001"  // Allows input with up to three decimal places
                                         pattern="^\d+(\.\d{1,3})?$"  // Allows up to two decimal places
-                                        min={1}
+                                        min={0}
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                         onInput={(e) => e.target.setCustomValidity('')}
@@ -410,7 +410,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                             value={productDetailsState.product_price_unit_b} 
                                             onChange={handleProductInputChange}
                                             step="0.001"  // Allows input with up to three decimal places
-                                            min={1}
+                                            min={0}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                             onInput={(e) => e.target.setCustomValidity('')}
@@ -509,7 +509,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                     value={productDetailsState.product_actual_size} 
                                     onChange={handleProductInputChange}
                                     step="0.0001"  // Allows input with up to four decimal places
-                                    min={1}
+                                    min={0}
                                     required
                                 />
                             </div>
@@ -533,7 +533,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                     value={productDetailsState.product_note} 
                                     onChange={handleProductInputChange}
                                     step="0.0001"  // Allows input with up to four decimal places
-                                    min={1}
+                                    min={0}
                                     required
                                 />
                             </div>

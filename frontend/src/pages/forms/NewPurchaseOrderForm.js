@@ -1,5 +1,5 @@
 // Import modules
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -21,6 +21,8 @@ const NewPurchaseOrderForm = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const location = useLocation();
+    const searchInputRef = useRef(null);
+
 
     // Component hook
     const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier();
@@ -258,6 +260,11 @@ const NewPurchaseOrderForm = () => {
 
         // clear search after adding
         setSearchProductTerm('');
+
+        // Refocus the input field
+        if (searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
     };
 
     const handleAddCustomItem = () => {
@@ -449,21 +456,20 @@ const NewPurchaseOrderForm = () => {
         });
     };
     
-
     const handleSearchChange = (e) => {
         setOrderState({...orderState, order_ref: e.target.value});
     };
 
     const handleApplyLocationToAll = (index, isCustom = false) => {
         let copyText = '';
-    
+
         // Determine the source of copyText based on isCustom
         if (isCustom) {
             copyText = orderState.custom_products[index]?.custom_product_location || '';
         } else {
             copyText = orderState.products[index]?.order_product_location || '';
         }
-    
+
         const updatedProducts = orderState.products.map(product => ({
             ...product,
             order_product_location: copyText, // Set all product locations to the copied location
@@ -863,6 +869,7 @@ const NewPurchaseOrderForm = () => {
                             <div className="grid grid-cols-1 lg:grid-cols-3 m-1 lg:m-2 gap-x-1">
                                 <input
                                     type="text"
+                                    ref={searchInputRef} // Attach the ref here to retain focus
                                     className="form-control mb-1 col-span-2 placeholder-gray-400 placeholder-opacity-50 text-xs lg:text-base"
                                     placeholder="Search products..."
                                     value={searchProductTerm}

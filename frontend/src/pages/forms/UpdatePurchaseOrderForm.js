@@ -1,5 +1,5 @@
 // Import modules
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -21,6 +21,7 @@ const UpdatePurchaseOrderForm = () => {
   // Component router
   const navigate = useNavigate();
   const {id} = useParams();
+  const searchInputRef = useRef(null);
 
   // Component hook
   const dispatch = useDispatch();
@@ -202,6 +203,11 @@ const UpdatePurchaseOrderForm = () => {
     
     // clear search after adding
     setSearchProductTerm('');
+
+    // Refocus the input field
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   };
 
   const handleAddCustomItem = () => {
@@ -873,6 +879,7 @@ const UpdatePurchaseOrderForm = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 m-1 lg:m-2 gap-x-1">
                 <input
                   type="text"
+                  ref={searchInputRef} // Attach the ref here to retain input focus
                   className="form-control mb-1 col-span-2 placeholder-gray-400 placeholder-opacity-50 text-xs lg:text-base"
                   placeholder="Search products..."
                   value={searchProductTerm}
