@@ -534,6 +534,32 @@ const NewInvoiceForm = () => {
       setShowConfirmationModal(true);
     }
   };
+  const handleApplyLocationToAll = (index, isCustom = false) => {
+      let copyText = '';
+
+      // Determine the source of copyText based on isCustom
+      if (isCustom) {
+          copyText = updatedOrder.custom_products[index]?.custom_product_location || '';
+      } else {
+          copyText = updatedOrder.products[index]?.order_product_location || '';
+      }
+
+      const updatedProducts = updatedOrder.products.map(product => ({
+          ...product,
+          order_product_location: copyText, // Set all product locations to the copied location
+      }));
+
+      const updatedCustomProducts = updatedOrder.custom_products.map(cproduct => ({
+          ...cproduct,
+          custom_product_location: copyText
+      }))
+      
+      setUpdatedOrder((prevState) => ({
+          ...prevState,
+          products: updatedProducts, // Update the products in state
+          custom_products: updatedCustomProducts
+      }));
+  }; 
   const handleConfirmAction = () => {
     resetForm();
     setShowConfirmationModal(false);
@@ -1137,51 +1163,148 @@ const NewInvoiceForm = () => {
     fetchProductDetails(supplierId, targetProductId);
   };
 
+  // const handleAutomation = (updatedProductId) => {
+  //   // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
+  //   const updatedItems = updatedOrder.products.filter(
+  //     (item) => item.product_obj_ref._id !== updatedProductId
+  //   );
+
+  //   const getItem = updatedOrder.products.filter(
+  //     (item) => item.product_obj_ref._id === updatedProductId
+  //   );
+
+  //   // Step 2: Find the product that needs to be re-added (optimized filtering)
+  //   const product = filterProductsBySearchTerm().find(
+  //     (product) => product.product._id === updatedProductId
+  //   );
+
+  //   if (!product) {
+  //     alert("Product not found in table. Automation failed. Please contact IT support");
+  //     return;
+  //   }
+
+  //   // Step 3: Create the new product object with required details
+  //   const newProduct = {
+  //     product_obj_ref: {
+  //       _id: product.product._id,
+  //       product_name: product.product.product_name,
+  //       product_sku: product.product.product_sku,
+  //     },
+  //     productprice_obj_ref: product.productPrice,
+  //     order_product_location: getItem[0].order_product_location,
+  //     order_product_qty_a: getItem[0].order_product_qty_a,
+  //     order_product_qty_b: getItem[0].order_product_qty_b,
+  //     order_product_price_unit_a: product.productPrice.product_price_unit_a,
+  //     order_product_gross_amount:
+  //       getItem[0].order_product_qty_a *
+  //       product.productPrice.product_price_unit_a,
+  //   };
+
+  //   // Step 4: Update the products list with the new product
+  //   const updatedProducts = [...updatedItems, newProduct];
+
+  //   setUpdatedOrder({
+  //     ...updatedOrder,
+  //     products: updatedProducts,
+  //   });
+  // };
+
+  // const handleAutomation = (updatedProductId) => {
+  //   // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
+  //   const updatedItems = updatedOrder.products.filter(
+  //     (item) => item.product_obj_ref._id !== updatedProductId
+  //   );
+  
+  //   // Step 2: Find all occurrences of the product in the order
+  //   const getItem = updatedOrder.products.filter(
+  //     (item) => item.product_obj_ref._id === updatedProductId
+  //   );
+  
+  //   // Step 3: Find the product that needs to be re-added (optimized filtering)
+  //   const product = filterProductsBySearchTerm().find(
+  //     (product) => product.product._id === updatedProductId
+  //   );
+  
+  //   if (!product) {
+  //     alert("Product not found in table. Automation failed. Please contact IT support");
+  //     return;
+  //   }
+  
+  //   // Step 4: Create new product objects for each occurrence in getItem
+  //   const newProducts = getItem.map((item) => ({
+  //     product_obj_ref: {
+  //       _id: product.product._id,
+  //       product_name: product.product.product_name,
+  //       product_sku: product.product.product_sku,
+  //     },
+  //     productprice_obj_ref: product.productPrice,
+  //     order_product_location: item.order_product_location,
+  //     order_product_qty_a: item.order_product_qty_a,
+  //     order_product_qty_b: item.order_product_qty_b,
+  //     order_product_price_unit_a: product.productPrice.product_price_unit_a,
+  //     order_product_gross_amount: item.order_product_qty_a * product.productPrice.product_price_unit_a,
+  //   }));
+  
+  //   // Step 5: Update the products list with all new product instances
+  //   const updatedProducts = [...updatedItems, ...newProducts];
+  
+  //   setUpdatedOrder({
+  //     ...updatedOrder,
+  //     products: updatedProducts,
+  //   });
+  // };
+
   const handleAutomation = (updatedProductId) => {
     // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
-    const updatedItems = updatedOrder.products.filter(
-      (item) => item.product_obj_ref._id !== updatedProductId
-    );
-
+    const updatedItems = updatedOrder.products.map((item) => {
+      if (item.product_obj_ref._id === updatedProductId) {
+        return null; // Mark items to be replaced
+      }
+      return item;
+    });
+  
+    // Step 2: Find all occurrences of the product in the order
     const getItem = updatedOrder.products.filter(
       (item) => item.product_obj_ref._id === updatedProductId
     );
-
-    // Step 2: Find the product that needs to be re-added (optimized filtering)
+  
+    // Step 3: Find the product that needs to be re-added (optimized filtering)
     const product = filterProductsBySearchTerm().find(
       (product) => product.product._id === updatedProductId
     );
-
+  
     if (!product) {
-      alert("Automation failed. Please contact IT support");
+      alert("Product not found in table. Automation failed. Please contact IT support");
       return;
     }
-
-    // Step 3: Create the new product object with required details
-    const newProduct = {
+  
+    // Step 4: Create new product objects for each occurrence in getItem
+    const newProducts = getItem.map((item) => ({
       product_obj_ref: {
         _id: product.product._id,
         product_name: product.product.product_name,
         product_sku: product.product.product_sku,
       },
       productprice_obj_ref: product.productPrice,
-      order_product_location: getItem[0].order_product_location,
-      order_product_qty_a: getItem[0].order_product_qty_a,
-      order_product_qty_b: getItem[0].order_product_qty_b,
+      order_product_location: item.order_product_location,
+      order_product_qty_a: item.order_product_qty_a,
+      order_product_qty_b: item.order_product_qty_b,
       order_product_price_unit_a: product.productPrice.product_price_unit_a,
-      order_product_gross_amount:
-        getItem[0].order_product_qty_a *
-        product.productPrice.product_price_unit_a,
-    };
-
-    // Step 4: Update the products list with the new product
-    const updatedProducts = [...updatedItems, newProduct];
-
+      order_product_gross_amount: item.order_product_qty_a * product.productPrice.product_price_unit_a,
+    }));
+  
+    // Step 5: Replace null values in updatedItems with new products while preserving index
+    let newProductIndex = 0;
+    const updatedProducts = updatedItems.map((item) =>
+      item === null ? newProducts[newProductIndex++] : item
+    );
+  
     setUpdatedOrder({
       ...updatedOrder,
       products: updatedProducts,
     });
   };
+  
   const handleRegisterAutomation = () => {
     // Step 1: Find the product that needs to be re-added (optimized filtering)
     const product = filterProductsBySearchTerm().find(
@@ -1932,26 +2055,48 @@ const NewInvoiceForm = () => {
                             >
                               <td>{prod.product_obj_ref.product_sku}</td>
                               <td>{prod.product_obj_ref.product_name}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  className="form-control md:text-base text-xs px-1 py-0.5"
-                                  name="order_product_location"
-                                  value={prod.order_product_location}
-                                  onChange={(e) =>
-                                    handleEditInputChange(e, index)
-                                  }
-                                  placeholder="Ex: Level 2"
-                                  required
-                                  onInvalid={(e) =>
-                                    e.target.setCustomValidity(
-                                      "Enter item location"
-                                    )
-                                  }
-                                  onInput={(e) =>
-                                    e.target.setCustomValidity("")
-                                  }
-                                />
+                              <td className="whitespace-nowrap">
+                                <div className="inline-block align-middle">
+                                  <input
+                                    type="text"
+                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
+                                    name="order_product_location"
+                                    value={prod.order_product_location}
+                                    onChange={(e) =>
+                                      handleEditInputChange(e, index)
+                                    }
+                                    placeholder="Ex: Level 2"
+                                    required
+                                    onInvalid={(e) =>
+                                      e.target.setCustomValidity(
+                                        "Enter item location"
+                                      )
+                                    }
+                                    onInput={(e) =>
+                                      e.target.setCustomValidity("")
+                                    }
+                                  />
+                                </div>
+                                <div
+                                    className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                    title='Paste location to all'
+                                    onClick={() => handleApplyLocationToAll(index)}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="1.5"
+                                        stroke="currentColor"
+                                        className="w-4 h-4 inline-block"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                        />
+                                    </svg>
+                                </div>
                               </td>
                               <td>
                                 <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -2112,23 +2257,45 @@ const NewInvoiceForm = () => {
                                 required
                               />
                             </td>
-                            <td>
-                              <input
-                                type="text"
-                                className="form-control md:text-base px-1 py-0.5 text-xs"
-                                name="custom_product_location"
-                                value={cproduct.custom_product_location}
-                                onChange={(e) =>
-                                  handleEditInputChange(e, index, true)
-                                }
-                                placeholder="Ex: Level 2"
-                                onInvalid={(e) =>
-                                  e.target.setCustomValidity(
-                                    "Enter custom item location"
-                                  )
-                                }
-                                onInput={(e) => e.target.setCustomValidity("")}
-                              />
+                            <td className="whitespace-nowrap">
+                              <div className="inline-block align-middle">
+                                <input
+                                  type="text"
+                                  className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"
+                                  name="custom_product_location"
+                                  value={cproduct.custom_product_location}
+                                  onChange={(e) =>
+                                    handleEditInputChange(e, index, true)
+                                  }
+                                  placeholder="Ex: Level 2"
+                                  onInvalid={(e) =>
+                                    e.target.setCustomValidity(
+                                      "Enter custom item location"
+                                    )
+                                  }
+                                  onInput={(e) => e.target.setCustomValidity("")}
+                                />
+                              </div>
+                              <div
+                                  className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                  title='Paste location to all'
+                                  onClick={() => handleApplyLocationToAll(index, true)}
+                              >
+                                  <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      strokeWidth="1.5"
+                                      stroke="currentColor"
+                                      className="w-4 h-4 inline-block"
+                                  >
+                                      <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                      />
+                                  </svg>
+                              </div>
                             </td>
                             <td>
                               <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -2254,6 +2421,8 @@ const NewInvoiceForm = () => {
     </div>
   );
 
+  const selectedProduct = updatedOrder?.products.find((prod) => prod.product_obj_ref._id === newProductPrice.product_obj_ref);
+
   const createPriceModal = (
     <div>
       {showCreatePriceModal && (
@@ -2286,17 +2455,12 @@ const NewInvoiceForm = () => {
               </button>
             </div>
             {/* Modal Body */}
-            {updatedOrder.products
-              .filter(
-                (prod) =>
-                  prod.product_obj_ref._id === newProductPrice.product_obj_ref
-              )
-              .map((prod) => (
+            { selectedProduct && (
                 <div className="p-2">
                   <h2 className="text-xs sm:text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
-                    <span>{prod.product_obj_ref.product_name}</span>
+                    <span>{selectedProduct.product_obj_ref.product_name}</span>
                     <span className="text-xs text-gray-500 ml-2">
-                      [SKU: {prod.product_obj_ref.product_sku}]
+                      [SKU: {selectedProduct.product_obj_ref.product_sku}]
                     </span>
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-x-1 md:gap-x-10 gap-y-1 md:gap-y-4 p-3 mb-1">
@@ -2311,8 +2475,8 @@ const NewInvoiceForm = () => {
                           name="product_number_a"
                           value={newProductPrice.product_number_a}
                           onChange={handleNewProductPriceInput}
-                          min={1}
-                          step="0.001" // Allows input with up to three decimal places
+                          min={0}
+                          step="0.0001" // Allows input with up to three decimal places
                           pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
                           required
                           onInvalid={(e) =>
@@ -2320,7 +2484,7 @@ const NewInvoiceForm = () => {
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={
-                            prod.productprice_obj_ref.product_number_a
+                            selectedProduct.productprice_obj_ref.product_number_a
                           }
                         />
                       </div>
@@ -2337,7 +2501,7 @@ const NewInvoiceForm = () => {
                             e.target.setCustomValidity("Enter unit-A")
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
-                          placeholder={prod.productprice_obj_ref.product_unit_a}
+                          placeholder={selectedProduct.productprice_obj_ref.product_unit_a}
                         />
                         <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: Box, Pack, Carton
@@ -2368,15 +2532,15 @@ const NewInvoiceForm = () => {
                             name="product_price_unit_a"
                             value={newProductPrice.product_price_unit_a}
                             onChange={handleNewProductPriceInput}
-                            step="0.001" // Allows input with up to three decimal places
-                            min={1}
+                            step="0.0001" // Allows input with up to three decimal places
+                            min={0}
                             required
                             onInvalid={(e) =>
                               e.target.setCustomValidity("Enter unit-A price")
                             }
                             onInput={(e) => e.target.setCustomValidity("")}
                             placeholder={
-                              prod.productprice_obj_ref.product_price_unit_a
+                              selectedProduct.productprice_obj_ref.product_price_unit_a
                             }
                           />
                         </div>
@@ -2393,16 +2557,16 @@ const NewInvoiceForm = () => {
                           name="product_number_b"
                           value={newProductPrice.product_number_b}
                           onChange={handleNewProductPriceInput}
-                          step="0.001" // Allows input with up to three decimal places
+                          step="0.0001" // Allows input with up to three decimal places
                           pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
-                          min={1}
+                          min={0}
                           required
                           onInvalid={(e) =>
                             e.target.setCustomValidity("Enter number-B")
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
                           placeholder={
-                            prod.productprice_obj_ref.product_number_b
+                            selectedProduct.productprice_obj_ref.product_number_b
                           }
                         />
                       </div>
@@ -2419,7 +2583,7 @@ const NewInvoiceForm = () => {
                             e.target.setCustomValidity("Enter unit-B")
                           }
                           onInput={(e) => e.target.setCustomValidity("")}
-                          placeholder={prod.productprice_obj_ref.product_unit_b}
+                          placeholder={selectedProduct.productprice_obj_ref.product_unit_b}
                         />
                         <label className="hidden text-xs italic text-gray-400 md:inline-block">
                           Ex: units, length, each, sheet
@@ -2450,15 +2614,15 @@ const NewInvoiceForm = () => {
                             name="product_price_unit_b"
                             value={newProductPrice.product_price_unit_b}
                             onChange={handleNewProductPriceInput}
-                            step="0.001" // Allows input with up to three decimal places
-                            min={1}
+                            step="0.0001" // Allows input with up to three decimal places
+                            min={0}
                             required
                             onInvalid={(e) =>
                               e.target.setCustomValidity("Enter unit-B price")
                             }
                             onInput={(e) => e.target.setCustomValidity("")}
                             placeholder={
-                              prod.productprice_obj_ref.product_price_unit_b
+                              selectedProduct.productprice_obj_ref.product_price_unit_b
                             }
                           />
                         </div>
@@ -2531,7 +2695,7 @@ const NewInvoiceForm = () => {
                       />
                       <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
                         Product price will take effect before order date:{" "}
-                        {formatDate(newProductPrice.product_effective_date)}
+                        {currentOrder ? formatDate(currentOrder.order_date) : `--/--/--`}
                       </p>
                     </div>
                     {/* **** PRICE ACTUAL RATE **** */}
@@ -2585,7 +2749,7 @@ const NewInvoiceForm = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
             {/* Modal Buttons */}
             <div className="flex justify-end p-3 border-t">
               <button

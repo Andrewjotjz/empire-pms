@@ -333,7 +333,7 @@ const NewProductForm = () => {
                                         name="product_number_a" 
                                         value={productDetailsState.product_number_a} 
                                         onChange={handleProductInputChange}
-                                        min={1}
+                                        min={0}
                                         step="0.0001"  // Allows input with up to four decimal places
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
@@ -367,7 +367,7 @@ const NewProductForm = () => {
                                             value={productDetailsState.product_price_unit_a} 
                                             onChange={handleProductInputChange}
                                             step="0.0001"  // Allows input with up to four decimal places
-                                            min={1}
+                                            min={0}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                             onInput={(e) => e.target.setCustomValidity('')}
@@ -385,7 +385,7 @@ const NewProductForm = () => {
                                         value={productDetailsState.product_number_b} 
                                         onChange={handleProductInputChange}
                                         step="0.0001"  // Allows input with up to four decimal places
-                                        min={1}
+                                        min={0}
                                         required
                                         onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                         onInput={(e) => e.target.setCustomValidity('')}
@@ -418,7 +418,7 @@ const NewProductForm = () => {
                                             value={productDetailsState.product_price_unit_b} 
                                             onChange={handleProductInputChange}
                                             step="0.0001"  // Allows input with up to four decimal places
-                                            min={1}
+                                            min={0}
                                             required
                                             onInvalid={(e) => e.target.setCustomValidity('Please input number up to four decimal places')}
                                             onInput={(e) => e.target.setCustomValidity('')}
@@ -517,7 +517,7 @@ const NewProductForm = () => {
                                     value={productDetailsState.product_actual_size} 
                                     onChange={handleProductInputChange}
                                     step="0.0001"  // Allows input with up to four decimal places
-                                    min={1}
+                                    min={0}
                                     required
                                 />
                             </div>
@@ -541,7 +541,7 @@ const NewProductForm = () => {
                                     value={productDetailsState.product_note} 
                                     onChange={handleProductInputChange}
                                     step="0.0001"  // Allows input with up to four decimal places
-                                    min={1}
+                                    min={0}
                                     required
                                 />
                             </div>
