@@ -35,7 +35,7 @@ const handleErrors = (err) => {
     return errors;
   }
 //Create json web token
-const maxAge = 60 * 60; //60 minutes in seconds
+const maxAge = 60 * 60; //60 minutes in seconds = 1 hour
 // Middleware to refresh token
 const refreshToken = (req, res, next) => {
     const token = req.cookies.jwt;
@@ -238,7 +238,7 @@ const sendPasswordResetEmail = async (req, res) => {
 
         if (!employee) { return res.status(404).json({ error: 'Employee not found' }); }
 
-        if (employee.employee_email === "andrewjot1998@gmail.com" || employee.employee_email === "shannon.c@empirecbs.com" ) {
+        if (employee.employee_email === "andrewjot1998@gmail.com" || employee.employee_email === "shannon.c@empirecbs.com" || employee.employee_email === "harper.l@empirecbs.com") {
             const resetToken = crypto.randomBytes(32).toString('hex');
 
             employee.employee_password_token = resetToken;

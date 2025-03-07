@@ -508,7 +508,7 @@ const PurchaseOrderDetails = () => {
                 })()}
             </div>
             <div>
-                <label className="form-label font-bold mr-1">Archived (?):</label>
+                <label className="form-label font-bold mr-1">Archived:</label>
                 {purchaseOrderState.order_isarchived !== null && purchaseOrderState.order_isarchived !== undefined && (
                     <label
                         className={`text-xs px-2 py-1 rounded-full font-medium ${

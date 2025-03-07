@@ -2191,7 +2191,7 @@ const NewInvoiceForm = () => {
                                   type="button"
                                   onClick={() => handleRemoveItem(index)}
                                   className="btn btn-danger p-1"
-                                  hidden={prod._id}
+                                  hidden={updatedOrder.invoices.flatMap(invoice => invoice.products.map(product => product._id)).includes(prod._id)}
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -2331,7 +2331,6 @@ const NewInvoiceForm = () => {
                                 type="button"
                                 onClick={() => handleRemoveCustomItem(index)}
                                 className="btn btn-danger p-1"
-                                hidden={cproduct._id}
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
