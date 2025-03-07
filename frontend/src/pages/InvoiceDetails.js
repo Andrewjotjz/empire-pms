@@ -196,13 +196,6 @@ const InvoiceDetails = () => {
                 <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_name}</p>
             </div>
             <div className="col-12 col-md-6 mb-0 sm:mb-3">
-                <label className="form-label fw-bold text-sm sm:text-base">Archived (?):</label>
-                {invoiceState.invoice_isarchived ? 
-                    (<span className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</span>) : 
-                    (<span className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Available</span>)
-                }
-            </div>
-            <div className="col-12 col-md-6 mb-0 sm:mb-3">
                 <label className="form-label fw-bold text-sm sm:text-base">Invoice Issue Date:</label>
                 <p className="form-label text-xs sm:text-base">{formatDate(invoiceState.invoice_issue_date)}</p>
             </div>
@@ -215,34 +208,52 @@ const InvoiceDetails = () => {
                 <p className="form-label text-xs sm:text-base">{formatDateTime(invoiceState.invoice_due_date)}</p>
             </div>
             <div className="col-12 col-md-6 mb-0 sm:mb-3">
-                <label className="form-label fw-bold text-sm sm:text-base">Invoice Status:</label>
+                <label className="form-label font-bold mr-1">Invoice Status:</label>
                 {invoiceState.invoice_status && (
-                    <span
-                        className={`text-sm md:text-lg font-bold m-1 py-0.5 px-1 rounded-xl ${
+                    <label
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${
                             invoiceState.invoice_status === "Cancelled"
-                            ? "border-2 bg-transparent border-gray-500 text-gray-500"
-                            : invoiceState.invoice_status === "To review"
-                            ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
-                            : invoiceState.invoice_status === "Settled"
-                            ? "border-2 bg-transparent border-green-600 text-green-600"
-                            : invoiceState.invoice_status === "To reconcile"
-                            ? "border-2 bg-transparent border-red-600 text-red-600"
-                            : invoiceState.invoice_status === "Reviewed"
-                            ? "border-2 bg-transparent border-blue-400 text-blue-400"
-                            : ""
+                                ? "bg-gray-100 text-gray-800"
+                                : invoiceState.invoice_status === "To review"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : invoiceState.invoice_status === "Settled"
+                                ? "bg-green-100 text-green-800"
+                                : invoiceState.invoice_status === "To reconcile"
+                                ? "bg-red-100 text-red-800"
+                                : invoiceState.invoice_status === "Reviewed"
+                                ? "bg-blue-100 text-blue-800"
+                                : ""
                         }`}
                     >
                         {invoiceState.invoice_status}
-                    </span>
+                </label>  
                 )}
             </div>
-            <div className="col-12 col-md-6 mb-0 sm:mb-3 text-sm opacity-50">
-                <label className="form-label fw-bold text-sm sm:text-base">Standalone:</label>
-                <p className="form-label">{invoiceState.invoice_is_stand_alone ? `Yes` : `No`}</p>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3">
+                <label className="form-label font-bold mr-1">Archived:</label>
+                {invoiceState.invoice_isarchived !== null && invoiceState.invoice_isarchived !== undefined && (
+                    <label
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            invoiceState.invoice_isarchived
+                                ? "bg-red-100 text-red-800"  // Archived
+                                : "bg-green-100 text-green-800" // Available
+                        }`}
+                    >
+                        {invoiceState.invoice_isarchived ? "Archived" : "Available"}
+                    </label>
+                )}
             </div>
-            <div className="col-12 col-md-6 mb-0 sm:mb-3 text-sm opacity-50">
-                <label className="form-label fw-bold text-sm sm:text-base">Archived:</label>
-                <p className="form-label">{invoiceState.invoice_isarchived ? `Yes` : `No`}</p>
+            <div className="col-12 col-md-6 mb-0 sm:mb-3 text-sm">
+                <label className="form-label fw-bold text-sm sm:text-base">Standalone:</label>
+                <label
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        invoiceState.invoice_is_stand_alone
+                            ? "bg-purple-100 text-purple-800"  // Standalone
+                            : "bg-gray-100 text-gray-800" // Not Standalone
+                    }`}
+                >
+                    {invoiceState.invoice_is_stand_alone ? "Yes" : "No"}
+                </label>
             </div>
         </div>
     ) : (
@@ -316,19 +327,19 @@ const InvoiceDetails = () => {
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
-                            <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={2}>Total Amount:</td>
-                            <td className='pt-1 font-bold text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1) * 100) / 100)}</td>
+                            <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Total Amount:</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1) * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
-                            <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={2}>Total Amount (incl. GST):</td>
-                            <td className='pt-1 font-bold text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
+                            <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Calculated Total Amount (incl. GST):</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
                         </tr>
                         <tr>
-                            <td colSpan={3}></td>
-                            <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={2}><span className='text-red-700'>Raw Total Amount (incl. GST):</span></td>
+                            <td colSpan={2}></td>
+                            <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={3}><span className='text-lg'>Printed Total Amount (incl. GST):</span></td>
                             <td className='pt-1 font-bold text-end px-2 py-1'>
-                                <span className='text-red-700'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
+                                <span className='text-lg'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
                             {(
                             invoiceState.invoiced_raw_total_amount_incl_gst - (Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
                             (<span className="text-xs text-red-600 ml-2 font-bold">+
@@ -367,7 +378,7 @@ const InvoiceDetails = () => {
                 <div className="col-md-6 col-12 mb-0 sm:mb-3">
                     <label className="form-label fw-bold text-sm sm:text-base">Order Ref:</label>
                     <div>
-                        <Link className="form-label text-blue-500 underline" to={`/EmpirePMS/order/${invoiceState.order._id}`}>
+                        <Link className="form-label text-blue-500 font-bold" to={`/EmpirePMS/order/${invoiceState.order._id}`}>
                             {invoiceState.order.order_ref}
                         </Link>
                     </div>
@@ -381,35 +392,40 @@ const InvoiceDetails = () => {
                     <p className="form-label text-xs sm:text-base">{formatDateTime(invoiceState.order.order_est_datetime)}</p>
                 </div>
                 <div className="col-md-6 col-12 mb-0 sm:mb-3">
-                    <label className="form-label fw-bold text-sm sm:text-base">Order Status:</label>
-                    <label>
-                        {invoiceState.order.order_status && (
+                    <label className="form-label font-bold mr-1">Order Status:</label>
+                    {invoiceState.order.order_status && (
                         <label
-                            className={`text-sm font-bold m-1 py-0.5 px-1 rounded-xl ${
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${
                                 invoiceState.order.order_status === "Cancelled"
-                                    ? "border-2 bg-transparent border-gray-500 text-gray-500"
+                                    ? "bg-gray-100 text-gray-800"
                                     : invoiceState.order.order_status === "Pending"
-                                    ? "border-2 bg-transparent border-yellow-300 text-yellow-600"
+                                    ? "bg-yellow-100 text-yellow-800"
                                     : invoiceState.order.order_status === "Approved"
-                                    ? "border-2 bg-transparent border-green-600 text-green-600"
+                                    ? "bg-green-100 text-green-800"
                                     : invoiceState.order.order_status === "Rejected"
-                                    ? "border-2 bg-transparent border-red-600 text-red-600"
+                                    ? "bg-red-100 text-red-800"
                                     : invoiceState.order.order_status === "Draft"
-                                    ? "border-2 bg-transparent border-gray-600 text-gray-600"
+                                    ? "bg-gray-100 text-gray-800"
                                     : ""
                             }`}
                         >
                             {invoiceState.order.order_status}
                         </label>
-                        )}
-                    </label>
+                    )}
                 </div>
                 <div className="col-md-6 col-12 mb-0 sm:mb-3">
-                    <label className="form-label fw-bold text-sm sm:text-base">isArchived:</label>
-                    {invoiceState.order.order_isarchived ? 
-                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
-                    }
+                <label className="form-label font-bold mr-1">Archived:</label>
+                    {invoiceState.order.order_isarchived !== null && invoiceState.order.order_isarchived !== undefined && (
+                        <label
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                invoiceState.order.order_isarchived
+                                    ? "bg-red-100 text-red-800"  // Archived
+                                    : "bg-green-100 text-green-800" // Available
+                            }`}
+                        >
+                            {invoiceState.order.order_isarchived ? "Archived" : "Available"}
+                        </label>
+                    )}
                 </div>
                 
                 <div className="col-12">
@@ -449,13 +465,13 @@ const InvoiceDetails = () => {
                                 ))}
                                 <tr>
                                     <td colSpan={3}></td>
-                                    <td colSpan={2} className="text-end font-bold">No. of Items:</td>
-                                    <td className="text-end font-bold">{invoiceState.order.products.length + invoiceState.order.custom_products.length}</td>
+                                    <td colSpan={2} className="text-end">No. of Items:</td>
+                                    <td className="text-end">{invoiceState.order.products.length + invoiceState.order.custom_products.length}</td>
                                 </tr>
                                 <tr>
                                     <td colSpan={3}></td>
-                                    <td colSpan={2} className="text-end font-bold">Total Gross Amount:</td>
-                                    <td className="text-end font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.order.products.reduce((totalSum, product) => {
+                                    <td colSpan={2} className="text-end">Total Gross Amount:</td>
+                                    <td className="text-end">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.order.products.reduce((totalSum, product) => {
                                         return totalSum + product.order_product_gross_amount
                                     }, 0)) * 100) / 100)}</td>
                                 </tr>
@@ -509,11 +525,18 @@ const InvoiceDetails = () => {
                     <p className="form-label text-xs sm:text-base">{invoiceState.supplier.supplier_material_types}</p>
                 </div>
                 <div className="col-md-6 col-12 mb-0 sm:mb-3">
-                    <label className="form-label fw-bold text-sm sm:text-base">Supplier Status:</label>
-                    {invoiceState.supplier.supplier_isarchived ? 
-                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-red-500">Archived</label>) : 
-                        (<label className="text-sm md:text-lg font-bold m-1 p-2 rounded-xl text-green-600">Active</label>)
-                    }
+                <label className="form-label font-bold mr-1">Archived:</label>
+                    {invoiceState.supplier.supplier_isarchived !== null && invoiceState.supplier.supplier_isarchived !== undefined && (
+                        <label
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                invoiceState.supplier.supplier_isarchived
+                                    ? "bg-red-100 text-red-800"  // Archived
+                                    : "bg-green-100 text-green-800" // Available
+                            }`}
+                        >
+                            {invoiceState.supplier.supplier_isarchived ? "Archived" : "Available"}
+                        </label>
+                    )}
                 </div>
     
                 <div className="w-100 mt-1 sm:mt-3">

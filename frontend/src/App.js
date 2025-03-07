@@ -42,6 +42,7 @@ import UpdateBudgetForm from "./pages/forms/UpdateBudgetForm";
 import Delivery from "./pages/DeliveryPage";
 import DeliveryDetails from "./pages/DeliveryDetails";
 import Payment from "./pages/PaymentPage";
+import Iframe from "./pages/Iframe";
 import PaymentDetails from "./pages/PaymentDetails";
 import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
@@ -112,6 +113,9 @@ function App() {
             <Route path="/EmpirePMS/payment/:id" element={<PaymentDetails />} />
             <Route path="/EmpirePMS/payment/create" element={<NewPaymentForm />} />
             <Route path="/EmpirePMS/payment/:id/edit" element={<UpdatePaymentForm /> } />
+
+
+            <Route path="/EmpirePMS/product" element={<Iframe /> } />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
