@@ -242,7 +242,7 @@ const DeliveryDetails = () => {
                 </div>
     
                 <div className="p-4 max-h-[60vh] overflow-y-auto">
-                  <form onSubmit={handleSubmit} className="space-y-3">
+                  <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit} className="space-y-3">
                     <div className='grid grid-cols-2 gap-x-4 gap-y-2'>
                         <div>
                             <label className="block mb-1 font-medium text-gray-700">* Evidence Reference:</label>

@@ -89,7 +89,7 @@ const UpdateEmployeeForm = () => {
                     <div className="card-header bg-dark text-white">
                         <h1>EDIT ACCOUNT DETAILS</h1>
                     </div>
-                    <form className="card-body" onSubmit={handleSubmit}>
+                    <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="card-body" onSubmit={handleSubmit}>
                         <div className="d-flex justify-content-end mb-3 hover:cursor-not-allowed">
                             <button type="button" className="btn btn-secondary bg" onClick={handleChangePasswordClick} disabled>CHANGE PASSWORD</button>
                         </div>

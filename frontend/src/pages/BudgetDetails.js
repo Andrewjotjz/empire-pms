@@ -344,7 +344,7 @@ if (fetchTypeError || fetchProjectError || addBudgetError || fetchBudgetError) {
           EDIT BUDGET
         </button>
       </div>
-      <form className="space-y-6">
+      <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="space-y-6">
         <div>
           <label htmlFor="budget_name" className="block text-sm font-medium text-gray-700">
             Budget Name

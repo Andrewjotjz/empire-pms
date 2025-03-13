@@ -49,7 +49,7 @@ const PasswordReset = () => {
                 <div className="card-header bg-dark text-white">
                     <h1>RESET YOUR PASSWORD</h1>
                 </div>
-                <form className="card-body" onSubmit={handleSubmit}>
+                <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="card-body" onSubmit={handleSubmit}>
                     <div className="col-md-6 mb-3">
                         <p className="form-text">To reset your password, kindly enter your new password below.</p>
                         <label className="form-label">New Password:</label>

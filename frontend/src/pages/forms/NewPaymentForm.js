@@ -482,7 +482,7 @@ const NewPaymentForm = () => {
 
     return ( 
         localUser && Object.keys(localUser).length > 0 ? (
-        <form className='p-4 pt-1' onSubmit={handleSubmit}>
+        <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className='p-4 pt-1' onSubmit={handleSubmit}>
             <h1 className='text-2xl font-medium m-1 mt-0'>NEW PAYMENT</h1>
             {/* PAYMENT DETAILS */}
             <div className="grid grid-cols-3 gap-4 p-4 border-2 rounded-xl shadow-sm bg-gray-50">

@@ -770,7 +770,7 @@ const UpdatePurchaseOrderForm = () => {
       <div className='mx-4 mt-2 sm:mt-4 p-1 sm:p-2 text-center font-bold text-sm sm:text-base md:text-lg lg:text-xl bg-slate-800 text-white rounded-t-lg'>
         EDIT PURCHASE ORDER
       </div>
-      <form onSubmit={handleSubmit}>
+      <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-2 mx-4 mb-1 sm:mb-4">
           <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base">
             {/* PURCHASE ORDER MAIN DETAILS */}

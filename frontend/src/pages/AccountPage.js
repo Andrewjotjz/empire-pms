@@ -18,7 +18,7 @@ const Account = () => {
 
     return (
       localUser && Object.keys(localUser).length > 0 ? (
-        <form className="container my-5 border rounded-xl p-5">
+        <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="container my-5 border rounded-xl p-5">
           <div className="space-y-12">
             <div className="border-b border-gray-900/10 pb-12">
               <h2 className="text-base font-semibold leading-7 text-gray-900">Profile</h2>

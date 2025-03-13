@@ -93,7 +93,7 @@ const NewSupplierForm = () => {
                 <div className="card-header bg-dark text-white">
                     <h1>NEW SUPPLIER</h1>
                 </div>
-                <form className="card-body" onSubmit={handleSubmit}>
+                <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="card-body" onSubmit={handleSubmit}>
                     <div className="row">
                         <div className="col-md-6 mb-1 sm:mb-3">
                             <label className="form-label fw-bold text-sm sm:text-base">Supplier name:</label>

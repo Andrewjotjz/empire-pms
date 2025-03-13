@@ -218,7 +218,7 @@ if (errorState) {
           <div className="bg-gradient-to-r from-gray-800 to-gray-800 px-6 py-2">
             <h1 className=" text-xs sm:text-xl font-bold text-white">NEW PROJECT</h1>
           </div>
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2 sm:space-y-6 text-xs sm:text-base">
+          <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-2 sm:space-y-6 text-xs sm:text-base">
             {/* PROJECT NAME */}
             <div className='flex gap-x-2'>
               <div className='w-full'>
