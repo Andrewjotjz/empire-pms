@@ -224,7 +224,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
     return (
         <div className="container"> 
             <div className="text-xs">
-                <form className="card-body" onSubmit={handleSubmit}>
+                <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="card-body" onSubmit={handleSubmit}>
                     <div className="row">
                         {/* PRODUCT TABLE */}
                         <div className="col-md-6 mb-0 md:mb-3">

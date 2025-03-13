@@ -51,7 +51,7 @@ const FileUpload = ({invoice_id}) => {
     return ( 
         <div>
             <h1>Upload File</h1>
-            <form onSubmit={handleSubmit}>
+            <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit}>
                 <input type="file" name="invoices" multiple onChange={handleFileChange} />
                 <button type="submit">Upload</button>
             </form>

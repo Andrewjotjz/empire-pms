@@ -292,7 +292,7 @@ if (fetchProjectError || addBudgetError) {
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-3">Create Budget</h2>
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="budget_name" className="block text-sm font-medium text-gray-700">
             Budget Name

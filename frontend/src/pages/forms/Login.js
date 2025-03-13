@@ -39,7 +39,7 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded shadow-md w-96 flex flex-col items-center">
         <img src={logo} alt="Logo" className="h-24 rounded-full" />
-        <form onSubmit={handleSubmit} className="w-full mt-4">
+        <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit} className="w-full mt-4">
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email

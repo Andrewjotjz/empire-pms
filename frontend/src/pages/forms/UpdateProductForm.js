@@ -366,7 +366,7 @@ const UpdateProductForm = () => {
                     </button>
                     <h1 className='mx-auto uppercase font-bold text-base'>EDIT PRODUCT</h1>
                 </div>
-                <form className="card-body" onSubmit={handleSubmit}>
+                <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="card-body" onSubmit={handleSubmit}>
                     <div className="row">
                         {/* PRODUCT TABLE */}
                         <div className="col-md-6 mb-0 sm:mb-3">

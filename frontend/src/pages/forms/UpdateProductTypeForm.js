@@ -206,7 +206,7 @@ const UpdateProductTypeForm = () => {
           <div className="bg-gradient-to-r from-gray-800 to-gray-800 px-6 py-2">
             <h1 className=" text-xs sm:text-xl font-bold text-white">EDIT PRODUCT TYPE</h1>
           </div>
-          <form className="p-4 sm:p-6 space-y-2 sm:space-y-6 text-xs sm:text-base" onSubmit={handleSubmit}>
+          <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} className="p-4 sm:p-6 space-y-2 sm:space-y-6 text-xs sm:text-base" onSubmit={handleSubmit}>
             <div className='flex gap-x-2'>
               <div className='w-full'>
                 <label className="block text-sm font-medium text-gray-700 mb-1">* Product Type Name</label>

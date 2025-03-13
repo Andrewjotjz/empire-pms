@@ -1865,7 +1865,7 @@ const NewInvoiceForm = () => {
     <div>
       {showEditOrderModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-1 lg:p-5 text-xs lg:text-base">
-          <form
+          <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
             className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg"
             onSubmit={() => {
               updatePurchaseOrder(updatedOrder);
@@ -2426,7 +2426,7 @@ const NewInvoiceForm = () => {
     <div>
       {showCreatePriceModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2">
-          <form
+          <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
             className="bg-white w-auto rounded-lg shadow-lg"
             onSubmit={handleSubmitNewPrice}
           >
@@ -2970,7 +2970,7 @@ const NewInvoiceForm = () => {
           <label>NEW INVOICE</label>
         </div>
         {/* BODY */}
-        <form onSubmit={handleSubmitInvoice}>
+        <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmitInvoice}>
           {/* Invoice Details */}
           <div className="mx-3 p-2 grid grid-cols-1 sm:grid-cols-4 gap-x-1 gap-y-1 sm:gap-x-4 sm:gap-y-2 border-2">
             <div>

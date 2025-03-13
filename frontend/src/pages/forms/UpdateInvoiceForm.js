@@ -1777,7 +1777,7 @@ const UpdateInvoiceForm = () => {
     <div>
       {showEditOrderModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 lg:p-5 text-xs lg:text-base">
-          <form
+          <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
             className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg"
             onSubmit={() => {
               updatePurchaseOrder(updatedOrder);
@@ -2340,7 +2340,7 @@ const UpdateInvoiceForm = () => {
   //   <div>
   //     {showCreatePriceModal && (
   //       <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 overflow-y-auto">
-  //         <form
+  //         <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
   //           className="bg-white w-auto rounded-lg shadow-lg"
   //           onSubmit={handleSubmitNewPrice}
   //         >
@@ -2696,7 +2696,7 @@ const UpdateInvoiceForm = () => {
     <div>
       {showCreatePriceModal && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2">
-          <form
+          <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
             className="bg-white w-auto rounded-lg shadow-lg"
             onSubmit={handleSubmitNewPrice}
           >
@@ -3240,7 +3240,7 @@ const UpdateInvoiceForm = () => {
           <label>EDIT INVOICE: {invoiceState.invoice_ref}</label>
         </div>
         {/* BODY */}
-        <form onSubmit={handleSubmitInvoice}>
+        <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmitInvoice}>
           {/* Invoice Details */}
           <div className="mx-3 p-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-2 border-2">
             <div>
