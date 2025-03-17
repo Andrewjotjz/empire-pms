@@ -1035,7 +1035,7 @@ const PurchaseOrderDetails = () => {
         <div>    
           {isDeliveryModalOpen && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center">
-              <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4 text-xs">
+              <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl m-4 text-xs">
                 <div className="flex justify-between items-center px-4 py-3 border-b">
                   <h2 className="text-lg font-bold text-gray-800">Receiving Items</h2>
                   <button
@@ -1139,7 +1139,7 @@ const PurchaseOrderDetails = () => {
                                 <tr key={prod.product_obj_ref._id} className="hover:bg-gray-50">
                                     <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_sku}</td>
                                     <td className="border-b p-1.5 text-gray-800">{prod.product_obj_ref.product_name}</td>
-                                    <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}</td>
+                                    <td className="border-b p-1.5 text-gray-800">{prod.order_product_qty_a}<span className='text-gray-400 text-xs ml-1'>{prod.productprice_obj_ref.product_unit_a}</span></td>
                                     <td className="border-b p-1.5">
                                     <input
                                         required

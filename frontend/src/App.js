@@ -46,6 +46,7 @@ import Iframe from "./pages/Iframe";
 import PaymentDetails from "./pages/PaymentDetails";
 import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
+import Calculator from "./components/Calculator";
 
 function App() {
 
@@ -120,6 +121,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
+        <Calculator />
       </BrowserRouter>
     </div>
   );
