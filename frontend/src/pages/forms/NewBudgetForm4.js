@@ -1265,7 +1265,7 @@ export default function BudgetPlanner() {
                                                           handleProductTypeInput(
                                                             e,
                                                             entry.area_info.area_id,
-                                                            subarea.subarea_id,
+                                                            level.level_id,
                                                             subarea.subarea_id,
                                                             type.type_id,
                                                             null,
