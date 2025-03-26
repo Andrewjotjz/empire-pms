@@ -557,47 +557,81 @@ export default function BudgetPlanner() {
                                 )}
                                 <div className="text-sm font-medium text-gray-700">{type.type_name}</div>
                               </div>
-
-                              <div className="grid grid-cols-4 gap-2 items-center mb-2">
+                              <div className="flex items-center justify-between gap-2 mb-2">
                                 <div className="text-xs text-gray-500">Area (m²)</div>
-                                <input
-                                  type="number"
-                                  placeholder="m²"
-                                  value={type.type_total_m2 || ""}
-                                  className="p-1 border border-gray-300 rounded text-sm"
-                                  onChange={(e) =>
-                                    handleProductTypeInput(
-                                      e,
-                                      entry.area_info.area_id,
-                                      null,
-                                      null,
-                                      type.type_id,
-                                      null,
-                                      null,
-                                      "type_total_m2",
-                                    )
-                                  }
-                                />
-                                <input
-                                  type="number"
-                                  placeholder="Rate"
-                                  value={type.type_rate || ""}
-                                  className="p-1 border border-gray-300 rounded text-sm"
-                                  onChange={(e) =>
-                                    handleProductTypeInput(
-                                      e,
-                                      entry.area_info.area_id,
-                                      null,
-                                      null,
-                                      type.type_id,
-                                      null,
-                                      null,
-                                      "type_rate",
-                                    )
-                                  }
-                                />
-                                <div className="text-sm font-medium text-gray-800">
-                                  ${type.type_total_amount || "0.00"}
+                                {/* INPUT starts here */}
+                                <div className={`relative`}>
+                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                    {productTypeState.find(typ => typ._id === type.type_id).type_unit}
+                                  </span>
+                                  <input
+                                    type="number"
+                                    name={`productType_total_m2_${entry.area_info.area_id}`}
+                                    id={`productType_total_m2_${entry.area_info.area_id}`}
+                                    placeholder="0.00"
+                                    value={type.type_total_m2 || ""}
+                                    aria-label={`Total m2 for ${type.type_name}`}
+                                    className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                    min="0"
+                                    step="0.01"
+                                    onChange={(e) =>
+                                      handleProductTypeInput(
+                                        e,
+                                        entry.area_info.area_id,
+                                        null,
+                                        null,
+                                        type.type_id,
+                                        null,
+                                        null,
+                                        "type_total_m2",
+                                      )
+                                    }
+                                  />
+                                </div>
+                                <div className={`relative`}>
+                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                    $
+                                  </span>
+                                  <input
+                                    type="number"
+                                    name={`productType_rate_${entry.area_info.area_id}`}
+                                    id={`productType_rate_${entry.area_info.area_id}`}
+                                    placeholder="0.00"
+                                    value={type.type_rate || ""}
+                                    aria-label={`Rate for ${type.type_name}`}
+                                    className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                    min="0"
+                                    step="0.01"
+                                    onChange={(e) =>
+                                      handleProductTypeInput(
+                                        e,
+                                        entry.area_info.area_id,
+                                        null,
+                                        null,
+                                        type.type_id,
+                                        null,
+                                        null,
+                                        "type_rate",
+                                      )
+                                    }
+                                  />
+                                </div>
+                                <div className="relative">
+                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                    $
+                                  </span>
+                                  <input
+                                    type="number"
+                                    name={`productType_total_amount_${type.type_id}`}
+                                    id={`productType_total_amount_${type.type_id}`}
+                                    placeholder="0.00"
+                                    value={type.type_total_amount || 0.00}
+                                    aria-label={`Total amount for ${type.type_name}`}
+                                    className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                    min="0"
+                                    step="0.01"
+                                    disabled={true}
+                                  />
                                 </div>
                               </div>
 
@@ -626,14 +660,24 @@ export default function BudgetPlanner() {
                                           <div className="text-sm text-gray-700">{category.category_name}</div>
                                         </div>
 
-                                        <div className="grid grid-cols-4 gap-2 items-center mb-2">
-                                            <div className="text-xs text-gray-500">Area (m²)</div>
+                                        <div className="flex items-center justify-between gap-2 mb-2">
+                                          <div className="text-xs text-gray-500">Area (m²)</div>
+                                          {/* INPUT starts here */}
+                                          <div className={`relative`}>
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                              {productTypeState.find(typ => typ._id === type.type_id).type_categories.find(cat => cat._id === category.category_id).category_unit}
+                                            </span>
                                             <input
-                                            type="number"
-                                            placeholder="m²"
-                                            value={category.category_total_m2 || ""}
-                                            className="p-1 border border-gray-300 rounded text-sm"
-                                            onChange={(e) =>
+                                              type="number"
+                                              name={`category_total_m2_${category.category_id}`}
+                                              id={`category_total_m2_${category.category_id}`}
+                                              placeholder="0.00"
+                                              value={category.category_total_m2 || ""}
+                                              aria-label={`Total m2 for ${category.category_name}`}
+                                              className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                              min="0"
+                                              step="0.01"
+                                              onChange={(e) =>
                                                 handleProductTypeInput(
                                                 e,
                                                 entry.area_info.area_id,
@@ -644,14 +688,24 @@ export default function BudgetPlanner() {
                                                 null,
                                                 "category_total_m2",
                                                 )
-                                            }
+                                              }
                                             />
+                                          </div>
+                                          <div className={`relative`}>
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                              $
+                                            </span>
                                             <input
-                                            type="number"
-                                            placeholder="Rate"
-                                            value={category.category_rate || ""}
-                                            className="p-1 border border-gray-300 rounded text-sm"
-                                            onChange={(e) =>
+                                              type="number"
+                                              name={`category_rate_${category.category_id}`}
+                                              id={`category_rate_${category.category_id}`}
+                                              placeholder="0.00"
+                                              value={category.category_rate || ""}
+                                              aria-label={`Rate for ${category.category_name}`}
+                                              className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                              min="0"
+                                              step="0.01"
+                                              onChange={(e) =>
                                                 handleProductTypeInput(
                                                 e,
                                                 entry.area_info.area_id,
@@ -662,64 +716,110 @@ export default function BudgetPlanner() {
                                                 null,
                                                 "category_rate",
                                                 )
-                                            }
+                                              }
                                             />
-                                            <div className="text-sm font-medium text-gray-800">
-                                            ${category.category_total_amount || "0.00"}
-                                            </div>
+                                          </div>
+                                          <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                              $
+                                            </span>
+                                            <input
+                                              type="number"
+                                              name={`category_total_amount_${category.category_id}`}
+                                              id={`category_total_amount_${category.category_id}`}
+                                              placeholder="0.00"
+                                              value={category.category_total_amount || 0.00}
+                                              aria-label={`Total amount for ${category.category_name}`}
+                                              className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                              min="0"
+                                              step="0.01"
+                                              disabled={true}
+                                            />
+                                          </div>
                                         </div>
 
-                                        {expandedSections[
-                                          `area-${entry.area_info.area_id}-type-${type.type_id}-cat-${category.category_id}`
-                                        ] &&
+                                        {expandedSections[`area-${entry.area_info.area_id}-type-${type.type_id}-cat-${category.category_id}`] &&
                                           category.subcategory_obj_ref && (
                                             <div className="pl-4 space-y-2 mt-2">
                                               {category.subcategory_obj_ref.map((subcategory) => (
                                                 <div
                                                   key={`area-${entry.area_info.area_id}-type-${type.type_id}-cat-${category.category_id}-subcat-${subcategory.subcategory_id}`}
                                                   className="grid grid-cols-4 gap-2 items-center"
-                                                >
-                                                  <div className="text-xs text-gray-600">
-                                                    {subcategory.subcategory_name}
+                                                > 
+                                                  <div className="text-xs text-gray-600">{subcategory.subcategory_name}</div>
+                                                  {/* NEW INPUT STARTS HERE */}
+                                                  <div className="relative">
+                                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                      {productTypeState.find(typ => typ._id === type.type_id).type_categories.find(cat => cat._id === category.category_id).subcategories.find(sub => sub._id === subcategory.subcategory_id).subcategory_unit}
+                                                    </span>
+                                                    <input
+                                                      type="number"
+                                                      name={`subcategory_total_m2_${subcategory._id}`}
+                                                      id={`subcategory_total_m2_${subcategory._id}`}
+                                                      placeholder="0.00"
+                                                      aria-label={`Total m2 for ${subcategory.subcategory_name}`}
+                                                      className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                      min="0"
+                                                      step="0.01"
+                                                      value={subcategory.subcategory_total_m2 || ""}
+                                                      onChange={(e) =>
+                                                        handleProductTypeInput(
+                                                          e,
+                                                          entry.area_info.area_id,
+                                                          null,
+                                                          null,
+                                                          type.type_id,
+                                                          category.category_id,
+                                                          subcategory.subcategory_id,
+                                                          "subcategory_total_m2",
+                                                        )
+                                                      }
+                                                    />
                                                   </div>
-                                                  <input
-                                                    type="number"
-                                                    placeholder="m²"
-                                                    className="p-1 border border-gray-300 rounded text-xs"
-                                                    value={subcategory.subcategory_total_m2 || ""}
-                                                    onChange={(e) =>
-                                                      handleProductTypeInput(
-                                                        e,
-                                                        entry.area_info.area_id,
-                                                        null,
-                                                        null,
-                                                        type.type_id,
-                                                        category.category_id,
-                                                        subcategory.subcategory_id,
-                                                        "subcategory_total_m2",
-                                                      )
-                                                    }
-                                                  />
-                                                  <input
-                                                    type="number"
-                                                    placeholder="Rate"
-                                                    className="p-1 border border-gray-300 rounded text-xs"
-                                                    value={subcategory.subcategory_rate || ""}
-                                                    onChange={(e) =>
-                                                      handleProductTypeInput(
-                                                        e,
-                                                        entry.area_info.area_id,
-                                                        null,
-                                                        null,
-                                                        type.type_id,
-                                                        category.category_id,
-                                                        subcategory.subcategory_id,
-                                                        "subcategory_rate",
-                                                      )
-                                                    }
-                                                  />
-                                                  <div className="text-xs font-medium text-gray-800">
-                                                    ${subcategory.subcategory_total_amount || "0.00"}
+                                                  <div className="relative">
+                                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                      $
+                                                    </span>
+                                                    <input
+                                                      type="number"
+                                                      name={`subcategory_rate_${subcategory._id}`}
+                                                      id={`subcategory_rate_${subcategory._id}`}
+                                                      placeholder="0.00"
+                                                      aria-label={`Rate for ${subcategory.subcategory_name}`}
+                                                      className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                      min="0"
+                                                      step="0.01"
+                                                      value={subcategory.subcategory_rate || ""}
+                                                      onChange={(e) =>
+                                                        handleProductTypeInput(
+                                                          e,
+                                                          entry.area_info.area_id,
+                                                          null,
+                                                          null,
+                                                          type.type_id,
+                                                          category.category_id,
+                                                          subcategory.subcategory_id,
+                                                          "subcategory_rate",
+                                                        )
+                                                      }
+                                                    />
+                                                  </div>
+                                                  <div className="relative">
+                                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                      $
+                                                    </span>
+                                                    <input
+                                                      type="number"
+                                                      name={`subcategory_total_amount_${subcategory.subcategory_id}`}
+                                                      id={`subcategory_total_amount_${subcategory.subcategory_id}`}
+                                                      placeholder="0.00"
+                                                      aria-label={`Total amount for ${subcategory.subcategory_name}`}
+                                                      className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right disabled:bg-gray-50"
+                                                      value={subcategory.subcategory_total_amount}
+                                                      min="0"
+                                                      step="0.01"
+                                                      disabled
+                                                    />
                                                   </div>
                                                 </div>
                                               ))}
@@ -779,46 +879,81 @@ export default function BudgetPlanner() {
                                           <div className="text-sm font-medium text-gray-700">{type.type_name}</div>
                                         </div>
 
-                                        <div className="grid grid-cols-4 gap-2 items-center mb-2">
+                                        {/* INPUT starts here - LEVEL + TYPE */}
+                                        <div className="flex items-center justify-between gap-2 mb-2">
                                           <div className="text-xs text-gray-500">Area (m²)</div>
-                                          <input
-                                            type="number"
-                                            placeholder="m²"
-                                            value={type.type_total_m2 || ""}
-                                            className="p-1 border border-gray-300 rounded text-sm"
-                                            onChange={(e) =>
-                                              handleProductTypeInput(
-                                                e,
-                                                entry.area_info.area_id,
-                                                level.level_id,
-                                                null,
-                                                type.type_id,
-                                                null,
-                                                null,
-                                                "type_total_m2",
-                                              )
-                                            }
-                                          />
-                                          <input
-                                            type="number"
-                                            placeholder="Rate"
-                                            value={type.type_rate || ""}
-                                            className="p-1 border border-gray-300 rounded text-sm"
-                                            onChange={(e) =>
-                                              handleProductTypeInput(
-                                                e,
-                                                entry.area_info.area_id,
-                                                level.level_id,
-                                                null,
-                                                type.type_id,
-                                                null,
-                                                null,
-                                                "type_rate",
-                                              )
-                                            }
-                                          />
-                                          <div className="text-sm font-medium text-gray-800">
-                                            ${type.type_total_amount || "0.00"}
+                                          <div className={`relative`}>
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                              {productTypeState.find(typ => typ._id === type.type_id).type_unit}
+                                            </span>
+                                            <input
+                                              type="number"
+                                              name={`productType_total_m2_${entry.area_info.area_id}_${level.level_id}`}
+                                              id={`productType_total_m2_${entry.area_info.area_id}_${level.level_id}`}
+                                              placeholder="0.00"
+                                              value={type.type_total_m2 || ""}
+                                              aria-label={`Total m2 for ${type.type_name} at ${level.level_name}`}
+                                              className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                              min="0"
+                                              step="0.01"
+                                              onChange={(e) =>
+                                                handleProductTypeInput(
+                                                  e,
+                                                  entry.area_info.area_id,
+                                                  level.level_id,
+                                                  null,
+                                                  type.type_id,
+                                                  null,
+                                                  null,
+                                                  "type_total_m2",
+                                                )
+                                              }
+                                            />
+                                          </div>
+                                          <div className={`relative`}>
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                              $
+                                            </span>
+                                            <input
+                                              type="number"
+                                              name={`productType_rate_${entry.area_info.area_id}_${level.level_id}`}
+                                              id={`productType_rate_${entry.area_info.area_id}_${level.level_id}`}
+                                              placeholder="0.00"
+                                              value={type.type_rate || ""}
+                                              aria-label={`Total m2 for ${type.type_name} at ${level.level_name}`}
+                                              className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                              min="0"
+                                              step="0.01"
+                                              onChange={(e) =>
+                                                handleProductTypeInput(
+                                                  e,
+                                                  entry.area_info.area_id,
+                                                  level.level_id,
+                                                  null,
+                                                  type.type_id,
+                                                  null,
+                                                  null,
+                                                  "type_rate",
+                                                )
+                                              }
+                                            />
+                                          </div>
+                                          <div className="relative">
+                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                              $
+                                            </span>
+                                            <input
+                                              type="number"
+                                              name={`productType_total_amount_${entry.area_info.area_id}_${level.level_id}`}
+                                              id={`productType_total_amount_${entry.area_info.area_id}_${level.level_id}`}
+                                              placeholder="0.00"
+                                              value={type.type_total_amount || 0.00}
+                                              aria-label={`Total amount for ${type.type_name} at ${level.level_name}`}
+                                              className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                              min="0"
+                                              step="0.01"
+                                              disabled={true}
+                                            />
                                           </div>
                                         </div>
 
@@ -848,14 +983,23 @@ export default function BudgetPlanner() {
                                                       {category.category_name}
                                                     </div>
                                                   </div>
-
-                                                  <div className="grid grid-cols-4 gap-2 items-center mb-2">
+                                                  {/* NEW INPUT STARTS HERE - LEVEL + CATEGORY */}
+                                                  <div className="flex items-center justify-between gap-2 mb-2">
                                                     <div className="text-xs text-gray-500">Area (m²)</div>
-                                                    <input
+                                                    <div className={`relative`}>
+                                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                        {productTypeState.find(typ => typ._id === type.type_id).type_categories.find(cat => cat._id === category.category_id).category_unit}
+                                                      </span>
+                                                      <input
                                                         type="number"
-                                                        placeholder="m²"
+                                                        name={`category_total_m2_${category.category_id}_${level.level_id}`}
+                                                        id={`category_total_m2_${category.category_id}_${level.level_id}`}
+                                                        placeholder="0.00"
                                                         value={category.category_total_m2 || ""}
-                                                        className="p-1 border border-gray-300 rounded text-sm"
+                                                        aria-label={`Total m2 for ${category.category_name} at ${level.level_name}`}
+                                                        className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                        min="0"
+                                                        step="0.01"
                                                         onChange={(e) =>
                                                         handleProductTypeInput(
                                                             e,
@@ -868,12 +1012,22 @@ export default function BudgetPlanner() {
                                                             "category_total_m2",
                                                         )
                                                         }
-                                                    />
-                                                    <input
-                                                        category="number"
-                                                        placeholder="Rate"
+                                                      />
+                                                    </div>
+                                                    <div className={`relative`}>
+                                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                        $
+                                                      </span>
+                                                      <input
+                                                        type="number"
+                                                        name={`category_rate_${category.category_id}_${level.level_id}`}
+                                                        id={`category_rate_${category.category_id}_${level.level_id}`}
+                                                        placeholder="0.00"
                                                         value={category.category_rate || ""}
-                                                        className="p-1 border border-gray-300 rounded text-sm"
+                                                        aria-label={`Rate for ${category.category_name} at ${level.level_name}`}
+                                                        className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                        min="0"
+                                                        step="0.01"
                                                         onChange={(e) =>
                                                         handleProductTypeInput(
                                                             e,
@@ -886,11 +1040,26 @@ export default function BudgetPlanner() {
                                                             "category_rate",
                                                         )
                                                         }
-                                                    />
-                                                    <div className="text-sm font-medium text-gray-800">
-                                                        ${category.category_total_amount || "0.00"}
+                                                      />
                                                     </div>
+                                                    <div className="relative">
+                                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                        $
+                                                      </span>
+                                                      <input
+                                                        type="number"
+                                                        name={`category_total_amount_${category.category_id}_${level.level_id}`}
+                                                        id={`category_total_amount_${category.category_id}_${level.level_id}`}
+                                                        placeholder="0.00"
+                                                        value={category.category_total_amount || 0.00}
+                                                        aria-label={`Total amount for ${category.category_name} at ${level.level_name}`}
+                                                        className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                        min="0"
+                                                        step="0.01"
+                                                        disabled={true}
+                                                      />
                                                     </div>
+                                                  </div>
 
                                                   {expandedSections[
                                                     `level-${level.level_id}-type-${type.type_id}-cat-${category.category_id}`
@@ -905,44 +1074,79 @@ export default function BudgetPlanner() {
                                                             <div className="text-xs text-gray-600">
                                                               {subcategory.subcategory_name}
                                                             </div>
-                                                            <input
-                                                              type="number"
-                                                              placeholder="m²"
-                                                              className="p-1 border border-gray-300 rounded text-xs"
-                                                              value={subcategory.subcategory_total_m2 || ""}
-                                                              onChange={(e) =>
-                                                                handleProductTypeInput(
-                                                                  e,
-                                                                  entry.area_info.area_id,
-                                                                  level.level_id,
-                                                                  null,
-                                                                  type.type_id,
-                                                                  category.category_id,
-                                                                  subcategory.subcategory_id,
-                                                                  "subcategory_total_m2",
-                                                                )
-                                                              }
-                                                            />
-                                                            <input
-                                                              type="number"
-                                                              placeholder="Rate"
-                                                              className="p-1 border border-gray-300 rounded text-xs"
-                                                              value={subcategory.subcategory_rate || ""}
-                                                              onChange={(e) =>
-                                                                handleProductTypeInput(
-                                                                  e,
-                                                                  entry.area_info.area_id,
-                                                                  level.level_id,
-                                                                  null,
-                                                                  type.type_id,
-                                                                  category.category_id,
-                                                                  subcategory.subcategory_id,
-                                                                  "subcategory_rate",
-                                                                )
-                                                              }
-                                                            />
-                                                            <div className="text-xs font-medium text-gray-800">
-                                                              ${subcategory.subcategory_total_amount || "0.00"}
+                                                            {/* NEW - LEVEL + SUBCATEGORY */}
+                                                            <div className="relative">
+                                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                {productTypeState.find(typ => typ._id === type.type_id).type_categories.find(cat => cat._id === category.category_id).subcategories.find(sub => sub._id === subcategory.subcategory_id).subcategory_unit}
+                                                              </span>
+                                                              <input
+                                                                type="number"
+                                                                name={`subcategory_total_m2_${subcategory._id}_${level.level_id}`}
+                                                                id={`subcategory_total_m2_${subcategory._id}_${level.level_id}`}
+                                                                placeholder="0.00"
+                                                                aria-label={`Total m2 for ${subcategory.subcategory_name}`}
+                                                                className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                min="0"
+                                                                step="0.01"
+                                                                value={subcategory.subcategory_total_m2 || ""}
+                                                                onChange={(e) =>
+                                                                  handleProductTypeInput(
+                                                                    e,
+                                                                    entry.area_info.area_id,
+                                                                    level.level_id,
+                                                                    null,
+                                                                    type.type_id,
+                                                                    category.category_id,
+                                                                    subcategory.subcategory_id,
+                                                                    "subcategory_total_m2",
+                                                                  )
+                                                                }
+                                                              />
+                                                            </div>
+                                                            <div className="relative">
+                                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                $
+                                                              </span>
+                                                              <input
+                                                                type="number"
+                                                                name={`subcategory_rate_${subcategory._id}_${level.level_id}`}
+                                                                id={`subcategory_rate_${subcategory._id}_${level.level_id}`}
+                                                                placeholder="0.00"
+                                                                aria-label={`Rate for ${subcategory.subcategory_name} at ${level.level_name}`}
+                                                                className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                min="0"
+                                                                step="0.01"
+                                                                value={subcategory.subcategory_rate || ""}
+                                                                onChange={(e) =>
+                                                                  handleProductTypeInput(
+                                                                    e,
+                                                                    entry.area_info.area_id,
+                                                                    level.level_id,
+                                                                    null,
+                                                                    type.type_id,
+                                                                    category.category_id,
+                                                                    subcategory.subcategory_id,
+                                                                    "subcategory_rate",
+                                                                  )
+                                                                }
+                                                              />
+                                                            </div>
+                                                            <div className="relative">
+                                                              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                $
+                                                              </span>
+                                                              <input
+                                                                type="number"
+                                                                name={`subcategory_total_amount_${subcategory.subcategory_id}_${level.level_id}`}
+                                                                id={`subcategory_total_amount_${subcategory.subcategory_id}_${level.level_id}`}
+                                                                placeholder="0.00"
+                                                                aria-label={`Total amount for ${subcategory.subcategory_name} at ${level.level_name}`}
+                                                                className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right disabled:bg-gray-50"
+                                                                value={subcategory.subcategory_total_amount}
+                                                                min="0"
+                                                                step="0.01"
+                                                                disabled
+                                                              />
                                                             </div>
                                                           </div>
                                                         ))}
@@ -1012,59 +1216,88 @@ export default function BudgetPlanner() {
                                                       {type.type_name}
                                                     </div>
                                                   </div>
-
-                                                  <div className="grid grid-cols-4 gap-2 items-center mb-2">
+                                                  {/* NEW - SUBAREA + TYPE */}
+                                                  <div className="flex items-center justify-between gap-2 mb-2">
                                                     <div className="text-xs text-gray-500">Area (m²)</div>
-                                                    <input
-                                                      type="number"
-                                                      placeholder="m²"
-                                                      value={type.type_total_m2 || ""}
-                                                      className="p-1 border border-gray-300 rounded text-sm"
-                                                      onChange={(e) =>
-                                                        handleProductTypeInput(
-                                                          e,
-                                                          entry.area_info.area_id,
-                                                          level.level_id,
-                                                          subarea.subarea_id,
-                                                          type.type_id,
-                                                          null,
-                                                          null,
-                                                          "type_total_m2",
-                                                        )
-                                                      }
-                                                    />
-                                                    <input
-                                                      type="number"
-                                                      placeholder="Rate"
-                                                      value={type.type_rate || ""}
-                                                      className="p-1 border border-gray-300 rounded text-sm"
-                                                      onChange={(e) =>
-                                                        handleProductTypeInput(
-                                                          e,
-                                                          entry.area_info.area_id,
-                                                          level.level_id,
-                                                          subarea.subarea_id,
-                                                          type.type_id,
-                                                          null,
-                                                          null,
-                                                          "type_rate",
-                                                        )
-                                                      }
-                                                    />
-                                                    <div className="text-sm font-medium text-gray-800">
-                                                      ${type.type_total_amount || "0.00"}
+                                                    <div className={`relative`}>
+                                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                        {productTypeState.find(typ => typ._id === type.type_id).type_unit}
+                                                      </span>
+                                                      <input
+                                                        type="number"
+                                                        name={`productType_total_m2_${type.type_id}_${subarea.subarea_id}`}
+                                                        id={`productType_total_m2_${type.type_id}_${subarea.subarea_id}`}
+                                                        placeholder="0.00"
+                                                        value={type.type_total_m2 || ""}
+                                                        aria-label={`Total m2 for ${type.type_name} at ${subarea.subarea_name}`}
+                                                        className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                        min="0"
+                                                        step="0.01"
+                                                        onChange={(e) =>
+                                                          handleProductTypeInput(
+                                                            e,
+                                                            entry.area_info.area_id,
+                                                            level.level_id,
+                                                            subarea.subarea_id,
+                                                            type.type_id,
+                                                            null,
+                                                            null,
+                                                            "type_total_m2",
+                                                          )
+                                                        }
+                                                      />
+                                                    </div>
+                                                    <div className={`relative`}>
+                                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                        $
+                                                      </span>
+                                                      <input
+                                                        type="number"
+                                                        name={`productType_total_m2_${type.type_id}_${subarea.subarea_id}`}
+                                                        id={`productType_total_m2_${type.type_id}_${subarea.subarea_id}`}
+                                                        placeholder="0.00"
+                                                        value={type.type_rate || ""}
+                                                        aria-label={`Total m2 for ${type.type_name} at ${subarea.subarea_name}`}
+                                                        className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                        min="0"
+                                                        step="0.01"
+                                                        onChange={(e) =>
+                                                          handleProductTypeInput(
+                                                            e,
+                                                            entry.area_info.area_id,
+                                                            subarea.subarea_id,
+                                                            subarea.subarea_id,
+                                                            type.type_id,
+                                                            null,
+                                                            null,
+                                                            "type_rate",
+                                                          )
+                                                        }
+                                                      />
+                                                    </div>
+                                                    <div className="relative">
+                                                      <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                        $
+                                                      </span>
+                                                      <input
+                                                        type="number"
+                                                        name={`productType_total_m2_${type.type_id}_${subarea.subarea_id}`}
+                                                        id={`productType_total_m2_${type.type_id}_${subarea.subarea_id}`}
+                                                        placeholder="0.00"
+                                                        value={type.type_total_amount || 0.00}
+                                                        aria-label={`Total amount for ${type.type_name} at ${subarea.subarea_name}`}
+                                                        className="pl-7 pr-2 py-1 w-60 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                        min="0"
+                                                        step="0.01"
+                                                        disabled={true}
+                                                      />
                                                     </div>
                                                   </div>
 
-                                                  {expandedSections[
-                                                    `subarea-${subarea.subarea_id}-type-${type.type_id}`
-                                                  ] &&
-                                                    type.category_obj_ref && (
+                                                  {expandedSections[`subarea-${subarea.subarea_id}-type-${type.type_id}`] && type.category_obj_ref && (
                                                       <div className="pl-4 space-y-3 mt-3 border-l-2 border-gray-200">
                                                         {type.category_obj_ref.map((category) => (
-                                                          <div
-                                                            key={`subarea-${subarea.subarea_id}-type-${type.type_id}-cat-${category.category_id}`}
-                                                          >
+                                                          <div key={`subarea-${subarea.subarea_id}-type-${type.type_id}-cat-${category.category_id}`}>
                                                             <div
                                                               className="flex items-center cursor-pointer mb-2"
                                                               onClick={() =>
@@ -1073,21 +1306,95 @@ export default function BudgetPlanner() {
                                                                 )
                                                               }
                                                             >
-                                                              {expandedSections[
-                                                                `subarea-${subarea.subarea_id}-type-${type.type_id}-cat-${category.category_id}`
-                                                              ] ? (
+                                                              {expandedSections[`subarea-${subarea.subarea_id}-type-${type.type_id}-cat-${category.category_id}`] ? (
                                                                 <ChevronDown className="h-4 w-4 text-gray-500 mr-1" />
                                                               ) : (
                                                                 <ChevronRight className="h-4 w-4 text-gray-500 mr-1" />
                                                               )}
-                                                              <div className="text-sm text-gray-700">
-                                                                {category.category_name}
+                                                              <div className="text-sm text-gray-700">{category.category_name}</div>
+                                                            </div>
+
+                                                            <div className="pl-6 space-y-4">
+                                                              {/* NEW - SUBAREA + CATEGORY */}
+                                                              <div className="flex items-center justify-between gap-2 mb-2">
+                                                                <div className="text-xs text-gray-500">Area (m²)</div>
+                                                                <div className={`relative`}>
+                                                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                    {productTypeState.find(typ => typ._id === type.type_id).type_categories.find(cat => cat._id === category.category_id).category_unit}
+                                                                  </span>
+                                                                  <input
+                                                                    type="number"
+                                                                    name={`productType_total_m2_${category.category_id}_${subarea.subarea_id}`}
+                                                                    id={`productType_total_m2_${category.category_id}_${subarea.subarea_id}`}
+                                                                    placeholder="0.00"
+                                                                    value={category.category_total_m2 || ""}
+                                                                    aria-label={`Total m2 for ${category.category_name} at ${subarea.subarea_name}`}
+                                                                    className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                    min="0"
+                                                                    step="0.01"
+                                                                    onChange={(e) =>
+                                                                      handleProductTypeInput(
+                                                                        e,
+                                                                        entry.area_info.area_id,
+                                                                        level.level_id,
+                                                                        subarea.subarea_id,
+                                                                        type.type_id,
+                                                                        category.category_id,
+                                                                        null,
+                                                                        "category_total_m2",
+                                                                      )
+                                                                    }
+                                                                  />
+                                                                </div>
+                                                                <div className={`relative`}>
+                                                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                    $
+                                                                  </span>
+                                                                  <input
+                                                                    type="number"
+                                                                    name={`category_rate_${category.category_id}_${subarea.subarea_id}`}
+                                                                    id={`category_rate_${category.category_id}_${subarea.subarea_id}`}
+                                                                    placeholder="0.00"
+                                                                    value={category.category_rate || ""}
+                                                                    aria-label={`Rate for ${category.category_name} at ${subarea.subarea_name}`}
+                                                                    className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                    min="0"
+                                                                    step="0.01"
+                                                                    onChange={(e) =>
+                                                                    handleProductTypeInput(
+                                                                        e,
+                                                                        entry.area_info.area_id,
+                                                                        level.level_id,
+                                                                        subarea.subarea_id,
+                                                                        type.type_id,
+                                                                        category.category_id,
+                                                                        null,
+                                                                        "category_rate",
+                                                                    )
+                                                                    }
+                                                                  />
+                                                                </div>
+                                                                <div className="relative">
+                                                                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                    $
+                                                                  </span>
+                                                                  <input
+                                                                    type="number"
+                                                                    name={`category_total_amount_${category.category_id}_${subarea.subarea_id}`}
+                                                                    id={`category_total_amount_${category.category_id}_${subarea.subarea_id}`}
+                                                                    placeholder="0.00"
+                                                                    value={category.category_total_amount || 0.00}
+                                                                    aria-label={`Total amount for ${category.category_name} at ${subarea.subarea_name}`}
+                                                                    className="pl-7 pr-2 py-1 w-52 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                    min="0"
+                                                                    step="0.01"
+                                                                    disabled={true}
+                                                                  />
+                                                                </div>
                                                               </div>
                                                             </div>
 
-                                                            {expandedSections[
-                                                              `subarea-${subarea.subarea_id}-type-${type.type_id}-cat-${category.category_id}`
-                                                            ] &&
+                                                            {expandedSections[`subarea-${subarea.subarea_id}-type-${type.type_id}-cat-${category.category_id}`] &&
                                                               category.subcategory_obj_ref && (
                                                                 <div className="pl-4 space-y-2 mt-2">
                                                                   {category.subcategory_obj_ref.map((subcategory) => (
@@ -1098,45 +1405,79 @@ export default function BudgetPlanner() {
                                                                       <div className="text-xs text-gray-600">
                                                                         {subcategory.subcategory_name}
                                                                       </div>
-                                                                      <input
-                                                                        type="number"
-                                                                        placeholder="m²"
-                                                                        className="p-1 border border-gray-300 rounded text-xs"
-                                                                        value={subcategory.subcategory_total_m2 || ""}
-                                                                        onChange={(e) =>
+                                                                      {/* NEW - SUBAREA + SUB-CATEGORY */}
+                                                                      <div className={`relative`}>
+                                                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                          {productTypeState.find(typ => typ._id === type.type_id).type_categories.find(cat => cat._id === category.category_id).subcategories.find(sub => sub._id === subcategory.subcategory_id).subcategory_unit}
+                                                                        </span>
+                                                                        <input
+                                                                          type="number"
+                                                                          name={`subcategory_total_m2_${subcategory.subcategory_id}_${subarea.subarea_id}`}
+                                                                          id={`subcategory_total_m2_${subcategory.subcategory_id}_${subarea.subarea_id}`}
+                                                                          placeholder="0.00"
+                                                                          value={subcategory.subcategory_total_m2 || ""}
+                                                                          aria-label={`Total m2 for ${subcategory.subcategory_name} at ${subarea.subarea_name}`}
+                                                                          className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                          min="0"
+                                                                          step="0.01"
+                                                                          onChange={(e) =>
+                                                                            handleProductTypeInput(
+                                                                              e,
+                                                                              entry.area_info.area_id,
+                                                                              level.level_id,
+                                                                              subarea.subarea_id,
+                                                                              type.type_id,
+                                                                              category.category_id,
+                                                                              subcategory.subcategory_id,
+                                                                              "subcategory_total_m2",
+                                                                            )
+                                                                          }
+                                                                        />
+                                                                      </div>
+                                                                      <div className={`relative`}>
+                                                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                          $
+                                                                        </span>
+                                                                        <input
+                                                                          type="number"
+                                                                          name={`subcategory_rate_${subcategory.subcategory_id}_${subarea.subarea_id}`}
+                                                                          id={`subcategory_rate_${subcategory.subcategory_id}_${subarea.subarea_id}`}
+                                                                          placeholder="0.00"
+                                                                          value={subcategory.subcategory_rate || ""}
+                                                                          aria-label={`Rate for ${subcategory.subcategory_name} at ${subarea.subarea_name}`}
+                                                                          className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                          min="0"
+                                                                          step="0.01"
+                                                                          onChange={(e) =>
                                                                           handleProductTypeInput(
-                                                                            e,
-                                                                            entry.area_info.area_id,
-                                                                            level.level_id,
-                                                                            subarea.subarea_id,
-                                                                            type.type_id,
-                                                                            category.category_id,
-                                                                            subcategory.subcategory_id,
-                                                                            "subcategory_total_m2",
+                                                                              e,
+                                                                              entry.area_info.area_id,
+                                                                              level.level_id,
+                                                                              subarea.subarea_id,
+                                                                              type.type_id,
+                                                                              category.category_id,
+                                                                              subcategory.subcategory_id,
+                                                                              "subcategory_rate",
                                                                           )
-                                                                        }
-                                                                      />
-                                                                      <input
-                                                                        type="number"
-                                                                        placeholder="Rate"
-                                                                        className="p-1 border border-gray-300 rounded text-xs"
-                                                                        value={subcategory.subcategory_rate || ""}
-                                                                        onChange={(e) =>
-                                                                          handleProductTypeInput(
-                                                                            e,
-                                                                            entry.area_info.area_id,
-                                                                            level.level_id,
-                                                                            subarea.subarea_id,
-                                                                            type.type_id,
-                                                                            category.category_id,
-                                                                            subcategory.subcategory_id,
-                                                                            "subcategory_rate",
-                                                                          )
-                                                                        }
-                                                                      />
-                                                                      <div className="text-xs font-medium text-gray-800">
-                                                                        $
-                                                                        {subcategory.subcategory_total_amount || "0.00"}
+                                                                          }
+                                                                        />
+                                                                      </div>
+                                                                      <div className="relative">
+                                                                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                                                          $
+                                                                        </span>
+                                                                        <input
+                                                                          type="number"
+                                                                          name={`subcategory_total_amount_${subcategory.subcategory_id}_${subarea.subarea_id}`}
+                                                                          id={`subcategory_total_amount_${subcategory.subcategory_id}_${subarea.subarea_id}`}
+                                                                          placeholder="0.00"
+                                                                          value={subcategory.subcategory_total_amount || 0.00}
+                                                                          aria-label={`Total amount for ${subcategory.subcategory_name} at ${subarea.subarea_name}`}
+                                                                          className="pl-7 pr-2 py-1 w-36 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-right"
+                                                                          min="0"
+                                                                          step="0.01"
+                                                                          disabled={true}
+                                                                        />
                                                                       </div>
                                                                     </div>
                                                                   ))}
