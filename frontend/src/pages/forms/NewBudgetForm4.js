@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronRight, Building, Layers, Grid3X3, Package, Save } from "lucide-react"
+import { ChevronDown, ChevronRight, Dot, Building, Layers, Grid3X3, Package, Save } from "lucide-react"
+import SessionExpired from "../../components/SessionExpired"
 
 
 export default function BudgetPlanner() {
@@ -21,6 +22,7 @@ export default function BudgetPlanner() {
 
   const [selectedProject, setSelectedProject] = useState(null)
   const [expandedSections, setExpandedSections] = useState({})
+  const [selectedIds, setSelectedIds] = useState([])
 
   // Fetch all projects
   useEffect(() => {
@@ -314,14 +316,19 @@ export default function BudgetPlanner() {
           // Calculate direct type amount (not including categories)
           const directTypeAmount = Number.parseFloat(calculateTotals(m2, rate))
 
-          // Sum category amounts
+          /* 
+          -- Sum category amounts --
           let categoriesTotal = 0
-          targetObj.product_type_obj_ref[typeIndex].category_obj_ref.forEach((category) => {
-            categoriesTotal += Number.parseFloat(category.category_total_amount || 0)
-          })
+           targetObj.product_type_obj_ref[typeIndex].category_obj_ref.forEach((category) => {
+             categoriesTotal += Number.parseFloat(category.category_total_amount || 0)
+           })
+
+          -- Type total = direct amount + categories --
+          targetObj.product_type_obj_ref[typeIndex].type_total_amount = Math.round((directTypeAmount + categoriesTotal) * 100) / 100
+          */
 
           // Type total is direct amount plus categories
-          targetObj.product_type_obj_ref[typeIndex].type_total_amount = Math.round((directTypeAmount + categoriesTotal) * 100) / 100
+          targetObj.product_type_obj_ref[typeIndex].type_total_amount = Math.round((directTypeAmount) * 100) / 100
 
         }
       }
@@ -330,7 +337,177 @@ export default function BudgetPlanner() {
     })
   }
 
-  // Calculate budget totals
+  // Calculate 'Total Budget by Area' for Summary
+  const calculateAreaTotals = (areaId) => {
+    let areaTotal = 0
+    const areaEntry = budget.entries.find((entry) => entry.area_info.area_id === areaId)
+
+    if (!areaEntry) return "0.00"
+
+    // Sum area level product types
+    if (areaEntry.area_info.product_type_obj_ref) {
+      areaEntry.area_info.product_type_obj_ref.forEach((type) => {
+        areaTotal += Number.parseFloat(type.type_total_amount || 0)
+      })
+    }
+
+    /* 
+    -- Sum all levels and subareas within this area --
+    if (areaEntry.area_info.level_info) {
+      areaEntry.area_info.level_info.forEach((level) => {
+        if (level.product_type_obj_ref) {
+          level.product_type_obj_ref.forEach((type) => {
+            areaTotal += Number.parseFloat(type.type_total_amount || 0)
+          })
+        }
+
+        if (level.subarea_info) {
+          level.subarea_info.forEach((subarea) => {
+            if (subarea.product_type_obj_ref) {
+              subarea.product_type_obj_ref.forEach((type) => {
+                areaTotal += Number.parseFloat(type.type_total_amount || 0)
+              })
+            }
+          })
+        }
+      })
+    }
+    */
+
+    return Math.round(areaTotal * 100) / 100
+
+  }
+  // Calculate 'Total Budget by Area by Level' for Summary
+  const calculateLevelTotals = (areaId, levelId) => {
+    let levelTotal = 0
+    const levelEntry = budget.entries.find((entry) => entry.area_info.area_id === areaId).area_info.level_info.find((level) => level.level_id === levelId)
+
+    if (!levelEntry) return "0.00"
+
+    // Sum level's product types
+    if (levelEntry.product_type_obj_ref) {
+      levelEntry.product_type_obj_ref.forEach((type) => {
+        levelTotal += Number.parseFloat(type.type_total_amount || 0)
+      })
+    }
+
+    /*
+    -- Sum all subareas within this level --
+    if (levelEntry.subarea_info) {
+      levelEntry.subarea_info.forEach((subarea) => {
+        if (subarea.product_type_obj_ref) {
+          subarea.product_type_obj_ref.forEach((type) => {
+            levelTotal += Number.parseFloat(type.type_total_amount || 0)
+          })
+        }
+      })
+    }
+    */
+
+    return Math.round(levelTotal * 100) / 100
+
+  }
+  // Calculate 'Total Budget by Area by Level' for Summary
+  const calculateSubareaTotals = (areaId, levelId, subareaId) => {
+    let subAreaTotal = 0
+    const subareaEntry = budget.entries.find((entry) => entry.area_info.area_id === areaId).area_info.level_info.find((level) => level.level_id === levelId).subarea_info.find((subarea) => subarea.subarea_id === subareaId)
+
+    if (!subareaEntry) return "0.00"
+
+    // Sum level's product types
+    if (subareaEntry.product_type_obj_ref) {
+      subareaEntry.product_type_obj_ref.forEach((type) => {
+        subAreaTotal += Number.parseFloat(type.type_total_amount || 0)
+      })
+    }
+
+    return Math.round(subAreaTotal * 100) / 100
+
+  }
+
+  // Calculate 'Total Budget by Product Type based on selected area/level/subarea' for Summary
+  const calculateProductTypeTotals = (typeId) => {
+    let typeTotal = 0
+
+    budget.entries.forEach((entry) => {
+      // Area level
+      if (entry.area_info.product_type_obj_ref && selectedIds.includes(entry.area_info.area_id)) {
+        const typeEntry = entry.area_info.product_type_obj_ref.find((type) => type.type_id === typeId)
+        if (typeEntry) {
+          typeTotal += Number.parseFloat(typeEntry.type_total_amount || 0)
+        }
+      }
+
+      // Level level
+      if (entry.area_info.level_info) {
+        entry.area_info.level_info.forEach((level) => {
+          if (level.product_type_obj_ref && selectedIds.includes(level.level_id)) {
+            const typeEntry = level.product_type_obj_ref.find((type) => type.type_id === typeId)
+            if (typeEntry) {
+              typeTotal += Number.parseFloat(typeEntry.type_total_amount || 0)
+            }
+          }
+
+          // Subarea level
+          if (level.subarea_info) {
+            level.subarea_info.forEach((subarea) => {
+              if (subarea.product_type_obj_ref && selectedIds.includes(subarea.subarea_id)) {
+                const typeEntry = subarea.product_type_obj_ref.find((type) => type.type_id === typeId)
+                if (typeEntry) {
+                  typeTotal += Number.parseFloat(typeEntry.type_total_amount || 0)
+                }
+              }
+            })
+          }
+        })
+      }
+    })
+
+    return Math.round(typeTotal * 100) / 100
+
+  }
+  const calculateCategoryTotals = (typeId, catId) => {
+    let categoryTotal = 0
+
+    budget.entries.forEach((entry) => {
+      // Area level
+      if (entry.area_info.product_type_obj_ref && selectedIds.includes(entry.area_info.area_id)) {
+        const catEntry = entry.area_info.product_type_obj_ref.find((type) => type.type_id === typeId).category_obj_ref.find((cat) => cat.category_id === catId)
+        if (catEntry) {
+          categoryTotal += Number.parseFloat(catEntry.category_total_amount || 0)
+        }
+      }
+
+      // Level level
+      if (entry.area_info.level_info) {
+        entry.area_info.level_info.forEach((level) => {
+          if (level.product_type_obj_ref && selectedIds.includes(level.level_id)) {
+            const catEntry = level.product_type_obj_ref.find((type) => type.type_id === typeId).category_obj_ref.find((cat) => cat.category_id === catId)
+            if (catEntry) {
+              categoryTotal += Number.parseFloat(catEntry.category_total_amount || 0)
+            }
+          }
+
+          // Subarea level
+          if (level.subarea_info) {
+            level.subarea_info.forEach((subarea) => {
+              if (subarea.product_type_obj_ref && selectedIds.includes(subarea.subarea_id)) {
+                const catEntry = subarea.product_type_obj_ref.find((type) => type.type_id === typeId).category_obj_ref.find((cat) => cat.category_id === catId)
+                if (catEntry) {
+                  categoryTotal += Number.parseFloat(catEntry.category_total_amount || 0)
+                }
+              }
+            })
+          }
+        })
+      }
+    })
+
+    return Math.round(categoryTotal * 100) / 100
+
+  }
+
+  // Calculate 'Total Budget of Whole Project' for Summary
   const calculateBudgetTotals = () => {
     let totalBudget = 0
 
@@ -370,86 +547,12 @@ export default function BudgetPlanner() {
 
   }
 
-  // Calculate area totals for summary
-  const calculateAreaTotals = (areaId) => {
-    let areaTotal = 0
-    const areaEntry = budget.entries.find((entry) => entry.area_info.area_id === areaId)
-
-    if (!areaEntry) return "0.00"
-
-    // Sum area level product types
-    if (areaEntry.area_info.product_type_obj_ref) {
-      areaEntry.area_info.product_type_obj_ref.forEach((type) => {
-        areaTotal += Number.parseFloat(type.type_total_amount || 0)
-      })
-    }
-
-    // Sum all levels and subareas within this area
-    if (areaEntry.area_info.level_info) {
-      areaEntry.area_info.level_info.forEach((level) => {
-        if (level.product_type_obj_ref) {
-          level.product_type_obj_ref.forEach((type) => {
-            areaTotal += Number.parseFloat(type.type_total_amount || 0)
-          })
-        }
-
-        if (level.subarea_info) {
-          level.subarea_info.forEach((subarea) => {
-            if (subarea.product_type_obj_ref) {
-              subarea.product_type_obj_ref.forEach((type) => {
-                areaTotal += Number.parseFloat(type.type_total_amount || 0)
-              })
-            }
-          })
-        }
-      })
-    }
-
-    return Math.round(areaTotal * 100) / 100
-
-  }
-
-  // Calculate product type totals for summary
-  const calculateProductTypeTotals = (typeId) => {
-    let typeTotal = 0
-
-    budget.entries.forEach((entry) => {
-      // Area level
-      if (entry.area_info.product_type_obj_ref) {
-        const typeEntry = entry.area_info.product_type_obj_ref.find((type) => type.type_id === typeId)
-        if (typeEntry) {
-          typeTotal += Number.parseFloat(typeEntry.type_total_amount || 0)
-        }
-      }
-
-      // Level level
-      if (entry.area_info.level_info) {
-        entry.area_info.level_info.forEach((level) => {
-          if (level.product_type_obj_ref) {
-            const typeEntry = level.product_type_obj_ref.find((type) => type.type_id === typeId)
-            if (typeEntry) {
-              typeTotal += Number.parseFloat(typeEntry.type_total_amount || 0)
-            }
-          }
-
-          // Subarea level
-          if (level.subarea_info) {
-            level.subarea_info.forEach((subarea) => {
-              if (subarea.product_type_obj_ref) {
-                const typeEntry = subarea.product_type_obj_ref.find((type) => type.type_id === typeId)
-                if (typeEntry) {
-                  typeTotal += Number.parseFloat(typeEntry.type_total_amount || 0)
-                }
-              }
-            })
-          }
-        })
-      }
-    })
-
-    return Math.round(typeTotal * 100) / 100
-
-  }
+  // Checkbox to select Areas, Levels or Subareas for Summary
+  const handleCheckboxChange = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
 
   if (isFetchProjectLoading || isFetchProductTypeLoading) {
     return (
@@ -460,12 +563,20 @@ export default function BudgetPlanner() {
   }
 
   if (fetchProjectError || fetchProductTypeError) {
+    if(fetchProjectError.includes("Session expired") || fetchProjectError.includes("jwt expired") || fetchProjectError.includes("jwt malformed")){
+        return(<div><SessionExpired /></div>)
+    }
+    else if(fetchProductTypeError.includes("Session expired") || fetchProductTypeError.includes("jwt expired") || fetchProductTypeError.includes("jwt malformed")){
+        return(<div><SessionExpired /></div>)
+    }
     return (
       <div className="p-4 bg-red-50 text-red-600 rounded-md">
         <p>Error: {fetchProjectError || fetchProductTypeError}</p>
       </div>
-    )
+    );
   }
+
+console.log("productTypeState", productTypeState)
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
@@ -1506,41 +1617,159 @@ export default function BudgetPlanner() {
 
             {/* Budget Summary */}
             <div className="mt-8 border border-gray-200 rounded-md p-4 bg-gray-50">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Budget Summary</h2>
-
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">Budget Summary</h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
+                  {/* ***** total budget by AREA ***** */}
                   <div>
-                    <h3 className="text-md font-medium text-gray-700 mb-2">By Area</h3>
+                    <h3 className="text-xl font-medium text-gray-700 mb-2">By Area</h3>
                     <div className="space-y-2">
                       {budget.entries.map((entry) => (
-                        <div key={`summary-area-${entry.area_info.area_id}`} className="flex justify-between">
-                          <span className="text-sm text-gray-600">{entry.area_info.area_name}</span>
-                          <span className="text-sm font-medium">${calculateAreaTotals(entry.area_info.area_id)}</span>
+                        <div key={`summary-area-${entry.area_info.area_id}`}>
+                          <div className="flex justify-between">
+                            <div 
+                              className="flex items-center cursor-pointer"
+                              onClick={() => toggleSection(`area-${entry.area_info.area_id}-summary`)}
+                            >
+                              {expandedSections[`area-${entry.area_info.area_id}-summary`] ? (
+                                <>
+                                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                                  <span className="text-lg font-semibold text-gray-600">{entry.area_info.area_name}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronRight className="h-4 w-4 text-gray-500" />
+                                  <span className="text-lg font-semibold text-gray-600">{entry.area_info.area_name}</span>
+                                </>
+                              )}
+                              <input 
+                                key={entry.area_info.area_id}
+                                type="checkbox"
+                                className="ml-2 cursor-pointer"
+                                value={entry.area_info.area_id}
+                                checked={selectedIds.includes(entry.area_info.area_id)}
+                                onClick={(e) => e.stopPropagation()} // This prevents checkbox onClick from reaching parent's onClick
+                                onChange={() => handleCheckboxChange(entry.area_info.area_id)}
+                              />
+                            </div>
+                            <span className="text-lg font-semibold">${calculateAreaTotals(entry.area_info.area_id)}</span>
+                          </div>
+
+                          {/* Expand to Levels */}
+                          {expandedSections[`area-${entry.area_info.area_id}-summary`] && (
+                            <div className="pl-6 space-y-4">
+                              {entry.area_info.level_info.map((lvl) => (
+                                <div key={`summary-area-${entry.area_info.area_id}-level-${lvl.level_id}`}>
+                                  <div className="flex justify-between">
+                                    <div 
+                                      className="flex items-center cursor-pointer"
+                                      onClick={() => toggleSection(`area-${entry.area_info.area_id}-level-${lvl.level_id}-summary`)}
+                                    >
+                                      {expandedSections[`area-${entry.area_info.area_id}-level-${lvl.level_id}-summary`] ? (
+                                        <>
+                                          <ChevronDown className="h-4 w-4 text-gray-500" />
+                                          <span className="text-md text-gray-600">{lvl.level_name}</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                                          <span className="text-md text-gray-600">{lvl.level_name}</span>
+                                        </>
+                                      )}
+                                      <input 
+                                        key={lvl.level_id}
+                                        type="checkbox"
+                                        className="ml-2 cursor-pointer"
+                                        value={lvl.level_id}
+                                        checked={selectedIds.includes(lvl.level_id)}
+                                        onClick={(e) => e.stopPropagation()} // This prevents checkbox onClick from reaching parent's onClick
+                                        onChange={() => handleCheckboxChange(lvl.level_id)}
+                                      />
+                                    </div>
+                                    <span className="text-md font-normal">
+                                      ${calculateLevelTotals(entry.area_info.area_id, lvl.level_id)}
+                                    </span>
+                                  </div>
+
+                                  {/* Expand to Subareas */}
+                                  {expandedSections[`area-${entry.area_info.area_id}-level-${lvl.level_id}-summary`] && (
+                                    <div className="pl-6 space-y-4">
+                                      {lvl.subarea_info.map((sub) => (
+                                        <div key={`summary-area-${entry.area_info.area_id}-level-${lvl.level_id}-subarea-${sub.subarea_id}`} className="flex justify-between">
+                                          <div 
+                                            className="flex items-center"
+                                            onClick={() => toggleSection(`area-${entry.area_info.area_id}-level-${lvl.level_id}-subarea-${sub.subarea_id}-summary`)}
+                                          >
+                                            {expandedSections[`area-${entry.area_info.area_id}-level-${lvl.level_id}-subarea-${sub.subarea_id}-summary`] ? (
+                                              <>
+                                                <Dot className="h-4 w-4 text-gray-500 mr-1" />
+                                                <span className="text-sm text-gray-400">{sub.subarea_name}</span>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <Dot className="h-4 w-4 text-gray-500 mr-1" />
+                                                <span className="text-sm text-gray-400">{sub.subarea_name}</span>
+                                              </>
+                                            )}
+                                            <input 
+                                              key={sub.subarea_id}
+                                              type="checkbox"
+                                              className="ml-2 cursor-pointer"
+                                              value={sub.subarea_id}
+                                              checked={selectedIds.includes(sub.subarea_id)}
+                                              onClick={(e) => e.stopPropagation()} // This prevents checkbox onClick from reaching parent's onClick
+                                              onChange={() => handleCheckboxChange(sub.subarea_id)}
+                                            />
+                                          </div>
+                                          <span className="text-sm font-light">
+                                            ${calculateSubareaTotals(entry.area_info.area_id, lvl.level_id, sub.subarea_id)}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   </div>
-
+                  {/* ***** total budget by PRODUCT TYPE ***** */}
                   <div>
-                    <h3 className="text-md font-medium text-gray-700 mb-2">By Product Type</h3>
+                    <h3 className="text-xl font-medium text-gray-700 mb-2">By Product Type</h3>
                     <div className="space-y-2">
                       {productTypeState.map((type) => (
-                        <div key={`summary-type-${type._id}`} className="flex justify-between">
-                          <span className="text-sm text-gray-600">{type.type_name}</span>
-                          <span className="text-sm font-medium">${calculateProductTypeTotals(type._id)}</span>
+                        <div key={`summary-type-${type._id}`} className="p-2">
+                          {/* Product Type Summary */}
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600 font-semibold">{type.type_name}</span>
+                            <span className="text-sm font-medium">${calculateProductTypeTotals(type._id)}</span>
+                          </div>
+
+                          {/* Ensure category_obj_ref exists before mapping */}
+                          {Array.isArray(type.type_categories) &&
+                            type.type_categories.map((cat) => (
+                              <div key={`summary-type-${cat._id}`} className="flex justify-between border-b-2">
+                                <span className="ml-4 text-xs text-gray-600">{cat.category_name}</span>
+                                <span className="text-xs font-light">${calculateCategoryTotals(type._id, cat._id)}</span>
+                              </div>
+                            ))}
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
 
+                {/* ***** total budget by WHOLE PROJECT ***** */}
                 <div className="pt-4 border-t border-gray-200">
                   <div className="flex justify-between">
                     <span className="text-lg font-medium text-gray-800">Total Budget</span>
                     <span className="text-lg font-bold text-primary">${calculateBudgetTotals()}</span>
                   </div>
                 </div>
+
               </div>
             </div>
 
