@@ -1,11 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronRight, Dot, Building, Layers, Grid3X3, Package, Save } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { ChevronDown, ChevronRight, Dot, Building, Layers, Grid3X3, Package, Save, Info } from "lucide-react"
 import SessionExpired from "../../components/SessionExpired"
 
 
 export default function BudgetPlanner() {
+  const navigate = useNavigate();
+
   const [projectState, setProjectState] = useState([])
   const [isFetchProjectLoading, setIsFetchProjectLoading] = useState(false)
   const [fetchProjectError, setFetchProjectError] = useState(null)
@@ -23,6 +26,9 @@ export default function BudgetPlanner() {
   const [selectedProject, setSelectedProject] = useState(null)
   const [expandedSections, setExpandedSections] = useState({})
   const [selectedIds, setSelectedIds] = useState([])
+
+  const [addBudgetLoading, setAddBudgetLoading] = useState(false);
+  const [addBudgetError, setAddBudgetError] = useState(null);
 
   // Fetch all projects
   useEffect(() => {
@@ -466,6 +472,8 @@ export default function BudgetPlanner() {
     return Math.round(typeTotal * 100) / 100
 
   }
+
+  // Calculate 'Total Budget by Product Type + Category based on selected area/level/subarea' for Summary
   const calculateCategoryTotals = (typeId, catId) => {
     let categoryTotal = 0
 
@@ -507,14 +515,14 @@ export default function BudgetPlanner() {
 
   }
 
-  // Calculate 'Total Budget of Whole Project' for Summary
+  // Calculate 'Total Budget of all Product Types based on Area/Level/Subarea selection' for Summary
   const calculateBudgetTotals = () => {
     let totalBudget = 0
 
     // Calculate totals for each area, level, and subarea
     budget.entries.forEach((entry) => {
       // Area level calculations
-      if (entry.area_info.product_type_obj_ref) {
+      if (selectedIds.includes(entry.area_info.area_id) && entry.area_info.product_type_obj_ref) {
         entry.area_info.product_type_obj_ref.forEach((type) => {
           totalBudget += Number.parseFloat(type.type_total_amount || 0)
         })
@@ -523,7 +531,7 @@ export default function BudgetPlanner() {
       // Level calculations
       if (entry.area_info.level_info) {
         entry.area_info.level_info.forEach((level) => {
-          if (level.product_type_obj_ref) {
+          if (level.product_type_obj_ref && selectedIds.includes(level.level_id)) {
             level.product_type_obj_ref.forEach((type) => {
               totalBudget += Number.parseFloat(type.type_total_amount || 0)
             })
@@ -532,7 +540,7 @@ export default function BudgetPlanner() {
           // Subarea calculations
           if (level.subarea_info) {
             level.subarea_info.forEach((subarea) => {
-              if (subarea.product_type_obj_ref) {
+              if (subarea.product_type_obj_ref && selectedIds.includes(subarea.subarea_id)) {
                 subarea.product_type_obj_ref.forEach((type) => {
                   totalBudget += Number.parseFloat(type.type_total_amount || 0)
                 })
@@ -552,6 +560,57 @@ export default function BudgetPlanner() {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+  };
+
+  // Form submit
+  const addBudget = async (budget) => {
+    setAddBudgetLoading(true)
+    setAddBudgetError(null)
+
+    const postBudget = async () => {
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/create`, {
+                credentials: 'include', method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                },
+                body: JSON.stringify(budget)
+            })
+
+            const data = await res.json();
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError)
+            }
+
+            if (!res.ok) {
+                throw new Error('Failed to POST new budget details')
+            }
+            if (res.ok) {
+                // navigate client to dashboard page
+                navigate(`/EmpirePMS/budget/`)
+
+                alert(`Budget created successfully!`);
+            
+                // update loading state
+                setAddBudgetLoading(false)
+
+            }
+        } catch (error) {
+            setAddBudgetError(error.message);
+            setAddBudgetLoading(false);
+        }
+    }
+    postBudget();
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    console.log("budget:", budget)
+
+    addBudget(budget)
   };
 
   if (isFetchProjectLoading || isFetchProductTypeLoading) {
@@ -575,8 +634,6 @@ export default function BudgetPlanner() {
       </div>
     );
   }
-
-console.log("productTypeState", productTypeState)
 
   return (
     <div className="container mx-auto p-4 max-w-6xl">
@@ -1622,7 +1679,12 @@ console.log("productTypeState", productTypeState)
                 <div className="grid grid-cols-2 gap-4">
                   {/* ***** total budget by AREA ***** */}
                   <div>
-                    <h3 className="text-xl font-medium text-gray-700 mb-2">By Area</h3>
+                    <div className="flex items-center mb-2">
+                      <h3 className="text-xl font-medium text-gray-700">By Area</h3>
+                      <button title="Calculate 'Total Budget by Area or Level or Subarea' based on checkbox selection" disabled>
+                        <Info className="h-4 w-4 text-blue-500 ml-2"/>
+                      </button>
+                    </div>
                     <div className="space-y-2">
                       {budget.entries.map((entry) => (
                         <div key={`summary-area-${entry.area_info.area_id}`}>
@@ -1703,12 +1765,12 @@ console.log("productTypeState", productTypeState)
                                             {expandedSections[`area-${entry.area_info.area_id}-level-${lvl.level_id}-subarea-${sub.subarea_id}-summary`] ? (
                                               <>
                                                 <Dot className="h-4 w-4 text-gray-500 mr-1" />
-                                                <span className="text-sm text-gray-400">{sub.subarea_name}</span>
+                                                <span className="text-sm text-gray-500">{sub.subarea_name}</span>
                                               </>
                                             ) : (
                                               <>
                                                 <Dot className="h-4 w-4 text-gray-500 mr-1" />
-                                                <span className="text-sm text-gray-400">{sub.subarea_name}</span>
+                                                <span className="text-sm text-gray-500">{sub.subarea_name}</span>
                                               </>
                                             )}
                                             <input 
@@ -1738,22 +1800,33 @@ console.log("productTypeState", productTypeState)
                   </div>
                   {/* ***** total budget by PRODUCT TYPE ***** */}
                   <div>
-                    <h3 className="text-xl font-medium text-gray-700 mb-2">By Product Type</h3>
+                    <div className="flex items-center mb-2">
+                      <h3 className="text-xl font-medium text-gray-700">By Product Type</h3>
+                      <button title="Total Budget using breakdown by Product Type" disabled>
+                        <Info className="h-4 w-4 text-blue-500 ml-2"/>
+                      </button>
+                    </div>
                     <div className="space-y-2">
                       {productTypeState.map((type) => (
                         <div key={`summary-type-${type._id}`} className="p-2">
                           {/* Product Type Summary */}
-                          <div className="flex justify-between">
+                          <div className={`flex justify-between`}>
                             <span className="text-sm text-gray-600 font-semibold">{type.type_name}</span>
-                            <span className="text-sm font-medium">${calculateProductTypeTotals(type._id)}</span>
+                            <span className="text-sm font-medium">
+                              <Dot className={`h-4 w-4 text-gray-500 ${calculateProductTypeTotals(type._id) > 0 ? 'inline-block' : 'hidden'}`}/>
+                              ${calculateProductTypeTotals(type._id)}
+                            </span>
                           </div>
 
                           {/* Ensure category_obj_ref exists before mapping */}
                           {Array.isArray(type.type_categories) &&
                             type.type_categories.map((cat) => (
-                              <div key={`summary-type-${cat._id}`} className="flex justify-between border-b-2">
+                              <div key={`summary-type-${cat._id}`} className={`flex justify-between border-b-2`}>
                                 <span className="ml-4 text-xs text-gray-600">{cat.category_name}</span>
-                                <span className="text-xs font-light">${calculateCategoryTotals(type._id, cat._id)}</span>
+                                <span className="text-xs font-light">
+                                  <Dot className={`h-4 w-4 text-gray-500 ${calculateCategoryTotals(type._id, cat._id) > 0 ? 'inline-block' : 'hidden'}`}/>
+                                  ${calculateCategoryTotals(type._id, cat._id)}
+                                </span>
                               </div>
                             ))}
                         </div>
@@ -1765,7 +1838,12 @@ console.log("productTypeState", productTypeState)
                 {/* ***** total budget by WHOLE PROJECT ***** */}
                 <div className="pt-4 border-t border-gray-200">
                   <div className="flex justify-between">
-                    <span className="text-lg font-medium text-gray-800">Total Budget</span>
+                    <div className="flex items-center">
+                      <span className="text-lg font-medium text-gray-800">Total Budget</span>
+                      <button title="Total Budget of all Product Types based on Area/Level/Subarea selection" disabled>
+                        <Info className="h-4 w-4 text-blue-500 ml-2"/>
+                      </button>
+                    </div>
                     <span className="text-lg font-bold text-primary">${calculateBudgetTotals()}</span>
                   </div>
                 </div>
@@ -1777,10 +1855,20 @@ console.log("productTypeState", productTypeState)
             <div className="flex justify-end mt-8">
               <button
                 className="flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-                onClick={() => console.log("Budget data:", budget)}
+                onClick={handleSubmit}
+                disabled={addBudgetLoading} // Optional: Disable button while loading
               >
-                <Save className="h-5 w-5 mr-2" />
-                Save Budget
+                {addBudgetLoading ? (
+                  <>
+                    <Save className="h-5 w-5 mr-2" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-5 w-5 mr-2" />
+                    Save Budget
+                  </>
+                )}
               </button>
             </div>
           </div>
