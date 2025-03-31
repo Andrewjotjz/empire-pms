@@ -48,8 +48,6 @@ import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 import Calculator from "./components/Calculator";
 import NewBudgetForm2 from "./pages/forms/NewBudgetForm2";
-import NewBudgetForm3 from "./pages/forms/NewBudgetForm3";
-import NewBudgetForm4 from "./pages/forms/NewBudgetForm4";
 
 function App() {
 
@@ -109,8 +107,6 @@ function App() {
             <Route path="/EmpirePMS/budget/:id" element={<BudgetDetails />} />
             <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
             <Route path="/EmpirePMS/budget/create2" element={<NewBudgetForm2 />} />
-            <Route path="/EmpirePMS/budget/create3" element={<NewBudgetForm3 />} />
-            <Route path="/EmpirePMS/budget/create4" element={<NewBudgetForm4 />} />
             <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
 
             <Route path="/EmpirePMS/delivery" element={<Delivery />} />

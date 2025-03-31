@@ -115,26 +115,6 @@ const Dashboard = () => {
                 <Col md={6}>
                     <Card className="mb-4 bg-blue-50">
                         <Card.Body>
-                        <Link to="/EmpirePMS/budget/create3"><Card.Title>Budget 3</Card.Title></Link>
-                            <Card.Text>
-                                {/* Insert Invoices content here */}
-                            </Card.Text>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={6}>
-                    <Card className="mb-4 bg-blue-50">
-                        <Card.Body>
-                        <Link to="/EmpirePMS/budget/create4"><Card.Title>Budget 4</Card.Title></Link>
-                            <Card.Text>
-                                {/* Insert Invoices content here */}
-                            </Card.Text>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={6}>
-                    <Card className="mb-4 bg-blue-50">
-                        <Card.Body>
                         <Link to="/EmpirePMS/product"><Card.Title>Products</Card.Title></Link>
                             <Card.Text>
                                 {/* Insert Invoices content here */}

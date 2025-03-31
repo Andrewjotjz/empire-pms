@@ -51,7 +51,6 @@ const Navbar = () => {
             
             {/* Desktop Links */}
             <div className="hidden md:flex items-center space-x-4">
-              <span className='text-blue-950'>T{Math.floor((new Date() - new Date('2024-12-16T00:00:00+11:00')) / (1000 * 60 * 60 * 24)) } days left</span>
               {localUser && (
                 <span className="text-white cursor-pointer" onClick={handleAccountClick}>
                   {localUser.employee_email}
