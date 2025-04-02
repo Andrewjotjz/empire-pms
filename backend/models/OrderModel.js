@@ -44,6 +44,10 @@ const orderSchema = new Schema({
             type: String,
             required: true
         },
+        order_product_area: {
+            type: String,
+            required: true
+        },
         order_product_qty_a: {
             type: Number,
             required: true,
@@ -70,6 +74,10 @@ const orderSchema = new Schema({
         }, 
         custom_product_location: {
             type: String
+        },
+        custom_product_area: {
+            type: String,
+            required: true
         },
         custom_order_qty:{
             type: Number
