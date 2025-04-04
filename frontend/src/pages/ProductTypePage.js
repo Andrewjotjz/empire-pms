@@ -1,234 +1,306 @@
-// import modules
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from "react-router-dom";
-import SessionExpired from "../components/SessionExpired";
-import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton";
-import UnauthenticatedSkeleton from './loaders/UnauthenticateSkeleton';
+"use client"
 
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { ChevronDown, ChevronRight, Edit, Layers, Plus, Search, Archive, X } from "lucide-react"
+import SessionExpired from "../components/SessionExpired"
+import EmployeePageSkeleton from "./loaders/EmployeePageSkeleton"
+import UnauthenticatedSkeleton from "./loaders/UnauthenticateSkeleton"
 
 const ProductType = () => {
-    // state
-    const localUser = JSON.parse(localStorage.getItem('localUser'))
-    const [isArchive, setIsArchive] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [productTypeState, setProductTypeState] = useState([]);
-    const [isLoadingState, setIsLoadingState] = useState(true);
-    const [errorState, setErrorState] = useState(null);
+  // state
+  const localUser = JSON.parse(localStorage.getItem("localUser"))
+  const [isArchive, setIsArchive] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [productTypeState, setProductTypeState] = useState([])
+  const [isLoadingState, setIsLoadingState] = useState(true)
+  const [errorState, setErrorState] = useState(null)
+  const [expandedNodes, setExpandedNodes] = useState({})
 
-    // router
-    const navigate = useNavigate();
-    
-    // functions and variables
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-    };
-    const handleAddClick = () => {
-        navigate('/EmpirePMS/product-type/create');
-    };
-    const handleEditClick = (typeId) => {
-        navigate(`/EmpirePMS/product-type/${typeId}/edit`)
-    }
-    // Filter the data using searchTerm
-    const filterProductType = () => {
-        return productTypeState.filter(producttype => {
+  // router
+  const navigate = useNavigate()
 
-            const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  // functions and variables
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value)
+  }
 
-            return (
-                producttype.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-                producttype.type_categories.some(category => category.category_name.toLowerCase().includes(lowerCaseSearchTerm)) ||
-                producttype.type_categories.some(category => category.subcategories.some(subcategory => subcategory.subcategory_name.toLowerCase().includes(lowerCaseSearchTerm)))
-            )
+  const handleAddClick = () => {
+    navigate("/EmpirePMS/product-type/create")
+  }
+
+  const handleEditClick = (typeId, e) => {
+    e.stopPropagation()
+    navigate(`/EmpirePMS/product-type/${typeId}/edit`)
+  }
+
+  const toggleNode = (nodeId) => {
+    setExpandedNodes((prev) => ({
+      ...prev,
+      [nodeId]: !prev[nodeId],
+    }))
+  }
+
+  // Filter the data using searchTerm
+  const filterProductType = () => {
+    return productTypeState.filter((producttype) => {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase()
+
+      return (
+        producttype.type_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+        producttype.type_categories.some(
+          (category) =>
+            category.category_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+            category.subcategories.some((subcategory) =>
+              subcategory.subcategory_name.toLowerCase().includes(lowerCaseSearchTerm),
+            ),
+        )
+      )
+    })
+  }
+
+  // Transform the data into the required format for the table
+  const formatData = (rawData) => {
+    return rawData.map((type) => ({
+      id: type._id,
+      name: type.type_name,
+      unit: type.type_unit,
+      children: type.type_categories.map((category) => ({
+        id: category._id,
+        name: category.category_name,
+        unit: category.category_unit,
+        children: category.subcategories.map((subcategory) => ({
+          id: subcategory._id,
+          name: subcategory.subcategory_name,
+          unit: subcategory.subcategory_unit,
+        })),
+      })),
+    }))
+  }
+
+  const formattedData = formatData(filterProductType().filter((type) => type.type_isarchived === isArchive))
+
+  // useEffect
+  useEffect(() => {
+    const abortController = new AbortController()
+    const signal = abortController.signal
+
+    const fetchProductTypes = async () => {
+      setIsLoadingState(true)
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, {
+          signal,
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+          },
         })
-    }
-    // Transform the data into the required format for the table
-    const formatData = (rawData) => {
-        return rawData.map(type => ({
-        id: type._id,
-        name: type.type_name,
-        unit: type.type_unit,
-        children: type.type_categories.map(category => ({
-            id: category._id,
-            name: category.category_name,
-            unit: category.category_unit,
-            children: category.subcategories.map(subcategory => ({
-            id: subcategory._id,
-            name: subcategory.subcategory_name,
-            unit: subcategory.subcategory_unit
-            }))
-        }))
-        }));
-    };
-    const formattedData = formatData(filterProductType().filter(type => type.type_isarchived === isArchive));
 
-    // useEffect
-    useEffect(() => {
-        const abortController = new AbortController();
-        const signal = abortController.signal;
-
-        const fetchProductTypes = async () => {
-            setIsLoadingState(true); // Set loading state to true at the beginning
-            try {
-                const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/product-type`, { signal , credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
-                    }});
-                if (!res.ok) {
-                    throw new Error('Failed to fetch');
-                }
-                const data = await res.json();
-
-                if (data.tokenError) {
-                    throw new Error(data.tokenError);
-                }
-                
-                setIsLoadingState(false);
-                setProductTypeState(data);
-                setErrorState(null);
-            } catch (error) {
-                if (error.name === 'AbortError') {
-                    // do nothing
-                } else {
-                    setIsLoadingState(false);
-                    setErrorState(error.message);
-                }
-            }
-        };
-
-        fetchProductTypes();
-
-        return () => {
-            abortController.abort(); // Cleanup
-        };
-    }, []);
-
-    // components
-    const TreeTableRow = ({ node, level }) => {
-        const [isExpanded, setIsExpanded] = useState(false);
-      
-        const hasChildren = node.children && node.children.length > 0;
-      
-        return (
-          <>
-            <tr>
-              <td className="font-medium">
-                <div style={{ paddingLeft: `${level * 20}px` }} className="flex items-center">
-                  {hasChildren && (
-                    <button
-                      className="w-4 sm:w-6 h-6 p-0 mr-0 sm:mr-2 text-gray-500"
-                      onClick={() => setIsExpanded(!isExpanded)}
-                    >
-                      {isExpanded ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 sm:size-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 sm:size-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                        </svg>
-                      )}
-                    </button>
-                  )}
-                  {/* empty box for indentation */}
-                  {!hasChildren && <div className="w-4 sm:w-6 h-6 mr-0 sm:mr-2" />}
-                  <label className='border-l-2 pl-2 border-gray-300'>{node.name} <span className='hidden sm:inline-block text-xs italic text-gray-400'>{node.unit}</span></label>
-                  {/* edit button */}
-                  { level === 0 && (
-                    <button className='ml-1 text-gray-400 hover:text-gray-600' onClick={() => handleEditClick(node.id)}>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-3">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </td>
-            </tr>
-            {isExpanded &&
-              node.children?.map((child) => (
-                <TreeTableRow key={child.id} node={child} level={level + 1} />
-              ))}
-          </>
-        );
-    };
-
-    const TreeTable = ({ data }) => {
-        return (
-          <table className="min-w-full table-auto text-xs sm:text-base">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 text-left">Product Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((node) => (
-                <TreeTableRow key={node.id} node={node} level={0} />
-              ))}
-            </tbody>
-          </table>
-        );
-    };
-
-    if (isLoadingState) { return (<EmployeePageSkeleton />); }
-
-    if (errorState) {
-        if(errorState.includes("Session expired") || errorState.includes("jwt expired") || errorState.includes("jwt malformed")){
-            return(<div><SessionExpired /></div>)
+        if (!res.ok) {
+          throw new Error("Failed to fetch product types")
         }
-        return (<div>Error: {errorState}</div>);
-    }     
 
-    return ( 
-        localUser && Object.keys(localUser).length > 0 ? (
-            <div className="container mt-3 sm:mt-5">
-                <div className="card">
-                    <div className="card-header bg-dark text-white">
-                        <h1 className='mx-auto uppercase font-bold text-sm sm:text-xl'>PRODUCT TYPES</h1>
-                    </div>
-                    <div className="card-body">
-                        <div  className="flex flex-col md:flex-row mb-3 gap-2">
-                            <div className="flex-1">
-                                <input
-                                    type="text"
-                                    className="form-control text-xs sm:text-base"
-                                    placeholder="Search..."
-                                    value={searchTerm}
-                                    onChange={handleSearchChange}
-                                />
-                            </div>
-                            <div className="flex justify-end">
-                                <button className="btn btn-primary flex items-center" onClick={handleAddClick}>
-                                    <div className='flex items-center'>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 mr-1">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                        </svg>
-                                        <label className='text-xs sm:text-base'>CREATE PRODUCT TYPE</label>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <button 
-                                className={`${!isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} 
-                                onClick={() => setIsArchive(false)}
-                            >
-                                Current
-                            </button>
-                            <button 
-                                className={`${isArchive ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white text-xs sm:text-base' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base'}`} 
-                                onClick={() => setIsArchive(true)}
-                            >
-                                Archived
-                            </button>
-                            <div className="border rounded-md overflow-auto">
-                                <TreeTable data={formattedData} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> ) : ( <UnauthenticatedSkeleton /> )
-     );
+        const data = await res.json()
+
+        if (data.tokenError) {
+          throw new Error(data.tokenError)
+        }
+
+        setIsLoadingState(false)
+        setProductTypeState(data)
+        setErrorState(null)
+      } catch (error) {
+        if (error.name === "AbortError") {
+          // do nothing
+        } else {
+          setIsLoadingState(false)
+          setErrorState(error.message)
+        }
+      }
+    }
+
+    fetchProductTypes()
+
+    return () => {
+      abortController.abort() // Cleanup
+    }
+  }, [])
+
+  // components
+  const TreeTableRow = ({ node, level }) => {
+    const hasChildren = node.children && node.children.length > 0
+    const isExpanded = expandedNodes[node.id]
+
+    const levelColors = ["border-blue-500", "border-emerald-500", "border-amber-500"]
+
+    const borderColor = levelColors[level] || "border-gray-300"
+
+    return (
+      <>
+        <tr
+          className={`border-t border-gray-100 hover:bg-gray-50 transition-colors duration-150 ${level === 0 ? "bg-gray-50" : ""}`}
+          onClick={() => hasChildren && toggleNode(node.id)}
+        >
+          <td className="p-3">
+            <div style={{ paddingLeft: `${level * 24}px` }} className="flex items-center">
+              {hasChildren ? (
+                <button className="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 mr-2">
+                  {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                </button>
+              ) : (
+                <div className="w-6 h-6 mr-2" />
+              )}
+
+              <div className={`border-l-2 pl-2 ${borderColor} flex-1 flex items-center`}>
+                <span className="font-medium text-gray-800">{node.name}</span>
+                {node.unit && (
+                  <span className="ml-2 text-xs text-gray-500 italic hidden sm:inline-block">{node.unit}</span>
+                )}
+              </div>
+
+              {level === 0 && (
+                <button
+                  className="ml-2 p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors duration-150"
+                  onClick={(e) => handleEditClick(node.id, e)}
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </td>
+        </tr>
+
+        {isExpanded &&
+          hasChildren &&
+          node.children.map((child) => <TreeTableRow key={child.id} node={child} level={level + 1} />)}
+      </>
+    )
+  }
+
+  if (isLoadingState) {
+    return <EmployeePageSkeleton />
+  }
+
+  if (errorState) {
+    if (
+      errorState.includes("Session expired") ||
+      errorState.includes("jwt expired") ||
+      errorState.includes("jwt malformed")
+    ) {
+      return <SessionExpired />
+    }
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">{errorState}</span>
+        </div>
+      </div>
+    )
+  }
+
+  return localUser && Object.keys(localUser).length > 0 ? (
+    <div className="bg-gray-100 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">Product Types</h1>
+
+          {/* Search and Add Button */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="relative flex-grow">
+              <input
+                type="text"
+                placeholder="Search product types..."
+                className="w-full p-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              { searchTerm === "" ? (<Search className="absolute right-3 top-2.5 text-gray-400 h-5 w-5" />) : (<X className="absolute right-3 top-2.5 text-gray-400 h-5 w-5 hover:scale-105 hover:cursor-pointer" onClick={() => setSearchTerm("")}/>) }
+            </div>
+
+            <button
+              onClick={handleAddClick}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors duration-200"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              <span className="font-medium">CREATE PRODUCT TYPE</span>
+            </button>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex">
+            <button
+              className={`mr-2 px-6 py-2 rounded-t-lg font-medium transition-colors duration-200 flex items-center ${
+                !isArchive ? "bg-white text-blue-600 shadow-inner" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }`}
+              onClick={() => setIsArchive(false)}
+            >
+              <Layers className="h-4 w-4 mr-2" />
+              Current
+            </button>
+            <button
+              className={`px-6 py-2 rounded-t-lg font-medium transition-colors duration-200 flex items-center ${
+                isArchive ? "bg-white text-blue-600 shadow-inner" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }`}
+              onClick={() => setIsArchive(true)}
+            >
+              <Archive className="h-4 w-4 mr-2" />
+              Archived
+            </button>
+          </div>
+
+          {/* Tree Table */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            {formattedData.length > 0 ? (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-100 text-left text-gray-600 text-sm uppercase">
+                    <th className="p-3">Product Type Hierarchy</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formattedData.map((node) => (
+                    <TreeTableRow key={node.id} node={node} level={0} />
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <Layers className="h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900">No product types found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {isArchive
+                    ? "There are no archived product types matching your criteria."
+                    : "There are no active product types matching your criteria."}
+                </p>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Clear search
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Summary */}
+          <div className="mt-6 text-sm text-gray-600">
+            {formattedData.length > 0 ? (
+              <p>
+                Showing {formattedData.length} product type{formattedData.length !== 1 ? "s" : ""}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <UnauthenticatedSkeleton />
+  )
 }
- 
-export default ProductType;
+
+export default ProductType
+

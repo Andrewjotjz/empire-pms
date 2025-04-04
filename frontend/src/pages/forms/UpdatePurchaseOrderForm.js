@@ -17,6 +17,8 @@ import SessionExpired from "../../components/SessionExpired";
 import NewPurchaseOrderSkeleton from "../loaders/NewPurchaseOrderSkeleton";
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 
+import { AreaSelection } from '../../components/AreaSelection';
+
 const UpdatePurchaseOrderForm = () => {
   // Component router
   const navigate = useNavigate();
@@ -186,6 +188,7 @@ const UpdatePurchaseOrderForm = () => {
         },
         productprice_obj_ref: product.productPrice,
         order_product_location: "",
+        order_product_area: '',
         order_product_qty_a: 0, // Ensure all fields are initialized properly
         order_product_qty_b: 0,
         order_product_price_unit_a: product.productPrice.product_price_unit_a,
@@ -220,6 +223,7 @@ const UpdatePurchaseOrderForm = () => {
             {
               custom_product_name: "",
               custom_product_location: "",
+              custom_product_area: '',
               custom_order_qty: '',
             },
           ],
@@ -470,35 +474,91 @@ const UpdatePurchaseOrderForm = () => {
       );
   };
 
-  const handleApplyLocationToAll = (index, isCustom = false) => {
+  const handleApplyLocationToAll = (index, isCustom) => {
       let copyText = '';
+      let copyID = '';
 
       // Determine the source of copyText based on isCustom
       if (isCustom) {
           copyText = purchaseOrderState.custom_products[index]?.custom_product_location || '';
+          copyID = purchaseOrderState.custom_products[index]?.custom_product_area || '';
       } else {
           copyText = purchaseOrderState.products[index]?.order_product_location || '';
+          copyID = purchaseOrderState.products[index]?.order_product_area || '';
       }
 
       const updatedProducts = purchaseOrderState.products.map(product => ({
           ...product,
-          order_product_location: copyText, // Set all product locations to the copied location
+          order_product_location: copyText, // Set all product locations to the copied location String
+          order_product_area: copyID, // Set all product locations to the copied location ID
       }));
 
       const updatedCustomProducts = purchaseOrderState.custom_products.map(cproduct => ({
           ...cproduct,
-          custom_product_location: copyText
+          custom_product_location: copyText,
+          custom_product_area: copyID
       }))
       
-      // Dispatch the updated state
-    dispatch(
-      setPurchaseOrderState({
-          ...purchaseOrderState,
-          products: updatedProducts, // Update the products in state
-          custom_products: updatedCustomProducts
-      })
-    );
-  }; 
+      dispatch(setPurchaseOrderState({
+        ...purchaseOrderState,  // Preserve the existing state
+        products: updatedProducts, 
+        custom_products: updatedCustomProducts
+    }));
+    
+  };
+
+  console.log("purchaseOrderState", purchaseOrderState)
+
+  // NEW function for Area/Level/Subarea change
+  // const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
+  //   if (!isCustom) {
+  //       const updatedProducts = [...purchaseOrderState.products];
+  //       updatedProducts[productIndex].order_product_location = locationString;
+  //       updatedProducts[productIndex].order_product_area = locationID;
+        
+  //       // Update your state with the new products array
+  //       setPurchaseOrderState({
+  //       ...purchaseOrderState,
+  //       products: updatedProducts
+  //       });
+  //   }
+  //   else {
+  //       const updatedProducts = [...purchaseOrderState.custom_products];
+  //       updatedProducts[productIndex].custom_product_location = locationString;
+  //       updatedProducts[productIndex].custom_product_area = locationID;
+        
+  //       // Update your state with the new products array
+  //       setPurchaseOrderState({
+  //           ...purchaseOrderState,
+  //           custom_products: updatedProducts
+  //       });
+  //   }
+  // };
+
+  const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
+    if (!isCustom) {
+        const updatedProducts = purchaseOrderState.products.map((product, index) => 
+            index === productIndex ? { ...product, order_product_location: locationString, order_product_area: locationID } : product
+        );
+
+        dispatch(setPurchaseOrderState({
+            ...purchaseOrderState,
+            products: updatedProducts
+        }));
+    } else {
+        const updatedCustomProducts = purchaseOrderState.custom_products.map((product, index) => 
+            index === productIndex ? { ...product, custom_product_location: locationString, custom_product_area: locationID } : product
+        );
+
+        dispatch(setPurchaseOrderState({
+            ...purchaseOrderState,
+            custom_products: updatedCustomProducts
+        }));
+    }
+};
+
+
+  
 
   const filterProductsBySearchTerm = () => {
     const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
@@ -992,7 +1052,7 @@ const UpdatePurchaseOrderForm = () => {
             {/* ***** ADDED ITEM TABLE ****** */}
             <label className="font-bold">Order Items:</label>
             <div className="bg-gray-100 border rounded-lg shadow-sm">
-              <div className="border-0 rounded-lg overflow-x-auto">
+              <div className="border-0 rounded-lg">
                 <table className="table m-0 text-xs">
                   <thead className="thead-dark text-center">
                     <tr className="table-primary">
@@ -1013,39 +1073,35 @@ const UpdatePurchaseOrderForm = () => {
                           <td className='hidden lg:table-cell'>{prod.product_obj_ref.product_sku}</td>
                           <td>{prod.product_obj_ref.product_name}</td>
                           <td className="whitespace-nowrap">
-                            <div className="inline-block align-middle">
-                                <input
-                                    type="text"
-                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
-                                    name="order_product_location"
-                                    value={prod.order_product_location}
-                                    onChange={(e) => handleInputChange(e, index, true)}
-                                    placeholder="Ex: Level 2"
-                                    required
-                                    onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
-                                    onInput={(e) => e.target.setCustomValidity('')}
-                                />
-                            </div>
-                            <div
-                                className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-                                title='Paste location to all'
-                                onClick={() => handleApplyLocationToAll(index)}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth="1.5"
-                                    stroke="currentColor"
-                                    className="w-4 h-4 inline-block"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
-                                    />
-                                </svg>
-                            </div>
+                            <div title={`${prod.order_product_location}`} className='inline-block'>
+                              <AreaSelection 
+                                  areaObjRef={projectState.find(proj => proj._id === selectedProject).area_obj_ref} 
+                                  productIndex={index}
+                                  currentLocation={prod.order_product_location}
+                                  onLocationChange={handleLocationChange}
+                                  isCustom={false}
+                              />
+                          </div>
+                          <div
+                              className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                              title='Paste location to all'
+                              onClick={() => handleApplyLocationToAll(index, false)}
+                          >
+                              <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth="1.5"
+                                  stroke="currentColor"
+                                  className="w-4 h-4 inline-block"
+                              >
+                                  <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                  />
+                              </svg>
+                          </div>
                         </td>
                           <td>
                             <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -1159,38 +1215,35 @@ const UpdatePurchaseOrderForm = () => {
                             />
                           </td>
                           <td className="whitespace-nowrap">
-                              <div className="inline-block align-middle">
-                                  <input
-                                      type="text"
-                                      className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"  
-                                      name="custom_product_location" 
-                                      value={cproduct.custom_product_location} 
-                                      onChange={(e) => handleInputChange(e, index, false, true)}
-                                      placeholder="Ex: Level 2"
-                                      onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
-                                      onInput={(e) => e.target.setCustomValidity('')}
-                                  />
-                              </div>
-                              <div
-                                  className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-                                  title='Paste location to all'
-                                  onClick={() => handleApplyLocationToAll(index, true)}
-                              >
-                                  <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth="1.5"
-                                      stroke="currentColor"
-                                      className="w-4 h-4 inline-block"
-                                  >
-                                      <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
-                                      />
-                                  </svg>
-                              </div>
+                            <div title={`${cproduct.custom_product_location}`} className='inline-block'>
+                                <AreaSelection 
+                                    areaObjRef={projectState.find(proj => proj._id === selectedProject).area_obj_ref} 
+                                    productIndex={index}
+                                    currentLocation={cproduct.custom_product_location}
+                                    onLocationChange={handleLocationChange}
+                                    isCustom={true}
+                                />
+                            </div>
+                            <div
+                                className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                title='Paste location to all'
+                                onClick={() => handleApplyLocationToAll(index, true)}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="w-4 h-4 inline-block"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                    />
+                                </svg>
+                            </div>
                           </td>
                           <td>
                             <div className="grid grid-cols-3 items-center border rounded w-28">

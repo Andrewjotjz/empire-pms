@@ -46,6 +46,8 @@ import Iframe from "./pages/Iframe";
 import PaymentDetails from "./pages/PaymentDetails";
 import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
+import Calculator from "./components/Calculator";
+import NewBudgetForm2 from "./pages/forms/NewBudgetForm2";
 
 function App() {
 
@@ -104,6 +106,7 @@ function App() {
             <Route path="/EmpirePMS/budget" element={<Budget />} />
             <Route path="/EmpirePMS/budget/:id" element={<BudgetDetails />} />
             <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
+            <Route path="/EmpirePMS/budget/create2" element={<NewBudgetForm2 />} />
             <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
 
             <Route path="/EmpirePMS/delivery" element={<Delivery />} />
@@ -120,6 +123,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
+        <Calculator />
       </BrowserRouter>
     </div>
   );

@@ -8,7 +8,6 @@ const getAllBudgets = async (req, res) => {
     //create a new model called Budgets, await, and assign it with all Budget documents in the Budget collection, sort created date in descending order
     const Budgets = await budgetModel.find({})
     .populate('project')
-    .populate('budget_area')
     .sort({createdAt: -1})
     //invoke 'res' object method: status() and json(), pass relevant data to them
     res.status(200).json(Budgets);
@@ -47,11 +46,11 @@ const getSingleBudget = async (req, res) => {
 const createNewBudget = async (req, res) => {
     //retrieve incoming request (along with new Budget object) by using 'req' object property 'body', which stores new Budget object.
     //destructure all relevant attributes in new Budget object
-    const { budget_name, project, budget_area, budget_area_level, budget_area_subarea, entries } = req.body;
+    const { budget_name, project, entries } = req.body;
 
     try {
         //since this function is asynchronous, means the function will 'await' for the database operation, which is create a new Company model with retrieved attributes.
-        const Budget = await budgetModel.create({ budget_name, project, budget_area, budget_area_level, budget_area_subarea, entries })
+        const Budget = await budgetModel.create({ budget_name, project, entries })
         //invoke 'res' object method: status() and json(), pass relevant data to them
         res.status(200).json(Budget)
     }

@@ -196,7 +196,7 @@ const createNewProject = async (req, res) => {
 // };
 const updateSingleProject = async (req, res) => {
     const { id } = req.params;
-    const { suppliers } = req.body; // Get the new supplier list
+    const { project_name, project_address, project_isarchived, area_obj_ref, suppliers } = req.body; // Get the new supplier list
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json({ msg: "ID exists, however there is no such Project." });
@@ -214,7 +214,12 @@ const updateSingleProject = async (req, res) => {
         const newSuppliers = suppliers.filter(supplier => !existingSupplierIds.includes(supplier.toString()));
 
         // Step 3: Update the project with new supplier selection
+        existingProject.project_name = project_name;
+        existingProject.project_address = project_address;
+        existingProject.project_isarchived = project_isarchived;
+        existingProject.area_obj_ref = area_obj_ref;
         existingProject.suppliers = suppliers;
+        
         const updatedProject = await existingProject.save();
 
         // Step 4: Find all products that belong to the new suppliers

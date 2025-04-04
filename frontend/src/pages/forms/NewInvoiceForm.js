@@ -19,6 +19,8 @@ import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
 import { useUploadInvoice } from "../../hooks/useUploadInvoice";
 
+import {  DndContext,  useDraggable,  useDroppable} from "@dnd-kit/core";
+
 const NewInvoiceForm = () => {
   //Component's hook
   const dispatch = useDispatch();

@@ -15,6 +15,7 @@ import { Modal, Button } from "react-bootstrap";
 import SessionExpired from '../../components/SessionExpired';
 import NewPurchaseOrderSkeleton from '../loaders/NewPurchaseOrderSkeleton';
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
+import { AreaSelection } from '../../components/AreaSelection';
 
 const NewPurchaseOrderForm = () => {
     // Hooks
@@ -39,8 +40,10 @@ const NewPurchaseOrderForm = () => {
 
     const [isFetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(true);
     const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
+
     const [isFetchOrderLoadingState, setIsFetchOrderLoadingState] = useState(true);
     const [fetchOrderErrorState, setFetchOrderErrorState] = useState(null);
+
     const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
     const [fetchTypeError, setFetchTypeError] = useState(null);
 
@@ -54,7 +57,7 @@ const NewPurchaseOrderForm = () => {
     const [pendingAction, setPendingAction] = useState(null);
     const [searchProductTerm, setSearchProductTerm] = useState('');
     const [productTypeState, setProductTypeState] = useState([]);
-    const [copiedProducts, setCopiedProducts] = useState([]);
+    
     const getCurrentDate = () => {
         const today = new Date();
         // Format the date as YYYY-MM-DD
@@ -249,6 +252,7 @@ const NewPurchaseOrderForm = () => {
                 product_obj_ref: product.product._id,
                 productprice_obj_ref: product.productPrice._id,
                 order_product_location: '',
+                order_product_area: '',
                 order_product_qty_a: 0, // Ensure all fields are initialized properly
                 order_product_qty_b: 0,
                 order_product_price_unit_a: product.productPrice.product_price_unit_a,
@@ -274,6 +278,7 @@ const NewPurchaseOrderForm = () => {
                 custom_products: [...orderState.custom_products, {
                     custom_product_name:'', 
                     custom_product_location: '',
+                    custom_product_area: '',
                     custom_order_qty: ''
                 }]
             })
@@ -460,24 +465,29 @@ const NewPurchaseOrderForm = () => {
         setOrderState({...orderState, order_ref: e.target.value});
     };
 
-    const handleApplyLocationToAll = (index, isCustom = false) => {
+    const handleApplyLocationToAll = (index, isCustom) => {
         let copyText = '';
+        let copyID = '';
 
         // Determine the source of copyText based on isCustom
         if (isCustom) {
             copyText = orderState.custom_products[index]?.custom_product_location || '';
+            copyID = orderState.custom_products[index]?.custom_product_area || '';
         } else {
             copyText = orderState.products[index]?.order_product_location || '';
+            copyID = orderState.products[index]?.order_product_area || '';
         }
 
         const updatedProducts = orderState.products.map(product => ({
             ...product,
-            order_product_location: copyText, // Set all product locations to the copied location
+            order_product_location: copyText, // Set all product locations to the copied location String
+            order_product_area: copyID, // Set all product locations to the copied location ID
         }));
 
         const updatedCustomProducts = orderState.custom_products.map(cproduct => ({
             ...cproduct,
-            custom_product_location: copyText
+            custom_product_location: copyText,
+            custom_product_area: copyID
         }))
         
         setOrderState((prevState) => ({
@@ -485,8 +495,33 @@ const NewPurchaseOrderForm = () => {
             products: updatedProducts, // Update the products in state
             custom_products: updatedCustomProducts
         }));
-    }; 
+    };
 
+    // NEW function for Area/Level/Subarea change
+    const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
+        if (!isCustom) {
+            const updatedProducts = [...orderState.products];
+            updatedProducts[productIndex].order_product_location = locationString;
+            updatedProducts[productIndex].order_product_area = locationID;
+            
+            // Update your state with the new products array
+            setOrderState({
+            ...orderState,
+            products: updatedProducts
+            });
+        }
+        else {
+            const updatedProducts = [...orderState.custom_products];
+            updatedProducts[productIndex].custom_product_location = locationString;
+            updatedProducts[productIndex].custom_product_area = locationID;
+            
+            // Update your state with the new products array
+            setOrderState({
+                ...orderState,
+                custom_products: updatedProducts
+            });
+        }
+    };
     
     const filterPurchaseOrderNumber = () => {
         return purchaseOrderState.filter(order => {
@@ -821,7 +856,7 @@ const NewPurchaseOrderForm = () => {
                                     ))}
                                 </label>
                                 <div className="text-xs italic text-gray-400">
-                                Based on search:
+                                Already existed:
                                 {purchaseOrderState && filterPurchaseOrderNumber()
                                     .filter((order) => order.order_isarchived === false)
                                     .slice(0, 3)
@@ -904,13 +939,13 @@ const NewPurchaseOrderForm = () => {
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="lg:hidden size-5 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                         </svg>
-                                        <label>{product.product.product_sku}</label>
+                                        <label className='text-xs'>{product.product.product_sku}</label>
                                     </div>
-                                    <div>{product.product.product_name}</div>
+                                    <div className='text-xs'>{product.product.product_name}</div>
                                     <div className='hidden lg:grid'>{product.productPrice.product_number_a}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_a}</span></div>
                                     <div className='hidden lg:grid'>{product.productPrice.product_number_b}<span className='ml-2 opacity-50'>{product.productPrice.product_unit_b}</span></div>
                                     <div className='hidden lg:grid grid-cols-3 gap-2 p-1'>
-                                        <label className="col-span-2">{productTypeState.find(type => type._id === product.product.product_type)?.type_name || 'Unknown'}</label>
+                                        <label className="col-span-2 text-xs">{productTypeState.find(type => type._id === product.product.product_type)?.type_name || 'Unknown'}</label>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                                         </svg>
@@ -924,11 +959,11 @@ const NewPurchaseOrderForm = () => {
                         </div>
                     
                 </div>
-                <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base">
+                <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base h-full">
                     {/* ***** ADDED ITEM TABLE ****** */}
-                    <label className="font-bold">Order Items:</label>
+                    <h2 className="font-bold">Order Items:</h2>
                     <div className='bg-gray-100 border rounded-lg shadow-sm'>
-                        <div className="border-0 rounded-lg overflow-x-auto">
+                        <div className="border-0 rounded-lg">
                             <table className="table m-0 text-xs">
                                 <thead className="thead-dark text-center">
                                 <tr className="table-primary">
@@ -952,23 +987,19 @@ const NewPurchaseOrderForm = () => {
                                             <label>{addedProductState[index].product.product_name}</label>
                                         </td>
                                         <td className="whitespace-nowrap">
-                                            <div className="inline-block align-middle">
-                                                <input
-                                                    type="text"
-                                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
-                                                    name="order_product_location"
-                                                    value={prod.order_product_location}
-                                                    onChange={(e) => handleInputChange(e, index, true)}
-                                                    placeholder="Ex: Level 2"
-                                                    required
-                                                    onInvalid={(e) => e.target.setCustomValidity('Enter item location')}
-                                                    onInput={(e) => e.target.setCustomValidity('')}
+                                            <div title={`${prod.order_product_location}`} className='inline-block'>
+                                                <AreaSelection 
+                                                    areaObjRef={projectState.find(proj => proj._id === selectedProject).area_obj_ref} 
+                                                    productIndex={index}
+                                                    currentLocation={prod.order_product_location}
+                                                    onLocationChange={handleLocationChange}
+                                                    isCustom={false}
                                                 />
                                             </div>
                                             <div
                                                 className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
                                                 title='Paste location to all'
-                                                onClick={() => handleApplyLocationToAll(index)}
+                                                onClick={() => handleApplyLocationToAll(index, false)}
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
@@ -1059,16 +1090,13 @@ const NewPurchaseOrderForm = () => {
                                         />
                                     </td>
                                     <td className="whitespace-nowrap">
-                                        <div className="inline-block align-middle">
-                                            <input
-                                                type="text"
-                                                className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"  
-                                                name="custom_product_location" 
-                                                value={cproduct.custom_product_location} 
-                                                onChange={(e) => handleInputChange(e, index, false, true)}
-                                                placeholder="Ex: Level 2"
-                                                onInvalid={(e) => e.target.setCustomValidity('Enter custom item location')}
-                                                onInput={(e) => e.target.setCustomValidity('')}
+                                        <div title={`${cproduct.custom_product_location}`} className='inline-block'>
+                                            <AreaSelection 
+                                                areaObjRef={projectState.find(proj => proj._id === selectedProject).area_obj_ref} 
+                                                productIndex={index}
+                                                currentLocation={cproduct.custom_product_location}
+                                                onLocationChange={handleLocationChange}
+                                                isCustom={true}
                                             />
                                         </div>
                                         <div
@@ -1126,7 +1154,7 @@ const NewPurchaseOrderForm = () => {
                             {/* ADD CUSTOM BUTTON */}
                             <div className='bg-white border-b-2'>
                                 <div className="flex justify-center p-2">
-                                    <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-xs cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={() => handleAddCustomItem()}>
+                                    <div className='flex items-center border bg-gray-200 rounded-xl p-2 text-xs cursor-pointer hover:bg-blue-400 hover:text-white hover:shadow-lg ' onClick={() => handleAddCustomItem()} hidden={!selectedProject}>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 mr-1">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
                                         </svg>

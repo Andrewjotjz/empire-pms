@@ -308,7 +308,7 @@ export default function DeliveryPage() {
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((item) => (
+            {paginatedData.length > 0 ? paginatedData.map((item) => (
               <React.Fragment key={item._id}>
                 <tr className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150">
                   <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/delivery/${item._id}`)}>{item.delivery_evidence_reference}</td>
@@ -359,7 +359,14 @@ export default function DeliveryPage() {
                   </tr>
                 )}
               </React.Fragment>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-gray-500">
+                  No deliveries found matching your criteria.
+                  <span className="text-blue-500 ml-2 hover:underline hover:cursor-pointer" onClick={() => {setSearchTerm(""); setDateFilter("") }}>Clear filter</span>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

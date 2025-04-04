@@ -12,9 +12,15 @@ const getAllOrders = async (req, res) => {
             .find({})
             .populate('project') // Populate the 'project' field
             .populate('supplier') // Populate the 'supplier' field
+            // .populate({
+            //     path: 'products.product_obj_ref', // Populate the 'product_obj_ref' inside 'products' array
+            //     select: 'product_name product_sku product_number_a product_unit_a', // Specify the fields to include
+            // })
             .populate({
-                path: 'products.product_obj_ref', // Populate the 'product_obj_ref' inside 'products' array
-                select: 'product_name product_sku product_number_a product_unit_a', // Specify the fields to include
+                path: 'products.product_obj_ref' // Populate the 'product_obj_ref' inside 'products' array
+            })
+            .populate({
+                path: 'products.productprice_obj_ref' // Populate the 'productprice_obj_ref' inside 'products' array
             })
             .sort({ createdAt: -1 });
 
