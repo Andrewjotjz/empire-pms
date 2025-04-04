@@ -471,15 +471,6 @@ const BudgetVsActual = () => {
     }, 5000);
   }, [budgetState, orderState]);
 
-  
-
-  console.log("actualData", actualData)
-  console.log("budgetData", budgetData)
-  console.log("aliasState", aliasState)
-  console.log("budgetState", budgetState)
-  console.log("orderState", orderState)
-  console.log("productTypeState", productTypeState)
-
   // Get type, category and subcategory names from the budget data
   const getTypeName = (typeId) => {
     return productTypeState.find(type => type._id === typeId).type_name
