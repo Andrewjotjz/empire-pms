@@ -11,7 +11,7 @@ const Breadcrumbs = () => {
         <div className="bg-gray-800 py-1 px-1 sticky top-0 z-1">
             <ul className=" flex border-gray-800 text-xs text-blue-500 items-center">
                 <Link className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname === "/EmpirePMS/dashboard" && "text-blue-500"}`} to="/EmpirePMS/dashboard">
-                    Dashboard
+                    Home
                 </Link>
 
                 {location.pathname.includes(`/EmpirePMS/invoice`) && (
@@ -423,6 +423,20 @@ const Breadcrumbs = () => {
                     to={`/EmpirePMS/budget/${id}`}
                     className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}`) && "text-blue-500"}`}>
                     Budget Details
+                    </Link>
+                </>
+                )}
+
+                {location.pathname.includes(`/EmpirePMS/budget/${id}/budget-vs-actual`) && id !== 'create' && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/budget/${id}budget-vs-actual`}
+                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}budget-vs-actual`) && "text-blue-500"}`}>
+                    Budget vs Actual
                     </Link>
                 </>
                 )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { ChevronDown, ChevronRight, Dot, Building, Layers, Grid3X3, Package, Info } from "lucide-react"
+import { ChevronDown, ChevronRight, Dot, Building, Layers, Grid3X3, Package, Info, ChartNoAxesCombined } from "lucide-react"
 import SessionExpired from "../components/SessionExpired"
 
 
@@ -650,7 +650,7 @@ export default function BudgetPlanner() {
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">Budget Planner</h1>
+        <h1 className="text-2xl font-bold mb-6 text-gray-800">Budget</h1>
 
         {/* Budget Name */}
         <div className="mb-6">
@@ -692,7 +692,16 @@ export default function BudgetPlanner() {
         {/* Budget Entries */}
         {selectedProject && budget.entries.length > 0 && (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Budget Details</h2>
+            <div className="flex justify-between align-middle items-center">
+              <h2 className="text-xl font-semibold text-gray-800">Budget Details</h2>
+              <button
+                className="flex items-center bg-indigo-400 text-white px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors hover:cursor-pointer mr-2 hover:shadow-md"
+                onClick={() => navigate(`/EmpirePMS/budget/${id}/budget-vs-actual`)}
+              >
+                <ChartNoAxesCombined className="h-5 w-5 text-white mr-2" />
+                Budget vs Actual
+              </button>
+            </div>
 
             {/* Areas */}
             {budget.entries.map((entry) => (
