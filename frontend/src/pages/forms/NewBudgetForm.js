@@ -608,8 +608,6 @@ export default function BudgetPlanner() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("budget:", budget)
-
     addBudget(budget)
   };
 

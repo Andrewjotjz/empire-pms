@@ -507,7 +507,6 @@ const UpdatePurchaseOrderForm = () => {
     
   };
 
-  console.log("purchaseOrderState", purchaseOrderState)
 
   // NEW function for Area/Level/Subarea change
   // const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
