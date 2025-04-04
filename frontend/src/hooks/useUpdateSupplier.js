@@ -37,7 +37,7 @@ export const useUpdateSupplier = () => {
                     throw new Error('Failed to PUT supplier details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/supplier/${supplierState._id}`)
                 
                     alert(`Supplier updated successfully!`);

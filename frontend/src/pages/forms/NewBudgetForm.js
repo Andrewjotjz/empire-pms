@@ -588,7 +588,7 @@ export default function BudgetPlanner() {
                 throw new Error('Failed to POST new budget details')
             }
             if (res.ok) {
-                // navigate client to dashboard page
+                // navigate client to home page
                 navigate(`/EmpirePMS/budget/`)
 
                 alert(`Budget created successfully!`);

@@ -22,7 +22,7 @@ const Loading = () => {
     }, []);
 
     const handleClick = () => {
-        navigate('/EmpirePMS/dashboard');
+        navigate('/EmpirePMS/home');
     };
 
     //Display DOM

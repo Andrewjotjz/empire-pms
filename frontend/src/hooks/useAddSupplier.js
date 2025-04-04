@@ -37,7 +37,7 @@ export const useAddSupplier = () => {
                     throw new Error('Failed to POST new supplier details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/supplier/`)
                 
                     alert(`Supplier added to company successfully!`);

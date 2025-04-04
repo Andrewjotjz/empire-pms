@@ -37,7 +37,7 @@ export const useUpdateProductType = () => {
                 }
 
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/product-type`);
 
                     alert(`Product type updated successfully!`);

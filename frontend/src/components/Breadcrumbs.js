@@ -10,7 +10,7 @@ const Breadcrumbs = () => {
         !location.pathname.includes(`/EmpirePMS/login`) ? (
         <div className="bg-gray-800 py-1 px-1 sticky top-0 z-1">
             <ul className=" flex border-gray-800 text-xs text-blue-500 items-center">
-                <Link className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname === "/EmpirePMS/dashboard" && "text-blue-500"}`} to="/EmpirePMS/dashboard">
+                <Link className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname === "/EmpirePMS/home" && "text-blue-500"}`} to="/EmpirePMS/home">
                     Home
                 </Link>
 

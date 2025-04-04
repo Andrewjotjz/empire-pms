@@ -51,7 +51,7 @@ export const useUpdateEmployee = () => {
                         dispatch(setLocalUser(employeeState))
                     }
 
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/employee/${employeeState._id}`)
                 
                     alert(`Account updated successfully!`);

@@ -36,7 +36,7 @@ export const useAddEmployee = () => {
                     throw new Error('Failed to POST new employee details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/employee/`)
 
                     alert(`Employee account added successfully!`);

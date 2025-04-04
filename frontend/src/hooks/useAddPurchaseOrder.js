@@ -41,7 +41,7 @@ export const useAddPurchaseOrder = () => {
                     // update loading state
                     setisAddOrderLoadingState(false)
                     
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/order/`)
                 
                     alert(`New Purchase Order created successfully!`);                
