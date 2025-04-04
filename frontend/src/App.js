@@ -2,9 +2,9 @@
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import Navbar from './components/Navbar';
 import Login from './pages/forms/Login';
-import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import EmployeePage from './pages/EmployeePage';
-import InvoicePage from './pages/InvoicePage2';
+import InvoicePage from './pages/InvoicePage';
 import PaymentPage from './pages/PaymentPage';
 import ProjectPage from './pages/ProjectPage';
 import AccountPage from './pages/AccountPage';
@@ -24,7 +24,7 @@ import NewSupplierForm from "./pages/forms/NewSupplierForm";
 import ProductDetails from "./pages/ProductDetails";
 import NewProductForm from "./pages/forms/NewProductForm";
 import UpdateProductForm from "./pages/forms/UpdateProductForm";
-import PurchaseOrder from "./pages/PurchaseOrderPage2";
+import PurchaseOrder from "./pages/PurchaseOrderPage";
 import PurchaseOrderDetails from "./pages/PurchaseOrderDetails";
 import NewPurchaseOrderForm from "./pages/forms/NewPurchaseOrderForm";
 import NewInvoiceForm from "./pages/forms/NewInvoiceForm";
@@ -47,7 +47,7 @@ import PaymentDetails from "./pages/PaymentDetails";
 import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 import Calculator from "./components/Calculator";
-import NewBudgetForm2 from "./pages/forms/NewBudgetForm2";
+import BudgetVsActual from "./pages/forms/BudgetVsActual";
 
 function App() {
 
@@ -61,8 +61,8 @@ function App() {
         <div className="pages">
           <Routes>
             <Route path="/EmpirePMS/login" element={<Login />} />
-            <Route path="/" element={!localUser ? <Navigate to='/EmpirePMS/login' />: <Dashboard />} />
-            <Route path="/EmpirePMS/dashboard" element={<Dashboard />} />
+            <Route path="/" element={!localUser ? <Navigate to='/EmpirePMS/login' />: <Home />} />
+            <Route path="/EmpirePMS/dashboard" element={<Home />} />
 
             <Route path="/EmpirePMS/order" element={<PurchaseOrder />} />
             <Route path="/EmpirePMS/order/:id" element={<PurchaseOrderDetails />} />
@@ -106,7 +106,7 @@ function App() {
             <Route path="/EmpirePMS/budget" element={<Budget />} />
             <Route path="/EmpirePMS/budget/:id" element={<BudgetDetails />} />
             <Route path="/EmpirePMS/budget/create" element={<NewBudgetForm />} />
-            <Route path="/EmpirePMS/budget/create2" element={<NewBudgetForm2 />} />
+            <Route path="/EmpirePMS/budget/:id/budget-vs-actual" element={<BudgetVsActual />} />
             <Route path="/EmpirePMS/budget/:id/edit" element={<UpdateBudgetForm /> } />
 
             <Route path="/EmpirePMS/delivery" element={<Delivery />} />

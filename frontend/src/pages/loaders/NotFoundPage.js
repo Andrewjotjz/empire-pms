@@ -5,7 +5,7 @@ const NotFoundPage = () => {
     // Router navigation hook
     const navigate = useNavigate();
 
-    // Redirects user to Dashboard after a delay
+    // Redirects user to Home after a delay
     useEffect(() => {
         const timer = setTimeout(() => {
             navigate('/EmpirePMS/dashboard');
@@ -27,7 +27,7 @@ const NotFoundPage = () => {
             <p className="lead">Sorry, we couldn’t find the page you’re looking for.</p>
             <p className="lead">You will be redirected to the dashboard shortly.</p>
             <button className="btn btn-primary mt-3" onClick={handleRedirect}>
-                Go to Dashboard
+                Go to Home
             </button>
         </div>
     );
