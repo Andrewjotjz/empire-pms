@@ -45,7 +45,7 @@ const Navbar = () => {
         <nav className="bg-gray-900 p-2 w-full px-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link className="text-white text-lg font-bold" to="/EmpirePMS/dashboard">
+            <Link className="text-white text-lg font-bold" to="/EmpirePMS/home">
               EmpirePMS
             </Link>
             

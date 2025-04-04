@@ -36,7 +36,7 @@ export const useAddProductType = () => {
                     throw new Error(data.error)
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/product-type`)
 
                     alert(`New product type created successfully!`);

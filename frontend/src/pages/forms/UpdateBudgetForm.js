@@ -26,8 +26,8 @@ export default function BudgetPlanner() {
   const [expandedSections, setExpandedSections] = useState({})
   const [selectedIds, setSelectedIds] = useState([])
 
-  const [addBudgetLoading, setAddBudgetLoading] = useState(false);
-  const [addBudgetError, setAddBudgetError] = useState(null);
+  const [updateBudgetLoading, setUpdateBudgetLoading] = useState(false);
+  const [updateBudgetError, setUpdateBudgetError] = useState(null);
 
   // Fetch all projects
   useEffect(() => {
@@ -604,14 +604,14 @@ export default function BudgetPlanner() {
   };
 
   // Form submit
-  const addBudget = async (budget) => {
-    setAddBudgetLoading(true)
-    setAddBudgetError(null)
+  const updateBudget = async (budget) => {
+    setUpdateBudgetLoading(true)
+    setUpdateBudgetError(null)
 
-    const postBudget = async () => {
+    const putBudget = async () => {
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/create`, {
-                credentials: 'include', method: 'POST',
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/${id}`, {
+                credentials: 'include', method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
@@ -626,31 +626,31 @@ export default function BudgetPlanner() {
             }
 
             if (!res.ok) {
-                throw new Error('Failed to POST new budget details')
+                throw new Error('Failed to update budget details')
             }
             if (res.ok) {
-                // navigate client to dashboard page
-                navigate(`/EmpirePMS/budget/`)
+                // navigate client to home page
+                navigate(`/EmpirePMS/budget/${id}`)
 
-                alert(`Budget created successfully!`);
+                alert(`Budget updated successfully!`);
             
                 // update loading state
-                setAddBudgetLoading(false)
+                setUpdateBudgetLoading(false)
 
             }
         } catch (error) {
-            setAddBudgetError(error.message);
-            setAddBudgetLoading(false);
+            setUpdateBudgetError(error.message);
+            setUpdateBudgetLoading(false);
         }
     }
-    postBudget();
+    putBudget();
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
 
-    addBudget(budget)
+    updateBudget(budget)
   };
 
   // Loading state handling
@@ -658,7 +658,7 @@ export default function BudgetPlanner() {
     isFetchProjectLoading ||
     isFetchProductTypeLoading ||
     isFetchBudgetLoading ||
-    addBudgetLoading
+    updateBudgetLoading
   ) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -672,7 +672,7 @@ export default function BudgetPlanner() {
     fetchProjectError ||
     fetchProductTypeError ||
     fetchBudgetError ||
-    addBudgetError
+    updateBudgetError
   ) {
     // Session expired check
     if (
@@ -685,9 +685,9 @@ export default function BudgetPlanner() {
       fetchBudgetError?.includes("Session expired") ||
       fetchBudgetError?.includes("jwt expired") ||
       fetchBudgetError?.includes("jwt malformed") ||
-      addBudgetError?.includes("Session expired") ||
-      addBudgetError?.includes("jwt expired") ||
-      addBudgetError?.includes("jwt malformed")
+      updateBudgetError?.includes("Session expired") ||
+      updateBudgetError?.includes("jwt expired") ||
+      updateBudgetError?.includes("jwt malformed")
     ) {
       return <div><SessionExpired /></div>;
     }
@@ -700,7 +700,7 @@ export default function BudgetPlanner() {
           {fetchProjectError ||
             fetchProductTypeError ||
             fetchBudgetError ||
-            addBudgetError}
+            updateBudgetError}
         </p>
       </div>
     );
@@ -1927,9 +1927,9 @@ export default function BudgetPlanner() {
               <button
                 className="flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
                 onClick={handleSubmit}
-                disabled={addBudgetLoading} // Optional: Disable button while loading
+                disabled={updateBudgetLoading} // Optional: Disable button while loading
               >
-                {addBudgetLoading ? (
+                {updateBudgetLoading ? (
                   <>
                     <Save className="h-5 w-5 mr-2" />
                     Submitting...

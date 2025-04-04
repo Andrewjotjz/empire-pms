@@ -52,8 +52,8 @@ export const useLogin = () => {
       // update the localUserState
       dispatch(setLocalUser(promise.employee))
 
-      // navigate client to dashboard page
-      navigate('/EmpirePMS/dashboard')
+      // navigate client to home page
+      navigate('/EmpirePMS/home')
 
       // update loading state
       setIsLoading(false)

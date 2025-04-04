@@ -223,7 +223,7 @@ const UpdatePaymentForm = () => {
                     throw new Error('Failed to update (PUT) payment details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/payment/${id}`)
 
                     alert(`Payment updated successfully!`);

@@ -38,7 +38,7 @@ export const useUpdateProject = () => {
                     throw new Error('Failed to PUT project details')
                 }
                 if (res.ok) {
-                    // navigate client to dashboard page
+                    // navigate client to home page
                     navigate(`/EmpirePMS/project/${projectState._id}`)
                 
                     alert(`Project updated successfully!`);

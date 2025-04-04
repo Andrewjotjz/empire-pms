@@ -13,7 +13,7 @@ const Account = () => {
 
   // Component's functions and variable
   const handleCancelClick = () => {
-    navigate('/EmpirePMS/dashboard')
+    navigate('/EmpirePMS/home')
   }
 
     return (

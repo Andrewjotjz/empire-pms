@@ -62,7 +62,7 @@ function App() {
           <Routes>
             <Route path="/EmpirePMS/login" element={<Login />} />
             <Route path="/" element={!localUser ? <Navigate to='/EmpirePMS/login' />: <Home />} />
-            <Route path="/EmpirePMS/dashboard" element={<Home />} />
+            <Route path="/EmpirePMS/home" element={<Home />} />
 
             <Route path="/EmpirePMS/order" element={<PurchaseOrder />} />
             <Route path="/EmpirePMS/order/:id" element={<PurchaseOrderDetails />} />

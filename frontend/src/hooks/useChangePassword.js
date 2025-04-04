@@ -42,7 +42,7 @@ export const useChangePassword = () => {
       }
     }
     if (response.ok) {
-      // navigate client to dashboard page
+      // navigate client to home page
       navigate(`/EmpirePMS/employee/${employeeState._id}`)
 
       alert(`Target account password updated succesfully!`);
