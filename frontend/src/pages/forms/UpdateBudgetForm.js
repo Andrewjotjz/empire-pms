@@ -513,6 +513,47 @@ export default function BudgetPlanner() {
     return Math.round(typeTotal * 100) / 100
 
   }
+  // Calculate 'Total M2 by Product Type based on selected area/level/subarea' for Summary
+  const calculateProductTypeTotalM2 = (typeId) => {
+    let typeTotalM2 = 0
+
+    budget.entries.forEach((entry) => {
+      // Area level
+      if (entry.area_info.product_type_obj_ref && selectedIds.includes(entry.area_info.area_id)) {
+        const typeEntry = entry.area_info.product_type_obj_ref.find((type) => type.type_id === typeId)
+        if (typeEntry) {
+          typeTotalM2 += Number.parseFloat(typeEntry.type_total_m2 || 0)
+        }
+      }
+
+      // Level level
+      if (entry.area_info.level_info) {
+        entry.area_info.level_info.forEach((level) => {
+          if (level.product_type_obj_ref && selectedIds.includes(level.level_id)) {
+            const typeEntry = level.product_type_obj_ref.find((type) => type.type_id === typeId)
+            if (typeEntry) {
+              typeTotalM2 += Number.parseFloat(typeEntry.type_total_m2 || 0)
+            }
+          }
+
+          // Subarea level
+          if (level.subarea_info) {
+            level.subarea_info.forEach((subarea) => {
+              if (subarea.product_type_obj_ref && selectedIds.includes(subarea.subarea_id)) {
+                const typeEntry = subarea.product_type_obj_ref.find((type) => type.type_id === typeId)
+                if (typeEntry) {
+                  typeTotalM2 += Number.parseFloat(typeEntry.type_total_m2 || 0)
+                }
+              }
+            })
+          }
+        })
+      }
+    })
+
+    return Math.round(typeTotalM2 * 100) / 100
+
+  }
 
   // Calculate 'Total Budget by Product Type + Category based on selected area/level/subarea' for Summary
   const calculateCategoryTotals = (typeId, catId) => {
@@ -553,6 +594,47 @@ export default function BudgetPlanner() {
     })
 
     return Math.round(categoryTotal * 100) / 100
+
+  }
+  // Calculate 'Total M2 by Product Type + Category based on selected area/level/subarea' for Summary
+  const calculateTotalCategoryM2 = (typeId, catId) => {
+    let categoryTotalM2 = 0
+
+    budget.entries.forEach((entry) => {
+      // Area level
+      if (entry.area_info.product_type_obj_ref && selectedIds.includes(entry.area_info.area_id)) {
+        const catEntry = entry.area_info.product_type_obj_ref.find((type) => type.type_id === typeId).category_obj_ref.find((cat) => cat.category_id === catId)
+        if (catEntry) {
+          categoryTotalM2 += Number.parseFloat(catEntry.category_total_m2 || 0)
+        }
+      }
+
+      // Level level
+      if (entry.area_info.level_info) {
+        entry.area_info.level_info.forEach((level) => {
+          if (level.product_type_obj_ref && selectedIds.includes(level.level_id)) {
+            const catEntry = level.product_type_obj_ref.find((type) => type.type_id === typeId).category_obj_ref.find((cat) => cat.category_id === catId)
+            if (catEntry) {
+              categoryTotalM2 += Number.parseFloat(catEntry.category_total_m2 || 0)
+            }
+          }
+
+          // Subarea level
+          if (level.subarea_info) {
+            level.subarea_info.forEach((subarea) => {
+              if (subarea.product_type_obj_ref && selectedIds.includes(subarea.subarea_id)) {
+                const catEntry = subarea.product_type_obj_ref.find((type) => type.type_id === typeId).category_obj_ref.find((cat) => cat.category_id === catId)
+                if (catEntry) {
+                  categoryTotalM2 += Number.parseFloat(catEntry.category_total_m2 || 0)
+                }
+              }
+            })
+          }
+        })
+      }
+    })
+
+    return Math.round(categoryTotalM2 * 100) / 100
 
   }
 
@@ -1883,10 +1965,15 @@ export default function BudgetPlanner() {
                           {/* Product Type Summary */}
                           <div className={`flex justify-between`}>
                             <span className="text-sm text-gray-600 font-semibold">{productTypeState.find(typ => typ._id === type._id).type_name}</span>
-                            <span className="text-sm font-medium">
-                              <Dot className={`h-4 w-4 text-gray-500 ${calculateProductTypeTotals(type._id) > 0 ? 'inline-block' : 'hidden'}`}/>
-                              ${calculateProductTypeTotals(type._id)}
-                            </span>
+                            <div>
+                              <span className="text-sm font-medium">
+                                {calculateProductTypeTotalM2(type._id)} ({type.type_unit})
+                              </span>
+                              <span className="text-sm font-medium ml-2">
+                                <Dot className={`h-4 w-4 text-gray-500 ${calculateProductTypeTotals(type._id) > 0 ? 'inline-block' : 'hidden'}`}/>
+                                ${calculateProductTypeTotals(type._id)}
+                              </span>
+                            </div>
                           </div>
 
                           {/* Ensure category_obj_ref exists before mapping */}
@@ -1894,10 +1981,15 @@ export default function BudgetPlanner() {
                             type.type_categories.map((cat) => (
                               <div key={`summary-type-${cat._id}`} className={`flex justify-between border-b-2`}>
                                 <span className="ml-4 text-xs text-gray-600">{cat.category_name}</span>
-                                <span className="text-xs font-light">
-                                  <Dot className={`h-4 w-4 text-gray-500 ${calculateCategoryTotals(type._id, cat._id) > 0 ? 'inline-block' : 'hidden'}`}/>
-                                  ${calculateCategoryTotals(type._id, cat._id)}
-                                </span>
+                                <div>
+                                  <span className="text-xs font-light">
+                                    {calculateTotalCategoryM2(type._id, cat._id)} ({cat.category_unit})
+                                  </span>
+                                  <span className="text-xs font-light ml-2">
+                                    <Dot className={`h-4 w-4 text-gray-500 ${calculateCategoryTotals(type._id, cat._id) > 0 ? 'inline-block' : 'hidden'}`}/>
+                                    ${calculateCategoryTotals(type._id, cat._id)}
+                                  </span>
+                                </div>
                               </div>
                             ))}
                         </div>
