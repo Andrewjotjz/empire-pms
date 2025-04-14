@@ -52,7 +52,7 @@ export default function BudgetSkeletonLoading() {
         <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between">
             <div className="flex space-x-4 mb-4 md:mb-0">
-              {["Summary", "By Type", "By Category", "By Subcategory"].map((tab, index) => (
+              {["Summary", "By Type"].map((tab, index) => (
                 <div
                   key={index}
                   className={`px-4 py-2 text-sm font-medium rounded-md ${index === 0 ? "bg-blue-50 text-blue-600" : "text-gray-600"}`}

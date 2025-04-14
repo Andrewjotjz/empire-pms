@@ -380,9 +380,7 @@ export default function BudgetPlanner() {
       return newBudget
     })
   }
-
-  console.log("productTypeState", productTypeState)
-
+  
   // Calculate 'Total Budget by Area' for Summary
   const calculateAreaTotals = (areaId) => {
     let areaTotal = 0

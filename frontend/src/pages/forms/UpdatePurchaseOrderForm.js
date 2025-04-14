@@ -830,7 +830,7 @@ const UpdatePurchaseOrderForm = () => {
         EDIT PURCHASE ORDER
       </div>
       <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 mx-4 mb-1 sm:mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 mx-4 mb-1 sm:mb-4">
           <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base">
             {/* PURCHASE ORDER MAIN DETAILS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-1 lg:gap-x-4">
@@ -1047,7 +1047,7 @@ const UpdatePurchaseOrderForm = () => {
               )}
             </div>
           </div>
-          <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base">
+          <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base col-span-2">
             {/* ***** ADDED ITEM TABLE ****** */}
             <label className="font-bold">Order Items:</label>
             <div className="bg-gray-100 border rounded-lg shadow-sm">

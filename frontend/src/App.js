@@ -47,7 +47,7 @@ import PaymentDetails from "./pages/PaymentDetails";
 import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 import Calculator from "./components/Calculator";
-import BudgetVsActual from "./pages/forms/BudgetVsActual";
+import BudgetVsActual from "./pages/BudgetVsActual";
 
 function App() {
 
