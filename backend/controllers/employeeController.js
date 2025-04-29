@@ -49,7 +49,7 @@ const refreshToken = (req, res, next) => {
         
         // Reset token expiration if the user is active
         const newToken = createToken(decoded.id); // Generate a new token
-        res.cookie('jwt', newToken, { httpOnly: true, maxAge: maxAge * 1000 }); // Update cookie
+        res.cookie('jwt', newToken, { httpOnly: true, maxAge: maxAge * 1000, secure: true, sameSite: 'None' }); // Update cookie
         next(); // Continue to the next middleware or route handler
       });
     } else {
@@ -75,7 +75,7 @@ const loginEmployee = async (req,res) => {
         //! insert comment
         const Employee = await employeeModel.login(employee_email, employee_password);
         const token = createToken(Employee._id);
-        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 }); //in millisecond
+        res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000, secure: true, sameSite: 'None' }); //in millisecond
         res.status(200).json({token, employee: Employee});
     } 
     catch (err) {
