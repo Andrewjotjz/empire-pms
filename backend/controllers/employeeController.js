@@ -247,7 +247,7 @@ const sendPasswordResetEmail = async (req, res) => {
 
             await employee.save();
 
-            const resetUrl = `http://localhost:3001/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
+            const resetUrl = `https://empirecbs.onrender.com/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
 
             const message = `
             <!DOCTYPE html>
