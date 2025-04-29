@@ -8,9 +8,9 @@ const Breadcrumbs = () => {
 
     return ( 
         !location.pathname.includes(`/EmpirePMS/login`) ? (
-        <div className="bg-gray-800 py-1 px-1 sticky top-0 z-1">
+        <div className="bg-gray-800 py-1 px-6 sticky top-0 z-1">
             <ul className=" flex border-gray-800 text-xs text-blue-500 items-center">
-                <Link className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname === "/EmpirePMS/home" && "text-blue-500"}`} to="/EmpirePMS/home">
+                <Link className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname === "/EmpirePMS/home" && "text-blue-500"}`} to="/EmpirePMS/home">
                     Home
                 </Link>
 
@@ -22,7 +22,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/invoice`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice`) && "text-blue-500"}`}>
                     Invoices
                     </Link>
                 </>
@@ -36,7 +36,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/invoice/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice/create`) && "text-blue-500"}`}>
                     New Invoice
                     </Link>
                 </>
@@ -50,7 +50,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/invoice/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice/${id}`) && "text-blue-500"}`}>
                     Invoice Details
                     </Link>
                 </>
@@ -64,7 +64,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/invoice/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/invoice/${id}/edit`) && "text-blue-500"}`}>
                     Edit Invoice
                     </Link>
                 </>
@@ -79,7 +79,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/order`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order`) && "text-blue-500"}`}>
                     Purchase Orders
                     </Link>
                 </>
@@ -93,7 +93,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/order/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order/${id}`) && "text-blue-500"}`}>
                     Order Details
                     </Link>
                 </>
@@ -107,7 +107,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/order/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order/${id}/edit`) && "text-blue-500"}`}>
                     Edit Order
                     </Link>
                 </>
@@ -121,7 +121,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/order/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/order/create`) && "text-blue-500"}`}>
                     New Order
                     </Link>
                 </>
@@ -136,7 +136,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/project`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project`) && "text-blue-500"}`}>
                     Projects
                     </Link>
                 </>
@@ -150,7 +150,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/project/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project/${id}`) && "text-blue-500"}`}>
                     Project Details
                     </Link>
                 </>
@@ -164,7 +164,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/project/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project/${id}/edit`) && "text-blue-500"}`}>
                     Edit Project
                     </Link>
                 </>
@@ -178,7 +178,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/project/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/project/create`) && "text-blue-500"}`}>
                     New Project
                     </Link>
                 </>
@@ -193,7 +193,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/employee`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee`) && "text-blue-500"}`}>
                     Employees
                     </Link>
                 </>
@@ -207,7 +207,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/employee/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}`) && "text-blue-500"}`}>
                     Employee Details
                     </Link>
                 </>
@@ -221,7 +221,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/employee/${id}/`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/`) && "text-blue-500"}`}>
                     Edit Employee
                     </Link>
                 </>
@@ -235,7 +235,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/employee/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/create`) && "text-blue-500"}`}>
                     New Employee
                     </Link>
                 </>
@@ -249,7 +249,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/employee/${id}/change-password`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/change-password`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/employee/${id}/change-password`) && "text-blue-500"}`}>
                     Change Password
                     </Link>
                 </>
@@ -264,7 +264,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier`) && "text-blue-500"}`}>
                     Suppliers
                     </Link>
                 </>
@@ -278,7 +278,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}`) && "text-blue-500"}`}>
                     Supplier Details
                     </Link>
                 </>
@@ -292,7 +292,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/edit`) && "text-blue-500"}`}>
                     Edit Supplier
                     </Link>
                 </>
@@ -306,7 +306,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/create`) && "text-blue-500"}`}>
                     New Supplier
                     </Link>
                 </>
@@ -321,7 +321,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier/${id}/products/${product_id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}`) && "text-blue-500"}`}>
                     Product Details
                     </Link>
                 </>
@@ -335,7 +335,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier/${id}/products/${product_id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}/edit`) && "text-blue-500"}`}>
                     Edit Product
                     </Link>
                 </>
@@ -349,7 +349,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/supplier/${id}/products/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/create`) && "text-blue-500"}`}>
                     New Product
                     </Link>
                 </>
@@ -364,7 +364,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/product-type`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type`) && "text-blue-500"}`}>
                     Product Types
                     </Link>
                 </>
@@ -378,7 +378,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/product-type/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type/${id}/edit`) && "text-blue-500"}`}>
                     Edit Product Type
                     </Link>
                 </>
@@ -392,7 +392,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/product-type/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/product-type/create`) && "text-blue-500"}`}>
                     New Product Type
                     </Link>
                 </>
@@ -407,7 +407,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/budget`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget`) && "text-blue-500"}`}>
                     Budgets
                     </Link>
                 </>
@@ -421,7 +421,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/budget/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}`) && "text-blue-500"}`}>
                     Budget Details
                     </Link>
                 </>
@@ -434,8 +434,8 @@ const Breadcrumbs = () => {
                     </svg>
 
                     <Link
-                    to={`/EmpirePMS/budget/${id}budget-vs-actual`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}budget-vs-actual`) && "text-blue-500"}`}>
+                    to={`/EmpirePMS/budget/${id}/budget-vs-actual`}
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}budget-vs-actual`) && "text-blue-500"}`}>
                     Budget vs Actual
                     </Link>
                 </>
@@ -449,7 +449,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/budget/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/${id}/edit`) && "text-blue-500"}`}>
                     Edit Budget
                     </Link>
                 </>
@@ -463,7 +463,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/budget/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/budget/create`) && "text-blue-500"}`}>
                     New Budget
                     </Link>
                 </>
@@ -479,7 +479,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/payment`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment`) && "text-blue-500"}`}>
                     Payments
                     </Link>
                 </>
@@ -493,7 +493,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/payment/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/${id}`) && "text-blue-500"}`}>
                     Payment Details
                     </Link>
                 </>
@@ -507,7 +507,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/payment/${id}/edit`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/${id}/edit`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/${id}/edit`) && "text-blue-500"}`}>
                     Edit Payment
                     </Link>
                 </>
@@ -521,7 +521,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/payment/create`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/create`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/payment/create`) && "text-blue-500"}`}>
                     New Payment
                     </Link>
                 </>
@@ -536,7 +536,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/delivery`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/delivery`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/delivery`) && "text-blue-500"}`}>
                     Deliveries
                     </Link>
                 </>
@@ -550,7 +550,7 @@ const Breadcrumbs = () => {
 
                     <Link
                     to={`/EmpirePMS/delivery/${id}`}
-                    className={`cursor-pointer hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/delivery/${id}`) && "text-blue-500"}`}>
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/delivery/${id}`) && "text-blue-500"}`}>
                     Delivery Details
                     </Link>
                 </>

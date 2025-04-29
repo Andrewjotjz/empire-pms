@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Modal, Button } from "react-bootstrap";
-
-import { setSupplierState } from "../../redux/supplierSlice";
-import { setPurchaseOrderState } from "../../redux/purchaseOrderSlice";
-import { setProductPrice } from "../../redux/productPriceSlice";
-import { setProjectState } from "../../redux/projectSlice";
 
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
 import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
@@ -19,11 +14,10 @@ import SessionExpired from "../../components/SessionExpired";
 import NewProductModal from "./NewProductModal";
 import { useUploadInvoice } from "../../hooks/useUploadInvoice";
 
-import {  DndContext,  useDraggable,  useDroppable} from "@dnd-kit/core";
+import { AreaSelection } from "../../components/AreaSelection";
 
 const NewInvoiceForm = () => {
   //Component's hook
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state;
@@ -44,6 +38,16 @@ const NewInvoiceForm = () => {
   const [newProductId, setNewProductId] = useState("");
   const [targetIndex, setTargetIndex] = useState(null);
   const [productTypeState, setProductTypeState] = useState([]);
+
+  
+  const [supplierState, setSupplierState] = useState();
+  const [purchaseOrderState, setPurchaseOrderState] = useState();
+  const [productPriceState, setProductPrice] = useState();
+  const [projectState, setProjectState] = useState();
+  const productState = useSelector(
+    (state) => state.productReducer.productState
+  );
+
 
   const [isToggled, setIsToggled] = useState(false);
   const [isToggleProjectDropdown, setIsToggleProjectDropdown] = useState(false);
@@ -67,21 +71,6 @@ const NewInvoiceForm = () => {
   const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
   const [fetchTypeError, setFetchTypeError] = useState(null);
 
-  const supplierState = useSelector(
-    (state) => state.supplierReducer.supplierState
-  );
-  const purchaseOrderState = useSelector(
-    (state) => state.purchaseOrderReducer.purchaseOrderState
-  );
-  const productPriceState = useSelector(
-    (state) => state.productPriceReducer.productPriceState
-  );
-  const projectState = useSelector(
-    (state) => state.projectReducer.projectState
-  );
-  const productState = useSelector(
-    (state) => state.productReducer.productState
-  );
   const [newInvoice, setNewInvoice] = useState({
     invoice_ref: "",
     supplier: state ? state.suppId : "",
@@ -205,6 +194,91 @@ const NewInvoiceForm = () => {
     }).split("/").reverse().join("-");
   };
 
+  // const fetchSelectedPurchaseOrder = async (id) => {
+  //   setIsFetchOrderLoading(true);
+  //   setFetchOrderError(null);
+
+  //   const getOrder = async () => {
+  //     try {
+  //       const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order/${id}`, {
+  //         credentials: 'include',
+  //         method: "GET",
+  //         headers: {
+  //             'Content-Type': 'application/json',
+  //             'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+  //         },
+  //       });
+
+  //       const data = await res.json();
+
+  //       if (data.tokenError) {
+  //         throw new Error(data.tokenError);
+  //       }
+
+  //       if (!res.ok) {
+  //         throw new Error("Failed to get order");
+  //       }
+
+  //       if (res.ok) {
+  //         // Store data to productPriceState
+  //         setCurrentOrder(data);
+  //         setUpdatedOrder(data);
+  //         fetchProductsBySupplier(data.supplier._id);
+
+  //         // Ensure products and custom_products exist before mapping
+  //         const formattedProducts =
+  //           data.products?.map((product, index) => ({
+  //             _id: product._id,
+  //             product_obj_ref: product.product_obj_ref._id,
+  //             invoice_product_location: product.order_product_location,
+  //             // invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
+  //             invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || product.order_product_qty_a,
+  //             // invoice_product_qty_a: previouslyInvoiced > 0 ? 0 : product.order_product_qty_a,
+  //             invoice_product_price_unit: product.order_product_price_unit_a,
+  //             invoice_product_gross_amount_a: product.order_product_price_unit_a * (newInvoice?.products[index]?.invoice_product_qty_a || 0),
+  //             // invoice_product_gross_amount_a: Number((product.order_product_qty_a * product.order_product_price_unit_a).toFixed(4)),
+  //           })) || [];
+
+  //         const formattedCustomProducts =
+  //           data.custom_products?.map((customProduct, index) => {
+  //             // Find if the customProduct exists in the invoices' custom_products
+  //             let matchingCustomProduct = null;
+  //             data.invoices.some(invoice => {
+  //               matchingCustomProduct = invoice.custom_products.find(
+  //                 invoiceCustomProduct => invoiceCustomProduct._id === customProduct._id
+  //               );
+  //               return matchingCustomProduct;
+  //             });
+
+  //             return {
+  //               _id: customProduct._id,
+  //               custom_product_name: customProduct.custom_product_name,
+  //               custom_product_location: customProduct.custom_product_location,
+  //               custom_order_qty: previouslyInvoiced > 0 ? 0 : customProduct.custom_order_qty,
+  //               // custom_order_qty: newInvoice?.custom_products[index]?.custom_order_qty || customProduct.custom_order_qty,
+  //               custom_order_price: matchingCustomProduct ? matchingCustomProduct.custom_order_price : 0, // Set custom_order_price from matching invoice or empty string
+  //               custom_order_gross_amount: (Number(customProduct.custom_order_gross_amount) || 0) * (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
+  //             };
+  //           }) || [];
+
+  //         setNewInvoice({
+  //           ...newInvoice,
+  //           order: id,
+  //           products: formattedProducts,
+  //           custom_products: formattedCustomProducts,
+  //         });
+
+  //         setIsFetchOrderLoading(false);
+  //       }
+  //     } catch (error) {
+  //       setFetchOrderError(error.message);
+  //       setIsFetchOrderLoading(false);
+  //     }
+  //   };
+
+  //   getOrder();
+  // };
+  
   const fetchSelectedPurchaseOrder = async (id) => {
     setIsFetchOrderLoading(true);
     setFetchOrderError(null);
@@ -238,55 +312,94 @@ const NewInvoiceForm = () => {
 
           // Ensure products and custom_products exist before mapping
           const formattedProducts =
-            data.products?.map((product, index) => ({
-              _id: product._id,
-              product_obj_ref: product.product_obj_ref._id,
-              invoice_product_location: product.order_product_location,
-              // invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || 0,
-              invoice_product_qty_a: newInvoice?.products[index]?.invoice_product_qty_a || product.order_product_qty_a,
-              invoice_product_price_unit: product.order_product_price_unit_a,
-              // invoice_product_gross_amount_a: product.order_product_gross_amount * (newInvoice?.products[index]?.invoice_product_qty_a || 0),
-              invoice_product_gross_amount_a: Number((product.order_product_qty_a * product.order_product_price_unit_a).toFixed(4)),
-            })) || [];
-
-          const formattedCustomProducts =
-            data.custom_products?.map((customProduct, index) => {
-              // Find if the customProduct exists in the invoices' custom_products
-              let matchingCustomProduct = null;
-              data.invoices.some(invoice => {
-                matchingCustomProduct = invoice.custom_products.find(
-                  invoiceCustomProduct => invoiceCustomProduct._id === customProduct._id
+            data.products?.map((product, index) => {
+              // Calculate previously invoiced quantity for this product
+              const previouslyInvoiced = data.invoices.reduce((sum, invoice) => {
+                const invoiceProductQtySum = invoice.products.reduce(
+                  (invoiceSum, invoiceProduct) => {
+                    if (product._id === invoiceProduct._id) {
+                      return invoiceSum + invoiceProduct.invoice_product_qty_a;
+                    }
+                    return invoiceSum;
+                  },
+                  0
                 );
-                return matchingCustomProduct;
-              });
+                return sum + invoiceProductQtySum;
+              }, 0);
 
+              // Calculate remaining quantity that can be invoiced
+              const remainingQty = Math.max(0, product.order_product_qty_a - previouslyInvoiced);
+
+              // Set invoice_product_qty_a to 0 if previously invoiced has value
               return {
-                _id: customProduct._id,
-                custom_product_name: customProduct.custom_product_name,
-                custom_product_location: customProduct.custom_product_location,
-                custom_order_qty: newInvoice?.custom_products[index]?.custom_order_qty || customProduct.custom_order_qty,
-                custom_order_price: matchingCustomProduct ? matchingCustomProduct.custom_order_price : 0, // Set custom_order_price from matching invoice or empty string
-                custom_order_gross_amount: (Number(customProduct.custom_order_gross_amount) || 0) * (Number(newInvoice?.custom_products[index]?.custom_order_qty) || 0),
+                _id: product._id,
+                product_obj_ref: product.product_obj_ref._id,
+                invoice_product_location: product.order_product_location,
+                invoice_product_qty_a: previouslyInvoiced > 0 ? 0 : product.order_product_qty_a,
+                invoice_product_price_unit: product.order_product_price_unit_a,
+                invoice_product_gross_amount_a: product.order_product_price_unit_a * (previouslyInvoiced > 0 ? 0 : product.order_product_qty_a),
+                previously_invoiced: previouslyInvoiced,
+                remaining_qty: remainingQty
               };
             }) || [];
 
-          setNewInvoice({
-            ...newInvoice,
-            order: id,
-            products: formattedProducts,
-            custom_products: formattedCustomProducts,
-          });
+        const formattedCustomProducts =
+          data.custom_products?.map((customProduct, index) => {
+            // Find if the customProduct exists in the invoices' custom_products
+            let matchingCustomProduct = null;
+            data.invoices.some(invoice => {
+              matchingCustomProduct = invoice.custom_products.find(
+                invoiceCustomProduct => invoiceCustomProduct._id === customProduct._id
+              );
+              return matchingCustomProduct;
+            });
 
-          setIsFetchOrderLoading(false);
-        }
-      } catch (error) {
-        setFetchOrderError(error.message);
+            // Calculate previously invoiced quantity for this custom product
+            const previouslyInvoiced = data.invoices.reduce((sum, invoice) => {
+              const invoiceCustomProductQtySum = invoice.custom_products.reduce(
+                (invoiceSum, invoiceCustomProduct) => {
+                  if (customProduct._id === invoiceCustomProduct._id) {
+                    return invoiceSum + invoiceCustomProduct.custom_order_qty;
+                  }
+                  return invoiceSum;
+                },
+                0
+              );
+              return sum + invoiceCustomProductQtySum;
+            }, 0);
+
+            // Calculate remaining quantity that can be invoiced
+            const remainingQty = Math.max(0, customProduct.custom_order_qty - previouslyInvoiced);
+
+            return {
+              _id: customProduct._id,
+              custom_product_name: customProduct.custom_product_name,
+              custom_product_location: customProduct.custom_product_location,
+              custom_order_qty: previouslyInvoiced > 0 ? 0 : customProduct.custom_order_qty,
+              custom_order_price: matchingCustomProduct ? matchingCustomProduct.custom_order_price : 0, // Set custom_order_price from matching invoice or empty string
+              custom_order_gross_amount: (Number(customProduct.custom_order_gross_amount) || 0) * (previouslyInvoiced > 0 ? 0 : customProduct.custom_order_qty),
+              previously_invoiced: previouslyInvoiced,
+              remaining_qty: remainingQty
+            };
+          }) || [];
+
+        setNewInvoice({
+          ...newInvoice,
+          order: id,
+          products: formattedProducts,
+          custom_products: formattedCustomProducts,
+        });
+
         setIsFetchOrderLoading(false);
       }
-    };
-
-    getOrder();
+    } catch (error) {
+      setFetchOrderError(error.message);
+      setIsFetchOrderLoading(false);
+    }
   };
+
+  getOrder();
+};
   const fetchProductDetails = async (supplierId, productId) => {
     setIsFetchProductDetailsLoading(true);
     try {
@@ -306,43 +419,15 @@ const NewInvoiceForm = () => {
       if (data.tokenError) {
         throw new Error(data.tokenError);
       }
-
-      dispatch(setProductPrice(data));
+      
+      setProductPrice(data);
       setIsFetchProductDetailsLoading(false);
     } catch (err) {
       setFetchProductDetailsError(err.message);
       setIsFetchProductDetailsLoading(false);
     }
   };
-  const fetchProjects = async () => {
-    setIsFetchProjectLoading(true); // Set loading state to true at the beginning
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
-        }});
-      if (!res.ok) {
-        throw new Error("Failed to fetch");
-      }
-      const data = await res.json();
-
-      if (data.tokenError) {
-        throw new Error(data.tokenError);
-      }
-
-      setIsFetchProjectLoading(false);
-      dispatch(setProjectState(data));
-      setFetchProjectError(null);
-    } catch (error) {
-      if (error.name === "AbortError") {
-        // do nothing
-      } else {
-        setIsFetchProjectLoading(false);
-        setFetchProjectError(error.message);
-      }
-    }
-  };
+  
   const resetForm = () => {
     if (newSupplier) {
       const supplier = supplierState.find(supplier => supplier._id === newSupplier); //get the supplier
@@ -536,6 +621,32 @@ const NewInvoiceForm = () => {
       setShowConfirmationModal(true);
     }
   };
+  
+  // NEW function for Area/Level/Subarea change
+  const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
+    if (!isCustom) {
+        const updatedProducts = [...updatedOrder.products];
+        updatedProducts[productIndex].order_product_location = locationString;
+        updatedProducts[productIndex].order_product_area = locationID;
+        
+        // Update your state with the new products array
+        setUpdatedOrder({
+        ...updatedOrder,
+        products: updatedProducts
+        });
+    }
+    else {
+        const updatedProducts = [...updatedOrder.custom_products];
+        updatedProducts[productIndex].custom_product_location = locationString;
+        updatedProducts[productIndex].custom_product_area = locationID;
+        
+        // Update your state with the new products array
+        setUpdatedOrder({
+            ...updatedOrder,
+            custom_products: updatedProducts
+        });
+    }
+};
   const handleApplyLocationToAll = (index, isCustom = false) => {
       let copyText = '';
 
@@ -619,24 +730,14 @@ const NewInvoiceForm = () => {
         updatedProducts[index] = {
           ...updatedProducts[index],
           [name]: Number(value),
-          invoice_product_gross_amount_a:
-            Number(
-              (
-                value * currentState.products[index]?.invoice_product_price_unit
-              ).toFixed(4)
-            ) || 0,
+          invoice_product_gross_amount_a: Number((value * currentState.products[index]?.invoice_product_price_unit).toFixed(4)) || 0,
         };
       }
       if (name === "custom_order_qty") {
         updatedCustomProducts[index] = {
           ...updatedCustomProducts[index],
           [name]: Number(value),
-          custom_order_gross_amount:
-            Number(
-              (
-                value * currentState.custom_products[index]?.custom_order_price
-              ).toFixed(4)
-            ) || 0,
+          custom_order_gross_amount: Number((value * currentState.custom_products[index]?.custom_order_price).toFixed(4)) || 0,
         };
       }
       if (name === "custom_order_price") {
@@ -787,41 +888,6 @@ const NewInvoiceForm = () => {
     // Set state with the updated state
     setNewInvoiceInvoiceWithoutPO(updatedState);
   };
-
-  // const handleInputChangeNoPO = (event, index = null) => {
-  //     const { name, value } = event.target;
-
-  //     // Copy current state to updatedState variable for changes
-  //     let updatedState = { ...newInvoiceWithoutPO };
-  //     let updatedCustomProducts = [...updatedState.custom_products];
-
-  //     if (index !== null) {
-  //         if (name === "custom_order_qty") {
-  //             updatedCustomProducts[index] = {
-  //                 ...updatedCustomProducts[index],
-  //                 [name]: Number(value), // Convert to number here
-  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_price).toFixed(4)) || 0,
-  //             };
-  //         } else if (name === "custom_order_price") {
-  //             updatedCustomProducts[index] = {
-  //                 ...updatedCustomProducts[index],
-  //                 [name]: Number(value), // Convert to number here
-  //                 custom_order_gross_amount: Number((value * updatedCustomProducts[index]?.custom_order_qty).toFixed(4)) || 0,
-  //             };
-  //         }
-  //         else {
-  //             updatedCustomProducts[index] = {
-  //                 ...updatedCustomProducts[index],
-  //                 [name]: value,
-  //             };
-  //         }
-  //     }
-
-  //     updatedState.custom_products = updatedCustomProducts;
-
-  //     setNewInvoiceInvoiceWithoutPO(updatedState);
-  // };
-
   const handleAddToInvoice = () => {
     if (selectedOrder === "") {
       alert("Please select an order");
@@ -831,7 +897,6 @@ const NewInvoiceForm = () => {
     setShowSelectionModal(false);
   };
   const handleCreateNewPrice = () => {
-    fetchProjects();
     handleToggleCreatePriceModal();
     handleTogglePriceModal();
   };
@@ -905,6 +970,8 @@ const NewInvoiceForm = () => {
       ...updatedOrder,
       products: updatedProducts,
     });
+
+    setSearchProductTerm("");
   };
   const handleEditInputChange = (event, index = null, isCustom = false) => {
     const { name, value } = event.target;
@@ -1164,98 +1231,6 @@ const NewInvoiceForm = () => {
     handleTogglePriceModal();
     fetchProductDetails(supplierId, targetProductId);
   };
-
-  // const handleAutomation = (updatedProductId) => {
-  //   // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
-  //   const updatedItems = updatedOrder.products.filter(
-  //     (item) => item.product_obj_ref._id !== updatedProductId
-  //   );
-
-  //   const getItem = updatedOrder.products.filter(
-  //     (item) => item.product_obj_ref._id === updatedProductId
-  //   );
-
-  //   // Step 2: Find the product that needs to be re-added (optimized filtering)
-  //   const product = filterProductsBySearchTerm().find(
-  //     (product) => product.product._id === updatedProductId
-  //   );
-
-  //   if (!product) {
-  //     alert("Product not found in table. Automation failed. Please contact IT support");
-  //     return;
-  //   }
-
-  //   // Step 3: Create the new product object with required details
-  //   const newProduct = {
-  //     product_obj_ref: {
-  //       _id: product.product._id,
-  //       product_name: product.product.product_name,
-  //       product_sku: product.product.product_sku,
-  //     },
-  //     productprice_obj_ref: product.productPrice,
-  //     order_product_location: getItem[0].order_product_location,
-  //     order_product_qty_a: getItem[0].order_product_qty_a,
-  //     order_product_qty_b: getItem[0].order_product_qty_b,
-  //     order_product_price_unit_a: product.productPrice.product_price_unit_a,
-  //     order_product_gross_amount:
-  //       getItem[0].order_product_qty_a *
-  //       product.productPrice.product_price_unit_a,
-  //   };
-
-  //   // Step 4: Update the products list with the new product
-  //   const updatedProducts = [...updatedItems, newProduct];
-
-  //   setUpdatedOrder({
-  //     ...updatedOrder,
-  //     products: updatedProducts,
-  //   });
-  // };
-
-  // const handleAutomation = (updatedProductId) => {
-  //   // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
-  //   const updatedItems = updatedOrder.products.filter(
-  //     (item) => item.product_obj_ref._id !== updatedProductId
-  //   );
-  
-  //   // Step 2: Find all occurrences of the product in the order
-  //   const getItem = updatedOrder.products.filter(
-  //     (item) => item.product_obj_ref._id === updatedProductId
-  //   );
-  
-  //   // Step 3: Find the product that needs to be re-added (optimized filtering)
-  //   const product = filterProductsBySearchTerm().find(
-  //     (product) => product.product._id === updatedProductId
-  //   );
-  
-  //   if (!product) {
-  //     alert("Product not found in table. Automation failed. Please contact IT support");
-  //     return;
-  //   }
-  
-  //   // Step 4: Create new product objects for each occurrence in getItem
-  //   const newProducts = getItem.map((item) => ({
-  //     product_obj_ref: {
-  //       _id: product.product._id,
-  //       product_name: product.product.product_name,
-  //       product_sku: product.product.product_sku,
-  //     },
-  //     productprice_obj_ref: product.productPrice,
-  //     order_product_location: item.order_product_location,
-  //     order_product_qty_a: item.order_product_qty_a,
-  //     order_product_qty_b: item.order_product_qty_b,
-  //     order_product_price_unit_a: product.productPrice.product_price_unit_a,
-  //     order_product_gross_amount: item.order_product_qty_a * product.productPrice.product_price_unit_a,
-  //   }));
-  
-  //   // Step 5: Update the products list with all new product instances
-  //   const updatedProducts = [...updatedItems, ...newProducts];
-  
-  //   setUpdatedOrder({
-  //     ...updatedOrder,
-  //     products: updatedProducts,
-  //   });
-  // };
-
   const handleAutomation = (updatedProductId) => {
     // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
     const updatedItems = updatedOrder.products.map((item) => {
@@ -1401,7 +1376,7 @@ const NewInvoiceForm = () => {
         }
 
         setIsFetchSupplierLoading(false);
-        dispatch(setSupplierState(data));
+        setSupplierState(data);
         setFetchSupplierError(null);
       } catch (error) {
         if (error.name === "AbortError") {
@@ -1418,7 +1393,7 @@ const NewInvoiceForm = () => {
     return () => {
       abortController.abort(); // Cleanup
     };
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -1442,7 +1417,7 @@ const NewInvoiceForm = () => {
         }
 
         setIsFetchSupplierLoading(false);
-        dispatch(setPurchaseOrderState(data));
+        setPurchaseOrderState(data);
         setFetchSupplierError(null);
       } catch (error) {
         if (error.name === "AbortError") {
@@ -1459,7 +1434,47 @@ const NewInvoiceForm = () => {
     return () => {
       abortController.abort(); // Cleanup
     };
-  }, [dispatch]);
+  }, []);
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchProjects = async () => {
+      setIsFetchProjectLoading(true); // Set loading state to true at the beginning
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { signal, credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }});
+        if (!res.ok) {
+          throw new Error("Failed to fetch");
+        }
+        const data = await res.json();
+  
+        if (data.tokenError) {
+          throw new Error(data.tokenError);
+        }
+  
+        setIsFetchProjectLoading(false);
+        setProjectState(data);
+        setFetchProjectError(null);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          // do nothing
+        } else {
+          setIsFetchProjectLoading(false);
+          setFetchProjectError(error.message);
+        }
+      }
+    };
+
+    fetchProjects();
+
+    return () => {
+      abortController.abort(); // Cleanup
+    };
+  }, []);
 
   useEffect(() => {
     setNewInvoiceInvoiceWithoutPO((prevState) => ({
@@ -2048,6 +2063,7 @@ const NewInvoiceForm = () => {
                         {updatedOrder.products &&
                           updatedOrder.products.map((prod, index) => (
                             <tr
+                              key={prod._id || prod.product_obj_ref._id || index}
                               className={
                                 prod.product_obj_ref._id ===
                                 newProductPrice.product_obj_ref
@@ -2058,47 +2074,35 @@ const NewInvoiceForm = () => {
                               <td>{prod.product_obj_ref.product_sku}</td>
                               <td>{prod.product_obj_ref.product_name}</td>
                               <td className="whitespace-nowrap">
-                                <div className="inline-block align-middle">
-                                  <input
-                                    type="text"
-                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 border border-gray-300 rounded w-36"
-                                    name="order_product_location"
-                                    value={prod.order_product_location}
-                                    onChange={(e) =>
-                                      handleEditInputChange(e, index)
-                                    }
-                                    placeholder="Ex: Level 2"
-                                    required
-                                    onInvalid={(e) =>
-                                      e.target.setCustomValidity(
-                                        "Enter item location"
-                                      )
-                                    }
-                                    onInput={(e) =>
-                                      e.target.setCustomValidity("")
-                                    }
-                                  />
-                                </div>
-                                <div
-                                    className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-                                    title='Paste location to all'
-                                    onClick={() => handleApplyLocationToAll(index)}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth="1.5"
-                                        stroke="currentColor"
-                                        className="w-4 h-4 inline-block"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
-                                        />
-                                    </svg>
-                                </div>
+                                  <div title={`${prod.order_product_location}`} className='inline-block'>
+                                      <AreaSelection 
+                                          areaObjRef={projectState.find(proj => proj._id === purchaseOrderState.find(order => order._id === selectedOrder).project._id).area_obj_ref} 
+                                          productIndex={index}
+                                          currentLocation={prod.order_product_location}
+                                          onLocationChange={handleLocationChange}
+                                          isCustom={false}
+                                      />
+                                  </div>
+                                  <div
+                                      className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                      title='Paste location to all'
+                                      onClick={() => handleApplyLocationToAll(index, false)}
+                                  >
+                                      <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          strokeWidth="1.5"
+                                          stroke="currentColor"
+                                          className="w-4 h-4 inline-block"
+                                      >
+                                          <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                          />
+                                      </svg>
+                                  </div>
                               </td>
                               <td>
                                 <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -2260,44 +2264,35 @@ const NewInvoiceForm = () => {
                               />
                             </td>
                             <td className="whitespace-nowrap">
-                              <div className="inline-block align-middle">
-                                <input
-                                  type="text"
-                                  className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"
-                                  name="custom_product_location"
-                                  value={cproduct.custom_product_location}
-                                  onChange={(e) =>
-                                    handleEditInputChange(e, index, true)
-                                  }
-                                  placeholder="Ex: Level 2"
-                                  onInvalid={(e) =>
-                                    e.target.setCustomValidity(
-                                      "Enter custom item location"
-                                    )
-                                  }
-                                  onInput={(e) => e.target.setCustomValidity("")}
-                                />
-                              </div>
-                              <div
-                                  className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-                                  title='Paste location to all'
-                                  onClick={() => handleApplyLocationToAll(index, true)}
-                              >
-                                  <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      strokeWidth="1.5"
-                                      stroke="currentColor"
-                                      className="w-4 h-4 inline-block"
-                                  >
-                                      <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
-                                      />
-                                  </svg>
-                              </div>
+                                <div title={`${cproduct.custom_product_location}`} className='inline-block'>
+                                    <AreaSelection 
+                                        areaObjRef={projectState.find(proj => proj._id === purchaseOrderState.find(order => order._id === selectedOrder).project._id).area_obj_ref}
+                                        productIndex={index}
+                                        currentLocation={cproduct.custom_product_location}
+                                        onLocationChange={handleLocationChange}
+                                        isCustom={true}
+                                    />
+                                </div>
+                                <div
+                                    className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
+                                    title='Paste location to all'
+                                    onClick={() => handleApplyLocationToAll(index, true)}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="1.5"
+                                        stroke="currentColor"
+                                        className="w-4 h-4 inline-block"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"
+                                        />
+                                    </svg>
+                                </div>
                             </td>
                             <td>
                               <div className="grid grid-cols-3 items-center border rounded w-28">
@@ -2882,7 +2877,7 @@ const NewInvoiceForm = () => {
     </Modal>
   );
 
-  if (isFetchSupplierLoading || isFetchProjectLoading) {
+  if (isFetchSupplierLoading || isFetchProjectLoading || isFetchTypeLoading) {
     return <EmployeeDetailsSkeleton />;
   }
 
@@ -2894,7 +2889,9 @@ const NewInvoiceForm = () => {
     fetchProjectError ||
     fetchProductsErrorState ||
     updateOrderErrorState ||
-    addInvoiceError || uploadInvoiceError
+    addInvoiceError || 
+    uploadInvoiceError ||
+    fetchTypeError
   ) {
     const errorMessages = [
       fetchSupplierError,
@@ -2905,7 +2902,8 @@ const NewInvoiceForm = () => {
       fetchProductsErrorState,
       updateOrderErrorState,
       addInvoiceError,
-      uploadInvoiceError
+      uploadInvoiceError,
+      fetchTypeError
     ];
 
     const isSessionExpired = errorMessages.some((error) =>
@@ -3237,7 +3235,7 @@ const NewInvoiceForm = () => {
                                 type="number"
                                 name="invoice_product_qty_a"
                                 value={
-                                  newInvoice.products[index].invoice_product_qty_a
+                                  newInvoice.products?.[index]?.invoice_product_qty_a || 0
                                 }
                                 onChange={(e) => handleInputChange(e, index)}
                                 step={0.0001}
@@ -3324,7 +3322,7 @@ const NewInvoiceForm = () => {
                                 name="custom_order_qty"
                                 value={
                                   newInvoice.custom_products[index]
-                                    .custom_order_qty
+                                    ?.custom_order_qty
                                 }
                                 onChange={(e) => handleInputChange(e, index)}
                                 step={0.0001}
@@ -3975,7 +3973,7 @@ const NewInvoiceForm = () => {
               {/* File Upload Input */}
               <div className="flex flex-col items-center w-full p-1">
                 <label
-                  for="file-upload"
+                  htmlFor="file-upload"
                   className="flex flex-col items-center justify-center w-full max-w-md p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-gray-50 hover:border-blue-400 hover:bg-blue-50 transition"
                 >
                   <svg
@@ -4042,7 +4040,7 @@ const NewInvoiceForm = () => {
                       </li>
                     ))
                   ) : (
-                    <p class="text-gray-500 text-sm">No files selected</p>
+                    <p className="text-gray-500 text-sm">No files selected</p>
                   )}
                 </ul>
               </div>

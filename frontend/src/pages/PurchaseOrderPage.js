@@ -214,7 +214,7 @@ const PurchaseOrder2 = () => {
                 order.supplier.supplier_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 order.order_total_amount.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
                 order.order_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                order.products.some(product => product.product_obj_ref.product_name.toLowerCase().includes(searchTerm.toLowerCase()) || product.product_obj_ref.product_sku.toLowerCase().includes(searchTerm.toLowerCase()))
+                order.products.some(product => product.product_obj_ref.product_name.toLowerCase().includes(searchTerm.toLowerCase()) || product.product_obj_ref.product_sku.toLowerCase().includes(searchTerm.toLowerCase()) || product.order_product_location.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
 
@@ -604,30 +604,49 @@ const PurchaseOrder2 = () => {
                                     </td>
                                 </tr>
                                 {expandedRow === order._id && (
-                                <tr>
-                                    <td colSpan="9" className="p-3 bg-gray-50">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <tr>
+                                    <td colSpan="9" className="p-2 bg-gray-50">
+                                        <div className="flex flex-col space-y-1">
                                         {order.products.map((product, index) => (
-                                        <div key={index} className="bg-white p-3 rounded shadow-sm">
-                                            <p title='product_sku' className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{productState?.filter(prod => prod.supplier === order.supplier._id).find(prod => prod._id === product.product_obj_ref._id)?.product_sku || 'Not found...'}</p>
-                                            <p title='product_name' className="font-medium text-gray-700 text-sm">
-                                            {productState?.filter(prod => prod.supplier === order.supplier._id).find(prod => prod._id === product.product_obj_ref._id)?.product_name || 'Not found...'}
-                                            </p>
-                                            <p title='product.order_product_qty_a' className="text-gray-600 text-xs">Ordered: {product.order_product_qty_a}</p>
-                                        </div>
+                                            <div key={index} className="bg-white py-1 px-2 rounded flex items-center text-sm border-b last:border-b-0">
+                                                <span
+                                                    title="product_sku"
+                                                    className="text-indigo-600 text-xs border rounded px-1 bg-indigo-50 mr-2 whitespace-nowrap"
+                                                >
+                                                    {productState
+                                                    ?.filter((prod) => prod.supplier === order.supplier._id)
+                                                    .find((prod) => prod._id === product.product_obj_ref._id)?.product_sku || "Not found..."}
+                                                </span>
+                                                <span title="product_name" className="font-medium text-gray-700 max-w-md">
+                                                    {productState
+                                                    ?.filter((prod) => prod.supplier === order.supplier._id)
+                                                    .find((prod) => prod._id === product.product_obj_ref._id)?.product_name || "Not found..."}
+                                                </span>
+                                                <span title="product.order_product_qty_a" className="text-gray-600 text-xs ml-auto whitespace-nowrap">
+                                                    Location: {product.order_product_location} | Qty: {product.order_product_qty_a}
+                                                </span>
+                                            </div>
                                         ))}
+
                                         {order.custom_products.map((cusProd, index) => (
-                                        <div key={index} className="bg-white p-3 rounded shadow-sm">
-                                            <p title='product_sku' className="text-indigo-600 text-xs border rounded-lg p-1 w-fit bg-indigo-50">{cusProd.custom_product_name || 'Not found...'}</p>
-                                            <p title='product_name' className="font-medium text-gray-700 text-sm">
-                                            {cusProd.custom_product_name || 'Not found...'}
-                                            </p>
-                                            <p title='cusProd.order_product_qty_a' className="text-gray-600 text-xs">Ordered: {cusProd.custom_order_qty}</p>
-                                        </div>
+                                            <div key={index} className="bg-white py-1 px-2 rounded flex items-center text-sm border-b last:border-b-0">
+                                                <span
+                                                    title="product_sku"
+                                                    className="text-indigo-600 text-xs border rounded px-1 bg-indigo-50 mr-2 whitespace-nowrap"
+                                                >
+                                                    {`CUSTOM ${index + 1}`}
+                                                </span>
+                                                <span title="product_name" className="font-medium text-gray-700 max-w-md">
+                                                    {cusProd.custom_product_name || "Not found..."}
+                                                </span>
+                                                <span title="cusProd.order_product_qty_a" className="text-gray-600 text-xs ml-auto whitespace-nowrap">
+                                                    Qty: {cusProd.custom_order_qty}
+                                                </span>
+                                            </div>
                                         ))}
-                                    </div>
+                                        </div>
                                     </td>
-                                </tr>
+                                    </tr>
                                 )}
                             </React.Fragment>
                             ))}

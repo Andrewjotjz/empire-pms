@@ -69,8 +69,8 @@ const UpdatePurchaseOrderForm = () => {
   const [productTypeState, setProductTypeState] = useState([]);
   const [isFetchTypeLoading, setIsFetchTypeLoading] = useState(false);
   const [fetchTypeError, setFetchTypeError] = useState(null);
-  const [isLoadingState, setIsLoadingState] = useState(true);
-  const [errorState, setErrorState] = useState(null);
+  const [isFetchPODetailsLoading, setFetchPODetailsLoading] = useState(true);
+  const [fetchPODetailsError, setFetchPODetailsError] = useState(null);
 
   // Component functions and variables
   const localUser = JSON.parse(localStorage.getItem('localUser'))
@@ -509,31 +509,6 @@ const UpdatePurchaseOrderForm = () => {
 
 
   // NEW function for Area/Level/Subarea change
-  // const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
-  //   if (!isCustom) {
-  //       const updatedProducts = [...purchaseOrderState.products];
-  //       updatedProducts[productIndex].order_product_location = locationString;
-  //       updatedProducts[productIndex].order_product_area = locationID;
-        
-  //       // Update your state with the new products array
-  //       setPurchaseOrderState({
-  //       ...purchaseOrderState,
-  //       products: updatedProducts
-  //       });
-  //   }
-  //   else {
-  //       const updatedProducts = [...purchaseOrderState.custom_products];
-  //       updatedProducts[productIndex].custom_product_location = locationString;
-  //       updatedProducts[productIndex].custom_product_area = locationID;
-        
-  //       // Update your state with the new products array
-  //       setPurchaseOrderState({
-  //           ...purchaseOrderState,
-  //           custom_products: updatedProducts
-  //       });
-  //   }
-  // };
-
   const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
     if (!isCustom) {
         const updatedProducts = purchaseOrderState.products.map((product, index) => 
@@ -555,9 +530,6 @@ const UpdatePurchaseOrderForm = () => {
         }));
     }
 };
-
-
-  
 
   const filterProductsBySearchTerm = () => {
     const lowerCaseSearchTerm = searchProductTerm.toLowerCase().trim();
@@ -608,6 +580,12 @@ const UpdatePurchaseOrderForm = () => {
     ) {
       alert("You must have at least one product to submit a new order.");
       return;
+    }
+
+    
+    if (purchaseOrderState.products.some(product => product.order_product_location === "") || purchaseOrderState.custom_products.some(cproduct => cproduct.custom_product_location === "")) {
+      alert("You must input location to all products.")
+      return
     }
 
     if (event.nativeEvent.submitter.name === "draft") {
@@ -738,10 +716,10 @@ const UpdatePurchaseOrderForm = () => {
             setSelectedSupplier(data.supplier._id)
             dispatch(setPurchaseOrderState(data));
 
-            setIsLoadingState(false);
+            setFetchPODetailsLoading(false);
         } catch (err) {
-            setErrorState(err.message);
-            setIsLoadingState(false);
+            setFetchPODetailsError(err.message);
+            setFetchPODetailsLoading(false);
         }
     };
 
@@ -751,9 +729,9 @@ const UpdatePurchaseOrderForm = () => {
   // Display DOM
   if (
     isFetchProjectLoadingState ||
-    isFetchProductsLoadingState ||
     isUpdateLoadingState ||
-    isFetchSupplierLoading
+    isFetchTypeLoading ||
+    isFetchPODetailsLoading
   ) {
     return <NewPurchaseOrderSkeleton />;
   }
@@ -762,7 +740,9 @@ const UpdatePurchaseOrderForm = () => {
     fetchProjectErrorState ||
     fetchProductsErrorState ||
     updateErrorState ||
-    fetchSupplierError
+    fetchSupplierError ||
+    fetchTypeError ||
+    fetchPODetailsError
   ) {
     if (
       fetchProjectErrorState &&
@@ -781,7 +761,9 @@ const UpdatePurchaseOrderForm = () => {
           {fetchProjectErrorState ||
             fetchProductsErrorState ||
             updateErrorState ||
-            fetchSupplierError}
+            fetchSupplierError ||
+            fetchTypeError ||
+            fetchPODetailsError}
         </p>
       </div>
     );
@@ -874,10 +856,11 @@ const UpdatePurchaseOrderForm = () => {
                 <select
                   className="form-control shadow-sm cursor-pointer text-xs lg:text-base"
                   name="supplier_name"
-                  value={selectedSupplier}
+                  value={isFetchSupplierLoading ? "Loading" : selectedSupplier}
                   onChange={handleSupplierChange}
                   required
                 >
+                  <option value="Loading" hidden={!isFetchSupplierLoading}>Loading...</option>
                   <option value="">Select Supplier</option>
                   {supplierState &&
                     supplierState.length > 0 &&
@@ -983,7 +966,7 @@ const UpdatePurchaseOrderForm = () => {
                   <label className="col-span-2">Type</label>
                 </div>
               </div>
-              {productState ? (
+              {productState && 
                 filterProductsBySearchTerm()
                   .filter(
                     (product, index, self) =>
@@ -1039,12 +1022,18 @@ const UpdatePurchaseOrderForm = () => {
                         </svg>
                       </div>
                     </div>
-                  ))
-              ) : (
-                <div className="border shadow-sm text-center">
-                  <p className="p-1">Select a supplier...</p>
-                </div>
+                  )
               )}
+              { !productState && !isFetchProductsLoadingState && (
+                  <div className='border shadow-sm text-center'>
+                      <p className='p-1'>Select a supplier...</p>
+                  </div>
+              )}
+              {isFetchProductsLoadingState &&
+                  <div className='border shadow-sm flex justify-center p-3'>
+                      <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-black"></div>
+                  </div>
+              }
             </div>
           </div>
           <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base col-span-2">

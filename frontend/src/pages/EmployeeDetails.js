@@ -206,7 +206,8 @@ const EmployeeDetails = () => {
     };
 
     const selectProjectsBtn = (
-        <div className='d-flex m-1 justify-content-end'>
+        <div className='d-flex m-1 justify-between'>
+            <label className='font-bold'>Assigned projects:</label>
             <button className="btn btn-primary" onClick={handleSelectProjectsClick}>
                 <div className='flex items-center'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 sm:size-6 mr-1">
@@ -214,7 +215,7 @@ const EmployeeDetails = () => {
                         d="M8 12L11 15L16 9M4 16.8002V7.2002C4 6.08009 4 5.51962 4.21799 5.0918C4.40973 4.71547 4.71547 4.40973 5.0918 4.21799C5.51962 4 6.08009 4 7.2002 4H16.8002C17.9203 4 18.4796 4 18.9074 4.21799C19.2837 4.40973 19.5905 4.71547 19.7822 5.0918C20 5.5192 20 6.07899 20 7.19691V16.8036C20 17.9215 20 18.4805 19.7822 18.9079C19.5905 19.2842 19.2837 19.5905 18.9074 19.7822C18.48 20 17.921 20 16.8031 20H7.19691C6.07899 20 5.5192 20 5.0918 19.7822C4.71547 19.5905 4.40973 19.2842 4.21799 18.9079C4 18.4801 4 17.9203 4 16.8002Z"
                          stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
-                    <label className='text-xs sm:text-base'>SELECT PROJECTS</label>
+                    <label className='text-xs sm:text-sm'>SELECT PROJECTS</label>
                 </div>
             </button>
         </div>
@@ -263,7 +264,7 @@ const EmployeeDetails = () => {
     );
 
     const employeeDetails = employeeState && (
-        <div className="card-body border-1 mx-1 rounded-sm relative">
+        <div className="card-body mx-1 rounded-sm relative">
             <div className="absolute right-4">
                 <Dropdown>
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -341,7 +342,7 @@ const EmployeeDetails = () => {
     );
 
     const employeeProjectsTable = (
-        <div className="card-body border-1 relative text-xs sm:text-base overflow-x-auto">
+        <div className="card-body relative text-xs sm:text-base overflow-x-auto">
             {selectProjectsBtn}
 
             {employeeState && employeeState.projects && employeeState.projects.length > 0 ? (
@@ -409,16 +410,11 @@ const EmployeeDetails = () => {
                     <h1 className='mx-auto uppercase font-bold text-base sm:text-xl'>{localUserState.employee_email === employeeState.employee_email ? 'YOUR ACCOUNT' : `EMPLOYEE : ${employeeState.employee_first_name} ${employeeState.employee_last_name}`}</h1>
                 </div>
             <div className="card-body">
-                <div>
-                    <button className={`${currentTab === 'employeeDetails' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('employeeDetails')}>Details</button>
-                    <button className={`${currentTab === 'employeeProjectsTable' ? 'border-x-2 border-t-2 p-2 rounded bg-gray-700 text-white' : 'border-x-2 border-t-2 p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 '}`}  onClick={() => setCurrentTab('employeeProjectsTable')}>Projects</button>
-                </div>
-                    {/* SWITCH BETWEEN COMPONENTS HERE */}
-                    {currentTab === 'employeeDetails' && employeeDetails}
-                    {currentTab === 'employeeProjectsTable' && employeeProjectsTable}
+                {employeeDetails}
+                {employeeProjectsTable}
 
 
-                    {isSelectProjectListVisible && selectProjectPopUp}
+                {isSelectProjectListVisible && selectProjectPopUp}
 
             </div>
         </div>
