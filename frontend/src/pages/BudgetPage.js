@@ -284,10 +284,6 @@ const Budget = () => {
     )
   }
 
-  console.log("budgetState", budgetState)
-  console.log("budgetData", budgetData)
-  console.log("filteredData", filteredData)
-
   return localUser && Object.keys(localUser).length > 0 ? (
     <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto px-4 py-8">

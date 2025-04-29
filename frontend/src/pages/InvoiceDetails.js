@@ -1,10 +1,9 @@
 //import modules
 import { useParams, useNavigate, Link} from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { DownloadIcon } from 'lucide-react';
 
-import { setInvoiceState } from '../redux/invoiceSlice';
 import { clearProductState } from '../redux/productSlice';
 
 import { useUpdateInvoice } from '../hooks/useUpdateInvoice';
@@ -24,7 +23,7 @@ const InvoiceDetails = () => {
     const navigate = useNavigate();
 
     //Component state declaration
-    const invoiceState = useSelector((state) => state.invoiceReducer.invoiceState)
+    const [invoiceState, setInvoiceState] = useState();
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -69,7 +68,7 @@ const InvoiceDetails = () => {
             };
         }
     
-        dispatch(setInvoiceState(updatedState));
+        setInvoiceState(updatedState);
 
         updateInvoice(updatedState);
 
@@ -140,7 +139,7 @@ const InvoiceDetails = () => {
                     throw new Error(data.tokenError);
                 }
 
-                dispatch(setInvoiceState(data));
+                setInvoiceState(data);
 
                 setIsLoadingState(false);
             } catch (err) {
@@ -150,7 +149,7 @@ const InvoiceDetails = () => {
         };
 
         fetchInvoiceDetails();
-    }, [id, dispatch]);
+    }, [id]);
 
     // Scroll to div
     useEffect(() => {
@@ -165,7 +164,8 @@ const InvoiceDetails = () => {
     useEffect(() => {
         const fetchFiles = async () => {
             try {
-                const fetchedFiles = await fetchInvoiceFiles(invoiceState?._id); // Use your fetchInvoiceFiles function
+                if (!invoiceState) { return }
+                const fetchedFiles = await fetchInvoiceFiles(invoiceState._id); // Use your fetchInvoiceFiles function
                 setFiles(fetchedFiles);
             } catch (error) {
                 console.error("Error fetching invoice files:", error);
@@ -173,7 +173,7 @@ const InvoiceDetails = () => {
         };
 
         fetchFiles();
-    }, [invoiceState?._id]);
+    }, [invoiceState]);
 
     // Display DOM
     if (isLoadingState || isUpdateLoadingState) { return (<EmployeeDetailsSkeleton />); }

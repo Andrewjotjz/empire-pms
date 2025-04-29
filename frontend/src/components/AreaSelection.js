@@ -117,12 +117,14 @@ export function AreaSelection({ areaObjRef, productIndex, currentLocation, onLoc
         level = area.levels.find((l) => l._id === item.levelId) || null
 
         if (level) {
+          // locationString = level.level_name
           locationString += ` > ${level.level_name}`
           locationID = level._id
 
           if (item.subareaId) {
             subarea = level.subareas.find((s) => s._id === item.subareaId) || null
             if (subarea) {
+              // locationString = subarea.subarea_name
               locationString += ` > ${subarea.subarea_name}`
               locationID = subarea._id
             }
@@ -161,14 +163,14 @@ export function AreaSelection({ areaObjRef, productIndex, currentLocation, onLoc
   }
 
   return (
-    <div className="w-40 relative inline-block align-middle ml-1" ref={dropdownRef}>
+    <div className="w-72 relative inline-block align-middle ml-1" ref={dropdownRef}>
       {/* Dropdown Trigger Button */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-2 py-0.5 text-xs border rounded-md shadow-sm bg-white hover:bg-gray-50 focus:outline-none"
       >
-        <span className="truncate max-w-[120px]">{getSelectionDisplayText()}</span>
+        <span className="max-w-[120px]">{getSelectionDisplayText()}</span>
         <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
       </button>
 
@@ -192,25 +194,6 @@ export function AreaSelection({ areaObjRef, productIndex, currentLocation, onLoc
             {/* No Results */}
             {Object.values(groupedItems).every((group) => group.length === 0) && (
               <div className="px-3 py-1 text-xs text-gray-500">No location found.</div>
-            )}
-
-            {/* Areas Group */}
-            {groupedItems.areas.length > 0 && (
-              <div>
-                <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Areas</div>
-                {groupedItems.areas.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleSelect(item)}
-                    className="flex w-full items-center px-2 py-1 text-xs hover:bg-gray-100"
-                  >
-                    {/* <Check
-                      className={`mr-1 h-3 w-3 ${selectedArea?.area_id === item.areaId ? "opacity-100" : "opacity-0"}`}
-                    /> */}
-                    {item.name}
-                  </button>
-                ))}
-              </div>
             )}
 
             {/* Levels Group */}
@@ -257,6 +240,26 @@ export function AreaSelection({ areaObjRef, productIndex, currentLocation, onLoc
                       }`}
                     /> */}
                     <span className="text-gray-500 mr-1">{item.parentPath} &gt;</span>
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+
+            {/* Areas Group */}
+            {groupedItems.areas.length > 0 && (
+              <div>
+                <div className="px-2 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">Areas</div>
+                {groupedItems.areas.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleSelect(item)}
+                    className="flex w-full items-center px-2 py-1 text-xs hover:bg-gray-100"
+                  >
+                    {/* <Check
+                      className={`mr-1 h-3 w-3 ${selectedArea?.area_id === item.areaId ? "opacity-100" : "opacity-0"}`}
+                    /> */}
                     {item.name}
                   </button>
                 ))}

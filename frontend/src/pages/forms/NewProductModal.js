@@ -265,10 +265,12 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                 required
                             >                                
                                 <option value="">Select Product Type</option>
-                                {productTypeState.filter(type => !type.type_isarchived).map((type,index) => (
-                                    <>
-                                    <option key={index} value={type._id}>{type.type_name}</option>
-                                    </>
+                                {productTypeState
+                                    .filter(type => !type.type_isarchived)
+                                    .map(type => (
+                                        <option key={type._id} value={type._id}>
+                                            {type.type_name}
+                                        </option>
                                 ))}
                             </select>
                             <label className='hidden md:inline-block text-xs italic text-gray-400'>Alias is based on the product type you select</label>
@@ -286,13 +288,17 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                     required
                                 >
                                     <option value="">Select Alias</option>
-                                    {aliasState && aliasState.length > 0 && 
+                                    {aliasState && aliasState.length > 0 &&
                                         Array.from(new Set(aliasState.map(product => product.alias ? product.alias._id : null)))
                                             .filter(aliasId => aliasId !== null)
-                                            .map((aliasId, index) => {
-                                                const alias = aliasState.find(product => product.alias && product.alias._id === aliasId).alias;
-                                                return <option key={index} value={aliasId}>{alias.alias_name}</option>;
+                                            .map(aliasId => {
+                                                return aliasState.find(product => product.alias && product.alias._id === aliasId)?.alias;
                                             })
+                                            .filter(alias => alias !== undefined) // Just in case
+                                            .sort((a, b) => a.alias_name.localeCompare(b.alias_name)) // <-- sort here
+                                            .map((alias, index) => (
+                                                <option key={index} value={alias._id}>{alias.alias_name}</option>
+                                            ))
                                     }
                                 </select>
                                 <label className='hidden md:inline-block text-xs italic text-gray-400'>Set alias to ('na') if not available or create custom alias <span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleInputCustomToggle}>here</span></label>

@@ -568,6 +568,11 @@ const NewPurchaseOrderForm = () => {
             return
         }
 
+        if (orderState.products.some(product => product.order_product_location === "") || orderState.custom_products.some(cproduct => cproduct.custom_product_location === "")) {
+            alert("You must input location to all products.")
+            return
+        }
+
         if (purchaseOrderState.some(order => order.order_ref.toLowerCase().includes(orderState.order_ref.toLowerCase()))) {
             alert("Purchase Order Number already exists. Please try another.")
             return
@@ -717,7 +722,7 @@ const NewPurchaseOrderForm = () => {
     }, [copiedState]);
 
     // Display Loading
-    if (isFetchProjectLoadingState || isFetchProductsLoadingState || isAddOrderLoadingState || isFetchSupplierLoading || isFetchOrderLoadingState || isFetchTypeLoading) {
+    if (isFetchProjectLoadingState || isAddOrderLoadingState || isFetchOrderLoadingState || isFetchTypeLoading) {
         return <NewPurchaseOrderSkeleton/>;
     }
 
@@ -766,7 +771,7 @@ const NewPurchaseOrderForm = () => {
             NEW PURCHASE ORDER
         </div>
         <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }} onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 mx-4 mb-1 sm:mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 mx-4 mb-1 sm:mb-4">
                 <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base"> 
                     
                         {/* PURCHASE ORDER MAIN DETAILS */}
@@ -815,10 +820,11 @@ const NewPurchaseOrderForm = () => {
                                 <select
                                 className="form-control shadow-sm cursor-pointer text-xs lg:text-base"
                                 name="supplier_name"
-                                value={selectedSupplier}
+                                value={isFetchSupplierLoading ? "Loading" : selectedSupplier}
                                 onChange={handleSupplierChange}
                                 required
                                 >
+                                <option value="Loading" hidden={!isFetchSupplierLoading}>Loading...</option>
                                 <option value="">Select Supplier</option>
                                 {supplierState &&
                                     supplierState.length > 0 &&
@@ -933,7 +939,7 @@ const NewPurchaseOrderForm = () => {
                                 <div className='p-1 hidden lg:grid'><label>Unit B</label></div>
                                 <div className='lg:grid lg:grid-cols-3 gap-2 p-1 hidden'><label className='col-span-2'>Type</label></div>
                             </div>
-                            { productState ? filterProductsBySearchTerm().filter(product => product.productPrice.projects.includes(selectedProject)).filter(product => orderState.order_date >= product.productPrice.product_effective_date).filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
+                            { productState && filterProductsBySearchTerm().filter(product => product.productPrice.projects.includes(selectedProject)).filter(product => orderState.order_date >= product.productPrice.product_effective_date).filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id)).slice(0,15).map((product, index) => (
                                 <div key={index} className="grid grid-cols-2 lg:grid-cols-5 gap-1 p-1 border-b text-xs lg:text-sm text-center hover:bg-slate-100" title='Add to order'>
                                     <div className='flex lg:inline-block justify-center gap-2'>
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="lg:hidden size-5 cursor-pointer text-green-600 justify-self-end hover:scale-110" onClick={() => handleAddItem(product)}>
@@ -951,15 +957,21 @@ const NewPurchaseOrderForm = () => {
                                         </svg>
                                     </div>
                                 </div>
-                            )) : (
+                            ))}
+                            { !productState && !isFetchProductsLoadingState && (
                                 <div className='border shadow-sm text-center'>
                                     <p className='p-1'>Select a supplier...</p>
                                 </div>
                             )}
+                            {isFetchProductsLoadingState &&
+                                <div className='border shadow-sm flex justify-center p-3'>
+                                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-black"></div>
+                                </div>
+                            }
                         </div>
                     
                 </div>
-                <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base h-full">
+                <div className="border rounded-b-lg p-2 sm:p-4 text-xs lg:text-base h-full col-span-2">
                     {/* ***** ADDED ITEM TABLE ****** */}
                     <h2 className="font-bold">Order Items:</h2>
                     <div className='bg-gray-100 border rounded-lg shadow-sm'>

@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Modal, Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-
-import { setSupplierState } from "../../redux/supplierSlice";
-import { setPurchaseOrderState } from "../../redux/purchaseOrderSlice";
-import { setProductPrice } from "../../redux/productPriceSlice";
-import { setProjectState } from "../../redux/projectSlice";
-import { setInvoiceState } from "../../redux/invoiceSlice";
 
 import { useAddProductPrice } from "../../hooks/useAddProductPrice";
 import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
@@ -17,11 +11,13 @@ import { useUpdateInvoice } from "../../hooks/useUpdateInvoice";
 import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
 import NewProductModal from "./NewProductModal";
+import SessionExpired from "../../components/SessionExpired";
+
+import { AreaSelection } from "../../components/AreaSelection";
 
 const UpdateInvoiceForm = () => {
   //Component's hook
   const { id: invoiceId } = useParams();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { updateInvoice, updateErrorState } = useUpdateInvoice();
@@ -29,24 +25,7 @@ const UpdateInvoiceForm = () => {
   const { updatePurchaseOrder, updateOrderErrorState } = useUpdatePurchaseOrder();
 
   //Component's state declaration
-  const supplierState = useSelector(
-    (state) => state.supplierReducer.supplierState
-  );
-  const purchaseOrderState = useSelector(
-    (state) => state.purchaseOrderReducer.purchaseOrderState
-  );
-  const productPriceState = useSelector(
-    (state) => state.productPriceReducer.productPriceState
-  );
-  const projectState = useSelector(
-    (state) => state.projectReducer.projectState
-  );
-  const productState = useSelector(
-    (state) => state.productReducer.productState
-  );
-  const invoiceState = useSelector(
-    (state) => state.invoiceReducer.invoiceState
-  );
+  const productState = useSelector((state) => state.productReducer.productState);
 
   const [searchOrderTerm, setSearchOrderTerm] = useState("");
   const [searchProductTerm, setSearchProductTerm] = useState("");
@@ -57,6 +36,12 @@ const UpdateInvoiceForm = () => {
   const [newSupplier, setNewSupplier] = useState("");
   const [newProductId, setNewProductId] = useState("");
   const [targetIndex, setTargetIndex] = useState(null);
+
+  const [supplierState, setSupplierState] = useState();
+  const [purchaseOrderState, setPurchaseOrderState] = useState();
+  const [productPriceState, setProductPrice] = useState();
+  const [projectState, setProjectState] = useState();
+  const [invoiceState, setInvoiceState] = useState();
 
   const [isToggled, setIsToggled] = useState(null);
   const [isToggleProjectDropdown, setIsToggleProjectDropdown] = useState(false);
@@ -244,42 +229,14 @@ const UpdateInvoiceForm = () => {
         throw new Error(data.tokenError);
       }
 
-      dispatch(setProductPrice(data));
+      setProductPrice(data);
       setIsFetchProductDetailsLoading(false);
     } catch (err) {
       setFetchProductDetailsError(err.message);
       setIsFetchProductDetailsLoading(false);
     }
   };
-  const fetchProjects = async () => {
-    setIsFetchProjectLoading(true); // Set loading state to true at the beginning
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
-        }});
-      if (!res.ok) {
-        throw new Error("Failed to fetch");
-      }
-      const data = await res.json();
-
-      if (data.tokenError) {
-        throw new Error(data.tokenError);
-      }
-
-      setIsFetchProjectLoading(false);
-      dispatch(setProjectState(data));
-      setFetchProjectError(null);
-    } catch (error) {
-      if (error.name === "AbortError") {
-        // do nothing
-      } else {
-        setIsFetchProjectLoading(false);
-        setFetchProjectError(error.message);
-      }
-    }
-  };
+  
   const resetForm = () => {
     const supplier = supplierState.find(supplier => supplier._id === newSupplier);
     const paymentTerm = supplier.supplier_payment_term; // "Net 60"
@@ -635,7 +592,6 @@ const UpdateInvoiceForm = () => {
     setShowSelectionModal(false);
   };
   const handleCreateNewPrice = () => {
-    fetchProjects();
     handleToggleCreatePriceModal();
     handleTogglePriceModal();
   };
@@ -709,6 +665,8 @@ const UpdateInvoiceForm = () => {
       ...updatedOrder,
       products: updatedProducts,
     });
+
+    setSearchProductTerm("");
   };
   const handleEditInputChange = (event, index = null, isCustom = false) => {
     const { name, value } = event.target;
@@ -960,52 +918,7 @@ const UpdateInvoiceForm = () => {
     handleTogglePriceModal();
     fetchProductDetails(supplierId, targetProductId);
   };
-  // const handleAutomation = (updatedProductId) => {
-  //   // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
-  //   const updatedItems = updatedOrder.products.filter(
-  //     (item) => item.product_obj_ref._id !== updatedProductId
-  //   );
 
-  //   const getItem = updatedOrder.products.filter(
-  //     (item) => item.product_obj_ref._id === updatedProductId
-  //   );
-
-  //   // Step 2: Find the product that needs to be re-added (optimized filtering)
-  //   const product = filterProductsBySearchTerm().find(
-  //     (product) => product.product._id === updatedProductId
-  //   );
-
-  //   if (!product) {
-  //     alert("Automation failed. Please contact IT support");
-  //     return;
-  //   }
-
-  //   // Step 3: Create the new product object with required details
-  //   const newProduct = {
-  //     product_obj_ref: {
-  //       _id: product.product._id,
-  //       product_name: product.product.product_name,
-  //       product_sku: product.product.product_sku,
-  //     },
-  //     productprice_obj_ref: product.productPrice,
-  //     order_product_location: getItem[0].order_product_location,
-  //     order_product_qty_a: getItem[0].order_product_qty_a,
-  //     order_product_qty_b: getItem[0].order_product_qty_b,
-  //     order_product_price_unit_a: product.productPrice.product_price_unit_a,
-  //     order_product_gross_amount:
-  //       getItem[0].order_product_qty_a *
-  //       product.productPrice.product_price_unit_a,
-  //   };
-
-  //   // Step 4: Update the products list with the new product
-  //   const updatedProducts = [...updatedItems, newProduct];
-
-  //   setUpdatedOrder({
-  //     ...updatedOrder,
-  //     products: updatedProducts,
-  //   });
-  // };
-  
   const handleAutomation = (updatedProductId) => {
     // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
     const updatedItems = updatedOrder.products.map((item) => {
@@ -1073,6 +986,32 @@ const UpdateInvoiceForm = () => {
     // Step 3: Remove custom product from list
     handleRemoveCustomItem(targetIndex);
   };
+
+  // NEW function for Area/Level/Subarea change
+  const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
+    if (!isCustom) {
+        const updatedProducts = [...updatedOrder.products];
+        updatedProducts[productIndex].order_product_location = locationString;
+        updatedProducts[productIndex].order_product_area = locationID;
+        
+        // Update your state with the new products array
+        setUpdatedOrder({
+        ...updatedOrder,
+        products: updatedProducts
+        });
+    }
+    else {
+        const updatedProducts = [...updatedOrder.custom_products];
+        updatedProducts[productIndex].custom_product_location = locationString;
+        updatedProducts[productIndex].custom_product_area = locationID;
+        
+        // Update your state with the new products array
+        setUpdatedOrder({
+            ...updatedOrder,
+            custom_products: updatedProducts
+        });
+    }
+};
 
   const handleApplyLocationToAll = (index, isCustom = false) => {
       let copyText = '';
@@ -1159,7 +1098,7 @@ const UpdateInvoiceForm = () => {
         }
 
         setIsFetchSupplierLoading(false);
-        dispatch(setSupplierState(data));
+        setSupplierState(data);
         setFetchSupplierError(null);
       } catch (error) {
         if (error.name === "AbortError") {
@@ -1176,7 +1115,7 @@ const UpdateInvoiceForm = () => {
     return () => {
       abortController.abort(); // Cleanup
     };
-  }, [dispatch]);
+  }, []);
 
   // Fetch orders
   useEffect(() => {
@@ -1201,7 +1140,7 @@ const UpdateInvoiceForm = () => {
         }
 
         setIsFetchSupplierLoading(false);
-        dispatch(setPurchaseOrderState(data));
+        setPurchaseOrderState(data);
         setFetchSupplierError(null);
       } catch (error) {
         if (error.name === "AbortError") {
@@ -1218,7 +1157,49 @@ const UpdateInvoiceForm = () => {
     return () => {
       abortController.abort(); // Cleanup
     };
-  }, [dispatch]);
+  }, []);
+
+  // Fetch projects
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchProjects = async () => {
+      setIsFetchProjectLoading(true); // Set loading state to true at the beginning
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, { signal, credentials: 'include',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+          }});
+        if (!res.ok) {
+          throw new Error("Failed to fetch");
+        }
+        const data = await res.json();
+  
+        if (data.tokenError) {
+          throw new Error(data.tokenError);
+        }
+  
+        setIsFetchProjectLoading(false);
+        setProjectState(data);
+        setFetchProjectError(null);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          // do nothing
+        } else {
+          setIsFetchProjectLoading(false);
+          setFetchProjectError(error.message);
+        }
+      }
+    };
+
+    fetchProjects();
+
+    return () => {
+      abortController.abort(); // Cleanup
+    };
+  }, []);
 
   // Set new invoice without PO
   useEffect(() => {
@@ -1296,7 +1277,7 @@ const UpdateInvoiceForm = () => {
           invoice_isarchived: data.invoice_isarchived,
           payment: data.payment?._id || null,
         })
-        dispatch(setInvoiceState(data));
+        setInvoiceState(data);
         if (data.order) {
           fetchSelectedPurchaseOrder(data.order._id);
         }
@@ -1316,7 +1297,7 @@ const UpdateInvoiceForm = () => {
     return () => {
       abortController.abort(); // Cleanup
     };
-  }, [dispatch, invoiceId]);
+  }, [invoiceId]);
 
   // Fetch product types
   useEffect(() => {
@@ -1968,31 +1949,19 @@ const UpdateInvoiceForm = () => {
                               <td>{prod.product_obj_ref.product_sku}</td>
                               <td>{prod.product_obj_ref.product_name}</td>
                               <td className="whitespace-nowrap">
-                                <div className="inline-block align-middle">
-                                  <input
-                                    type="text"
-                                    className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"
-                                    name="order_product_location"
-                                    value={prod.order_product_location}
-                                    onChange={(e) =>
-                                      handleEditInputChange(e, index)
-                                    }
-                                    placeholder="Ex: Level 2"
-                                    required
-                                    onInvalid={(e) =>
-                                      e.target.setCustomValidity(
-                                        "Enter item location"
-                                      )
-                                    }
-                                    onInput={(e) =>
-                                      e.target.setCustomValidity("")
-                                    }
-                                  />
+                                <div title={`${prod.order_product_location}`} className='inline-block'>
+                                    <AreaSelection 
+                                        areaObjRef={projectState.find(proj => proj._id === purchaseOrderState.find(order => order._id === selectedOrder).project._id).area_obj_ref} 
+                                        productIndex={index}
+                                        currentLocation={prod.order_product_location}
+                                        onLocationChange={handleLocationChange}
+                                        isCustom={false}
+                                    />
                                 </div>
                                 <div
                                     className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
                                     title='Paste location to all'
-                                    onClick={() => handleApplyLocationToAll(index)}
+                                    onClick={() => handleApplyLocationToAll(index, false)}
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -2009,7 +1978,7 @@ const UpdateInvoiceForm = () => {
                                         />
                                     </svg>
                                 </div>
-                              </td>
+                            </td>
                               <td>
                                 <div className="grid grid-cols-3 items-center border rounded w-28">
                                   <input
@@ -2171,23 +2140,14 @@ const UpdateInvoiceForm = () => {
                               />
                             </td>
                             <td className="whitespace-nowrap">
-                              <div className="inline-block align-middle">
-                                <input
-                                  type="text"
-                                  className="form-control px-1 py-0.5 text-xs placeholder-gray-400 placeholder-opacity-50 w-36"
-                                  name="custom_product_location"
-                                  value={cproduct.custom_product_location}
-                                  onChange={(e) =>
-                                    handleEditInputChange(e, index, true)
-                                  }
-                                  placeholder="Ex: Level 2"
-                                  onInvalid={(e) =>
-                                    e.target.setCustomValidity(
-                                      "Enter custom item location"
-                                    )
-                                  }
-                                  onInput={(e) => e.target.setCustomValidity("")}
-                                />
+                              <div title={`${cproduct.custom_product_location}`} className='inline-block'>
+                                  <AreaSelection 
+                                      areaObjRef={projectState.find(proj => proj._id === purchaseOrderState.find(order => order._id === selectedOrder).project._id).area_obj_ref}
+                                      productIndex={index}
+                                      currentLocation={cproduct.custom_product_location}
+                                      onLocationChange={handleLocationChange}
+                                      isCustom={true}
+                                  />
                               </div>
                               <div
                                   className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
@@ -2209,7 +2169,7 @@ const UpdateInvoiceForm = () => {
                                       />
                                   </svg>
                               </div>
-                            </td>
+                          </td>
                             <td>
                               <div className="grid grid-cols-3 items-center border rounded w-28">
                                 <input
@@ -2335,362 +2295,6 @@ const UpdateInvoiceForm = () => {
   );
 
   const selectedProduct = updatedOrder?.products.find((prod) => prod.product_obj_ref._id === newProductPrice.product_obj_ref);
-
-  // const createPriceModal = (
-  //   <div>
-  //     {showCreatePriceModal && (
-  //       <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-2 overflow-y-auto">
-  //         <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
-  //           className="bg-white w-auto rounded-lg shadow-lg"
-  //           onSubmit={handleSubmitNewPrice}
-  //         >
-  //           {/* Modal Header */}
-  //           <div className="flex justify-between items-center px-4 py-3 border-b bg-slate-100">
-  //             <h2 className="text-sm sm:text-xl font-bold">CREATE NEW PRICE</h2>
-  //             <button
-  //               onClick={handleToggleCreatePriceModal}
-  //               className="text-gray-500 hover:text-gray-800"
-  //             >
-  //               <svg
-  //                 xmlns="http://www.w3.org/2000/svg"
-  //                 fill="none"
-  //                 viewBox="0 0 24 24"
-  //                 strokeWidth={1.5}
-  //                 stroke="currentColor"
-  //                 className="size-6"
-  //               >
-  //                 <path
-  //                   strokeLinecap="round"
-  //                   strokeLinejoin="round"
-  //                   d="M6 18 18 6M6 6l12 12"
-  //                 />
-  //               </svg>
-  //             </button>
-  //           </div>
-  //           {/* Modal Body */}
-  //           {updatedOrder.products
-  //             .filter(
-  //               (prod) =>
-  //                 prod.product_obj_ref._id === newProductPrice.product_obj_ref
-  //             )
-  //             .map((prod) => (
-  //               <div className="p-2">
-  //                 <h2 className="text-xs sm:text-lg font-semibold bg-indigo-50 px-3 py-1 rounded-md shadow-md transition duration-300 hover:bg-indigo-100">
-  //                   <span>{prod.product_obj_ref.product_name}</span>
-  //                   <span className="text-xs text-gray-500 ml-2">
-  //                     [SKU: {prod.product_obj_ref.product_sku}]
-  //                   </span>
-  //                 </h2>
-  //                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-1 md:gap-x-10 gap-y-1 md:gap-y-4 p-3 mb-1">
-  //                   <div className="border-2 rounded p-2">
-  //                     <div className="mb-0 md:mb-3">
-  //                       <label className="form-label font-bold text-xs md:text-base">
-  //                         *Number-A:
-  //                       </label>
-  //                       <input
-  //                         type="number"
-  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
-  //                         name="product_number_a"
-  //                         value={newProductPrice.product_number_a}
-  //                         onChange={handleNewProductPriceInput}
-  //                         min={0}
-  //                         step="0.001" // Allows input with up to three decimal places
-  //                         pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
-  //                         required
-  //                         onInvalid={(e) =>
-  //                           e.target.setCustomValidity("Enter number-A")
-  //                         }
-  //                         onInput={(e) => e.target.setCustomValidity("")}
-  //                         placeholder={
-  //                           prod.productprice_obj_ref.product_number_a
-  //                         }
-  //                       />
-  //                     </div>
-  //                     <div className="mb-0 md:mb-3">
-  //                       <label className="form-label font-bold text-xs md:text-base">*Unit-A:</label>
-  //                       <input
-  //                         type="text"
-  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
-  //                         name="product_unit_a"
-  //                         value={newProductPrice.product_unit_a}
-  //                         onChange={handleNewProductPriceInput}
-  //                         required
-  //                         onInvalid={(e) =>
-  //                           e.target.setCustomValidity("Enter unit-A")
-  //                         }
-  //                         onInput={(e) => e.target.setCustomValidity("")}
-  //                         placeholder={prod.productprice_obj_ref.product_unit_a}
-  //                       />
-  //                       <label className="hidden text-xs italic text-gray-400 md:inline-block">
-  //                         Ex: Box, Pack, Carton
-  //                       </label>
-  //                     </div>
-  //                     <div className="mb-0 md:mb-3">
-  //                       <label className="form-label font-bold text-xs md:text-base">
-  //                         *Unit-A Price:
-  //                       </label>
-  //                       <div className="flex items-center border rounded">
-  //                         <svg
-  //                           xmlns="http://www.w3.org/2000/svg"
-  //                           fill="none"
-  //                           viewBox="0 0 24 24"
-  //                           strokeWidth={1.5}
-  //                           stroke="currentColor"
-  //                           className="size-6 ml-2"
-  //                         >
-  //                           <path
-  //                             strokeLinecap="round"
-  //                             strokeLinejoin="round"
-  //                             d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-  //                           />
-  //                         </svg>
-  //                         <input
-  //                           type="number"
-  //                           className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
-  //                           name="product_price_unit_a"
-  //                           value={newProductPrice.product_price_unit_a}
-  //                           onChange={handleNewProductPriceInput}
-  //                           step="0.001" // Allows input with up to three decimal places
-  //                           min={0}
-  //                           required
-  //                           onInvalid={(e) =>
-  //                             e.target.setCustomValidity("Enter unit-A price")
-  //                           }
-  //                           onInput={(e) => e.target.setCustomValidity("")}
-  //                           placeholder={
-  //                             prod.productprice_obj_ref.product_price_unit_a
-  //                           }
-  //                         />
-  //                       </div>
-  //                     </div>
-  //                   </div>
-  //                   <div className="border-2 rounded p-2">
-  //                     <div className="mb-0 md:mb-3">
-  //                       <label className="form-label font-bold text-xs md:text-base">
-  //                         *Number-B:
-  //                       </label>
-  //                       <input
-  //                         type="number"
-  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
-  //                         name="product_number_b"
-  //                         value={newProductPrice.product_number_b}
-  //                         onChange={handleNewProductPriceInput}
-  //                         step="0.001" // Allows input with up to three decimal places
-  //                         pattern="^\d+(\.\d{1,3})?$" // Allows up to two decimal places
-  //                         min={0}
-  //                         required
-  //                         onInvalid={(e) =>
-  //                           e.target.setCustomValidity("Enter number-B")
-  //                         }
-  //                         onInput={(e) => e.target.setCustomValidity("")}
-  //                         placeholder={
-  //                           prod.productprice_obj_ref.product_number_b
-  //                         }
-  //                       />
-  //                     </div>
-  //                     <div className="mb-0 md:mb-3">
-  //                       <label className="form-label font-bold text-xs md:text-base">*Unit-B:</label>
-  //                       <input
-  //                         type="text"
-  //                         className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50"
-  //                         name="product_unit_b"
-  //                         value={newProductPrice.product_unit_b}
-  //                         onChange={handleNewProductPriceInput}
-  //                         required
-  //                         onInvalid={(e) =>
-  //                           e.target.setCustomValidity("Enter unit-B")
-  //                         }
-  //                         onInput={(e) => e.target.setCustomValidity("")}
-  //                         placeholder={prod.productprice_obj_ref.product_unit_b}
-  //                       />
-  //                       <label className="hidden text-xs italic text-gray-400 md:inline-block">
-  //                         Ex: units, length, each, sheet
-  //                       </label>
-  //                     </div>
-  //                     <div className="mb-0 md:mb-3">
-  //                       <label className="form-label font-bold text-xs md:text-base">
-  //                         *Unit-B Price:
-  //                       </label>
-  //                       <div className="flex items-center border rounded">
-  //                         <svg
-  //                           xmlns="http://www.w3.org/2000/svg"
-  //                           fill="none"
-  //                           viewBox="0 0 24 24"
-  //                           strokeWidth={1.5}
-  //                           stroke="currentColor"
-  //                           className="size-6 ml-2"
-  //                         >
-  //                           <path
-  //                             strokeLinecap="round"
-  //                             strokeLinejoin="round"
-  //                             d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-  //                           />
-  //                         </svg>
-  //                         <input
-  //                           type="number"
-  //                           className="form-control text-xs md:text-base placeholder-gray-400 placeholder-opacity-50 flex-1 pl-2 border-0"
-  //                           name="product_price_unit_b"
-  //                           value={newProductPrice.product_price_unit_b}
-  //                           onChange={handleNewProductPriceInput}
-  //                           step="0.001" // Allows input with up to three decimal places
-  //                           min={0}
-  //                           required
-  //                           onInvalid={(e) =>
-  //                             e.target.setCustomValidity("Enter unit-B price")
-  //                           }
-  //                           onInput={(e) => e.target.setCustomValidity("")}
-  //                           placeholder={
-  //                             prod.productprice_obj_ref.product_price_unit_b
-  //                           }
-  //                         />
-  //                       </div>
-  //                     </div>
-  //                   </div>
-  //                   {/* **** PROJECT DROPDOWN START **** */}
-  //                   <div>
-  //                     <label className="block font-bold mb-0 md:mb-2 text-xs md:text-base">*Project:</label>
-  //                     <div>
-  //                       <button
-  //                         type="button"
-  //                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-left focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs md:text-base"
-  //                         onClick={() =>
-  //                           setIsToggleProjectDropdown(!isToggleProjectDropdown)
-  //                         }
-  //                       >
-  //                         {newProductPrice.projects.length > 0
-  //                           ? `x${newProductPrice.projects.length} Projects Selected`
-  //                           : `Select Projects`}
-  //                       </button>
-  //                       {isToggleProjectDropdown && (
-  //                         <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto thin-scrollbar text-xs md:text-base">
-  //                           <ul className="py-1">
-  //                             {projectState &&
-  //                               projectState.length > 0 &&
-  //                               projectState.map((project, index) => (
-  //                                 <li
-  //                                   key={index}
-  //                                   className="flex items-center px-4 py-2 hover:bg-gray-100"
-  //                                 >
-  //                                   <input
-  //                                     type="checkbox"
-  //                                     id={`project-${project._id}`}
-  //                                     value={project._id}
-  //                                     checked={newProductPrice.projects.includes(
-  //                                       project._id
-  //                                     )}
-  //                                     onChange={handleCheckboxChangeNewPrice}
-  //                                     className="mr-2"
-  //                                   />
-  //                                   <label
-  //                                     htmlFor={`project-${project._id}`}
-  //                                     className="text-gray-900"
-  //                                   >
-  //                                     {project.project_name}
-  //                                   </label>
-  //                                 </li>
-  //                               ))}
-  //                           </ul>
-  //                         </div>
-  //                       )}
-  //                     </div>
-  //                     <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
-  //                       Select one or more projects that this new product
-  //                       applies to
-  //                     </p>
-  //                   </div>
-  //                   {/* **** PRICE EFFECTIVE DATE **** */}
-  //                   <div>
-  //                     <label className="form-label font-bold text-xs md:text-base">
-  //                       *Price effective date:
-  //                     </label>
-  //                     <input
-  //                       type="date"
-  //                       className="form-control text-xs md:text-base"
-  //                       name="product_effective_date"
-  //                       value={newProductPrice.product_effective_date}
-  //                       onChange={handleNewProductPriceInput}
-  //                       required
-  //                     />
-  //                     <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
-  //                       Product price will take effect before order date:{" "}
-  //                       {formatDate(newProductPrice.product_effective_date)}
-  //                     </p>
-  //                   </div>
-  //                   {/* **** PRICE ACTUAL RATE **** */}
-  //                   <div>
-  //                     <label className="form-label font-bold text-xs md:text-base">
-  //                       *Price actual price/rate:
-  //                     </label>
-  //                     <input
-  //                       type="number"
-  //                       className="form-control text-xs md:text-base"
-  //                       name="product_actual_rate"
-  //                       value={newProductPrice.product_actual_rate}
-  //                       onChange={handleNewProductPriceInput}
-  //                       required
-  //                     />
-  //                     <p className="hidden text-xs italic text-gray-400 md:inline-block mt-2">
-  //                       The price/rate of the product's actual size.
-  //                     </p>
-  //                   </div>
-  //                   {/* **** PRICE FIXED (?) **** */}
-  //                   <div>
-  //                     <label className="form-label font-bold text-xs md:text-base">
-  //                       Price fixed(?):
-  //                     </label>
-  //                     <input
-  //                       type="checkbox"
-  //                       className="form-check-input m-1"
-  //                       name="price_fixed"
-  //                       checked={newProductPrice.price_fixed}
-  //                       onChange={(e) =>
-  //                         handleNewProductPriceInput({
-  //                           target: {
-  //                             name: "price_fixed",
-  //                             value: e.target.checked,
-  //                           },
-  //                         })
-  //                       }
-  //                     />
-  //                   </div>
-  //                   {/* **** PRODUCT PRICE NOTE **** */}
-  //                   <div className="col-span-3">
-  //                     <label className="form-label font-bold text-xs md:text-base">
-  //                       Price notes:
-  //                     </label>
-  //                     <textarea
-  //                       className="form-control text-xs md:text-base"
-  //                       name="product_price_note"
-  //                       value={newProductPrice.product_price_note}
-  //                       onChange={handleNewProductPriceInput}
-  //                     />
-  //                   </div>
-  //                 </div>
-  //               </div>
-  //             ))}
-  //           {/* Modal Buttons */}
-  //           <div className="flex justify-end p-3 border-t">
-  //             <button
-  //               onClick={() => {
-  //                 handleTogglePriceModal();
-  //                 handleToggleCreatePriceModal();
-  //               }}
-  //               className="bg-gray-300 text-gray-700 px-3 py-2 rounded mr-2 hover:bg-gray-400 text-sm md:text-base"
-  //             >
-  //               BACK
-  //             </button>
-  //             <button
-  //               type="submit"
-  //               className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm md:text-base"
-  //             >
-  //               SUBMIT NEW PRICE
-  //             </button>
-  //           </div>
-  //         </form>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
 
   const createPriceModal = (
     <div>
@@ -3150,87 +2754,9 @@ const UpdateInvoiceForm = () => {
     </Modal>
   );
 
-  if (isFetchSupplierLoading || isFetchProjectLoading || isFetchInvoiceLoading) {
+  if (isFetchSupplierLoading || isFetchProjectLoading || isFetchInvoiceLoading || isFetchTypeLoading) {
     return <EmployeeDetailsSkeleton />;
   }
-
-  // if (
-  //   fetchSupplierError ||
-  //   fetchOrderError ||
-  //   fetchProductDetailsError ||
-  //   addPriceErrorState ||
-  //   fetchProjectError ||
-  //   fetchProductsErrorState ||
-  //   updateOrderErrorState ||
-  //   updateErrorState ||
-  //   fetchInvoiceError
-  // ) {
-  //   const errorMessages = [
-  //     fetchSupplierError,
-  //     fetchOrderError,
-  //     fetchProductDetailsError,
-  //     addPriceErrorState,
-  //     fetchProjectError,
-  //     fetchProductsErrorState,
-  //     updateOrderErrorState,
-  //     updateErrorState,
-  //     fetchInvoiceError
-  //   ];
-
-  //   const isSessionExpired = errorMessages.some((error) =>
-  //     error?.includes("Session expired.")
-  //   );
-
-  //   if (isSessionExpired) {
-  //     return (
-  //       <div>
-  //         <SessionExpired />
-  //       </div>
-  //     );
-  //   } else {
-  //     return (
-  //       <div className="flex flex-col items-center justify-center min-h-screen bg-red-50 text-red-800 p-6 rounded-lg shadow-lg">
-  //         <div className="flex items-center space-x-2">
-  //           <svg
-  //             xmlns="http://www.w3.org/2000/svg"
-  //             fill="none"
-  //             viewBox="0 0 24 24"
-  //             strokeWidth={1.5}
-  //             stroke="currentColor"
-  //             className="size-10"
-  //           >
-  //             <path
-  //               strokeLinecap="round"
-  //               strokeLinejoin="round"
-  //               d="M15.182 16.318A4.486 4.486 0 0 0 12.016 15a4.486 4.486 0 0 0-3.198 1.318M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z"
-  //             />
-  //           </svg>
-  //           <h2 className="font-bold text-xs md:text-2xl">
-  //             Ooops...Something went wrong!
-  //           </h2>
-  //         </div>
-  //         <p className="mt-4 text-lg text-center">
-  //           Error:{" "}
-  //           {fetchSupplierError ||
-  //             fetchOrderError ||
-  //             fetchProductDetailsError ||
-  //             addPriceErrorState ||
-  //             fetchProjectError ||
-  //             fetchProductsErrorState ||
-  //             updateOrderErrorState ||
-  //             updateErrorState ||
-  //             fetchInvoiceError}
-  //         </p>
-  //         <button
-  //           onClick={() => window.location.reload()}
-  //           className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-300"
-  //         >
-  //           Try Again
-  //         </button>
-  //       </div>
-  //     );
-  //   }
-  // }
 
   return localUser && Object.keys(localUser).length > 0 ? (
     <div>
