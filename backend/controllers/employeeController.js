@@ -49,7 +49,7 @@ const refreshToken = (req, res, next) => {
         
         // Reset token expiration if the user is active
         const newToken = createToken(decoded.id); // Generate a new token
-        res.cookie('jwt', newToken, { httpOnly: true, maxAge: maxAge * 1000 }); // Update cookie
+        res.cookie('jwt', newToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: maxAge * 1000 }); // Update cookie
         next(); // Continue to the next middleware or route handler
       });
     } else {
@@ -247,7 +247,7 @@ const sendPasswordResetEmail = async (req, res) => {
 
             await employee.save();
 
-            const resetUrl = `http://localhost:3001/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
+            const resetUrl = `https://empirecbs.onrender.com/EmpirePMS/employee/reset-password?token=${resetToken}&id=${id}`;
 
             const message = `
             <!DOCTYPE html>
