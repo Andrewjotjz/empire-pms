@@ -25,6 +25,10 @@ const budgetRoutes = require('./routes/budgetRoutes');
 //import from importJSONtoDB file
 const importJSONtoDB = require('./importJSONtoDB'); 
 
+const allowedOrigins = [
+    'http://localhost:3001', 
+    'https://empirecbs.onrender.com' // ← use your actual deployed frontend URL
+  ];
 
 // Load the .env file
 dotenv.config();
@@ -32,7 +36,7 @@ dotenv.config();
 const app = express();
 //invoke CORS
 app.use(cors({
-    origin: 'https://empirecbs.onrender.com',
+    origin: allowedOrigins,
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Content-Disposition'], // Expose the Content-Disposition header for Download Invoice Attachment
