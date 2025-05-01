@@ -8,6 +8,7 @@ import InvoicePage from './pages/InvoicePage';
 import PaymentPage from './pages/PaymentPage';
 import ProjectPage from './pages/ProjectPage';
 import AccountPage from './pages/AccountPage';
+import AliasPage from './pages/AliasPage';
 import ProjectDetails from './pages/ProjectDetails';
 import NewProjectForm from './pages/forms/NewProjectForm';
 import UpdateProjectForm from "./pages/forms/UpdateProjectForm";
@@ -15,6 +16,7 @@ import UpdatePurchaseOrderForm from "./pages/forms/UpdatePurchaseOrderForm";
 import SupplierPage from './pages/SupplierPage';
 import EmployeeDetails from './pages/EmployeeDetails';
 import UpdateEmployeeForm from "./pages/forms/UpdateEmployeeForm";
+import UpdateAliasForm from "./pages/forms/UpdateAliasForm";
 import NewEmployeeForm from "./pages/forms/NewEmployeeForm";
 import ChangePasswordForm from "./pages/forms/ChangePasswordForm";
 import PasswordReset from "./components/PasswordReset";
@@ -116,6 +118,9 @@ function App() {
             <Route path="/EmpirePMS/payment/:id" element={<PaymentDetails />} />
             <Route path="/EmpirePMS/payment/create" element={<NewPaymentForm />} />
             <Route path="/EmpirePMS/payment/:id/edit" element={<UpdatePaymentForm /> } />
+
+            <Route path="/EmpirePMS/alias" element={<AliasPage />} />
+            <Route path="/EmpirePMS/alias/:id/edit" element={<UpdateAliasForm />} />
 
 
             <Route path="/EmpirePMS/product" element={<Iframe /> } />

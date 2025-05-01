@@ -92,19 +92,6 @@ const UpdateProductForm = () => {
         }
     }
 
-    const handleEditAlias = () => {
-        if (defaultAlias === '') {
-            setDefaultAlias(productState.alias_name)
-        }
-        if (!isEditAlias) {
-            setIsEditAlias(true); 
-        }
-        else {
-            setIsEditAlias(false); 
-            dispatch(setProductState({...productState, alias_name: defaultAlias}));
-        }
-    }
-
     const changeAlias = () => {
         setIsChangeAlias(!isChangeAlias)
         if (defaultProductType === '') {
@@ -427,20 +414,7 @@ const UpdateProductForm = () => {
                                     value={productState.alias_name} 
                                     disabled
                                 />
-                                <label className='text-xs italic text-gray-400'><span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleEditAlias}>Edit</span> current alias or <span className="text-blue-600 size-5 cursor-pointer underline" onClick={changeAlias}>Change</span> alias</label>
-                            </div>}
-                            { isEditAlias && !isChangeAlias && <div>
-                                <input 
-                                    type='text'
-                                    className="form-control text-xs sm:text-base" 
-                                    name="alias_name" 
-                                    value={productState.alias_name}
-                                    required
-                                    onChange={handleProductInputChange}
-                                    onInvalid={(e) => e.target.setCustomValidity('Enter alias name')}
-                                    onInput={(e) => e.target.setCustomValidity('')}
-                                />
-                                <label className='text-xs italic text-gray-400'>Don't want to edit alias? <span className="text-blue-600 size-5 cursor-pointer underline" onClick={handleEditAlias}>Cancel</span></label>
+                                <label className='text-xs italic text-gray-400'><span className="text-blue-600 size-5 cursor-pointer underline" onClick={changeAlias}>Change</span> alias</label>
                             </div>}
                             { isChangeAlias && !isEditAlias && <div>
                                 <select 

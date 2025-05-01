@@ -606,9 +606,10 @@ const InvoiceDetails = () => {
                         {new Date(invoiceState.createdAt) > new Date("2024-07-20T00:00:00.000Z") && (
                             <div className="absolute right-3">
                                 <Dropdown>
+                                    {localUser.employee_roles === "Admin" && 
                                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                                         ACTIONS
-                                    </Dropdown.Toggle>
+                                    </Dropdown.Toggle>}
                                     <Dropdown.Menu>
                                         <Dropdown.Item onClick={handleEditInvoice}>
                                             <div className="flex items-center">

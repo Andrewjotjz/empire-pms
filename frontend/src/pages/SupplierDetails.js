@@ -458,9 +458,10 @@ const SupplierDetails = () => {
     const selectProjectsBtn = (
         <div className='d-flex m-1 justify-content-end'>
             <Dropdown>
+                    {localUser.employee_roles === "Admin" && 
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                         ACTIONS
-                    </Dropdown.Toggle>
+                    </Dropdown.Toggle>}
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={handleAddProjectClick}>
                             <div className='flex items-center'>
@@ -801,9 +802,10 @@ const SupplierDetails = () => {
         <div className="card-body border-1 relative text-xs sm:text-base">
             <div className="absolute right-3">
                 <Dropdown>
+                    {localUser.employee_roles === "Admin" && 
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                         ACTIONS
-                    </Dropdown.Toggle>
+                    </Dropdown.Toggle>}
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={handleEditSupplierClick}>
                             <div className='flex items-center'>

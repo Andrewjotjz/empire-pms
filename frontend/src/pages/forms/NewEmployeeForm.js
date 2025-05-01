@@ -110,7 +110,7 @@ const NewEmployeeForm = () => {
                                 value={employeeState.employee_roles} 
                                 onChange={handleInputChange}
                             >
-                                <option value="Admin">Admin</option>
+                                {localUser.employee_roles === "Admin" && <option value="Admin">Admin</option>}
                                 <option value="Manager">Manager</option>
                                 <option value="Foreman">Foreman</option>
                                 <option value="Employee">Employee</option>
