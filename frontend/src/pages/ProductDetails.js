@@ -211,9 +211,10 @@ const ProductDetails = () => {
                     <div className="d-flex justify-content-between mb-3">
                         <div></div>
                         <Dropdown>
+                            {localUser.employee_roles === "Admin" && 
                             <Dropdown.Toggle variant="success" id="dropdown-basic">
                                 ACTIONS
-                            </Dropdown.Toggle>
+                            </Dropdown.Toggle>}
                             <Dropdown.Menu>
                                 <Dropdown.Item onClick={handleEditProductClick}>
                                     <div className='flex items-center'>

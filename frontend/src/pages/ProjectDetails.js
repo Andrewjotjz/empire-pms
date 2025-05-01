@@ -404,9 +404,10 @@ const Project_Details = () => {
     const selectEmployeesBtn = (
         <div className='d-flex m-1 justify-content-end'>
             <Dropdown>
+                    {localUser.employee_roles === "Admin" && 
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                         ACTIONS
-                    </Dropdown.Toggle>
+                    </Dropdown.Toggle>}
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={() => handleAddEmployeeClick()}>
                             <div className='flex items-center'>
@@ -452,9 +453,10 @@ const Project_Details = () => {
         <div className="card-body border-1 relative">
             <div className='d-flex m-1 justify-content-end'>
                 <Dropdown>
+                    {localUser.employee_roles === "Admin" && 
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                         ACTIONS
-                    </Dropdown.Toggle>
+                    </Dropdown.Toggle>}
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={handleEditClick}>
                             <div className='flex items-center'>
@@ -576,14 +578,14 @@ const Project_Details = () => {
                 </table>
             </div>
     ) : (
-        <div className='border'>No related Employee</div>
+        <div className='border'>Employees not Assigned to this project</div>
     )}
     </div>
     );
 
     const projectSuppliersTab = (
         <div className="card-body border-1 relative">
-            {selectSuppliersBtn}
+            {localUser.employee_roles === "Admin" && selectSuppliersBtn}
 
             {projectState && projectState.suppliers && projectState.suppliers.length > 0 ? (
                 <div className='overflow-x-auto'>

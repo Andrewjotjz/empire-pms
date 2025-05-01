@@ -208,6 +208,7 @@ const EmployeeDetails = () => {
     const selectProjectsBtn = (
         <div className='d-flex m-1 justify-between'>
             <label className='font-bold'>Assigned projects:</label>
+            {localUserState.employee_roles === 
             <button className="btn btn-primary" onClick={handleSelectProjectsClick}>
                 <div className='flex items-center'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 sm:size-6 mr-1">
@@ -217,7 +218,7 @@ const EmployeeDetails = () => {
                     </svg>
                     <label className='text-xs sm:text-sm'>SELECT PROJECTS</label>
                 </div>
-            </button>
+            </button>}
         </div>
     );
 
@@ -267,9 +268,10 @@ const EmployeeDetails = () => {
         <div className="card-body mx-1 rounded-sm relative">
             <div className="absolute right-4">
                 <Dropdown>
+                    {localUserState.employee_roles === "Admin" && 
                     <Dropdown.Toggle variant="success" id="dropdown-basic">
                         ACTIONS
-                    </Dropdown.Toggle>
+                    </Dropdown.Toggle>}
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={handleEditClick}>
                             <div className='flex items-center'>
@@ -343,7 +345,7 @@ const EmployeeDetails = () => {
 
     const employeeProjectsTable = (
         <div className="card-body relative text-xs sm:text-base overflow-x-auto">
-            {selectProjectsBtn}
+            {localUserState.employee_roles === "Admin" && selectProjectsBtn}
 
             {employeeState && employeeState.projects && employeeState.projects.length > 0 ? (
             <table className="table table-bordered table-hover">
@@ -367,7 +369,7 @@ const EmployeeDetails = () => {
                 </tbody>
             </table>
     ) : (
-        <div className='border'>No related Employee</div>
+        <div className='border p-2'>Not assigned to any projects.</div>
     )}
     </div>
     );

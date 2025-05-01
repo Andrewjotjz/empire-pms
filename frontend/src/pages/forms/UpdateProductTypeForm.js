@@ -1234,10 +1234,6 @@ export default UpdateProductTypeForm
 //       setAliasState(aliases);
 //     }
 //   }, [productState]);
-  
-
-//   console.log("productState", productState)
-//   console.log("aliasState", aliasState)
 
 //   // component
 //   if (isFetchError || updateError) {

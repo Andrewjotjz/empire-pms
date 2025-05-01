@@ -48,7 +48,7 @@ const Home = () => {
             icon={ShoppingCart}
             color="bg-indigo-100 hover:bg-indigo-200"
           />
-          <NavCard to="/EmpirePMS/invoice" title="Invoices" icon={FileText} color="bg-indigo-100 hover:bg-indigo-200" />
+          {localUser.employee_roles === "Admin" &&  <NavCard to="/EmpirePMS/invoice" title="Invoices" icon={FileText} color="bg-indigo-100 hover:bg-indigo-200" />}
           <NavCard to="/EmpirePMS/delivery" title="Deliveries" icon={Truck} color="bg-indigo-100 hover:bg-indigo-200" />
           <NavCard
             to="/EmpirePMS/payment"
@@ -83,14 +83,15 @@ const Home = () => {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4 text-gray-700">Resources & Items</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <NavCard
+          {localUser.employee_roles === "Admin" && <NavCard
             to="/EmpirePMS/product-type"
             title="Product Types"
             icon={Layers}
             color="bg-blue-50 hover:bg-blue-100"
-          />
+          />}
           <NavCard to="/EmpirePMS/budget" title="Budgets" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />
-          <NavCard to="/EmpirePMS/product" title="Reports (Beta)" icon={ChartArea} color="bg-blue-50 hover:bg-blue-100" />
+          {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/alias" title="Alias" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />}
+          {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/product" title="Reports (Beta)" icon={ChartArea} color="bg-blue-50 hover:bg-blue-100" />}
         </div>
       </div>
     </div>
