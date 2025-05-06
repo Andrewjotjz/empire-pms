@@ -26,7 +26,15 @@ const ProductDetails = () => {
     //Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handlePriceTableClick = (priceId) => { return }
+    const handlePriceTableClick = (priceId) => {
+        navigator.clipboard.writeText(priceId)
+            .then(() => {
+            console.log(`Copied priceId: ${priceId}`);
+            })
+            .catch((err) => {
+            console.error('Failed to copy priceId:', err);
+            });
+    };      
 
     const handleEditProductClick = () => {
         // Convert the MongoDB Date ISO8601 format to (YYYY-MM-DD) JavaScript Date string
@@ -159,7 +167,7 @@ const ProductDetails = () => {
                     </thead>
                     <tbody className='text-center'>
                     {productState.map((item, index) => (
-                        <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)}>
+                        <tr key={index} onClick={() => handlePriceTableClick(item.productPrice._id)} title='Click to copy ObjectID' className='hover:cursor-pointer'>
                             <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">{formatDate(item.productPrice.product_effective_date)}</td>
                             <td className="border border-gray-300 px-2 py-1">
                                 <label>{item.productPrice.product_number_a}</label>

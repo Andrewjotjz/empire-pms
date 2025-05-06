@@ -168,9 +168,13 @@ const Calculator = () => {
       else if (e.key === "Backspace") {
         clearLastChar()
       }
-      // Escape or Delete
-      else if (e.key === "Escape" || e.key === "Delete") {
+      // Delete
+      else if (e.key === "Delete") {
         clearAll()
+      }
+      // ESC
+      else if (e.key === "Escape") {
+        setShowCalculator(false)
       }
     }
 
