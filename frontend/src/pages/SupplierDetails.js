@@ -366,12 +366,12 @@ const SupplierDetails = () => {
                     throw new Error('Failed to fetch supplier products');
                 }
                 const data = await res.json();
-
+                console.log("data", data)
                 if (data.tokenError) {
                     throw new Error(data.tokenError)
                 }
 
-                dispatch(setProductState(data))
+                dispatch(setProductState(data.filter(prod => prod.product.product_isarchived === false)))
                 setIsLoadingState(false)
             } catch (err) {
                 setErrorState(err.message);
