@@ -1130,6 +1130,18 @@ const UpdateProductForm = () => {
                   required
                 />
               </div>
+              
+              
+              <div className="col-md-6 mb-1 sm:mb-3 border-b-2 sm:border-b-0">
+                  <label className="font-semibold text-gray-700">Archived:</label>
+                  <input 
+                      type="checkbox"
+                      className="form-check-input m-1" 
+                      name="product_isarchived" 
+                      checked={productState.product_isarchived} 
+                      onChange={(e) => handleProductInputChange({ target: { name: 'product_isarchived', value: e.target.checked }})}
+                  />
+              </div>
             </div>
           </div>
 
