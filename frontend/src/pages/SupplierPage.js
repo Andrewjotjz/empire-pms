@@ -16,7 +16,8 @@ const Supplier = () => {
   const [errorState, setErrorState] = useState(null)
   const [isArchive, setIsArchive] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [sortConfig, setSortConfig] = useState({ key: "supplier_name", direction: "ascending" })
+  const [sortConfig, setSortConfig] = useState({})
+  // const [sortConfig, setSortConfig] = useState({ key: "supplier_name", direction: "ascending" })
   const [currentPage, setCurrentPage] = useState(1)
   const [expandedRow, setExpandedRow] = useState(null)
 

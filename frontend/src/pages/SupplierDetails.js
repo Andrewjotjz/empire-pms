@@ -196,7 +196,15 @@ const SupplierDetails = () => {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                         },
-                        body: JSON.stringify({ suppliers: Array.from(updatedSuppliers) })
+                        // body: JSON.stringify({ suppliers: Array.from(updatedSuppliers) })
+                        body: JSON.stringify({
+                            project_name: projectData[0].project_name,
+                            project_address: projectData[0].project_address,
+                            project_isarchived: projectData[0].project_isarchived,
+                            area_obj_ref: projectData[0].area_obj_ref,
+                            suppliers: Array.from(updatedSuppliers)
+                        })
+                        
                     });
     
                     if (!updateRes.ok) {
@@ -240,7 +248,6 @@ const SupplierDetails = () => {
 
                     const projectData = await projectRes.json();
 
-
                     // Filter out the current supplier ID from project's suppliers array 
                     const updatedSuppliers = projectData[0].suppliers.filter(supplier => supplier._id !== id);
 
@@ -250,7 +257,15 @@ const SupplierDetails = () => {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
                         },
-                        body: JSON.stringify({ suppliers: updatedSuppliers })
+                        // body: JSON.stringify({ suppliers: updatedSuppliers })
+                        body: JSON.stringify({
+                            project_name: projectData[0].project_name,
+                            project_address: projectData[0].project_address,
+                            project_isarchived: projectData[0].project_isarchived,
+                            area_obj_ref: projectData[0].area_obj_ref,
+                            suppliers: Array.from(updatedSuppliers)
+                        })
+                        
 
                     })
                     if (!updateRes.ok) {
@@ -366,7 +381,6 @@ const SupplierDetails = () => {
                     throw new Error('Failed to fetch supplier products');
                 }
                 const data = await res.json();
-                console.log("data", data)
                 if (data.tokenError) {
                     throw new Error(data.tokenError)
                 }
