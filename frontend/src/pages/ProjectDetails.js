@@ -51,6 +51,9 @@ const Project_Details = () => {
     };
     const isOpen = (id) => openId === id;
 
+    const [isSelectingSuppliers, setIsSelectingSuppliers] = useState(false)
+
+
     //Component hooks
     const { update } = useUpdateProject();
 
@@ -63,6 +66,23 @@ const Project_Details = () => {
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
     const handleEditClick = () => navigate(`/EmpirePMS/project/${id}/edit`, { state: id });
+
+    // Dots animation
+    const useDotAnimation = (maxDots = 3, intervalMs = 500) => {
+        const [dots, setDots] = useState("")
+      
+        useEffect(() => {
+          const interval = setInterval(() => {
+            setDots((prev) => (prev.length >= maxDots ? "" : prev + "."))
+          }, intervalMs)
+      
+          return () => clearInterval(interval)
+        }, [maxDots, intervalMs])
+      
+        return dots
+      }
+      
+    const dots = useDotAnimation();
 
     // fetch project details by projectID
     const fetchProjectDetails = useCallback(async () => {
@@ -87,7 +107,6 @@ const Project_Details = () => {
             setIsLoadingState(false);
         }
     }, [id, dispatch]);
-
     useEffect(() => {
         fetchProjectDetails();
     }, [fetchProjectDetails]);  // Add id as dependency
@@ -118,7 +137,7 @@ const Project_Details = () => {
         fetchAllEmployees();
     }, [id, dispatch]);
 
-    // Fetch all Actived Suppliers when the component mounts
+    // Fetch all Active suppliers when the component mounts
     useEffect(() => {
         const fetchAllSuppliers = async () => {
             try {
@@ -211,7 +230,7 @@ const Project_Details = () => {
 
     const handleRelatedSuppliers = () => {
         if (projectState && projectState.suppliers) {
-            const relatedSuppliersIds = new Set(projectState.suppliers.map(emp => emp._id));
+            const relatedSuppliersIds = new Set(projectState.suppliers.map(sup => sup._id));
             setSelectedSuppliers(relatedSuppliersIds);
         }
     };
@@ -375,31 +394,76 @@ const Project_Details = () => {
         }
     
     };
-    
+
     const handleSelectSuppliersConfirm = async () => {
+        const selectedSuppliersArray = Array.from(selectedSuppliers)
+        setIsSelectingSuppliers(true)
 
-        const selectedSuppliersArray = Array.from(selectedSuppliers);
-
-        const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, {
-            credentials: 'include', method: 'PUT',
+        try {
+            const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, {
+            credentials: "include",
+            method: "PUT",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${sessionStorage.getItem("jwt")}`, // Include token
             },
-            body: JSON.stringify({ suppliers: Array.from(selectedSuppliersArray) })
-        });
+            body: JSON.stringify({
+                project_name: projectState.project_name,
+                project_address: projectState.project_address,
+                project_isarchived: projectState.project_isarchived,
+                area_obj_ref: projectState.area_obj_ref,
+                suppliers: selectedSuppliersArray,
+            }),
+            })
 
-        if (!updateRes.ok) {
-            throw new Error(`Failed to update project ${id}`);
+            if (!updateRes.ok) {
+            throw new Error(`Failed to update project ${id}`)
+            }
+
+            // Close the popup
+            setSelectSupplierListVisible(false)
+
+            // Refresh project data
+            await fetchProjectDetails()
+        } catch (error) {
+            console.error("Error updating suppliers:", error)
+        } finally {
+            setIsSelectingSuppliers(false)
         }
+    }
 
-         // Close the selectSuppliers Propup
-         setSelectSupplierListVisible(false);
+    // const handleSelectSuppliersConfirm = async () => {
+
+    //     const selectedSuppliersArray = Array.from(selectedSuppliers);
+
+    //     const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${id}`, {
+    //         credentials: 'include', method: 'PUT',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+    //         },
+    //         body: JSON.stringify({
+    //             project_name: projectState.project_name,
+    //             project_address: projectState.project_address,
+    //             project_isarchived: projectState.project_isarchived,
+    //             area_obj_ref: projectState.area_obj_ref,
+    //             suppliers: Array.from(selectedSuppliersArray)
+    //         })
+            
+    //         // body: JSON.stringify({ suppliers: Array.from(selectedSuppliersArray) })
+    //     });
+
+    //     if (!updateRes.ok) {
+    //         throw new Error(`Failed to update project ${id}`);
+    //     }
+
+    //      // Close the selectSuppliers Propup
+    //      setSelectSupplierListVisible(false);
     
-         // Fetch the updated project details to refresh the UI
-         await fetchProjectDetails();
+    //      // Fetch the updated project details to refresh the UI
+    //      await fetchProjectDetails();
 
-    };
+    // };
 
     const selectEmployeesBtn = (
         <div className='d-flex m-1 justify-content-end'>
@@ -762,8 +826,10 @@ const Project_Details = () => {
                     </button>
                     <button 
                         className="bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md font-medium"
-                        onClick={handleSelectSuppliersConfirm}>
-                        Confirm
+                        onClick={handleSelectSuppliersConfirm}
+                        disabled={isSelectingSuppliers}
+                    >
+                        {isSelectingSuppliers ? `Saving${dots}` : "Confirm"}
                     </button>
                 </div>
             </div>
