@@ -37,112 +37,99 @@ const NewPurchaseOrderSkeleton = () => {
             </button>
         </div>
     ) : (
-        <>
-            <div className="mx-4 mt-4 p-2 text-center font-bold text-lg sm:text-xl lg:text-2xl bg-slate-800 text-white rounded-t-lg">
-                <div className="card-header bg-dark text-white">
-                    <h1 className="skeleton skeleton-text"><span className="visually-hidden">EMPLOYEE ACCOUNT</span></h1>
+        <form className="w-full px-2 sm:px-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
+                {/* Left Column */}
+                <div className="bg-white rounded-lg shadow-md p-3 space-y-2 lg:col-span-1">
+                <h2 className="text-base font-semibold border-b pb-1">Order Information</h2>
+
+                {/* Project Dropdown */}
+                <div className="space-y-1">
+                    <div className="h-6 bg-gray-200 rounded w-1/2" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                </div>
+
+                {/* Supplier Dropdown */}
+                <div className="space-y-1">
+                    <div className="h-6 bg-gray-200 rounded w-1/2" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                </div>
+
+                {/* PO Number Input */}
+                <div className="space-y-1">
+                    <div className="h-6 bg-gray-200 rounded w-3/4" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                    <div className="space-y-1 mt-1">
+                    <div className="h-4 bg-gray-100 rounded w-1/2" />
+                    <div className="h-4 bg-gray-100 rounded w-full" />
+                    </div>
+                </div>
+
+                {/* Order Date */}
+                <div className="space-y-1">
+                    <div className="h-6 bg-gray-200 rounded w-2/3" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                </div>
+
+                {/* Delivery Date/Time */}
+                <div className="space-y-1">
+                    <div className="h-6 bg-gray-200 rounded w-3/4" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                    <div className="h-4 bg-gray-100 rounded w-1/3" />
+                </div>
+
+                {/* Product Search */}
+                <div className="border rounded-lg overflow-hidden mt-3">
+                    <div className="bg-gray-50 p-2 border-b space-y-2">
+                    <div className="h-6 bg-gray-200 rounded w-1/2" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                    <div className="h-9 bg-gray-100 rounded" />
+                    </div>
+                    <div className="max-h-[400px] overflow-y-auto space-y-2 p-2">
+                    {[...Array(5)].map((_, i) => (
+                        <div key={i} className="h-16 bg-gray-100 rounded" />
+                    ))}
+                    </div>
+                </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="bg-white rounded-lg shadow-md p-3 lg:col-span-3">
+                <h2 className="text-base font-semibold border-b pb-1 mb-2">Order Items</h2>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm divide-y">
+                    <thead className="bg-gray-50">
+                        <tr>
+                        {[...Array(7)].map((_, i) => (
+                            <th key={i} className="px-2 py-2 text-left text-xs text-gray-500">
+                            <div className="h-4 bg-gray-200 rounded w-full" />
+                            </th>
+                        ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {[...Array(3)].map((_, i) => (
+                        <tr key={i} className="bg-gray-50">
+                            {[...Array(7)].map((_, j) => (
+                            <td key={j} className="px-2 py-2">
+                                <div className="h-4 bg-gray-100 rounded w-full" />
+                            </td>
+                            ))}
+                        </tr>
+                        ))}
+                    </tbody>
+                    <tfoot>
+                        <tr className="bg-gray-100">
+                        <td colSpan={7} className="px-2 py-2">
+                            <div className="h-6 bg-gray-200 rounded w-1/4 ml-auto" />
+                        </td>
+                        </tr>
+                    </tfoot>
+                    </table>
+                </div>
                 </div>
             </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mx-4 mb-4">
-                
-                <div className="border rounded-b-lg p-4">
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4">
-                        <div className="mb-1">
-                            <label className="form-label font-bold">*Purchase Order No:</label>
-                            <div className="skeleton skeleton-input"></div>
-                        </div>
-                        <div className="mb-1">
-                            <label className="form-label font-bold">*Project:</label>
-                            <div className="skeleton skeleton-select"></div>
-                        </div>
-                        <div className="mb-1">
-                            <label className="form-label font-bold">*Supplier:</label>
-                            <div className="skeleton skeleton-select"></div>
-                        </div>
-                        <div className="col-span-2 mb-3">
-                            <label className="text-xs italic text-gray-400 mb-2">Previous order numbers:</label>
-                            <div className="skeleton skeleton-text"></div>
-                        </div>
-                    </div>
-
-                    
-                    <div className="container p-0 border-2 shadow-md bg-slate-50">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 m-2 gap-x-1">
-                            <div className="skeleton skeleton-input"></div>
-                            <div>
-                                <div className="skeleton skeleton-select"></div>
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1 p-1 font-bold bg-gray-200 text-center text-sm">
-                            <div className="p-1"><div className="skeleton skeleton-text"></div></div>
-                            <div className="p-1"><div className="skeleton skeleton-text"></div></div>
-                            <div className="p-1"><div className="skeleton skeleton-text"></div></div>
-                            <div className="p-1"><div className="skeleton skeleton-text"></div></div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-1">
-                                <div className="col-span-2"><div className="skeleton skeleton-text"></div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                
-                <div className="border rounded-b-lg p-4">
-                
-                    <label className="font-bold">Order Items:</label>
-                    <div className="bg-gray-100 border rounded-lg shadow-sm">
-                        <div className="border-0 rounded-lg">
-                            <div className="skeleton skeleton-table"></div>
-                        </div>
-                        <div className="bg-white border-b-2">
-                            <div className="flex justify-center p-2">
-                                <div className="skeleton skeleton-button"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    
-                    <div className="flex justify-end">
-                        <div>
-                            <div className="skeleton skeleton-text mb-2"></div>
-                            <div className="skeleton skeleton-text mb-2"></div>
-                            <div className="skeleton skeleton-text mb-2"></div>
-                        </div>
-                    </div>
-
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 my-2">
-                        <div>
-                            <label className="form-label font-bold">*Order Date:</label>
-                            <div className="skeleton skeleton-input"></div>
-                        </div>
-                        <div>
-                            <label className="form-label font-bold">*EST Date and Time:</label>
-                            <div className="skeleton skeleton-input"></div>
-                            <label className="text-xs italic text-gray-400">(EST) - Delivery estimate time of arrival</label>
-                        </div>
-                    </div>
-
-                    
-                    <div className="my-2">
-                        <label className="form-label font-bold">Internal comments:</label>
-                        <div className="skeleton skeleton-textarea"></div>
-                    </div>
-                    <div className="my-2">
-                        <label className="form-label font-bold">Notes to supplier:</label>
-                        <div className="skeleton skeleton-textarea"></div>
-                    </div>
-
-                    
-                    <div className="flex flex-col sm:flex-row justify-between mb-3 space-y-2 sm:space-y-0 sm:space-x-2">
-                        <div className="skeleton skeleton-button"></div>
-                        <div className="skeleton skeleton-button"></div>
-                        <div className="skeleton skeleton-button"></div>
-                    </div>
-                </div>
-            </div>
-        </>
+            </form>
     )}
 </div>
 
