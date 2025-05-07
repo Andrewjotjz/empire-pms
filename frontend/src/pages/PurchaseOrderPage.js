@@ -617,7 +617,7 @@ const PurchaseOrder2 = () => {
                                                     ?.filter((prod) => prod.supplier === order.supplier._id)
                                                     .find((prod) => prod._id === product.product_obj_ref._id)?.product_sku || "Not found..."}
                                                 </span>
-                                                <span title="product_name" className="font-medium text-gray-700 max-w-md">
+                                                <span title="product_name" className="font-medium text-gray-700 max-w-2xl">
                                                     {productState
                                                     ?.filter((prod) => prod.supplier === order.supplier._id)
                                                     .find((prod) => prod._id === product.product_obj_ref._id)?.product_name || "Not found..."}
