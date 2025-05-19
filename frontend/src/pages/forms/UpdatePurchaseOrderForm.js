@@ -837,6 +837,7 @@ const UpdatePurchaseOrderForm = () => {
                 ) : (
                   <div className="divide-y">
                     {filterProductsBySearchTerm()
+                      .filter((product) => purchaseOrderState.order_date >= product.productPrice.product_effective_date)
                       .filter(
                         (product, index, self) =>
                           index === self.findIndex((p) => p.product._id === product.product._id),

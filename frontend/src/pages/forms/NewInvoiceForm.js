@@ -1985,6 +1985,7 @@ const NewInvoiceForm = () => {
                   </div>
                   {productState ? (
                     filterProductsBySearchTerm()
+                      .filter((product) => updatedOrder.order_date >= product.productPrice.product_effective_date)
                       .filter(
                         (product, index, self) =>
                           index ===
@@ -3009,6 +3010,7 @@ const NewInvoiceForm = () => {
                   e.target.setCustomValidity("Enter invoice reference number")
                 }
                 onInput={(e) => e.target.setCustomValidity("")}
+                disabled={!newInvoice.supplier}
               />
             </div>
             <div>
@@ -3024,27 +3026,12 @@ const NewInvoiceForm = () => {
                   e.target.setCustomValidity("Enter invoice issue date")
                 }
                 onInput={(e) => e.target.setCustomValidity("")}
+                disabled={!newInvoice.supplier}
               />
             </div>
-            {/* TEMPORARILY REMOVED as it's not required - Feedback from Office team */}
-            {/* <div>
-              <label className="font-bold text-sm sm:text-base">*Invoice Received Date:</label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
-                name="invoice_received_date"
-                value={newInvoice.invoice_received_date}
-                onChange={handleInputChange}
-                required
-                onInvalid={(e) =>
-                  e.target.setCustomValidity("Enter invoice received date")
-                }
-                onInput={(e) => e.target.setCustomValidity("")}
-              />
-            </div> */}
             <div>
               <label className="font-bold text-sm sm:text-base">Invoice Due Date:</label>
-              <input
+              {/* <input
                 type="date"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
                 name="invoice_due_date"
@@ -3055,6 +3042,15 @@ const NewInvoiceForm = () => {
                   e.target.setCustomValidity("Enter invoice due date")
                 }
                 onInput={(e) => e.target.setCustomValidity("")}
+              /> */}
+              <input
+                type="date"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm cursor-pointer text-xs sm:text-base"
+                name="invoice_due_date"
+                value={newInvoice.invoice_due_date || ""}
+                onChange={handleInputChange}
+                required
+                disabled={!newInvoice.supplier}
               />
             </div>
             <div>
@@ -3198,28 +3194,27 @@ const NewInvoiceForm = () => {
                             {/* Based on previous invoice */}
                             <td className="border border-gray-300 px-1 py-2 bg-gray-100">
                               <label>
-                                {currentOrder.invoices.reduce((sum, invoice) => {
-                                  // Reduce over each invoice to accumulate the quantities
-                                  const invoiceProductQtySum =
-                                    invoice.products.reduce(
-                                      (invoiceSum, invoiceProduct) => {
-                                        // Check if the current product's _id matches the invoice product's _id
-                                        if (prod._id === invoiceProduct._id) {
-                                          // Add the invoice product quantity to the sum if there's a match
-                                          return (
-                                            invoiceSum +
-                                            invoiceProduct.invoice_product_qty_a
-                                          );
-                                        }
-                                        return invoiceSum;
-                                      },
-                                      0
+                                {
+                                  (() => {
+                                    const filteredInvoices = currentOrder.invoices.filter(
+                                      ivc => ivc.invoice_isarchived === false 
                                     );
 
-                                  return sum + invoiceProductQtySum;
-                                }, 0)}
-                              </label>
+                                    const total = filteredInvoices.reduce((sum, invoice) => {
+                                      const invoiceProductQtySum = invoice.products.reduce((invoiceSum, invoiceProduct) => {
+                                        if (prod._id === invoiceProduct._id) {
+                                          return invoiceSum + invoiceProduct.invoice_product_qty_a;
+                                        }
+                                        return invoiceSum;
+                                      }, 0);
 
+                                      return sum + invoiceProductQtySum;
+                                    }, 0);
+
+                                    return total;
+                                  })()
+                                }
+                              </label>
                               <label className="ml-1 text-xs opacity-50 col-span-1 text-nowrap">
                                 {prod.productprice_obj_ref.product_unit_a}
                               </label>

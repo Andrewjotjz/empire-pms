@@ -226,6 +226,7 @@ const PurchaseOrderDetails = () => {
         }
     };
 
+    // Convert UTC to AU
     const formatDateTime = (dateString) => {
         if (dateString === null) {
             return ''
@@ -235,6 +236,26 @@ const PurchaseOrderDetails = () => {
             return date.toLocaleDateString('en-AU', options).toUpperCase()
         }
     };
+
+    // Convert AU to UTC
+    const formatDateTimeUTC = (dateString) => {
+        if (dateString === null) {
+            return '';
+        } else {
+            const date = new Date(dateString);
+            const options = {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'UTC' // ✅ specify UTC here
+            };
+            return date.toLocaleDateString('en-AU', options).toUpperCase();
+        }
+    };    
 
     const totalGrossAmount = purchaseOrderState && purchaseOrderState.products
     ? parseFloat(purchaseOrderState.products.reduce(
@@ -452,7 +473,7 @@ const PurchaseOrderDetails = () => {
             </div>
             <div>
                 <label className="form-label font-bold">EST Date/Time:</label>
-                <p className="form-label">{formatDateTime(purchaseOrderState.order_est_datetime)}</p>
+                <p className="form-label">{formatDateTimeUTC(purchaseOrderState.order_est_datetime)}</p>
             </div>
             <div className="text-sm">
                 <label className="form-label font-bold">Created on:</label>
