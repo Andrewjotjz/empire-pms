@@ -1819,6 +1819,12 @@ const UpdateInvoiceForm = () => {
                       placeholder="Search products..."
                       value={searchProductTerm}
                       onChange={(e) => setSearchProductTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                      if (e.key === "Enter" && productState && filterProductsBySearchTerm().length > 0) {
+                        e.preventDefault()
+                        handleAddItem(filterProductsBySearchTerm()[0])
+                      }
+                    }}
                     />
                     <div>
                       <select

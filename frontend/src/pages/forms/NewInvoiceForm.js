@@ -1,20 +1,22 @@
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Modal, Button } from "react-bootstrap";
+"use client"
 
-import { useAddProductPrice } from "../../hooks/useAddProductPrice";
-import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier";
-import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder";
-import { useAddInvoice } from "../../hooks/useAddInvoice";
+import { useEffect, useState } from "react"
+import { useSelector } from "react-redux"
+import { useNavigate, useLocation } from "react-router-dom"
+import { Modal, Button } from "react-bootstrap"
 
-import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton";
+import { useAddProductPrice } from "../../hooks/useAddProductPrice"
+import { useFetchProductsBySupplier } from "../../hooks/useFetchProductsBySupplier"
+import { useUpdatePurchaseOrder } from "../../hooks/useUpdatePurchaseOrder"
+import { useAddInvoice } from "../../hooks/useAddInvoice"
+
+import EmployeeDetailsSkeleton from "../loaders/EmployeeDetailsSkeleton"
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton";
-import SessionExpired from "../../components/SessionExpired";
-import NewProductModal from "./NewProductModal";
-import { useUploadInvoice } from "../../hooks/useUploadInvoice";
+import SessionExpired from "../../components/SessionExpired"
+import NewProductModal from "./NewProductModal"
+import { useUploadInvoice } from "../../hooks/useUploadInvoice"
 
-import { AreaSelection } from "../../components/AreaSelection";
+import { AreaSelection } from "../../components/AreaSelection"
 
 const NewInvoiceForm = () => {
   //Component's hook
@@ -170,7 +172,7 @@ const NewInvoiceForm = () => {
 
   // Helper function to calculate the due date based on payment terms
   const calculateDueDate = (paymentTerm) => {
-    const daysToAdd = parseInt(paymentTerm.replace(/\D/g, ''), 10) || 30; // Default to 30 days if no term specified
+    const daysToAdd = Number.parseInt(paymentTerm.replace(/\D/g, ''), 10) || 30; // Default to 30 days if no term specified
     const issueDate = new Date(); // Get the current date
     const interimDueDate = new Date(issueDate); // Create a copy of the current date
 
@@ -400,6 +402,7 @@ const NewInvoiceForm = () => {
 
   getOrder();
 };
+
   const fetchProductDetails = async (supplierId, productId) => {
     setIsFetchProductDetailsLoading(true);
     try {
@@ -682,7 +685,7 @@ const NewInvoiceForm = () => {
 
       // Get payment term and format it to Integer
       const paymentTerm = supplierState.find(supplier => supplier._id === newInvoice.supplier)?.supplier_payment_term || "Net 30"
-      const formattedPaymentTerm = parseInt(paymentTerm.split(" ")[1], 10);
+      const formattedPaymentTerm = Number.parseInt(paymentTerm.split(" ")[1], 10);
 
       // Parse the input date (value) into a Date object
       const issueDate = new Date(value);
@@ -705,7 +708,7 @@ const NewInvoiceForm = () => {
       }).split("/").reverse().join("-");
 
       // Update the state with the newDueDate
-      let updatedState = { ...newInvoice, [name]: value, invoice_due_date: newDueDate };
+      const updatedState = { ...newInvoice, [name]: value, invoice_due_date: newDueDate };
 
       // You can then update the state using your state management function
       setNewInvoice(updatedState);
@@ -721,8 +724,8 @@ const NewInvoiceForm = () => {
     let updatedState = { ...currentState };
 
     // Create separate variables for products and custom_products so they can be updated independently
-    let updatedProducts = [...currentState.products];
-    let updatedCustomProducts = [...currentState.custom_products];
+    const updatedProducts = [...currentState.products];
+    const updatedCustomProducts = [...currentState.custom_products];
 
     // Handle order items details input using index
     if (index !== null) {
@@ -774,7 +777,7 @@ const NewInvoiceForm = () => {
     }
 
     // Calculate updatedTotalAmount using updatedProducts and updatedCustomProducts
-    let updatedInvoicedTotalAmount = (
+    const updatedInvoicedTotalAmount = (
       (updatedProducts.reduce(
         (total, prod) =>
           total + (Number(prod.invoice_product_gross_amount_a) || 0),
@@ -812,7 +815,7 @@ const NewInvoiceForm = () => {
     let updatedState = { ...currentState };
 
     // Create separate variables for products and custom_products so they can be updated independently
-    let updatedCustomProducts = [...currentState.custom_products];
+    const updatedCustomProducts = [...currentState.custom_products];
 
     // Handle order items details input using index
     if (index !== null) {
@@ -865,7 +868,7 @@ const NewInvoiceForm = () => {
     }
 
     // Calculate updatedTotalAmount using updatedProducts and updatedCustomProducts
-    let updatedInvoicedTotalAmount = (
+    const updatedInvoicedTotalAmount = (
       (updatedCustomProducts.reduce(
         (total, cprod) =>
           total + (Number(cprod.custom_order_gross_amount) || 0),
@@ -926,26 +929,57 @@ const NewInvoiceForm = () => {
     });
   };
   const handleSubmitNewPrice = async (event) => {
-    event.preventDefault();
+      event.preventDefault();
 
-    if (!newProductPrice.projects.length > 0) {
-      alert(`You must select one or more projects that this new product applies to!`)
-      return;
-    }
+      const {
+          product_obj_ref,
+          product_unit_a,
+          product_number_a,
+          product_price_unit_a,
+          product_unit_b,
+          product_number_b,
+          product_price_unit_b,
+          product_effective_date,
+          product_actual_rate,
+          product_price_note,
+          projects
+      } = newProductPrice;
 
-    if (
-      newProductPrice.product_number_a !== "" &&
-      showCreatePriceModal === true
-    ) {
+      const requiredFields = [
+          { key: 'product_obj_ref', value: product_obj_ref },
+          { key: 'product_unit_a', value: product_unit_a },
+          { key: 'product_number_a', value: product_number_a },
+          { key: 'product_price_unit_a', value: product_price_unit_a },
+          { key: 'product_unit_b', value: product_unit_b },
+          { key: 'product_number_b', value: product_number_b },
+          { key: 'product_price_unit_b', value: product_price_unit_b },
+          { key: 'product_effective_date', value: product_effective_date },
+          { key: 'product_actual_rate', value: product_actual_rate },
+          { key: 'product_price_note', value: product_price_note },
+          { key: 'projects', value: projects }
+      ];
+
+      const isEmpty = (value) =>
+          value === '' ||
+          value === null ||
+          value === undefined ||
+          (Array.isArray(value) && value.length === 0);
+
+      const emptyFields = requiredFields.filter(field => isEmpty(field.value));
+
+      if (emptyFields.length > 0) {
+          const fieldNames = emptyFields.map(f => f.key).join(', ');
+          alert(`Please fill in all required fields: ${fieldNames}`);
+          return;
+      }
+
+      // All fields are valid, proceed
       addPrice(newProductPrice);
-      fetchProductDetails(
-        updatedOrder.supplier._id,
-        newProductPrice.product_obj_ref
-      );
+      fetchProductDetails(updatedOrder.supplier._id, newProductPrice.product_obj_ref);
       fetchProductsBySupplier(updatedOrder.supplier._id);
       setShowUpdateConfirmationModal(true);
-    }
   };
+
   const handleAddItem = (product) => {
     // Create the updated products array
     const updatedProducts = [
@@ -980,12 +1014,12 @@ const NewInvoiceForm = () => {
     const currentState = updatedOrder; // assuming purchaseOrderState is the correct slice
 
     let updatedState = { ...currentState };
-    let isProduct = !isCustom;
-    let isCustomProduct = isCustom;
+    const isProduct = !isCustom;
+    const isCustomProduct = isCustom;
 
     // Handle product array updates
     if (isProduct && index !== null) {
-      let updatedProducts = [...currentState.products];
+      const updatedProducts = [...currentState.products];
 
       updatedProducts[index] = {
         ...updatedProducts[index],
@@ -1029,7 +1063,7 @@ const NewInvoiceForm = () => {
     const { name, value } = event.target;
 
     // Create a copy of the current state outside of the dispatch
-    let updatedProducts = [...updatedOrder.products];
+    const updatedProducts = [...updatedOrder.products];
 
     updatedProducts[index] = {
       ...updatedProducts[index],
@@ -1047,7 +1081,7 @@ const NewInvoiceForm = () => {
         )
           ? value *
             updatedOrder.products[index].productprice_obj_ref.product_number_b
-          : parseFloat(
+          : Number.parseFloat(
               value *
                 updatedOrder.products[index].productprice_obj_ref
                   .product_number_b
@@ -1059,7 +1093,7 @@ const NewInvoiceForm = () => {
         )
           ? value /
             updatedOrder.products[index].productprice_obj_ref.product_number_a
-          : parseFloat(
+          : Number.parseFloat(
               value /
                 updatedOrder.products[index].productprice_obj_ref
                   .product_number_a
@@ -1089,7 +1123,7 @@ const NewInvoiceForm = () => {
         )
           ? value *
             updatedOrder.products[index].productprice_obj_ref.product_number_a
-          : parseFloat(
+          : Number.parseFloat(
               value *
                 updatedOrder.products[index].productprice_obj_ref
                   .product_number_a
@@ -1101,7 +1135,7 @@ const NewInvoiceForm = () => {
         )
           ? value /
             updatedOrder.products[index].productprice_obj_ref.product_number_b
-          : parseFloat(
+          : Number.parseFloat(
               value /
                 updatedOrder.products[index].productprice_obj_ref
                   .product_number_b
@@ -1114,7 +1148,7 @@ const NewInvoiceForm = () => {
     }
 
     // Calculate updatedTotalAmount using updatedProducts
-    let updatedTotalAmount = (
+    const updatedTotalAmount = (
       updatedProducts.reduce(
         (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
         0
@@ -1884,10 +1918,17 @@ const NewInvoiceForm = () => {
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center p-1 lg:p-5 text-xs lg:text-base">
           <form  onKeyDown={(e) => { if (e.key === 'Enter') {e.preventDefault();} }}
             className="bg-white w-auto max-h-[90vh] overflow-y-auto rounded-lg shadow-lg"
-            onSubmit={() => {
-              updatePurchaseOrder(updatedOrder);
+            onSubmit={async (e) => {
+              e.preventDefault();
+              // Update the currentOrder state immediately for UI responsiveness
+              setCurrentOrder(updatedOrder);
+              // Call the API to update the order
+              await updatePurchaseOrder(updatedOrder);
               handleToggleEditOrderModal();
-              handleAddToInvoice();
+              // Fetch the updated order from the server to ensure everything is in sync
+              if (selectedOrder) {
+                fetchSelectedPurchaseOrder(selectedOrder);
+              }
             }}
           >
             {/* Modal Header */}
@@ -1943,6 +1984,12 @@ const NewInvoiceForm = () => {
                       placeholder="Search products..."
                       value={searchProductTerm}
                       onChange={(e) => setSearchProductTerm(e.target.value)}
+                      onKeyDown={(e) => {
+                      if (e.key === "Enter" && productState && filterProductsBySearchTerm().length > 0) {
+                        e.preventDefault()
+                        handleAddItem(filterProductsBySearchTerm()[0])
+                      }
+                    }}
                     />
                     <div>
                       <select
@@ -2368,7 +2415,7 @@ const NewInvoiceForm = () => {
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+                              d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
                             />
                           </svg>
                           <label className="cursor-pointer">
@@ -3259,8 +3306,11 @@ const NewInvoiceForm = () => {
                               ) * 100) / 100)}
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.products[index]
-                                  .invoice_product_gross_amount_a * 100) / 100)}
+                              {newInvoice.products[index] && newInvoice.products[index].invoice_product_gross_amount_a !== undefined
+                                ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                                    Math.floor(newInvoice.products[index].invoice_product_gross_amount_a * 100) / 100
+                                  )
+                                : '-'}
                             </td>
                           </tr>
                         ))}
