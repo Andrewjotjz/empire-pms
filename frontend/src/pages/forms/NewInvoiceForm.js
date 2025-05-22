@@ -3588,7 +3588,6 @@ const NewInvoiceForm = () => {
                             name="invoiced_raw_total_amount_incl_gst"
                             value={newInvoice.invoiced_raw_total_amount_incl_gst}
                             onChange={(e) => handleInputChange(e)}
-                            min={0}
                             step={0.01}
                             required
                             onInvalid={(e) => e.target.setCustomValidity("")}
@@ -3965,7 +3964,6 @@ const NewInvoiceForm = () => {
                           newInvoiceWithoutPO.invoiced_raw_total_amount_incl_gst
                         }
                         onChange={(e) => handleInputChangeNoPO(e, null)}
-                        min={0}
                         step={0.01}
                         required
                         onInvalid={(e) => e.target.setCustomValidity("")}
