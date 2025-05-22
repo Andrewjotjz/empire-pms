@@ -356,7 +356,7 @@ const UpdateProductTypeForm = () => {
             // Remove measurements at the end - both dimension and length patterns
             return aliasName
               .replace(/\b\d+x\d+mm\b/gi, "") // Remove dimensions like "25x75mm"
-              .replace(/\b\d+mm\b/gi, "") // Remove single measurements like "300mm"
+              // .replace(/\b\d+mm\b/gi, "") // Remove single measurements like "300mm"
               .replace(/\b\d+(\.\d+)?m\b/gi, "") // Remove lengths like "2.4m", "3.0m"
               .trim()
 

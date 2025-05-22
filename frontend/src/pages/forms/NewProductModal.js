@@ -97,8 +97,59 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        if (!productDetailsState.projects.length > 0){
-            alert(`You must select one or more projects that this new product applies to`);
+        const {
+            product_sku,
+            product_name,
+            product_type,
+            product_actual_size,
+            product_isarchived,
+            supplier,
+            alias,
+            product_unit_a,
+            product_number_a,
+            product_price_unit_a,
+            product_unit_b,
+            product_number_b,
+            product_price_unit_b,
+            product_actual_rate,
+            product_note,
+            product_price_note,
+            product_effective_date,
+            projects
+        } = productDetailsState;
+
+        const requiredFields = [
+            { key: 'product_sku', value: product_sku },
+            { key: 'product_name', value: product_name },
+            { key: 'product_type', value: product_type },
+            { key: 'product_actual_size', value: product_actual_size },
+            { key: 'product_isarchived', value: product_isarchived },
+            { key: 'supplier', value: supplier },
+            { key: 'alias', value: alias },
+            { key: 'product_unit_a', value: product_unit_a },
+            { key: 'product_number_a', value: product_number_a },
+            { key: 'product_price_unit_a', value: product_price_unit_a },
+            { key: 'product_unit_b', value: product_unit_b },
+            { key: 'product_number_b', value: product_number_b },
+            { key: 'product_price_unit_b', value: product_price_unit_b },
+            { key: 'product_actual_rate', value: product_actual_rate },
+            { key: 'product_note', value: product_note },
+            { key: 'product_price_note', value: product_price_note },
+            { key: 'product_effective_date', value: product_effective_date },
+            { key: 'projects', value: projects }
+        ];
+
+        const isEmpty = (value) =>
+            value === '' ||
+            value === null ||
+            value === undefined ||
+            (Array.isArray(value) && value.length === 0);
+
+        const emptyFields = requiredFields.filter(field => isEmpty(field.value));
+
+        if (emptyFields.length > 0) {
+            const fieldNames = emptyFields.map(f => f.key).join(', ');
+            alert(`Please fill in all required fields: ${fieldNames}`);
             return;
         }
 
@@ -112,9 +163,10 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
         // To confirm automatic or manual
         setShowRegisterConfirmationModal(true);
 
-        //close this modal
+        // Close this modal
         handleToggleCreateProductModal();
     };
+
     
     //Render component
     useEffect(() => {

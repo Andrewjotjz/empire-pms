@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
+import { useParams } from "react-router-dom"
 import {
   Calendar,
   ChevronDown,
@@ -20,9 +21,11 @@ import {
 
 const BudgetVsActual = () => {
   // State for data
+  const { id } = useParams()
   const [budgetState, setBudgetState] = useState(null)
   const [orderState, setOrderState] = useState([])
   const [invoiceState, setInvoiceState] = useState([])
+  const [aliasState, setAliasState] = useState([])
   const [productTypeState, setProductTypeState] = useState([])
   const [categories, setCategories] = useState([])
   const [subcategories, setSubcategories] = useState([])
@@ -36,12 +39,14 @@ const BudgetVsActual = () => {
   const [fetchOrderLoading, setFetchOrderLoading] = useState(false)
   const [isFetchProductTypeLoading, setIsFetchProductTypeLoading] = useState(false)
   const [isFetchInvoiceLoading, setIsFetchInvoiceLoading] = useState(false)
+  const [isFetchAliasLoading, setIsFetchAliasLoading] = useState(false)
 
   // Error states
   const [fetchBudgetError, setFetchBudgetError] = useState(null)
   const [fetchOrderError, setFetchOrderError] = useState(null)
   const [fetchProductTypeError, setFetchProductTypeError] = useState(null)
   const [fetchInvoiceError, setFetchInvoiceError] = useState(null)
+  const [fetchAliasError, setFetchAliasError] = useState(null)
 
   // UI states for expansion
   const [expandedAreas, setExpandedAreas] = useState({})
@@ -63,8 +68,6 @@ const BudgetVsActual = () => {
 
     const fetchBudget = async () => {
       setFetchBudgetLoading(true)
-
-      const id = "67e621ab4c5848be61ebe353" // You might want to make this dynamic or configurable
 
       try {
         const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/budget/${id}`, {
@@ -248,6 +251,54 @@ const BudgetVsActual = () => {
       abortController.abort() // Cleanup
     }
   }, [])
+  // Fetch all aliases
+  useEffect(() => {
+    const abortController = new AbortController()
+    const signal = abortController.signal
+
+    const fetchAliases = async () => {
+      setIsFetchAliasLoading(true)
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/alias`, {
+          signal,
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+          },
+        })
+        if (!res.ok) {
+          throw new Error("Failed to fetch")
+        }
+        const data = await res.json()
+
+        if (data.tokenError) {
+          throw new Error(data.tokenError)
+        }
+
+        setIsFetchAliasLoading(false)
+        setAliasState(data)
+        setFetchAliasError(null)
+      } catch (error) {
+        if (error.name === "AbortError") {
+          // do nothing
+        } else {
+          setIsFetchAliasLoading(false)
+          setFetchAliasError(error.message)
+        }
+      }
+    }
+
+    fetchAliases()
+
+    return () => {
+      abortController.abort() // Cleanup
+    }
+  }, [])
+
+  console.log("categories", categories)
+  console.log("subcategories", subcategories)
+  console.log("alias", aliasState)
 
   // Process budget data with full hierarchy
   const processBudgetData = useCallback(() => {
@@ -258,7 +309,7 @@ const BudgetVsActual = () => {
       projectId: budgetState.project,
       areas: [],
       totalBudget: 0,
-      totalM2: 0
+      totalM2: 0,
     }
 
     // Process each area in the budget
@@ -272,7 +323,7 @@ const BudgetVsActual = () => {
         types: [],
         levels: [],
         budget: 0,
-        m2: 0
+        m2: 0,
       }
 
       // Process area-level product types
@@ -310,7 +361,7 @@ const BudgetVsActual = () => {
               category_total_amount: categoryRef.category_total_amount,
               subcategories: [],
               budget: categoryRef.category_total_amount,
-              m2: categoryRef.category_total_m2
+              m2: categoryRef.category_total_m2,
             }
 
             // Process subcategories within the category
@@ -326,7 +377,7 @@ const BudgetVsActual = () => {
                 subcategory_rate: subcategoryRef.subcategory_rate,
                 subcategory_total_amount: subcategoryRef.subcategory_total_amount,
                 budget: subcategoryRef.subcategory_total_amount,
-                m2: subcategoryRef.subcategory_total_m2
+                m2: subcategoryRef.subcategory_total_m2,
               }
 
               cat.subcategories.push(subcat)
@@ -350,7 +401,7 @@ const BudgetVsActual = () => {
             types: [],
             subareas: [],
             budget: 0,
-            m2: 0
+            m2: 0,
           }
 
           // Process level-specific product types
@@ -388,7 +439,7 @@ const BudgetVsActual = () => {
                   category_total_amount: categoryRef.category_total_amount,
                   subcategories: [],
                   budget: categoryRef.category_total_amount,
-                  m2: categoryRef.category_total_m2
+                  m2: categoryRef.category_total_m2,
                 }
 
                 // Process subcategories within the category
@@ -404,7 +455,7 @@ const BudgetVsActual = () => {
                     subcategory_rate: subcategoryRef.subcategory_rate,
                     subcategory_total_amount: subcategoryRef.subcategory_total_amount,
                     budget: subcategoryRef.subcategory_total_amount,
-                    m2: subcategoryRef.subcategory_total_m2
+                    m2: subcategoryRef.subcategory_total_m2,
                   }
 
                   cat.subcategories.push(subcat)
@@ -427,7 +478,7 @@ const BudgetVsActual = () => {
                 subarea_name: subareaInfo.subarea_name,
                 types: [],
                 budget: 0,
-                m2: 0
+                m2: 0,
               }
 
               // Process subarea-specific product types
@@ -465,7 +516,7 @@ const BudgetVsActual = () => {
                       category_total_amount: categoryRef.category_total_amount,
                       subcategories: [],
                       budget: categoryRef.category_total_amount,
-                      m2: categoryRef.category_total_m2
+                      m2: categoryRef.category_total_m2,
                     }
 
                     // Process subcategories within the category
@@ -483,7 +534,7 @@ const BudgetVsActual = () => {
                         subcategory_rate: subcategoryRef.subcategory_rate,
                         subcategory_total_amount: subcategoryRef.subcategory_total_amount,
                         budget: subcategoryRef.subcategory_total_amount,
-                        m2: subcategoryRef.subcategory_total_m2
+                        m2: subcategoryRef.subcategory_total_m2,
                       }
 
                       cat.subcategories.push(subcat)
@@ -529,6 +580,8 @@ const BudgetVsActual = () => {
     })
 
     if (projectInvoices.length === 0) return null
+
+    console.log("projectInvoices", projectInvoices)
 
     // Initialize structure to match budget data
     const processedInvoices = {
@@ -578,6 +631,7 @@ const BudgetVsActual = () => {
           const typeId = productType._id
           const typeName = productType.type_name
 
+          // console.log("processedInvoices", processedInvoices)
           // Update area data
           if (!processedInvoices.areaMap.has(areaName)) {
             processedInvoices.areaMap.set(areaName, {
@@ -588,6 +642,7 @@ const BudgetVsActual = () => {
           }
 
           const areaData = processedInvoices.areaMap.get(areaName)
+          // console.log("areaData", areaData)
           areaData.actual += amount
           areaData.actualM2 += m2
 
@@ -666,8 +721,15 @@ const BudgetVsActual = () => {
           }
 
           // Find category if available
-          if (productDetails.product_category) {
-            const category = categories.find((c) => c._id === productDetails.product_category)
+          if (productDetails.alias) {
+            const category = categories.find((c) =>
+              aliasState
+                .find((alias) => alias._id === productDetails.alias)
+                .alias_name.toLowerCase()
+                .includes(c.category_name.toLowerCase()),
+            )
+            // console.log("after finding category:", category)
+
             if (category) {
               const categoryId = category._id
               const categoryName = category.category_name
@@ -725,60 +787,90 @@ const BudgetVsActual = () => {
               }
 
               // Find subcategory if available
-              if (productDetails.product_subcategory) {
-                const subcategory = subcategories.find((sc) => sc._id === productDetails.product_subcategory)
-                if (subcategory) {
-                  const subcategoryId = subcategory._id
-                  const subcategoryName = subcategory.subcategory_name
+              if (productDetails.alias) {
+                // First, get the alias object
+                const productAlias = aliasState.find((alias) => alias._id === productDetails.alias)
 
-                  // Update subcategory data for area
-                  if (!areaCategoryData.subcategoryMap.has(subcategoryId)) {
-                    areaCategoryData.subcategoryMap.set(subcategoryId, {
-                      name: subcategoryName,
-                      actual: 0,
-                      actualM2: 0
-                    })
+                if (productAlias) {
+                  // Log for debugging
+                  console.log("Processing product with alias:", productAlias.alias_name)
+
+                  // Try to find a direct match first (more reliable)
+                  let subcategory = subcategories.find(
+                    (sc) => sc.subcategory_name.toLowerCase() === productAlias.alias_name.toLowerCase(),
+                  )
+
+                  // If no direct match, try the substring approach as fallback
+                  if (!subcategory) {
+                    subcategory = subcategories.find(
+                      (sc) =>
+                        productAlias.alias_name.toLowerCase().includes(sc.subcategory_name.toLowerCase()) ||
+                        sc.subcategory_name.toLowerCase().includes(productAlias.alias_name.toLowerCase()),
+                    )
                   }
 
-                  const areaSubcategoryData = areaCategoryData.subcategoryMap.get(subcategoryId)
-                  areaSubcategoryData.actual += amount
-                  areaSubcategoryData.actualM2 += m2
+                  // Add more logging to see which subcategories are being matched
+                  if (subcategory) {
+                    console.log("Matched subcategory:", subcategory.subcategory_name)
+                  } else {
+                    console.log("No subcategory match found for alias:", productAlias.alias_name)
+                  }
 
-                  // Update subcategory data for level if available
-                  if (levelName) {
-                    const levelData = processedInvoices.levelMap.get(`${areaName}/${levelName}`)
-                    const levelTypeData = levelData.typeMap.get(typeId)
-                    const levelCategoryData = levelTypeData.categoryMap.get(categoryId)
+                  if (subcategory) {
+                    const subcategoryId = subcategory._id
+                    const subcategoryName = subcategory.subcategory_name
 
-                    if (!levelCategoryData.subcategoryMap.has(subcategoryId)) {
-                      levelCategoryData.subcategoryMap.set(subcategoryId, {
+                    // Rest of your code for updating subcategory data...
+                    // Update subcategory data for area
+                    if (!areaCategoryData.subcategoryMap.has(subcategoryId)) {
+                      areaCategoryData.subcategoryMap.set(subcategoryId, {
                         name: subcategoryName,
                         actual: 0,
-                        actualM2: 0
+                        actualM2: 0,
                       })
                     }
 
-                    const levelSubcategoryData = levelCategoryData.subcategoryMap.get(subcategoryId)
-                    levelSubcategoryData.actual += amount
-                    levelSubcategoryData.actualM2 += m2
+                    const areaSubcategoryData = areaCategoryData.subcategoryMap.get(subcategoryId)
+                    areaSubcategoryData.actual += amount
+                    areaSubcategoryData.actualM2 += m2
+                    console.log("areaSubcategoryData", areaSubcategoryData)
 
-                    // Update subcategory data for subarea if available
-                    if (subareaName) {
-                      const subareaData = processedInvoices.subareaMap.get(`${areaName}/${levelName}/${subareaName}`)
-                      const subareaTypeData = subareaData.typeMap.get(typeId)
-                      const subareaCategoryData = subareaTypeData.categoryMap.get(categoryId)
+                    // Update subcategory data for level if available
+                    if (levelName) {
+                      const levelData = processedInvoices.levelMap.get(`${areaName}/${levelName}`)
+                      const levelTypeData = levelData.typeMap.get(typeId)
+                      const levelCategoryData = levelTypeData.categoryMap.get(categoryId)
 
-                      if (!subareaCategoryData.subcategoryMap.has(subcategoryId)) {
-                        subareaCategoryData.subcategoryMap.set(subcategoryId, {
+                      if (!levelCategoryData.subcategoryMap.has(subcategoryId)) {
+                        levelCategoryData.subcategoryMap.set(subcategoryId, {
                           name: subcategoryName,
                           actual: 0,
-                          actualM2: 0
+                          actualM2: 0,
                         })
                       }
 
-                      const subareaSubcategoryData = subareaCategoryData.subcategoryMap.get(subcategoryId)
-                      subareaSubcategoryData.actual += amount
-                      subareaSubcategoryData.actualM2 += m2
+                      const levelSubcategoryData = levelCategoryData.subcategoryMap.get(subcategoryId)
+                      levelSubcategoryData.actual += amount
+                      levelSubcategoryData.actualM2 += m2
+
+                      // Update subcategory data for subarea if available
+                      if (subareaName) {
+                        const subareaData = processedInvoices.subareaMap.get(`${areaName}/${levelName}/${subareaName}`)
+                        const subareaTypeData = subareaData.typeMap.get(typeId)
+                        const subareaCategoryData = subareaTypeData.categoryMap.get(categoryId)
+
+                        if (!subareaCategoryData.subcategoryMap.has(subcategoryId)) {
+                          subareaCategoryData.subcategoryMap.set(subcategoryId, {
+                            name: subcategoryName,
+                            actual: 0,
+                            actualM2: 0,
+                          })
+                        }
+
+                        const subareaSubcategoryData = subareaCategoryData.subcategoryMap.get(subcategoryId)
+                        subareaSubcategoryData.actual += amount
+                        subareaSubcategoryData.actualM2 += m2
+                      }
                     }
                   }
                 }
@@ -876,7 +968,6 @@ const BudgetVsActual = () => {
     return processedInvoices
   }, [invoiceState, budgetState, orderState, productTypeState, categories, subcategories])
 
-  // Merge budget and actual data with full hierarchy
   const mergeData = useCallback(() => {
     const budgetData = processBudgetData()
     const actualData = processInvoiceData()
@@ -925,7 +1016,12 @@ const BudgetVsActual = () => {
       // Process area-level product types
       budgetArea.types.forEach((budgetType) => {
         const typeId = budgetType.type_id
-        const actualType = actualArea.typeMap.get(typeId) || { name: "", actual: 0, actualM2: 0, categoryMap: new Map() }
+        const actualType = actualArea.typeMap.get(typeId) || {
+          name: "",
+          actual: 0,
+          actualM2: 0,
+          categoryMap: new Map(),
+        }
 
         const type = {
           type_name: budgetType.type_name,
@@ -968,7 +1064,11 @@ const BudgetVsActual = () => {
           // Process each subcategory in the category
           budgetCategory.subcategories.forEach((budgetSubcategory) => {
             const subcategoryId = budgetSubcategory.subcategory_id
-            const actualSubcategory = actualCategory.subcategoryMap.get(subcategoryId) || { name: "", actual: 0, actualM2: 0, }
+            const actualSubcategory = actualCategory.subcategoryMap.get(subcategoryId) || {
+              name: "",
+              actual: 0,
+              actualM2: 0,
+            }
 
             const subcategory = {
               subcategory_name: budgetSubcategory.subcategory_name,
@@ -1016,7 +1116,12 @@ const BudgetVsActual = () => {
         // Process level-specific product types
         budgetLevel.types.forEach((budgetType) => {
           const typeId = budgetType.type_id
-          const actualType = actualLevel.typeMap.get(typeId) || { name: "", actual: 0, actualM2: 0, categoryMap: new Map() }
+          const actualType = actualLevel.typeMap.get(typeId) || {
+            name: "",
+            actual: 0,
+            actualM2: 0,
+            categoryMap: new Map(),
+          }
 
           const type = {
             type_name: budgetType.type_name,
@@ -1059,7 +1164,11 @@ const BudgetVsActual = () => {
             // Process each subcategory in the category
             budgetCategory.subcategories.forEach((budgetSubcategory) => {
               const subcategoryId = budgetSubcategory.subcategory_id
-              const actualSubcategory = actualCategory.subcategoryMap.get(subcategoryId) || { name: "", actual: 0, actualM2: 0 }
+              const actualSubcategory = actualCategory.subcategoryMap.get(subcategoryId) || {
+                name: "",
+                actual: 0,
+                actualM2: 0,
+              }
 
               const subcategory = {
                 subcategory_name: budgetSubcategory.subcategory_name,
@@ -1108,7 +1217,12 @@ const BudgetVsActual = () => {
           // Process subarea-specific product types
           budgetSubarea.types.forEach((budgetType) => {
             const typeId = budgetType.type_id
-            const actualType = actualSubarea.typeMap.get(typeId) || { name: "", actual: 0, actualM2: 0, categoryMap: new Map() }
+            const actualType = actualSubarea.typeMap.get(typeId) || {
+              name: "",
+              actual: 0,
+              actualM2: 0,
+              categoryMap: new Map(),
+            }
 
             const type = {
               type_name: budgetType.type_name,
@@ -1151,7 +1265,11 @@ const BudgetVsActual = () => {
               // Process each subcategory in the category
               budgetCategory.subcategories.forEach((budgetSubcategory) => {
                 const subcategoryId = budgetSubcategory.subcategory_id
-                const actualSubcategory = actualCategory.subcategoryMap.get(subcategoryId) || { name: "", actual: 0, actualM2: 0, }
+                const actualSubcategory = actualCategory.subcategoryMap.get(subcategoryId) || {
+                  name: "",
+                  actual: 0,
+                  actualM2: 0,
+                }
 
                 const subcategory = {
                   subcategory_name: budgetSubcategory.subcategory_name,
@@ -1310,11 +1428,6 @@ const BudgetVsActual = () => {
     }).format(amount || 0)
   }
 
-  // Format percentage
-  const formatPercent = (percent) => {
-    return `${(percent || 0).toFixed(2)}%`
-  }
-
   // Determine variance class based on value
   const getVarianceClass = (variance) => {
     if (variance > 0) {
@@ -1341,11 +1454,13 @@ const BudgetVsActual = () => {
   }
 
   // Check if any data is loading
-  const isLoading = fetchBudgetLoading || fetchOrderLoading || isFetchProductTypeLoading || isFetchInvoiceLoading
+  const isLoading =
+    fetchBudgetLoading || fetchOrderLoading || isFetchProductTypeLoading || isFetchInvoiceLoading || isFetchAliasLoading
 
   // Check for any errors
-  const hasError = fetchBudgetError || fetchOrderError || fetchProductTypeError || fetchInvoiceError
-  const errorMessage = fetchBudgetError || fetchOrderError || fetchProductTypeError || fetchInvoiceError
+  const hasError = fetchBudgetError || fetchOrderError || fetchProductTypeError || fetchInvoiceError || fetchAliasError
+  const errorMessage =
+    fetchBudgetError || fetchOrderError || fetchProductTypeError || fetchInvoiceError || fetchAliasError
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -1488,7 +1603,7 @@ const BudgetVsActual = () => {
                   <p className="text-sm text-gray-500 mb-1">Variance (M2)</p>
                   <p className={`text-2xl font-bold ${getVarianceClass(filteredData.summary.varianceM2)}`}>
                     {/* {formatPercent(filteredData.summary.varianceM2)} */}
-                    {filteredData.summary.varianceM2.toFixed(4)} 
+                    {filteredData.summary.varianceM2.toFixed(4)}
                   </p>
                 </div>
                 <div className="p-2 bg-orange-100 rounded-full">
@@ -1508,57 +1623,43 @@ const BudgetVsActual = () => {
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3"
                     >
-                      <div className="flex items-center">
-                        Area - Level - Subarea | Type - Category - Subcategory
-                      </div>
+                      <div className="flex items-center">Area - Level - Subarea | Type - Category - Subcategory</div>
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-end">
-                        Budget ($)
-                      </div>
+                      <div className="flex items-center justify-end">Budget ($)</div>
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-end">
-                        Budget (M2)
-                      </div>
+                      <div className="flex items-center justify-end">Budget (M2)</div>
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-end">
-                        Actual ($)
-                      </div>
+                      <div className="flex items-center justify-end">Actual ($)</div>
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-end">
-                        Actual (M2)
-                      </div>
+                      <div className="flex items-center justify-end">Actual (M2)</div>
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-end">
-                        Variance ($)
-                      </div>
+                      <div className="flex items-center justify-end">Variance ($)</div>
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      <div className="flex items-center justify-end">
-                        Variance (M2)
-                      </div>
+                      <div className="flex items-center justify-end">Variance (M2)</div>
                     </th>
                   </tr>
                 </thead>
@@ -1580,15 +1681,11 @@ const BudgetVsActual = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
                           {formatCurrency(area.budget)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
-                          {area.m2}
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">{area.m2}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
                           {formatCurrency(area.actual)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
-                          {area.actualM2}
-                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">{area.actualM2}</td>
                         <td
                           className={`px-6 py-4 whitespace-nowrap text-right font-medium ${getVarianceClass(area.variance)}`}
                         >
@@ -1638,15 +1735,11 @@ const BudgetVsActual = () => {
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(type.budget)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                  {type.m2}
-                                </td>
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{type.m2}</td>
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(type.actual)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                  {type.actualM2}
-                                </td>
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{type.actualM2}</td>
                                 <td
                                   className={`px-6 py-3 whitespace-nowrap text-right text-sm ${getVarianceClass(
                                     type.variance,
@@ -1807,15 +1900,11 @@ const BudgetVsActual = () => {
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(level.budget)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                  {level.m2}
-                                </td>
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{level.m2}</td>
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(level.actual)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
-                                  {level.actualM2}
-                                </td>
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{level.actualM2}</td>
                                 <td
                                   className={`px-6 py-3 whitespace-nowrap text-right text-sm ${getVarianceClass(
                                     level.variance,
@@ -1871,9 +1960,7 @@ const BudgetVsActual = () => {
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
                                           {formatCurrency(type.budget)}
                                         </td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
-                                          {type.m2}
-                                        </td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-right text-sm">{type.m2}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
                                           {formatCurrency(type.actual)}
                                         </td>
@@ -2057,9 +2144,7 @@ const BudgetVsActual = () => {
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
                                           {formatCurrency(subarea.budget)}
                                         </td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
-                                          {subarea.m2}
-                                        </td>
+                                        <td className="px-6 py-2 whitespace-nowrap text-right text-sm">{subarea.m2}</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
                                           {formatCurrency(subarea.actual)}
                                         </td>

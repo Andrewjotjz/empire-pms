@@ -31,6 +31,8 @@ const PurchaseOrder2 = () => {
 
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
+    console.log("purchaseOrderState", purchaseOrderState)
+
     const formatDate = (dateString) => {
         if (dateString === null) {
             return ''
@@ -542,6 +544,9 @@ const PurchaseOrder2 = () => {
                                     </svg>
                                     )}
                                 </th>
+                                <th className="p-3">
+                                    Invoice
+                                </th>
                                 <th className="p-3 cursor-pointer" onClick={() => requestSort('order_status')}>
                                     Status
                                     {sortConfig.key === 'order_status' && (
@@ -577,6 +582,11 @@ const PurchaseOrder2 = () => {
                                     <td className="p-3 text-gray-600">{order.supplier.supplier_name}</td>
                                     <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>
                                     <td className="p-3">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.invoices.length > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                                        {`${order.invoices.length} Invoice${order.invoices.length > 1 ? 's' : ''}`}
+                                        </span>
+                                    </td>
+                                    <td className="p-3">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                         order.order_status === 'Approved' ? 'bg-green-100 text-green-800' :
                                         order.order_status === 'Pending' ? 'bg-lime-100 text-lime-800' :
@@ -605,7 +615,7 @@ const PurchaseOrder2 = () => {
                                 </tr>
                                 {expandedRow === order._id && (
                                     <tr>
-                                    <td colSpan="9" className="p-2 bg-gray-50">
+                                    <td colSpan="10" className="p-2 bg-gray-50">
                                         <div className="flex flex-col space-y-1">
                                         {order.products.map((product, index) => (
                                             <div key={index} className="bg-white py-1 px-2 rounded flex items-center text-sm border-b last:border-b-0">

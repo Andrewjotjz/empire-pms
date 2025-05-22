@@ -690,7 +690,7 @@ const InvoicePage2 = () => {
                                     <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
                                     <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_raw_total_amount_incl_gst * 100) / 100)}</td>
                                     <td className="p-3">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        <span className={`px-2 py-1 rounded-full text-xs text-nowrap font-medium ${
                                         invoice.invoice_status === 'Settled' ? 'bg-green-100 text-green-800' :
                                         invoice.invoice_status === 'To review' ? 'bg-orange-100 text-orange-800' :
                                         invoice.invoice_status === 'Cancelled' ? 'bg-gray-100 text-gray-800' :
