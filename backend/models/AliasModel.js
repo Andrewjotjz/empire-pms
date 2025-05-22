@@ -15,9 +15,11 @@ const aliasSchema = new Schema({
 }, { timestamps: true })
 
 
-//export the model
+//Export the model
 // const Alias = mongoose.model('Alias', aliasSchema);
 
-// check if the model already exists before creating it
-const Alias = mongoose.models.Alias || mongoose.model('Alias', aliasSchema);
-module.exports = Alias;
+//Check if the model already exists before creating it
+// const Alias = mongoose.models.Alias || mongoose.model('Alias', aliasSchema);
+// module.exports = Alias;
+
+module.exports = (connection) => connection.model('Alias', aliasSchema);

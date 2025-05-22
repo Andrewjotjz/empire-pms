@@ -1,4 +1,5 @@
 //import modules
+const { dbA, dbB } = require('./db');
 const dotenv = require('dotenv');
 const express = require('express');
 const mongoose = require('mongoose');
@@ -86,3 +87,21 @@ mongoose.connect(process.env.MONG_URI)
     .catch((error) => {
         console.log(error)
     });
+
+
+// Wait for both connections before starting the server
+Promise.all([
+  new Promise((resolve, reject) => dbA.once('open', resolve).on('error', reject)),
+  new Promise((resolve, reject) => dbB.once('open', resolve).on('error', reject)),
+])
+  .then(() => {
+    app.listen(process.env.PORT2, () => {
+      console.log("Connected to MongoDB databases A & B. Listening on port", process.env.PORT2);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to connect to one or both databases:", error);
+  });
+
+// Export the connections so you can use them in your models/controllers
+module.exports = { dbA, dbB };
