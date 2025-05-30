@@ -1,5 +1,5 @@
 //import modules
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setProductState } from '../redux/productSlice';
@@ -16,11 +16,9 @@ const ProductDetails = () => {
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
     const [productTypeState, setProductTypeState] = useState([]);
-    const location = useLocation();
 
     //Component router
-    const { id, productId } = useParams();
-    const supplierId = location.state || id;
+    const { id: supplierId, productId } = useParams();
     const navigate = useNavigate();
 
     //Component functions and variables

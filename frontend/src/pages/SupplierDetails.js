@@ -135,8 +135,7 @@ const SupplierDetails = () => {
   }
 
   const handleProductTableClick = (productId) => {
-    dispatch(clearProductState())
-    navigate(`/EmpirePMS/supplier/${id}/products/${productId}`, { state: id })
+    window.open(`/EmpirePMS/supplier/${id}/products/${productId}`, '_blank')
   }
 
   const handleRelatedProjects = () => {

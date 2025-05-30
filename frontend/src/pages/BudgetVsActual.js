@@ -631,7 +631,7 @@ const BudgetVsActual = () => {
           const typeId = productType._id
           const typeName = productType.type_name
 
-          // console.log("processedInvoices", processedInvoices)
+          console.log("processedInvoices", processedInvoices)
           // Update area data
           if (!processedInvoices.areaMap.has(areaName)) {
             processedInvoices.areaMap.set(areaName, {
@@ -642,7 +642,7 @@ const BudgetVsActual = () => {
           }
 
           const areaData = processedInvoices.areaMap.get(areaName)
-          // console.log("areaData", areaData)
+          console.log("areaData", areaData)
           areaData.actual += amount
           areaData.actualM2 += m2
 
@@ -728,7 +728,7 @@ const BudgetVsActual = () => {
                 .alias_name.toLowerCase()
                 .includes(c.category_name.toLowerCase()),
             )
-            // console.log("after finding category:", category)
+            console.log("after finding category:", category)
 
             if (category) {
               const categoryId = category._id

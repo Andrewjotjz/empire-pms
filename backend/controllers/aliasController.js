@@ -1,7 +1,7 @@
 //import modules
-const {dbA} = require('../db');
-const createAliasModel = require('../models/AliasModel');
-const aliasModel = createAliasModel(dbA);
+// const {dbA} = require('../db');
+const aliasModel = require('../models/AliasModel');
+// const aliasModel = createAliasModel(dbA);
 const mongoose = require('mongoose');
 
 //Controller function - GET all Aliases

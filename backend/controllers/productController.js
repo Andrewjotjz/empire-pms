@@ -1,7 +1,9 @@
 //import modules
+// const {dbA} = require('../db');
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
 const aliasModel = require('../models/AliasModel')
+// const aliasModel = createAliasModel(dbA);
 const mongoose = require('mongoose');
 
 // Helper function to fetch products by type
