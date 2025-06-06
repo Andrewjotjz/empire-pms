@@ -153,7 +153,8 @@ const createNewProject = async (req, res) => {
 };
 
 
-//Controller function - PUT to update a single Project
+//********* Controller function - PUT to update a single Project
+
 // const updateSingleProject = async (req, res) => {
 //     const { id } = req.params;
 //     const { suppliers } = req.body; // Get the new supplier list
@@ -194,6 +195,8 @@ const createNewProject = async (req, res) => {
 //         return res.status(500).json({ error: "Internal server error. Please try again later." });
 //     }
 // };
+
+
 const updateSingleProject = async (req, res) => {
     const { id } = req.params;
     const { project_name, project_address, project_isarchived, area_obj_ref, suppliers } = req.body; // Get the new supplier list

@@ -173,143 +173,188 @@ const SupplierDetails = () => {
       setProjectsToRemove(updatedProjectsToRemove)
     }
   }
+// *** COMMENTED ON 30/5/2025 because there is some bug and redundant code here. Unexpected behavior like the project removes itself from a supplier (BELL Plaster)
+  // const handleAddProjectConfirm = async () => { #Version 2
+  //   const selectedProjectArray = Array.from(selectedProjects)
+  //   const currentProjectIds = new Set(supplierState.projects.map((project) => project._id))
+  //   const newProjects = selectedProjectArray.filter((projectId) => !currentProjectIds.has(projectId))
+
+  //   if (newProjects.length > 0) {
+  //       setIsAddingProjects(true)
+  //       try {
+  //       await Promise.all(
+  //           newProjects.map(async (projectId) => {
+  //           const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
+  //               credentials: "include",
+  //               headers: {
+  //               "Content-Type": "application/json",
+  //               Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+  //               },
+  //           })
+
+  //           if (!projectRes.ok) {
+  //               throw new Error(`Failed to fetch project ${projectId}`)
+  //           }
+
+  //           const projectData = await projectRes.json()
+  //           const supplierExists = projectData[0].suppliers.some((supplier) => supplier === id || supplier._id === id)
+
+  //           if (!supplierExists) {
+  //               const updatedSuppliers = [...projectData[0].suppliers, id]
+
+  //               const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
+  //               credentials: "include",
+  //               method: "PUT",
+  //               headers: {
+  //                   "Content-Type": "application/json",
+  //                   Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+  //               },
+  //               body: JSON.stringify({
+  //                   project_name: projectData[0].project_name,
+  //                   project_address: projectData[0].project_address,
+  //                   project_isarchived: projectData[0].project_isarchived,
+  //                   area_obj_ref: projectData[0].area_obj_ref,
+  //                   suppliers: updatedSuppliers,
+  //               }),
+  //               })
+
+  //               if (!updateRes.ok) {
+  //               throw new Error(`Failed to update project ${projectId}`)
+  //               }
+  //           }
+  //           }),
+  //       )
+
+  //       setAddProjectListVisible(false)
+  //       await fetchSupplierDetails()
+  //       } catch (error) {
+  //       console.error("Error updating projects:", error)
+  //       } finally {
+  //       setIsAddingProjects(false)
+  //       }
+  //   } else {
+  //       setAddProjectListVisible(false)
+  //   }
+  //   }
 
   const handleAddProjectConfirm = async () => {
     const selectedProjectArray = Array.from(selectedProjects)
+
+    // Get the current project IDs from supplier details
     const currentProjectIds = new Set(supplierState.projects.map((project) => project._id))
+
+    // Filter the selected projects to only include new ones that aren't already associated with this supplier
     const newProjects = selectedProjectArray.filter((projectId) => !currentProjectIds.has(projectId))
 
     if (newProjects.length > 0) {
-        setIsAddingProjects(true)
-        try {
+      try {
+        // Update each new project to add the current supplier to its suppliers array
         await Promise.all(
-            newProjects.map(async (projectId) => {
+          newProjects.map(async (projectId) => {
+            // Fetch the current project data to get its suppliers array
             const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
-                credentials: "include",
-                headers: {
+              credentials: "include",
+              headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-                },
+              },
             })
 
             if (!projectRes.ok) {
-                throw new Error(`Failed to fetch project ${projectId}`)
+              throw new Error(`Failed to fetch project ${projectId}`)
             }
 
             const projectData = await projectRes.json()
+
+            // Check if the supplier is already in the project's suppliers array
             const supplierExists = projectData[0].suppliers.some((supplier) => supplier === id || supplier._id === id)
 
+            // Only add the supplier if it doesn't already exist
             if (!supplierExists) {
-                const updatedSuppliers = [...projectData[0].suppliers, id]
+              // Create a new array of suppliers that includes the current supplier ID
+              const updatedSuppliers = [...projectData[0].suppliers, id]
 
-                const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
+              // Update the project with the new suppliers array
+              const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
                 credentials: "include",
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
                 },
                 body: JSON.stringify({
-                    project_name: projectData[0].project_name,
-                    project_address: projectData[0].project_address,
-                    project_isarchived: projectData[0].project_isarchived,
-                    area_obj_ref: projectData[0].area_obj_ref,
-                    suppliers: updatedSuppliers,
+                  project_name: projectData[0].project_name,
+                  project_address: projectData[0].project_address,
+                  project_isarchived: projectData[0].project_isarchived,
+                  area_obj_ref: projectData[0].area_obj_ref,
+                  suppliers: updatedSuppliers,
                 }),
-                })
+              })
 
-                if (!updateRes.ok) {
+              if (!updateRes.ok) {
                 throw new Error(`Failed to update project ${projectId}`)
-                }
+              }
             }
-            }),
+          }),
         )
 
+        // Close the addProjects Popup
         setAddProjectListVisible(false)
+
+        // Fetch the updated supplier details to refresh the UI
         await fetchSupplierDetails()
-        } catch (error) {
+      } catch (error) {
         console.error("Error updating projects:", error)
-        } finally {
-        setIsAddingProjects(false)
-        }
+      }
     } else {
-        setAddProjectListVisible(false)
+      // If no new projects were selected, just close the popup
+      setAddProjectListVisible(false)
     }
-    }
-//   const handleAddProjectConfirm = async () => {
-//     const selectedProjectArray = Array.from(selectedProjects)
+  }
 
-//     // Get the current project IDs from supplier details
-//     const currentProjectIds = new Set(supplierState.projects.map((project) => project._id))
+// * This is the latest code from ChatGPT
+  // const handleAddProjectConfirm = async () => {
+  //   const selectedProjectArray = Array.from(selectedProjects)
+  //   const currentProjectIds = new Set(supplierState.projects.map((project) => project._id))
+  //   const newProjects = selectedProjectArray.filter((projectId) => !currentProjectIds.has(projectId))
 
-//     // Filter the selected projects to only include new ones that aren't already associated with this supplier
-//     const newProjects = selectedProjectArray.filter((projectId) => !currentProjectIds.has(projectId))
+  //   if (newProjects.length === 0) {
+  //     setAddProjectListVisible(false)
+  //     return
+  //   }
 
-//     if (newProjects.length > 0) {
-//       try {
-//         // Update each new project to add the current supplier to its suppliers array
-//         await Promise.all(
-//           newProjects.map(async (projectId) => {
-//             // Fetch the current project data to get its suppliers array
-//             const projectRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
-//               credentials: "include",
-//               headers: {
-//                 "Content-Type": "application/json",
-//                 Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-//               },
-//             })
+  //   setIsAddingProjects(true)
+  //   try {
+  //     await Promise.all(
+  //       newProjects.map(async (projectId) => {
+  //         const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
+  //           credentials: "include",
+  //           method: "PUT",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+  //           },
+  //           body: JSON.stringify({
+  //             suppliers: [id], // Send just the new supplier
+  //           }),
+  //         })
 
-//             if (!projectRes.ok) {
-//               throw new Error(`Failed to fetch project ${projectId}`)
-//             }
+  //         if (!updateRes.ok) {
+  //           throw new Error(`Failed to update project ${projectId}`)
+  //         }
+  //       })
+  //     )
 
-//             const projectData = await projectRes.json()
+  //     setAddProjectListVisible(false)
+  //     await fetchSupplierDetails()
+  //   } catch (error) {
+  //     console.error("Error updating projects:", error)
+  //   } finally {
+  //     setIsAddingProjects(false)
+  //   }
+  // }
 
-//             // Check if the supplier is already in the project's suppliers array
-//             const supplierExists = projectData[0].suppliers.some((supplier) => supplier === id || supplier._id === id)
 
-//             // Only add the supplier if it doesn't already exist
-//             if (!supplierExists) {
-//               // Create a new array of suppliers that includes the current supplier ID
-//               const updatedSuppliers = [...projectData[0].suppliers, id]
-
-//               // Update the project with the new suppliers array
-//               const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
-//                 credentials: "include",
-//                 method: "PUT",
-//                 headers: {
-//                   "Content-Type": "application/json",
-//                   Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
-//                 },
-//                 body: JSON.stringify({
-//                   project_name: projectData[0].project_name,
-//                   project_address: projectData[0].project_address,
-//                   project_isarchived: projectData[0].project_isarchived,
-//                   area_obj_ref: projectData[0].area_obj_ref,
-//                   suppliers: updatedSuppliers,
-//                 }),
-//               })
-
-//               if (!updateRes.ok) {
-//                 throw new Error(`Failed to update project ${projectId}`)
-//               }
-//             }
-//           }),
-//         )
-
-//         // Close the addProjects Popup
-//         setAddProjectListVisible(false)
-
-//         // Fetch the updated supplier details to refresh the UI
-//         await fetchSupplierDetails()
-//       } catch (error) {
-//         console.error("Error updating projects:", error)
-//       }
-//     } else {
-//       // If no new projects were selected, just close the popup
-//       setAddProjectListVisible(false)
-//     }
-//   }
 
   const handleRemoveEmployeesConfirm = async () => {
     const projectsToRemoveArray = Array.from(projectsToRemove)

@@ -296,9 +296,6 @@ const BudgetVsActual = () => {
     }
   }, [])
 
-  console.log("categories", categories)
-  console.log("subcategories", subcategories)
-  console.log("alias", aliasState)
 
   // Process budget data with full hierarchy
   const processBudgetData = useCallback(() => {
@@ -569,6 +566,7 @@ const BudgetVsActual = () => {
     return processedBudget
   }, [budgetState, productTypeState, categories, subcategories])
 
+  // ***********************************************************************************************************************************************************************
   // Process invoice data with full hierarchy
   const processInvoiceData = useCallback(() => {
     if (!invoiceState || !invoiceState.length || !budgetState) return null
@@ -595,18 +593,19 @@ const BudgetVsActual = () => {
     // Process each invoice
     projectInvoices.forEach((invoice) => {
       // Process regular products
-      if (invoice.products && invoice.products.length > 0) {
-        invoice.products.forEach((product) => {
-          if (!product.product_obj_ref) return
+      if (invoice.products && invoice.products.length > 0) { //if there's products
+        invoice.products.forEach((product) => { // for each product
+          if (!product.product_obj_ref) return // if product doesn't have property
 
           const amount = product.invoice_product_gross_amount_a || 0
           const m2 = product.invoice_product_qty_a || 0
           const location = product.invoice_product_location || "Unknown Location"
 
+          console.log("#1 location:", location)
           // Parse location to determine area, level, and subarea
-          // This is a simplified approach - you may need to adjust based on your actual location format
           const locationParts = location.split(">").map((part) => part.trim())
 
+          console.log("#2 locationParts:", locationParts)
           let areaName = location
           let levelName = null
           let subareaName = null
@@ -624,14 +623,16 @@ const BudgetVsActual = () => {
           // Get product details to determine type, category, subcategory
           const productDetails = product.product_obj_ref
 
-          // Find product type, category, subcategory
+          // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE Use Product_obj to find Product_type
+          // Using product_type ID, find productType object
           const productType = productTypeState.find((pt) => pt._id === productDetails.product_type)
           if (!productType) return
 
           const typeId = productType._id
           const typeName = productType.type_name
-
-          console.log("processedInvoices", processedInvoices)
+          
+          // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE  Create AREA, set area name and create TYPE. Immediately calculate the SUM of 'actual' and 'actualM2'. [ Layer: Area ]
+          // For this invoice, check if it has Area
           // Update area data
           if (!processedInvoices.areaMap.has(areaName)) {
             processedInvoices.areaMap.set(areaName, {
@@ -642,9 +643,11 @@ const BudgetVsActual = () => {
           }
 
           const areaData = processedInvoices.areaMap.get(areaName)
-          console.log("areaData", areaData)
           areaData.actual += amount
           areaData.actualM2 += m2
+
+          // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE  
+          // *************** In the AREA's punya TYPE, create TYPE and set its type name, then create Category and Subcategory. Immediately calculate the SUM of 'actual' and 'actualM2'. #1 [ Layer: Area's ProductType]
 
           // Update area-level product type data
           if (!areaData.typeMap.has(typeId)) {
@@ -652,7 +655,7 @@ const BudgetVsActual = () => {
               name: typeName,
               actual: 0,
               actualM2: 0,
-              categoryMap: new Map(),
+              categoryMap: new Map()
             })
           }
 
@@ -660,6 +663,7 @@ const BudgetVsActual = () => {
           areaTypeData.actual += amount
           areaTypeData.actualM2 += m2
 
+          // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE If the Area has Levels, create a Key for 'levelMap', set its name and create TYPE. [ Layer: Area's Level ]
           // Update level data if available
           if (levelName) {
             const levelKey = `${areaName}/${levelName}`
@@ -675,13 +679,14 @@ const BudgetVsActual = () => {
             levelData.actual += amount
             levelData.actualM2 += m2
 
+            // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE Level will have TYPE, set Type name and create Category and Subcategory. #2 [ Layer: Level's ProductType ]
             // Update level-specific product type data
             if (!levelData.typeMap.has(typeId)) {
               levelData.typeMap.set(typeId, {
                 name: typeName,
                 actual: 0,
                 actualM2: 0,
-                categoryMap: new Map(),
+                categoryMap: new Map()
               })
             }
 
@@ -689,6 +694,7 @@ const BudgetVsActual = () => {
             levelTypeData.actual += amount
             levelTypeData.actualM2 += m2
 
+            // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE If the Level has Subareas, create a Key for 'subareaMap', set its name and create TYPE. [ Layer: Level's Subarea ]
             // Update subarea data if available
             if (subareaName) {
               const subareaKey = `${areaName}/${levelName}/${subareaName}`
@@ -704,13 +710,14 @@ const BudgetVsActual = () => {
               subareaData.actual += amount
               subareaData.actualM2 += m2
 
+              // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE Subarea will have TYPE, set Type name and create Category and Subcategory. #2 [ Layer: Subarea's ProductType ]
               // Update subarea-specific product type data
               if (!subareaData.typeMap.has(typeId)) {
                 subareaData.typeMap.set(typeId, {
                   name: typeName,
                   actual: 0,
                   actualM2: 0,
-                  categoryMap: new Map(),
+                  categoryMap: new Map()
                 })
               }
 
@@ -719,16 +726,49 @@ const BudgetVsActual = () => {
               subareaTypeData.actualM2 += m2
             }
           }
+          console.log("categories", categories)
+          console.log("subcategories", subcategories)
 
+          console.log("#0 Processed Invoice: ", processedInvoices)
+          // ! STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ****************************************************  BACK to [#1 Layer: Area's ProductType ]
+
+          // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Area's ProductType has Category, set its ID as Key and create Subcategory. [ Layer: Area's ProductType's CATEGORY ]
           // Find category if available
           if (productDetails.alias) {
-            const category = categories.find((c) =>
-              aliasState
-                .find((alias) => alias._id === productDetails.alias)
-                .alias_name.toLowerCase()
-                .includes(c.category_name.toLowerCase()),
-            )
-            console.log("after finding category:", category)
+            console.log("#1 Search on this invoice product for category....", productDetails)
+            console.log("#2 It has this alias_name", aliasState.find((alias) => alias._id === productDetails.alias).alias_name)
+
+            const productAlias = aliasState.find((alias) => alias._id === productDetails.alias);
+            const productAliasName = productAlias?.alias_name?.toLowerCase();
+
+            let category = null;
+            let matchedSubcategory = null;
+
+            if (productAliasName) {
+              // Try to find a category that matches the alias name
+              category = categories.find((cat) =>
+                productAliasName.includes(cat.category_name.toLowerCase())
+              );
+
+              // If no direct category match, try to find a subcategory match
+              if (!category) {
+                for (const cat of categories) {
+                  const subcategory = cat.subcategories.find((sc) =>
+                    productAliasName.includes(sc.subcategory_name.toLowerCase())
+                  );
+                  if (subcategory) {
+                    category = cat;
+                    matchedSubcategory = subcategory;
+                    break;
+                  }
+                }
+              }
+            }
+
+          
+
+            console.log("#3 Using invoice's product alias to find alias details from aliasState, from category list, find if the alias is in Category list:", category)
+
 
             if (category) {
               const categoryId = category._id
@@ -740,13 +780,17 @@ const BudgetVsActual = () => {
                   name: categoryName,
                   actual: 0,
                   actualM2: 0,
-                  subcategoryMap: new Map(),
+                  subcategoryMap: new Map(), // this is getting used at line 844
                 })
               }
 
               const areaCategoryData = areaTypeData.categoryMap.get(categoryId)
               areaCategoryData.actual += amount
               areaCategoryData.actualM2 += m2
+
+              // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ****************************************************  BACK to [ Layer: Area's Level's ProductType ]
+
+              // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Level's ProductType has Category, set its ID as Key and create Subcategory. [ Layer: Level's ProductType's CATEGORY ]
 
               // Update category data for level if available
               if (levelName) {
@@ -758,13 +802,17 @@ const BudgetVsActual = () => {
                     name: categoryName,
                     actual: 0,
                     actualM2: 0,
-                    subcategoryMap: new Map(),
+                    subcategoryMap: new Map(), // this line should be used too
                   })
                 }
 
                 const levelCategoryData = levelTypeData.categoryMap.get(categoryId)
                 levelCategoryData.actual += amount
                 levelCategoryData.actualM2 += m2
+
+                // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ****************************************************  BACK to [ Layer: Area's Level's Subarea's ProductType ]
+
+                // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Subarea's ProductType has Category, set its ID as Key and create Subcategory. [ Layer: Subarea's ProductType's CATEGORY ]
 
                 // Update category data for subarea if available
                 if (subareaName) {
@@ -786,34 +834,38 @@ const BudgetVsActual = () => {
                 }
               }
 
-              // Find subcategory if available
+              // ! STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ****************************************************  BEFORE[ Layer: Area's ProductType ] NOW[ Layer: Area's ProductType's Category ]
+
+              // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Area'sProductType'sCategory has Subcategory, set its ID as Key and create Subcategory. [ Layer: Area's ProductType's Category's SUBCATEGORY ]
+
               if (productDetails.alias) {
                 // First, get the alias object
                 const productAlias = aliasState.find((alias) => alias._id === productDetails.alias)
 
                 if (productAlias) {
                   // Log for debugging
-                  console.log("Processing product with alias:", productAlias.alias_name)
-
+                  console.log("#4 Search on this invoice product for subcategory:", productDetails)
                   // Try to find a direct match first (more reliable)
-                  let subcategory = subcategories.find(
-                    (sc) => sc.subcategory_name.toLowerCase() === productAlias.alias_name.toLowerCase(),
-                  )
+                  let subcategory = subcategories.find((sc) => aliasState.find((alias) => alias._id === productDetails.alias).alias_name.toLowerCase().includes(sc.subcategory_name.toLowerCase()))
+                  console.log("#5 subcategories", subcategories)
+                  console.log("#6 Matched/Found subcategory", subcategory)
+                  // console.log(`Matched subcategory: ${subcategory}, name:${subcategory.subcategory_name}, _id:${subcategory._id}`)
 
                   // If no direct match, try the substring approach as fallback
                   if (!subcategory) {
+                    console.log(`#7 can't find this subcategory, still trying to match invoice product: ${productAlias.alias_name}, _id: ${productAlias._id}`)
                     subcategory = subcategories.find(
                       (sc) =>
                         productAlias.alias_name.toLowerCase().includes(sc.subcategory_name.toLowerCase()) ||
                         sc.subcategory_name.toLowerCase().includes(productAlias.alias_name.toLowerCase()),
                     )
-                  }
 
-                  // Add more logging to see which subcategories are being matched
-                  if (subcategory) {
-                    console.log("Matched subcategory:", subcategory.subcategory_name)
-                  } else {
-                    console.log("No subcategory match found for alias:", productAlias.alias_name)
+                    // Add more logging to see which subcategories are being matched
+                    if (subcategory) {
+                      
+                    } else {
+                      console.log(`#8 No subcategory match found for invoice product's alias: ${productAlias.alias_name}, _id:${productAlias._id}`)
+                    }
                   }
 
                   if (subcategory) {
@@ -833,8 +885,9 @@ const BudgetVsActual = () => {
                     const areaSubcategoryData = areaCategoryData.subcategoryMap.get(subcategoryId)
                     areaSubcategoryData.actual += amount
                     areaSubcategoryData.actualM2 += m2
-                    console.log("areaSubcategoryData", areaSubcategoryData)
+                    // console.log("areaSubcategoryData", areaSubcategoryData)
 
+                    // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Level'sProductType'sCategory has Subcategory, set its ID as Key. [ Layer: Level's ProductType's Category's SUBCATEGORY ]
                     // Update subcategory data for level if available
                     if (levelName) {
                       const levelData = processedInvoices.levelMap.get(`${areaName}/${levelName}`)
@@ -853,6 +906,8 @@ const BudgetVsActual = () => {
                       levelSubcategoryData.actual += amount
                       levelSubcategoryData.actualM2 += m2
 
+
+                      // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Subarea'sProductType'sCategory has Subcategory, set its ID as Key. [ Layer: Subarea's ProductType's Category's SUBCATEGORY ]
                       // Update subcategory data for subarea if available
                       if (subareaName) {
                         const subareaData = processedInvoices.subareaMap.get(`${areaName}/${levelName}/${subareaName}`)
@@ -877,13 +932,13 @@ const BudgetVsActual = () => {
               }
             }
           }
-
           // Update total
           processedInvoices.totalActual += amount
           processedInvoices.totalM2 += m2
         })
       }
 
+      // ! ***************************************************************************** STOPS HERE *************************************************************************************
       // Process custom products
       if (invoice.custom_products && invoice.custom_products.length > 0) {
         invoice.custom_products.forEach((customProduct) => {

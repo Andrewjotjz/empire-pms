@@ -915,7 +915,11 @@ const NewPurchaseOrderForm = () => {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && productState && filterProductsBySearchTerm().length > 0) {
                         e.preventDefault()
-                        handleAddItem(filterProductsBySearchTerm()[0])
+                        handleAddItem(filterProductsBySearchTerm()
+                        .filter((product) => product.productPrice.projects.includes(selectedProject))
+                        .filter((product) => orderState.order_date >= product.productPrice.product_effective_date)
+                        .filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id))
+                        [0])
                       }
                     }}
                   />
