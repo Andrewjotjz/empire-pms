@@ -579,8 +579,6 @@ const BudgetVsActual = () => {
 
     if (projectInvoices.length === 0) return null
 
-    console.log("projectInvoices", projectInvoices)
-
     // Initialize structure to match budget data
     const processedInvoices = {
       totalActual: 0,
@@ -601,11 +599,9 @@ const BudgetVsActual = () => {
           const m2 = product.invoice_product_qty_a || 0
           const location = product.invoice_product_location || "Unknown Location"
 
-          console.log("#1 location:", location)
           // Parse location to determine area, level, and subarea
           const locationParts = location.split(">").map((part) => part.trim())
 
-          console.log("#2 locationParts:", locationParts)
           let areaName = location
           let levelName = null
           let subareaName = null
@@ -726,18 +722,12 @@ const BudgetVsActual = () => {
               subareaTypeData.actualM2 += m2
             }
           }
-          console.log("categories", categories)
-          console.log("subcategories", subcategories)
 
-          console.log("#0 Processed Invoice: ", processedInvoices)
           // ! STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE ****************************************************  BACK to [#1 Layer: Area's ProductType ]
 
           // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Area's ProductType has Category, set its ID as Key and create Subcategory. [ Layer: Area's ProductType's CATEGORY ]
           // Find category if available
           if (productDetails.alias) {
-            console.log("#1 Search on this invoice product for category....", productDetails)
-            console.log("#2 It has this alias_name", aliasState.find((alias) => alias._id === productDetails.alias).alias_name)
-
             const productAlias = aliasState.find((alias) => alias._id === productDetails.alias);
             const productAliasName = productAlias?.alias_name?.toLowerCase();
 
@@ -764,11 +754,6 @@ const BudgetVsActual = () => {
                 }
               }
             }
-
-          
-
-            console.log("#3 Using invoice's product alias to find alias details from aliasState, from category list, find if the alias is in Category list:", category)
-
 
             if (category) {
               const categoryId = category._id
@@ -843,29 +828,16 @@ const BudgetVsActual = () => {
                 const productAlias = aliasState.find((alias) => alias._id === productDetails.alias)
 
                 if (productAlias) {
-                  // Log for debugging
-                  console.log("#4 Search on this invoice product for subcategory:", productDetails)
                   // Try to find a direct match first (more reliable)
                   let subcategory = subcategories.find((sc) => aliasState.find((alias) => alias._id === productDetails.alias).alias_name.toLowerCase().includes(sc.subcategory_name.toLowerCase()))
-                  console.log("#5 subcategories", subcategories)
-                  console.log("#6 Matched/Found subcategory", subcategory)
-                  // console.log(`Matched subcategory: ${subcategory}, name:${subcategory.subcategory_name}, _id:${subcategory._id}`)
 
                   // If no direct match, try the substring approach as fallback
                   if (!subcategory) {
-                    console.log(`#7 can't find this subcategory, still trying to match invoice product: ${productAlias.alias_name}, _id: ${productAlias._id}`)
                     subcategory = subcategories.find(
                       (sc) =>
                         productAlias.alias_name.toLowerCase().includes(sc.subcategory_name.toLowerCase()) ||
                         sc.subcategory_name.toLowerCase().includes(productAlias.alias_name.toLowerCase()),
                     )
-
-                    // Add more logging to see which subcategories are being matched
-                    if (subcategory) {
-                      
-                    } else {
-                      console.log(`#8 No subcategory match found for invoice product's alias: ${productAlias.alias_name}, _id:${productAlias._id}`)
-                    }
                   }
 
                   if (subcategory) {
@@ -885,7 +857,6 @@ const BudgetVsActual = () => {
                     const areaSubcategoryData = areaCategoryData.subcategoryMap.get(subcategoryId)
                     areaSubcategoryData.actual += amount
                     areaSubcategoryData.actualM2 += m2
-                    // console.log("areaSubcategoryData", areaSubcategoryData)
 
                     // **************** STARTS HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEE  If the Level'sProductType'sCategory has Subcategory, set its ID as Key. [ Layer: Level's ProductType's Category's SUBCATEGORY ]
                     // Update subcategory data for level if available
@@ -1478,8 +1449,8 @@ const BudgetVsActual = () => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(amount || 0)
   }
 
@@ -1518,7 +1489,8 @@ const BudgetVsActual = () => {
     fetchBudgetError || fetchOrderError || fetchProductTypeError || fetchInvoiceError || fetchAliasError
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    // <div className="container mx-auto px-4 py-6">
+    <div className="px-4 py-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
@@ -1611,7 +1583,7 @@ const BudgetVsActual = () => {
           </div>
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
               <div className="flex justify-between items-start">
                 <div>
@@ -1652,20 +1624,19 @@ const BudgetVsActual = () => {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+            {/* <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Variance (M2)</p>
                   <p className={`text-2xl font-bold ${getVarianceClass(filteredData.summary.varianceM2)}`}>
-                    {/* {formatPercent(filteredData.summary.varianceM2)} */}
-                    {filteredData.summary.varianceM2.toFixed(4)}
+                    {filteredData.summary.varianceM2.toFixed(2)}
                   </p>
                 </div>
                 <div className="p-2 bg-orange-100 rounded-full">
                   <Percent className="w-5 h-5 text-orange-600" />
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Main Table */}
@@ -1736,11 +1707,13 @@ const BudgetVsActual = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
                           {formatCurrency(area.budget)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">{area.m2}</td>
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-right font-medium">{area.m2}</td> */}
+                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">-</td>
                         <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
                           {formatCurrency(area.actual)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">{area.actualM2}</td>
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-right font-medium">{area.actualM2}</td> */}
+                        <td className="px-6 py-4 whitespace-nowrap text-right font-medium">-</td>
                         <td
                           className={`px-6 py-4 whitespace-nowrap text-right font-medium ${getVarianceClass(area.variance)}`}
                         >
@@ -1749,10 +1722,15 @@ const BudgetVsActual = () => {
                             <span className="ml-1">{formatCurrency(area.variance)}</span>
                           </div>
                         </td>
+                        {/* <td
+                          className={`px-6 py-4 whitespace-nowrap text-right font-medium ${getVarianceClass(area.varianceM2)}`}
+                        >
+                          {area.varianceM2.toFixed(2)}
+                        </td> */}
                         <td
                           className={`px-6 py-4 whitespace-nowrap text-right font-medium ${getVarianceClass(area.varianceM2)}`}
                         >
-                          {area.varianceM2.toFixed(4)}
+                          -
                         </td>
                       </tr>
 
@@ -1794,7 +1772,7 @@ const BudgetVsActual = () => {
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(type.actual)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{type.actualM2}</td>
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{type.actualM2.toFixed(1)}</td>
                                 <td
                                   className={`px-6 py-3 whitespace-nowrap text-right text-sm ${getVarianceClass(
                                     type.variance,
@@ -1810,7 +1788,7 @@ const BudgetVsActual = () => {
                                     type.varianceM2,
                                   )}`}
                                 >
-                                  {type.varianceM2.toFixed(4)}
+                                  {type.varianceM2.toFixed(2)}
                                 </td>
                               </tr>
 
@@ -1850,7 +1828,7 @@ const BudgetVsActual = () => {
                                         {formatCurrency(category.actual)}
                                       </td>
                                       <td className="px-6 py-2 whitespace-nowrap text-right text-xs text-gray-600">
-                                        {category.actualM2}
+                                        {category.actualM2.toFixed(1)}
                                       </td>
                                       <td
                                         className={`px-6 py-2 whitespace-nowrap text-right text-xs ${getVarianceClass(
@@ -1867,7 +1845,7 @@ const BudgetVsActual = () => {
                                           category.varianceM2,
                                         )}`}
                                       >
-                                        {category.varianceM2.toFixed(4)}
+                                        {category.varianceM2.toFixed(2)}
                                       </td>
                                     </tr>
 
@@ -1897,7 +1875,7 @@ const BudgetVsActual = () => {
                                             {formatCurrency(subcategory.actual)}
                                           </td>
                                           <td className="px-6 py-1 whitespace-nowrap text-right text-xs text-gray-500">
-                                            {subcategory.actualM2}
+                                            {subcategory.actualM2.toFixed(1)}
                                           </td>
                                           <td
                                             className={`px-6 py-1 whitespace-nowrap text-right text-xs ${getVarianceClass(
@@ -1914,7 +1892,7 @@ const BudgetVsActual = () => {
                                               subcategory.varianceM2,
                                             )}`}
                                           >
-                                            {subcategory.varianceM2.toFixed(4)}
+                                            {subcategory.varianceM2.toFixed(2)}
                                           </td>
                                         </tr>
                                       ))}
@@ -1955,11 +1933,13 @@ const BudgetVsActual = () => {
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(level.budget)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{level.m2}</td>
+                                {/* <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{level.m2}</td> */}
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">-</td>
                                 <td className="px-6 py-3 whitespace-nowrap text-right text-sm">
                                   {formatCurrency(level.actual)}
                                 </td>
-                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{level.actualM2}</td>
+                                {/* <td className="px-6 py-3 whitespace-nowrap text-right text-sm">{level.actualM2.toFixed(1)}</td> */}
+                                <td className="px-6 py-3 whitespace-nowrap text-right text-sm">-</td>
                                 <td
                                   className={`px-6 py-3 whitespace-nowrap text-right text-sm ${getVarianceClass(
                                     level.variance,
@@ -1970,12 +1950,19 @@ const BudgetVsActual = () => {
                                     <span className="ml-1">{formatCurrency(level.variance)}</span>
                                   </div>
                                 </td>
+                                {/* <td
+                                  className={`px-6 py-3 whitespace-nowrap text-right text-sm ${getVarianceClass(
+                                    level.varianceM2,
+                                  )}`}
+                                >
+                                  {level.varianceM2.toFixed(2)}
+                                </td> */}
                                 <td
                                   className={`px-6 py-3 whitespace-nowrap text-right text-sm ${getVarianceClass(
                                     level.varianceM2,
                                   )}`}
                                 >
-                                  {level.varianceM2.toFixed(4)}
+                                  -
                                 </td>
                               </tr>
 
@@ -2020,7 +2007,7 @@ const BudgetVsActual = () => {
                                           {formatCurrency(type.actual)}
                                         </td>
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
-                                          {type.actualM2}
+                                          {type.actualM2.toFixed(1)}
                                         </td>
                                         <td
                                           className={`px-6 py-2 whitespace-nowrap text-right text-sm ${getVarianceClass(
@@ -2037,7 +2024,7 @@ const BudgetVsActual = () => {
                                             type.varianceM2,
                                           )}`}
                                         >
-                                          {type.varianceM2.toFixed(4)}
+                                          {type.varianceM2.toFixed(2)}
                                         </td>
                                       </tr>
 
@@ -2086,7 +2073,7 @@ const BudgetVsActual = () => {
                                                 {formatCurrency(category.actual)}
                                               </td>
                                               <td className="px-6 py-1 whitespace-nowrap text-right text-xs text-gray-600">
-                                                {category.actualM2}
+                                                {category.actualM2.toFixed(1)}
                                               </td>
                                               <td
                                                 className={`px-6 py-1 whitespace-nowrap text-right text-xs ${getVarianceClass(
@@ -2103,7 +2090,7 @@ const BudgetVsActual = () => {
                                                   category.varianceM2,
                                                 )}`}
                                               >
-                                                {category.varianceM2.toFixed(4)}
+                                                {category.varianceM2.toFixed(2)}
                                               </td>
                                             </tr>
 
@@ -2133,7 +2120,7 @@ const BudgetVsActual = () => {
                                                     {formatCurrency(subcategory.actual)}
                                                   </td>
                                                   <td className="px-6 py-1 whitespace-nowrap text-right text-xs text-gray-500">
-                                                    {subcategory.actualM2}
+                                                    {subcategory.actualM2.toFixed(1)}
                                                   </td>
                                                   <td
                                                     className={`px-6 py-1 whitespace-nowrap text-right text-xs ${getVarianceClass(
@@ -2152,7 +2139,7 @@ const BudgetVsActual = () => {
                                                       subcategory.varianceM2,
                                                     )}`}
                                                   >
-                                                    {subcategory.varianceM2.toFixed(4)}
+                                                    {subcategory.varianceM2.toFixed(2)}
                                                   </td>
                                                 </tr>
                                               ))}
@@ -2199,12 +2186,16 @@ const BudgetVsActual = () => {
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
                                           {formatCurrency(subarea.budget)}
                                         </td>
-                                        <td className="px-6 py-2 whitespace-nowrap text-right text-sm">{subarea.m2}</td>
+                                        {/* <td className="px-6 py-2 whitespace-nowrap text-right text-sm">{subarea.m2}</td> */}
+                                        <td className="px-6 py-2 whitespace-nowrap text-right text-sm">-</td>
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
                                           {formatCurrency(subarea.actual)}
                                         </td>
+                                        {/* <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
+                                          {subarea.actualM2.toFixed(1)}
+                                        </td> */}
                                         <td className="px-6 py-2 whitespace-nowrap text-right text-sm">
-                                          {subarea.actualM2}
+                                          -
                                         </td>
                                         <td
                                           className={`px-6 py-2 whitespace-nowrap text-right text-sm ${getVarianceClass(
@@ -2216,12 +2207,19 @@ const BudgetVsActual = () => {
                                             <span className="ml-1">{formatCurrency(subarea.variance)}</span>
                                           </div>
                                         </td>
+                                        {/* <td
+                                          className={`px-6 py-2 whitespace-nowrap text-right text-sm ${getVarianceClass(
+                                            subarea.varianceM2,
+                                          )}`}
+                                        >
+                                          {subarea.varianceM2.toFixed(2)}
+                                        </td> */}
                                         <td
                                           className={`px-6 py-2 whitespace-nowrap text-right text-sm ${getVarianceClass(
                                             subarea.varianceM2,
                                           )}`}
                                         >
-                                          {subarea.varianceM2.toFixed(4)}
+                                          -
                                         </td>
                                       </tr>
 
@@ -2265,7 +2263,7 @@ const BudgetVsActual = () => {
                                                 {formatCurrency(type.actual)}
                                               </td>
                                               <td className="px-6 py-1 whitespace-nowrap text-right text-sm">
-                                                {type.actualM2}
+                                                {type.actualM2.toFixed(1)}
                                               </td>
                                               <td
                                                 className={`px-6 py-1 whitespace-nowrap text-right text-sm ${getVarianceClass(
@@ -2282,7 +2280,7 @@ const BudgetVsActual = () => {
                                                   type.varianceM2,
                                                 )}`}
                                               >
-                                                {type.varianceM2.toFixed(4)}
+                                                {type.varianceM2.toFixed(2)}
                                               </td>
                                             </tr>
 
@@ -2331,7 +2329,7 @@ const BudgetVsActual = () => {
                                                       {formatCurrency(category.actual)}
                                                     </td>
                                                     <td className="px-6 py-1 whitespace-nowrap text-right text-xs text-gray-600">
-                                                      {category.actualM2}
+                                                      {category.actualM2.toFixed(1)}
                                                     </td>
                                                     <td
                                                       className={`px-6 py-1 whitespace-nowrap text-right text-xs ${getVarianceClass(
@@ -2350,7 +2348,7 @@ const BudgetVsActual = () => {
                                                         category.varianceM2,
                                                       )}`}
                                                     >
-                                                      {category.varianceM2.toFixed(4)}
+                                                      {category.varianceM2.toFixed(2)}
                                                     </td>
                                                   </tr>
 
@@ -2380,7 +2378,7 @@ const BudgetVsActual = () => {
                                                           {formatCurrency(subcategory.actual)}
                                                         </td>
                                                         <td className="px-6 py-1 whitespace-nowrap text-right text-xs text-gray-500">
-                                                          {subcategory.actualM2}
+                                                          {subcategory.actualM2.toFixed(1)}
                                                         </td>
                                                         <td
                                                           className={`px-6 py-1 whitespace-nowrap text-right text-xs ${getVarianceClass(
@@ -2399,7 +2397,7 @@ const BudgetVsActual = () => {
                                                             subcategory.varianceM2,
                                                           )}`}
                                                         >
-                                                          {subcategory.varianceM2.toFixed(4)}
+                                                          {subcategory.varianceM2?.toFixed(2) || 0}
                                                         </td>
                                                       </tr>
                                                     ))}
@@ -2423,7 +2421,7 @@ const BudgetVsActual = () => {
           </div>
 
           {/* Chart Section */}
-          <div className="bg-white rounded-lg shadow border border-gray-200 p-4 mb-6">
+          {/* <div className="bg-white rounded-lg shadow border border-gray-200 p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-medium">Budget vs Actual by Area</h2>
               <div className="flex gap-2">
@@ -2463,6 +2461,121 @@ const BudgetVsActual = () => {
                   </p>
                 </div>
               ))}
+            </div>
+          </div> */}
+          {/* Enhanced Horizontal Bar Chart Section */}
+          <div className="bg-white rounded-lg shadow border border-gray-200 p-6 mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-gray-800">Budget vs Actual Analysis by Area</h2>
+              <div className="flex gap-4 text-sm">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-blue-500 rounded mr-2"></div>
+                  <span className="text-gray-600">Budget</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-purple-500 rounded mr-2"></div>
+                  <span className="text-gray-600">Actual</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                  <span className="text-gray-600">Under Budget</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                  <span className="text-gray-600">Over Budget</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {filteredData.areas.map((area, index) => {
+                const maxValue = Math.max(area.budget, area.actual)
+                const budgetWidth = (area.budget / maxValue) * 100
+                const actualWidth = (area.actual / maxValue) * 100
+                const isOverBudget = area.actual > area.budget
+
+                return (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-medium text-gray-800 text-sm">{area.area_name}</h3>
+                      <div className="flex items-center space-x-4 text-xs text-gray-600">
+                        <span>Budget: {formatCurrency(area.budget)}</span>
+                        <span>Actual: {formatCurrency(area.actual)}</span>
+                        <span className={`font-medium ${getVarianceClass(area.variance)}`}>
+                          {area.variancePercent.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      {/* Budget bar */}
+                      <div className="h-6 bg-gray-100 rounded-lg overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500 rounded-lg flex items-center justify-end pr-2"
+                          style={{ width: `${budgetWidth}%` }}
+                        >
+                          <span className="text-white text-xs font-medium">
+                            {budgetWidth > 20 ? formatCurrency(area.budget) : ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actual bar */}
+                      <div className="h-6 bg-gray-100 rounded-lg overflow-hidden mt-1">
+                        <div
+                          className={`h-full rounded-lg flex items-center justify-end pr-2 ${
+                            isOverBudget ? "bg-red-500" : "bg-purple-500"
+                          }`}
+                          style={{ width: `${actualWidth}%` }}
+                        >
+                          <span className="text-white text-xs font-medium">
+                            {actualWidth > 20 ? formatCurrency(area.actual) : ""}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Variance indicator */}
+                    <div className="flex justify-between items-center text-xs">
+                      <div className="flex items-center space-x-2">
+                        {getVarianceIcon(area.variance)}
+                        <span className={getVarianceClass(area.variance)}>
+                          Variance: {formatCurrency(area.variance)}
+                        </span>
+                      </div>
+                      <div className="text-gray-500">
+                        M2 - Budget: {area.m2} | Actual: {area.actualM2.toFixed(1)}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Summary at bottom */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {formatCurrency(filteredData.summary.totalBudget)}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Budget</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {formatCurrency(filteredData.summary.totalActual)}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Actual</div>
+                </div>
+                <div>
+                  <div className={`text-2xl font-bold ${getVarianceClass(filteredData.summary.variance)}`}>
+                    {formatCurrency(filteredData.summary.variance)}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Total Variance ({filteredData.summary.variancePercent.toFixed(1)}%)
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

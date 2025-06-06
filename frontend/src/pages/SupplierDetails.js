@@ -1534,9 +1534,7 @@ export default SupplierDetails
 //                     // Add the current supplier ID to the project's suppliers array if it's not already present
 //                     const updatedSuppliers = new Set(projectData[0].suppliers);
 //                     updatedSuppliers.add(id);
-
-//                     console.log("updatedSuppliers", updatedSuppliers)
-    
+   
 //                     // Update the project's suppliers array
 //                     const updateRes = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project/${projectId}`, {
 //                         credentials: 'include', method: 'PUT',

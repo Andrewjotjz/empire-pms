@@ -31,8 +31,6 @@ const PurchaseOrder2 = () => {
 
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    console.log("purchaseOrderState", purchaseOrderState)
-
     const formatDate = (dateString) => {
         if (dateString === null) {
             return ''
