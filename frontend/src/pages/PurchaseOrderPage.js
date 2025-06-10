@@ -573,7 +573,7 @@ const PurchaseOrder2 = () => {
                                             disabled={order.order_isarchived}
                                         />
                                     </td>
-                                    <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/order/${order._id}`)}>{order.order_ref}</td>
+                                    <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => window.open(`/EmpirePMS/order/${order._id}`, '_blank')}>{order.order_ref}</td>
                                     <td className="p-3 text-gray-600">{formatDate(order.order_date)}</td>
                                     <td className="p-3 text-gray-600">{formatDateTime(order.order_est_datetime)}</td>
                                     <td className="p-3 text-gray-600">{order.project.project_name}</td>
