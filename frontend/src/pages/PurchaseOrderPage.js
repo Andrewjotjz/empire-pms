@@ -464,11 +464,11 @@ const PurchaseOrder2 = () => {
                             <tr className="bg-gray-100 text-left text-gray-600 text-sm uppercase">
                                 <th scope="col" hidden={!paginatedData.map(order => order.order_status).includes('Pending')} className="p-3">
                                     <input 
-                                        className="form-checkbox h-3 w-8 sm:h-4 sm:w-4 text-blue-600 hover:cursor-pointer"
+                                        className={`form-checkbox h-3 w-8 sm:h-4 sm:w-4 text-blue-600 hover:${localUser.employee_roles === "Admin" ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                                         type="checkbox"
                                         checked={Array.from(selectedPOs).length === paginatedData.filter(order => order.order_status === 'Pending' && order.order_isarchived === false).length && Array.from(selectedPOs).length !== 0}
                                         onChange={handleSelectAllPO}
-                                        disabled={activeTab === 'archive'}
+                                        disabled={activeTab === 'archive' || localUser.employee_roles !== "Admin"}
                                     />
                                 </th>
                                 <th className="p-3 cursor-pointer" onClick={() => requestSort('order_ref')}>
@@ -567,11 +567,11 @@ const PurchaseOrder2 = () => {
                                 <tr className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150">
                                     <td hidden={!paginatedData.map(order => order.order_status).includes('Pending')} className="p-3">
                                         <input 
-                                            className="form-checkbox h-3 w-3 sm:h-4 sm:w-4 text-blue-600 hover:cursor-pointer"
+                                            className={`form-checkbox h-3 w-3 sm:h-4 sm:w-4 text-blue-600 hover:${localUser.employee_roles === "Admin" ? 'cursor-pointer' : 'cursor-not-allowed'}`}
                                             type="checkbox"
                                             checked={selectedPOs.has(order._id)}
                                             onChange={() => handleSelectPO(order._id)}
-                                            disabled={order.order_isarchived}
+                                            disabled={order.order_isarchived  || localUser.employee_roles !== "Admin"}
                                         />
                                     </td>
                                     <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => window.open(`/EmpirePMS/order/${order._id}`, '_blank')}>{order.order_ref}</td>

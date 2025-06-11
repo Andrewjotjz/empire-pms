@@ -738,7 +738,7 @@ const SupplierDetails = () => {
             <thead className="thead-dark">
               <tr className="table-primary">
                 <th scope="col" className="hidden sm:table-cell">
-                  Id
+                  ID
                 </th>
                 <th scope="col">Project Name</th>
                 <th scope="col">Project Address</th>
@@ -914,7 +914,7 @@ const SupplierDetails = () => {
         </div>
         <table className="table table-bordered table-hover text-xs">
           <thead className="thead-dark">
-            <tr className="table-primary">
+            <tr className="table-primary text-center">
               <th scope="col">SKU</th>
               <th scope="col">Name</th>
               <th scope="col" className="hidden sm:table-cell">
@@ -1238,7 +1238,7 @@ const SupplierDetails = () => {
           <div className="overflow-x-auto">
             <table className="table table-bordered">
               <thead className="thead-dark">
-                <tr className="table-primary">
+                <tr className="table-primary text-center">
                   <th scope="col" className="hidden sm:table-cell">
                     ID
                   </th>
@@ -1250,7 +1250,7 @@ const SupplierDetails = () => {
               <tbody>
                 {supplierState.supplier_contacts &&
                   supplierState.supplier_contacts.map((supplier, index) => (
-                    <tr key={index}>
+                    <tr key={index} className='text-center'>
                       <th scope="row" className="hidden sm:table-cell">
                         {index + 1}
                       </th>
@@ -1857,7 +1857,7 @@ export default SupplierDetails
 //                 <table className="table table-bordered table-hover">
 //                     <thead className="thead-dark">
 //                         <tr className="table-primary">
-//                             <th scope="col" className="hidden sm:table-cell">Id</th>
+//                             <th scope="col" className="hidden sm:table-cell">ID</th>
 //                             <th scope="col">Project Name</th>
 //                             <th scope="col">Project Address</th>
 //                             <th scope="col" className="hidden sm:table-cell">Status</th>
