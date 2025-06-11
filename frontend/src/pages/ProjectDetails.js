@@ -621,7 +621,7 @@ const Project_Details = () => {
                 <table className="table table-bordered table-hover">
                     <thead className="thead-dark">
                         <tr className="table-primary">
-                            <th scope="col" className="hidden sm:table-cell">Id</th>
+                            <th scope="col" className="hidden sm:table-cell">ID</th>
                             <th scope="col">Name</th>
                             <th scope="col" className="hidden sm:table-cell">Phone</th>
                             <th scope="col" className="hidden sm:table-cell">Email</th>
@@ -656,7 +656,7 @@ const Project_Details = () => {
                     <table className="table table-bordered table-hover">
                         <thead className="thead-dark">
                             <tr className="table-primary">
-                                <th scope="col" className="hidden sm:table-cell">Id</th>
+                                <th scope="col" className="hidden sm:table-cell">ID</th>
                                 <th scope="col">Name</th>
                                 <th scope="col" className="hidden sm:table-cell">Address</th>
                                 <th scope="col">Material Type</th>

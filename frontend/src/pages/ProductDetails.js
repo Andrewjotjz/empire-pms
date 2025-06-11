@@ -302,8 +302,8 @@ const ProductDetails = () => {
   return localUser && Object.keys(localUser).length > 0 ? (
     <div className="max-w-full mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-gray-800 text-white px-6 py-4">
-          <h1 className="text-2xl font-bold">PRODUCT DETAILS</h1>
+        <div className="bg-gray-800 text-white px-6 py-2">
+          <h1 className="text-lg font-bold">PRODUCT DETAILS</h1>
         </div>
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
@@ -349,42 +349,42 @@ const ProductDetails = () => {
           {Array.isArray(productState) && productState.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">SKU:</label>
                   <p className="text-gray-900 font-mono">{productState[0].product.product_sku}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Type:</label>
                   <p className="text-gray-900">
                     {productTypeState.find((type) => type._id === productState[0].product.product_type)?.type_name ||
                       "Unknown"}
                   </p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Alias:</label>
                   <p className="text-gray-900">{productState[0].product.alias_name}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Notes:</label>
                   <p className="text-gray-900">{productState[0].product?.product_note || "None"}</p>
                 </div>
               </div>
               <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Name:</label>
                   <p className="text-gray-900 font-medium">{productState[0].product.product_name}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Actual Size:</label>
                   <p className="text-gray-900">{productState[0].product.product_actual_size}</p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Next available stock date:</label>
                   <p className="text-gray-900">
                     {productState[0].product.product_next_available_stock_date || "In-stock now"}
                   </p>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-3 rounded-lg">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">isArchived:</label>
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${

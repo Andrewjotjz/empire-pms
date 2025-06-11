@@ -199,13 +199,13 @@ const Supplier = () => {
               { searchTerm === "" ? (<Search className="absolute right-3 top-2.5 text-gray-400 h-5 w-5" />) : (<X className="absolute right-3 top-2.5 text-gray-400 h-5 w-5 hover:scale-105 hover:cursor-pointer" onClick={() => setSearchTerm("")}/>) }
             </div>
 
-            <button
+            {localUser.employee_roles === "Admin" && <button
               onClick={handleAddClick}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors duration-200"
             >
               <Plus className="h-5 w-5 mr-2" />
               <span className="font-medium">ADD SUPPLIER</span>
-            </button>
+            </button>}
           </div>
 
           {/* Tabs */}

@@ -350,8 +350,8 @@ const EmployeeDetails = () => {
             {employeeState && employeeState.projects && employeeState.projects.length > 0 ? (
             <table className="table table-bordered table-hover">
                 <thead className="thead-dark">
-                    <tr className="table-primary">
-                        <th scope="col" className="hidden sm:table-cell">Id</th>
+                    <tr className="table-primary text-center">
+                        <th scope="col" className="hidden sm:table-cell">ID</th>
                         <th scope="col">Project Name</th>
                         <th scope="col">Project Address</th>
                         <th scope="col">Project Status</th>
@@ -360,10 +360,10 @@ const EmployeeDetails = () => {
                 <tbody>
                     {employeeState.projects.map((project, index) => (
                             <tr className="cursor-pointer" key={`employeeProjectsTable-${project._id}`} onClick={() => handleTableClick('project', project._id)}>
-                                <th className="hidden sm:table-cell">{index + 1}</th>
-                                <td>{project.project_name}</td>
+                                <th className="hidden sm:table-cell text-center">{index + 1}</th>
+                                <td className='text-center'>{project.project_name}</td>
                                 <td>{project.project_address}</td>
-                                <td>{project.project_isarchived ? `Archived` : `Active`}</td>
+                                <td className='text-center'>{project.project_isarchived ? `Archived` : `Active`}</td>
                             </tr>
                             ))}
                 </tbody>
