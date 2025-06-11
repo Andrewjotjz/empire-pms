@@ -382,7 +382,8 @@ const InvoicePage2 = () => {
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="bg-gray-100 min-h-screen">
-            <div className="container mx-auto px-4 py-8">
+            {/* <div className="container mx-auto px-4 py-8"> */}
+            <div className="px-4 py-8">
                 <div className="bg-white rounded-lg shadow-md p-6">
                     {/* Header and New Invoice */}
                     <div className="flex justify-between items-center mb-6">

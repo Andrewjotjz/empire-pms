@@ -704,7 +704,7 @@ const PurchaseOrderDetails = () => {
                 </thead>
                 <tbody>
                     {purchaseOrderState.invoices && purchaseOrderState.invoices.filter(invoice => !invoice.invoice_isarchived).map(invoice => (
-                        <tr key={invoice._id} className="cursor-pointer" onClick={() => navigate(`/EmpirePMS/invoice/${invoice._id}`)}>
+                        <tr key={invoice._id} className={`cursor-pointer`} onClick={() => { localUser.employee_roles === "Admin" ? navigate(`/EmpirePMS/invoice/${invoice._id}`) : alert("You do not have permission to view invoice details. Please contact your administrator if you believe this is an error.")}}>
                             <th scope="row">{invoice.invoice_ref}</th>
                             <td>{formatDate(invoice.invoice_issue_date)}</td>
                             <td>{formatDate(invoice.invoice_received_date)}</td>

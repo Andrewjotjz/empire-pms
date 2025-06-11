@@ -52,7 +52,7 @@ const Login = () => {
               className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
               required
             />
-            {/* <label className='text-red-400 italic text-sm'>Demo account: demo@empirecbs.com</label> */}
+            <label className='text-red-400 italic text-sm'>Demo account: demo@empirecbs.com</label>
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -66,7 +66,7 @@ const Login = () => {
               className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
               required
             />
-            {/* <label className='text-red-400 italic text-sm'>Demo password: demo123</label> */}
+            <label className='text-red-400 italic text-sm'>Demo password: demo123</label>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <button

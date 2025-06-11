@@ -892,7 +892,7 @@ const SupplierDetails = () => {
             value={searchTerm}
             onChange={handleSearchChange}
           />
-          <button className="btn btn-primary mb-1" onClick={handleAddProductClick}>
+          {localUser.employee_roles === "Admin" && <button className="btn btn-primary mb-1" onClick={handleAddProductClick}>
             <div className="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -910,7 +910,7 @@ const SupplierDetails = () => {
               </svg>
               <label className="text-xs sm:text-base">ADD PRODUCT</label>
             </div>
-          </button>
+          </button>}
         </div>
         <table className="table table-bordered table-hover text-xs">
           <thead className="thead-dark">
@@ -982,7 +982,7 @@ const SupplierDetails = () => {
         <div className="m-1">
           <label className="text-xl">No products found in this supplier.</label>
         </div>
-        <button className="btn btn-primary m-1" onClick={handleAddProductClick}>
+        {localUser.employee_roles === "Admin" && <button className="btn btn-primary m-1" onClick={handleAddProductClick}>
           <div className="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1000,7 +1000,7 @@ const SupplierDetails = () => {
             </svg>
             <label>ADD PRODUCT</label>
           </div>
-        </button>
+        </button>}
       </div>
     )
     
@@ -1015,7 +1015,7 @@ const SupplierDetails = () => {
             value={searchTerm}
             onChange={handleSearchChange}
           />
-          <button className="btn btn-primary mb-1" onClick={handleCreateOrder}>
+          {localUser.employee_roles === "Admin" && <button className="btn btn-primary mb-1" onClick={handleCreateOrder}>
             <div className="flex items-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1033,7 +1033,7 @@ const SupplierDetails = () => {
               </svg>
               <label className="text-xs sm:text-base">CREATE NEW ORDER</label>
             </div>
-          </button>
+          </button>}
         </div>
         <div className="overflow-x-auto">
           <table className="table table-bordered table-hover shadow-md">
@@ -1115,7 +1115,7 @@ const SupplierDetails = () => {
         <div className="m-1">
           <label className="text-xl">No purchase orders corresponding to this supplier.</label>
         </div>
-        <button className="btn btn-primary m-1" onClick={() => navigate(`/EmpirePMS/order/create`)}>
+        {localUser.employee_roles === "Admin" && <button className="btn btn-primary m-1" onClick={() => navigate(`/EmpirePMS/order/create`)}>
           <div className="flex items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1133,7 +1133,7 @@ const SupplierDetails = () => {
             </svg>
             <label>NEW PURCHASE ORDER</label>
           </div>
-        </button>
+        </button>}
       </div>
     )
 
