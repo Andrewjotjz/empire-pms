@@ -81,7 +81,7 @@ const Home = () => {
 
       {/* Resources Section */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Resources & Items</h2>
+        {localUser.employee_roles === "Admin" && <h2 className="text-xl font-semibold mb-4 text-gray-700">Resources & Items</h2>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {localUser.employee_roles === "Admin" && <NavCard
             to="/EmpirePMS/product-type"
@@ -89,7 +89,7 @@ const Home = () => {
             icon={Layers}
             color="bg-blue-50 hover:bg-blue-100"
           />}
-          <NavCard to="/EmpirePMS/budget" title="Budgets" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />
+          {localUser.employee_roles === "Admin" &&<NavCard to="/EmpirePMS/budget" title="Budgets" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />}
           {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/alias" title="Alias" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />}
           {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/product" title="Reports (Beta)" icon={ChartArea} color="bg-blue-50 hover:bg-blue-100" />}
         </div>

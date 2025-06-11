@@ -1013,31 +1013,74 @@ const UpdateInvoiceForm = () => {
     }
 };
 
-  const handleApplyLocationToAll = (index, isCustom = false) => {
-      let copyText = '';
+// ! Commented because we want to change copy&apply values to items below the INDEX.
+  // const handleApplyLocationToAll = (index, isCustom = false) => {
+  //     let copyText = '';
 
-      // Determine the source of copyText based on isCustom
-      if (isCustom) {
-          copyText = updatedOrder.custom_products[index]?.custom_product_location || '';
-      } else {
-          copyText = updatedOrder.products[index]?.order_product_location || '';
-      }
+  //     // Determine the source of copyText based on isCustom
+  //     if (isCustom) {
+  //         copyText = updatedOrder.custom_products[index]?.custom_product_location || '';
+  //     } else {
+  //         copyText = updatedOrder.products[index]?.order_product_location || '';
+  //     }
 
-      const updatedProducts = updatedOrder.products.map(product => ({
-          ...product,
-          order_product_location: copyText, // Set all product locations to the copied location
-      }));
+  //     const updatedProducts = updatedOrder.products.map(product => ({
+  //         ...product,
+  //         order_product_location: copyText, // Set all product locations to the copied location
+  //     }));
 
-      const updatedCustomProducts = updatedOrder.custom_products.map(cproduct => ({
-          ...cproduct,
-          custom_product_location: copyText
-      }))
+  //     const updatedCustomProducts = updatedOrder.custom_products.map(cproduct => ({
+  //         ...cproduct,
+  //         custom_product_location: copyText
+  //     }))
       
-      setUpdatedOrder((prevState) => ({
-          ...prevState,
-          products: updatedProducts, // Update the products in state
-          custom_products: updatedCustomProducts
-      }));
+  //     setUpdatedOrder((prevState) => ({
+  //         ...prevState,
+  //         products: updatedProducts, // Update the products in state
+  //         custom_products: updatedCustomProducts
+  //     }));
+  // };
+
+  const handleApplyLocationToAll = (index, isCustom = false) => {
+    let copyText = '';
+    let copyID = '';
+
+    // Determine the source of copyText and copyID based on isCustom
+    if (isCustom) {
+      copyText = updatedOrder.custom_products[index]?.custom_product_location || "";
+      copyID = updatedOrder.custom_products[index]?.custom_product_area || "";
+    } else {
+      copyText = updatedOrder.products[index]?.order_product_location || "";
+      copyID = updatedOrder.products[index]?.order_product_area || "";
+    }
+
+    const updatedProducts = updatedOrder.products.map((product, i) => {
+      if (!isCustom && i > index) {
+        return {
+          ...product,
+          order_product_location: copyText,
+          order_product_area: copyID,
+        };
+      }
+      return product;
+    });
+
+    const updatedCustomProducts = updatedOrder.custom_products.map((cproduct, i) => {
+      if (isCustom && i > index) {
+        return {
+          ...cproduct,
+          custom_product_location: copyText,
+          custom_product_area: copyID,
+        };
+      }
+      return cproduct;
+    });
+
+    setUpdatedOrder((prevState) => ({
+      ...prevState,
+      products: updatedProducts,
+      custom_products: updatedCustomProducts,
+    }));
   };
   
   const handleSubmitInvoice = (event) => {
@@ -3342,7 +3385,6 @@ const UpdateInvoiceForm = () => {
                             name="invoiced_raw_total_amount_incl_gst"
                             value={newInvoice.invoiced_raw_total_amount_incl_gst}
                             onChange={(e) => handleInputChange(e)}
-                            min={0}
                             step={0.01}
                             required
                             onInvalid={(e) => e.target.setCustomValidity("")}
@@ -3692,7 +3734,6 @@ const UpdateInvoiceForm = () => {
                             newInvoiceWithoutPO.invoiced_raw_total_amount_incl_gst
                           }
                           onChange={(e) => handleInputChangeNoPO(e, null)}
-                          min={0}
                           step={0.01}
                           required
                           onInvalid={(e) => e.target.setCustomValidity("")}

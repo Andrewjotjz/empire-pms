@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const PaymentsPage = () => {
   // Hooks
   const navigate = useNavigate();
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
 
   // States
   const [payments, setPayments] = useState([]);
@@ -174,7 +175,7 @@ const PaymentsPage = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-800">Payments</h1>
-            <button
+            {localUser.employee_roles === "Admin" && <button
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center transition duration-300 ease-in-out"
               onClick={() => {navigate(`/EmpirePMS/payment/create`)}}
             >
@@ -182,7 +183,7 @@ const PaymentsPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
               New Payment
-            </button>
+            </button>}
           </div>
 
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
@@ -273,35 +274,77 @@ const PaymentsPage = () => {
                   ))}
                 </tr>
               </thead>
+              
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredPayments.map((payment) => (
-                  <tr key={payment._id} className="hover:bg-gray-50 transition duration-300 ease-in-out">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 hover:text-blue-500 hover:underline hover:cursor-pointer" onClick={() => navigate(`/EmpirePMS/payment/${payment._id}`)}>{payment.payment_ref}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{supplierState.find((supplier) => supplier._id === payment.supplier)?.supplier_name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{payment.payment_type}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$ {payment.payment_raw_total_amount_incl_gst.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">$ {Math.floor(
-                        (payment.payment_raw_total_amount_incl_gst -
-                        payment.payment_term.reduce((totalSum, payment) => {
-                        return totalSum + (payment?.payment_amount_paid || 0);
-                        }, 0)) * 100
-                    ) / 100}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(payment.period_start_date).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(payment.period_end_date).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        payment.payment_status === 'In Review' ? 'bg-gray-100 text-gray-800' :
-                        payment.payment_status === 'Overpaid' ? 'bg-yellow-100 text-yellow-800' :
-                        payment.payment_status === 'Statement Checked' ? 'bg-blue-100 text-blue-800' :
-                        payment.payment_status === 'Fully Settled' ? 'bg-green-100 text-green-800' :
-                        payment.payment_status === 'Partially Settled' ? 'bg-orange-100 text-orange-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {payment.payment_status}
+                {filteredPayments.length > 0 ? (
+                  filteredPayments.map((payment) => (
+                    <tr key={payment._id} className="hover:bg-gray-50 transition duration-300 ease-in-out">
+                      <td
+                        className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 hover:text-blue-500 hover:underline hover:cursor-pointer"
+                        onClick={() => navigate(`/EmpirePMS/payment/${payment._id}`)}
+                      >
+                        {payment.payment_ref}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {supplierState.find((supplier) => supplier._id === payment.supplier)?.supplier_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{payment.payment_type}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        $ {payment.payment_raw_total_amount_incl_gst.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${" "}
+                        {Math.floor(
+                          (payment.payment_raw_total_amount_incl_gst -
+                            payment.payment_term.reduce((totalSum, payment) => {
+                              return totalSum + (payment?.payment_amount_paid || 0);
+                            }, 0)) * 100
+                        ) / 100}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(payment.period_start_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(payment.period_end_date).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            payment.payment_status === "In Review"
+                              ? "bg-gray-100 text-gray-800"
+                              : payment.payment_status === "Overpaid"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : payment.payment_status === "Statement Checked"
+                              ? "bg-blue-100 text-blue-800"
+                              : payment.payment_status === "Fully Settled"
+                              ? "bg-green-100 text-green-800"
+                              : payment.payment_status === "Partially Settled"
+                              ? "bg-orange-100 text-orange-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {payment.payment_status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="p-4 text-center text-gray-500">
+                      No Payment found matching your criteria.
+                      <span
+                        className="text-blue-500 ml-2 hover:underline hover:cursor-pointer"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setStartDate("");
+                          setEndDate("");
+                        }}
+                      >
+                        Clear filter
                       </span>
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

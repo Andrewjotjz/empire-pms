@@ -392,30 +392,75 @@ const UpdatePurchaseOrderForm = () => {
     )
   }
 
-  const handleApplyLocationToAll = (index, isCustom) => {
-    let copyText = ""
-    let copyID = ""
+  // ! Commented because we want to change copy&apply values to items below the INDEX.
+  // const handleApplyLocationToAll = (index, isCustom) => {
+  //   let copyText = ""
+  //   let copyID = ""
 
-    // Determine the source of copyText based on isCustom
+  //   // Determine the source of copyText based on isCustom
+  //   if (isCustom) {
+  //     copyText = purchaseOrderState.custom_products[index]?.custom_product_location || ""
+  //     copyID = purchaseOrderState.custom_products[index]?.custom_product_area || ""
+  //   } else {
+  //     copyText = purchaseOrderState.products[index]?.order_product_location || ""
+  //     copyID = purchaseOrderState.products[index]?.order_product_area || ""
+  //   }
+
+  //   const updatedProducts = purchaseOrderState.products.map((product) => ({
+  //     ...product,
+  //     order_product_location: copyText, // Set all product locations to the copied location String
+  //     order_product_area: copyID, // Set all product locations to the copied location ID
+  //   }))
+
+  //   const updatedCustomProducts = purchaseOrderState.custom_products.map((cproduct) => ({
+  //     ...cproduct,
+  //     custom_product_location: copyText,
+  //     custom_product_area: copyID,
+  //   }))
+
+  //   dispatch(
+  //     setPurchaseOrderState({
+  //       ...purchaseOrderState, // Preserve the existing state
+  //       products: updatedProducts,
+  //       custom_products: updatedCustomProducts,
+  //     }),
+  //   )
+  // }
+
+  const handleApplyLocationToAll = (index, isCustom) => {
+    let copyText = "";
+    let copyID = "";
+
+    // Determine the source of copyText and copyID based on isCustom
     if (isCustom) {
-      copyText = purchaseOrderState.custom_products[index]?.custom_product_location || ""
-      copyID = purchaseOrderState.custom_products[index]?.custom_product_area || ""
+      copyText = purchaseOrderState.custom_products[index]?.custom_product_location || "";
+      copyID = purchaseOrderState.custom_products[index]?.custom_product_area || "";
     } else {
-      copyText = purchaseOrderState.products[index]?.order_product_location || ""
-      copyID = purchaseOrderState.products[index]?.order_product_area || ""
+      copyText = purchaseOrderState.products[index]?.order_product_location || "";
+      copyID = purchaseOrderState.products[index]?.order_product_area || "";
     }
 
-    const updatedProducts = purchaseOrderState.products.map((product) => ({
-      ...product,
-      order_product_location: copyText, // Set all product locations to the copied location String
-      order_product_area: copyID, // Set all product locations to the copied location ID
-    }))
+    const updatedProducts = purchaseOrderState.products.map((product, i) => {
+      if (!isCustom && i > index) {
+        return {
+          ...product,
+          order_product_location: copyText,
+          order_product_area: copyID,
+        };
+      }
+      return product;
+    });
 
-    const updatedCustomProducts = purchaseOrderState.custom_products.map((cproduct) => ({
-      ...cproduct,
-      custom_product_location: copyText,
-      custom_product_area: copyID,
-    }))
+    const updatedCustomProducts = purchaseOrderState.custom_products.map((cproduct, i) => {
+      if (isCustom && i > index) {
+        return {
+          ...cproduct,
+          custom_product_location: copyText,
+          custom_product_area: copyID,
+        };
+      }
+      return cproduct;
+    });
 
     dispatch(
       setPurchaseOrderState({
@@ -424,7 +469,7 @@ const UpdatePurchaseOrderForm = () => {
         custom_products: updatedCustomProducts,
       }),
     )
-  }
+  };
 
   // NEW function for Area/Level/Subarea change
   const handleLocationChange = (locationString, productIndex, locationID, isCustom) => {
@@ -804,7 +849,11 @@ const UpdatePurchaseOrderForm = () => {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && productState && filterProductsBySearchTerm().length > 0) {
                         e.preventDefault()
-                        handleAddItem(filterProductsBySearchTerm()[0])
+                        handleAddItem(filterProductsBySearchTerm()
+                        .filter((product) => product.productPrice.projects.includes(selectedProject))
+                        .filter((product) => purchaseOrderState.order_date >= product.productPrice.product_effective_date)
+                        .filter((product, index, self) => index === self.findIndex((p) => p.product._id === product.product._id))
+                        [0])
                       }
                     }}
                   />
@@ -935,7 +984,7 @@ const UpdatePurchaseOrderForm = () => {
                             <button
                               type="button"
                               className="ml-1 p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
-                              title="Apply location to all items"
+                              title="Apply location to all items below"
                               onClick={() => handleApplyLocationToAll(index, false)}
                             >
                               <Copy size={14} />
@@ -1032,7 +1081,7 @@ const UpdatePurchaseOrderForm = () => {
                           <button
                             type="button"
                             className="ml-1 p-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
-                            title="Apply location to all items"
+                            title="Apply location to all items below"
                             onClick={() => handleApplyLocationToAll(index, true)}
                           >
                             <Copy size={14} />

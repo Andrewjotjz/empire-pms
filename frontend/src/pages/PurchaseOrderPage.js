@@ -31,8 +31,6 @@ const PurchaseOrder2 = () => {
 
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    console.log("purchaseOrderState", purchaseOrderState)
-
     const formatDate = (dateString) => {
         if (dateString === null) {
             return ''
@@ -332,19 +330,20 @@ const PurchaseOrder2 = () => {
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="bg-gray-100 min-h-screen">
-            <div className="container mx-auto px-4 py-8">
+            {/* <div className="container mx-auto px-4 py-8"> */}
+            <div className="px-4 py-8">
                 <div className="bg-white rounded-lg shadow-md p-6">
                     {/* Header and New Order */}
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-3xl font-bold text-gray-800">Purchase Orders</h1>
-                        <button
+                        {localUser.employee_roles === "Admin" && <button
                             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center transition duration-300 ease-in-out"
                             onClick={() => navigate(`/EmpirePMS/order/create`)}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mr-2 size-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
                             New Order
-                        </button>
+                        </button>}
                     </div>
                 
                     {/* Search and Date Filter */}
@@ -575,7 +574,7 @@ const PurchaseOrder2 = () => {
                                             disabled={order.order_isarchived}
                                         />
                                     </td>
-                                    <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/order/${order._id}`)}>{order.order_ref}</td>
+                                    <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => window.open(`/EmpirePMS/order/${order._id}`, '_blank')}>{order.order_ref}</td>
                                     <td className="p-3 text-gray-600">{formatDate(order.order_date)}</td>
                                     <td className="p-3 text-gray-600">{formatDateTime(order.order_est_datetime)}</td>
                                     <td className="p-3 text-gray-600">{order.project.project_name}</td>

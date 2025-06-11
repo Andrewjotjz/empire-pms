@@ -382,7 +382,8 @@ const InvoicePage2 = () => {
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="bg-gray-100 min-h-screen">
-            <div className="container mx-auto px-4 py-8">
+            {/* <div className="container mx-auto px-4 py-8"> */}
+            <div className="px-4 py-8">
                 <div className="bg-white rounded-lg shadow-md p-6">
                     {/* Header and New Invoice */}
                     <div className="flex justify-between items-center mb-6">
@@ -680,7 +681,8 @@ const InvoicePage2 = () => {
                             {paginatedData.map((invoice) => (
                             <React.Fragment key={invoice._id}>
                                 <tr className="border-t border-gray-200 hover:bg-gray-50 transition-colors duration-150">
-                                    <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/invoice/${invoice._id}`)}>{invoice.invoice_ref}</td>
+                                    {/* <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/invoice/${invoice._id}`)}>{invoice.invoice_ref}</td> */}
+                                    <td className="p-3 text-blue-600 font-medium hover:cursor-pointer hover:underline" onClick={() => window.open(`/EmpirePMS/invoice/${invoice._id}`, '_blank')}>{invoice.invoice_ref}</td>
                                     <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/supplier/${invoice.supplier._id}`)}>{invoice.supplier.supplier_name}</td>
                                     <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/project/${invoice.order.project}`)}>{projectState.find(project => project._id === invoice.order.project)?.project_name || 'Not found'}</td>
                                     <td className="p-3 text-black font-medium hover:cursor-pointer hover:underline" onClick={() => navigate(`/EmpirePMS/order/${invoice.order._id}`)}>{invoice.order.order_ref}</td>

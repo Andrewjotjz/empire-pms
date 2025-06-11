@@ -15,11 +15,23 @@ const aliasSchema = new Schema({
 }, { timestamps: true })
 
 
-//Export the model
+// Export the model
 // const Alias = mongoose.model('Alias', aliasSchema);
 
-//Check if the model already exists before creating it
-// const Alias = mongoose.models.Alias || mongoose.model('Alias', aliasSchema);
-// module.exports = Alias;
+// Check if the model already exists before creating it
+const Alias = mongoose.models.Alias || mongoose.model('Alias', aliasSchema);
+module.exports = Alias;
 
-module.exports = (connection) => connection.model('Alias', aliasSchema);
+// module.exports = (connection) => connection.model('Alias', aliasSchema);
+
+// module.exports = (connection) => {
+//   // Register on custom connection (for writes or multi-tenant logic)
+//   connection.model('Alias', aliasSchema);
+
+//   // Also register on default connection (for .populate() to work properly)
+//   if (mongoose.connection.models['Alias'] === undefined) {
+//     mongoose.model('Alias', aliasSchema);
+//   }
+
+//   return connection.model('Alias');
+// };
