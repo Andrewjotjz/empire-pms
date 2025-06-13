@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
  
 
 export const useAddProductPrice = () => {
+    //Component's hook router
+    const navigate = useNavigate();
+
     // Component's hook state declaration
     const [isAddPriceLoadingState, setAddPriceIsLoadingState] = useState(false);
     const [addPriceErrorState, setAddPriceErrorState] = useState(null);
@@ -32,6 +36,9 @@ export const useAddProductPrice = () => {
                     throw new Error('Failed to create new product price.');
                 }
                 if (res.ok) {
+                    // navigate back to product price details
+                    navigate(-1);
+
                     alert(`New product price created successfully!`);
 
                     // update loading state

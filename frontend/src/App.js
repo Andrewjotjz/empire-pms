@@ -50,6 +50,7 @@ import NewPaymentForm from "./pages/forms/NewPaymentForm";
 import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 import Calculator from "./components/Calculator";
 import BudgetVsActual from "./pages/BudgetVsActual";
+import UpdatePriceForm from "./pages/forms/UpdatePriceForm";
 
 function App() {
 
@@ -93,6 +94,7 @@ function App() {
             <Route path="/EmpirePMS/supplier/:id/products/:productId" element={<ProductDetails />} />
             <Route path="/EmpirePMS/supplier/:id/products/create" element={<NewProductForm />} />
             <Route path="/EmpirePMS/supplier/:id/products/:productId/edit" element={<UpdateProductForm />} />
+            <Route path="/EmpirePMS/supplier/:id/products/:productId/productprice/:priceId/edit" element={<UpdatePriceForm />} />
             
             <Route path="/EmpirePMS/employee" element={<EmployeePage />} />
             <Route path="/EmpirePMS/employee/:id" element={<EmployeeDetails />} />

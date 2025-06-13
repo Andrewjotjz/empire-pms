@@ -4,7 +4,8 @@ const Breadcrumbs = () => {
 
     const location = useLocation();
     const id = location.pathname.split('/')[3];
-    const product_id = location.pathname.split('/')[5];
+    const productId = location.pathname.split('/')[5];
+    const priceId = location.pathname.split('/')[7];
 
     return ( 
         !location.pathname.includes(`/EmpirePMS/login`) ? (
@@ -313,33 +314,48 @@ const Breadcrumbs = () => {
                 )}
 
 
-                {location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}`) && product_id !== 'create' && (
+                {location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${productId}`) && productId !== 'create' && (
                 <>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
                     </svg>
 
                     <Link
-                    to={`/EmpirePMS/supplier/${id}/products/${product_id}`}
-                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}`) && "text-blue-500"}`}>
+                    to={`/EmpirePMS/supplier/${id}/products/${productId}`}
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${productId}`) && "text-blue-500"}`}>
                     Product Details
                     </Link>
                 </>
                 )}
 
-                {location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}/edit`) && (
+                {location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${productId}/edit`) && (
                 <>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
                     </svg>
 
                     <Link
-                    to={`/EmpirePMS/supplier/${id}/products/${product_id}/edit`}
-                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${product_id}/edit`) && "text-blue-500"}`}>
+                    to={`/EmpirePMS/supplier/${id}/products/${productId}/edit`}
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${productId}/edit`) && "text-blue-500"}`}>
                     Edit Product
                     </Link>
                 </>
                 )}
+
+                {location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${productId}/productprice/${priceId}/edit`) && (
+                <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                    </svg>
+
+                    <Link
+                    to={`/EmpirePMS/supplier/${id}/products/${productId}/productprice/${priceId}/edit`}
+                    className={`cursor-pointer text-base hover:bg-blue-100 p-1 rounded-md ${location.pathname.includes(`/EmpirePMS/supplier/${id}/products/${productId}/productprice/${priceId}/edit`) && "text-blue-500"}`}>
+                    Edit Price
+                    </Link>
+                </>
+                )}
+                
 
                 {location.pathname.includes(`/EmpirePMS/supplier/${id}/products/create`) && (
                 <>

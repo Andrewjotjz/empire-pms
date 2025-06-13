@@ -54,11 +54,13 @@ const UpdateProductForm = () => {
     product_price_unit_b: 0,
     product_price_note: "",
     price_fixed: false,
+    product_actual_rate: 0,
     product_effective_date: "",
     projects: [],
   })
   const [productTypeState, setProductTypeState] = useState([])
 
+  console.log("productState", productState)
   // Component functions and variables
   const localUser = JSON.parse(localStorage.getItem("localUser"))
 
@@ -75,6 +77,7 @@ const UpdateProductForm = () => {
       product_number_b: 0,
       product_price_unit_b: 0,
       price_fixed: false,
+      product_actual_rate: 0,
       product_effective_date: "",
       projects: [],
     })
@@ -370,7 +373,7 @@ const UpdateProductForm = () => {
     <div className="max-w-fit mx-auto px-4 py-6">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-gray-800 text-white p-4 flex items-center">
+        <div className="bg-gray-800 text-white p-2 flex items-center">
           <button onClick={handleBackClick} className="mr-4 p-1 rounded hover:bg-gray-700 transition-colors">
             <ChevronLeft className="h-6 w-6" />
           </button>
