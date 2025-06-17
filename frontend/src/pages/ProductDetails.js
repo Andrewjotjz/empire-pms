@@ -10,8 +10,8 @@ import { ChevronDown, Edit, Calendar, DollarSign, Package, Tag } from "lucide-re
 
 const ProductDetails = () => {
   // Component state declaration - converted from Redux to useState
+  const [fetchedOrders, setFetchedOrders] = useState([])
   const [productState, setProductState] = useState([])
-  const [productPriceState, setProductPriceState] = useState(null)
   const [isLoadingState, setIsLoadingState] = useState(true)
   const [errorState, setErrorState] = useState(null)
   const [productTypeState, setProductTypeState] = useState([])
@@ -57,7 +57,7 @@ const ProductDetails = () => {
       localStorage.setItem("editProductPriceState", JSON.stringify(modifiedProductPriceState))
     }
 
-    navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: productId })
+    navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/edit`, { state: fetchedOrders })
   }
 
   const handleEditPrice = (priceId) => {
@@ -73,7 +73,7 @@ const ProductDetails = () => {
     // Store in localStorage instead of Redux
     localStorage.setItem("editProductPriceState", JSON.stringify(modifiedProductPriceState))
 
-    navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/productprice/${priceId}/edit`, { state: productId})
+    navigate(`/EmpirePMS/supplier/${supplierId}/products/${productId}/productprice/${priceId}/edit`, { state: fetchedOrders})
   }
 
   const formatDate = (dateString) => {
@@ -161,6 +161,37 @@ const ProductDetails = () => {
       abortController.abort() // Cleanup
     }
   }, [])
+
+  // Fetch Order details
+  useEffect(() => {
+      setIsLoadingState(true);
+      const fetchPurchaseOrderDetails = async () => {
+          try {
+              const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, { credentials: 'include',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${sessionStorage.getItem('jwt')}` // Include token in Authorization header
+                  }});
+              if (!res.ok) {
+                  throw new Error('Failed to fetch purchase orders');
+              }
+              const data = await res.json();
+
+              if (data.tokenError) {
+                  throw new Error(data.tokenError);
+              }
+
+              setFetchedOrders(data);
+
+              setIsLoadingState(false);
+          } catch (err) {
+              setErrorState(err.message);
+              setIsLoadingState(false);
+          }
+      };
+
+      fetchPurchaseOrderDetails();
+  }, []);
 
   //Display DOM
   const productPriceTable =

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { ChevronLeft, DollarSign, HelpCircle, ChevronDown, Check, Edit2, Plus, X, RotateCcw } from "lucide-react"
 
 import { useAddProductPrice } from "../../hooks/useAddProductPrice"
@@ -15,7 +15,9 @@ import SessionExpired from "../../components/SessionExpired"
 const UpdatePriceForm = () => {
   // Component router
   const navigate = useNavigate()
-  const { priceId, productId } = useParams()
+  const { priceId, id: supplierId, productId } = useParams()
+  const location = useLocation();
+  const supplierOrders = location.state;
 
   // Component hooks - converted from Redux to local state management
   const { fetchAliasesByProductType, productTypeIsLoadingState, productTypeErrorState } = useFetchAliasesByProductType()
@@ -326,6 +328,7 @@ const UpdatePriceForm = () => {
     }
     return <div>Error: {errorState}</div>
   }
+  
 
   return localUser && Object.keys(localUser).length > 0 ? (
     <div className="max-w-fit mx-auto px-4 py-6">
@@ -560,7 +563,8 @@ const UpdatePriceForm = () => {
                           <ul className="py-1">
                             {projectState &&
                               projectState.length > 0 &&
-                              projectState.map((project, index) => (
+                              projectState.filter(proj => proj.suppliers.some(sup => sup._id === supplierId))
+                              .map((project, index) => (
                                 <li key={index} className="relative">
                                   <label className="flex items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                     <input
@@ -579,6 +583,7 @@ const UpdatePriceForm = () => {
                                         )
                                       }
                                       onInput={(e) => e.target.setCustomValidity("")}
+                                      disabled={supplierOrders.some(order => order.project._id === project._id) && supplierOrders.some(order => order.supplier._id === supplierId)}
                                     />
                                     <span className="text-gray-800">{project.project_name}</span>
                                     {productPriceState.projects && productPriceState.projects.includes(project._id) && (
@@ -825,7 +830,7 @@ const UpdatePriceForm = () => {
                             <ul className="py-1">
                               {projectState &&
                                 projectState.length > 0 &&
-                                projectState.map((project, index) => (
+                                projectState.filter(proj => proj.suppliers.some(sup => sup._id === supplierId)).map((project, index) => (
                                   <li key={index} className="relative">
                                     <label className="flex items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                       <input

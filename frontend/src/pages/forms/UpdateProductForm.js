@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import { ChevronLeft, DollarSign, HelpCircle, ChevronDown, Check, Edit2, Plus, X, RotateCcw } from 'lucide-react'
 
@@ -20,6 +20,8 @@ const UpdateProductForm = () => {
   // Component router
   const navigate = useNavigate()
   const { id, productId } = useParams()
+  const location = useLocation();
+  const supplierOrders = location.state;
 
   // Component hook
   const dispatch = useDispatch()
@@ -60,7 +62,6 @@ const UpdateProductForm = () => {
   })
   const [productTypeState, setProductTypeState] = useState([])
 
-  console.log("productState", productState)
   // Component functions and variables
   const localUser = JSON.parse(localStorage.getItem("localUser"))
 
@@ -730,7 +731,7 @@ const UpdateProductForm = () => {
                           <ul className="py-1">
                             {projectState &&
                               projectState.length > 0 &&
-                              projectState.map((project, index) => (
+                              projectState.filter(proj => proj.suppliers.some(sup => sup._id === id)).map((project, index) => (
                                 <li key={index} className="relative">
                                   <label className="flex items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                     <input
@@ -749,6 +750,7 @@ const UpdateProductForm = () => {
                                         )
                                       }
                                       onInput={(e) => e.target.setCustomValidity("")}
+                                      disabled={supplierOrders.some(order => order.project._id === project._id) && supplierOrders.some(order => order.supplier._id === id)}
                                     />
                                     <span className="text-gray-800">{project.project_name}</span>
                                     {productPriceState.projects && productPriceState.projects.includes(project._id) && (
@@ -995,7 +997,7 @@ const UpdateProductForm = () => {
                             <ul className="py-1">
                               {projectState &&
                                 projectState.length > 0 &&
-                                projectState.map((project, index) => (
+                                projectState.filter(proj => proj.suppliers.some(sup => sup._id === id)).map((project, index) => (
                                   <li key={index} className="relative">
                                     <label className="flex items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                       <input

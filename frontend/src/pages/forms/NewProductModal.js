@@ -490,7 +490,7 @@ const NewProductModal = ({supplierId, handleToggleCreateProductModal, setNewProd
                                     {isDropdownOpen && (
                                         <div className="relative z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-60 overflow-auto" onMouseLeave={() => setIsDropdownOpen(false)}>
                                             <ul className="py-1">
-                                                {projectState && projectState.length > 0 && projectState.map((project, index) => (
+                                                {projectState && projectState.length > 0 && projectState.filter(proj => proj.suppliers.some(sup => sup._id === productDetailsState.supplier)).map((project, index) => (
                                                     <li key={index} className="flex items-center px-4 py-2 hover:bg-gray-100">
                                                         <input
                                                             type="checkbox"

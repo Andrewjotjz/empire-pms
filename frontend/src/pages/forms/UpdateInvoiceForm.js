@@ -2571,7 +2571,7 @@ const UpdateInvoiceForm = () => {
                             <ul className="py-1">
                               {projectState &&
                                 projectState.length > 0 &&
-                                projectState.map((project, index) => (
+                                projectState.filter(proj => proj.suppliers.some(sup => sup._id === updatedOrder.supplier._id)).map((project, index) => (
                                   <li
                                     key={index}
                                     className="flex items-center px-4 py-2 hover:bg-gray-100"

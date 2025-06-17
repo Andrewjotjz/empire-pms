@@ -27,6 +27,7 @@ const SupplierDetails = () => {
   const [currentTab, setCurrentTab] = useState("supplierDetails")
   const [searchTerm, setSearchTerm] = useState("")
   const [productTypeState, setProductTypeState] = useState([])
+  const [projectsThatHasPurchaseOrder, setProjectsThatHasPurchaseOrder] = useState([])
 
   const [selectedProjects, setSelectedProjects] = useState(new Set()) // set select projects to add
   const [projectsToRemove, setProjectsToRemove] = useState(new Set()) // set select projects to remove
@@ -352,6 +353,7 @@ const SupplierDetails = () => {
     }
   }, [id])
 
+  useEffect(() => {
   const fetchOrdersBySupplier = async () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, {
@@ -370,15 +372,19 @@ const SupplierDetails = () => {
         throw new Error(data.tokenError)
       }
 
-      const filteredOrders = data.filter((order) => order.supplier._id === supplierState._id)
+      const filteredOrders = data.filter((order) => order.supplier._id === supplierState?._id)
 
       setPurchaseOrderState(filteredOrders) // Direct state update instead of dispatch
+      setProjectsThatHasPurchaseOrder(filteredOrders.map(order => order.project._id)) // Get a list of projects that has PO
       setIsLoadingState(false)
     } catch (err) {
       setErrorState(err.message)
       setIsLoadingState(false)
     }
   }
+
+  fetchOrdersBySupplier()
+  }, [supplierState])
 
   useEffect(() => {
     fetchSupplierDetails()
@@ -656,8 +662,8 @@ const SupplierDetails = () => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 sm:p-6 md:p-8 text-xs sm:text-base">
       <div className="bg-white p-2 sm:p-5 rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-3xl">
         <h4 className="font-bold mb-1 sm:mb-4 text-center sm:text-left text-sm sm:text-lg md:text-xl sm:border-b-2">
-          SELECT PROJECT TO <span className="text-red-500">REMOVE</span> FROM THE{" "}
-          {supplierState?.supplier_name?.toUpperCase()} SUPPLIER
+          Select project to <span className="text-red-500">remove</span> from {" "}
+          {supplierState?.supplier_name?.toUpperCase()}
         </h4>
 
         {supplierState?.projects && supplierState.projects.length > 0 ? (
@@ -671,6 +677,7 @@ const SupplierDetails = () => {
                   className="form-checkbox h-3 w-3 sm:h-5 sm:w-5 text-blue-600"
                   type="checkbox"
                   onChange={() => handleProjectCheckbox(project._id, false)}
+                  disabled={projectsThatHasPurchaseOrder.includes(project._id)}
                 />
                 <label className="flex-1 text-gray-800">
                   <span className="ml-2 font-semibold">{project.project_name}</span>
@@ -1147,7 +1154,6 @@ const SupplierDetails = () => {
               className={`${currentTab === "supplierPurchaseOrdersTable" ? "border-x-2 border-t-2 p-1 sm:p-2 rounded bg-gray-700 text-white text-xs sm:text-base" : "border-x-2 border-t-2 p-1 sm:p-2 rounded bg-transparent text-black hover:scale-90 transition ease-out duration-50 text-xs sm:text-base"}`}
               onClick={() => {
                 setCurrentTab("supplierPurchaseOrdersTable")
-                fetchOrdersBySupplier()
               }}
             >
               Purchase Orders
