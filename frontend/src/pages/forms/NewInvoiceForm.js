@@ -1018,9 +1018,11 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
           return;
       }
 
-      // All fields are valid, proceed
+      // All fields are valid, proceed with creating new price
       addPrice(newProductPrice);
+      // Fetch the details of the product that the new price is created, so that price version modal has the newly created price.
       fetchProductDetails(updatedOrder.supplier._id, newProductPrice.product_obj_ref);
+      // Fetch all the products of this supplier
       fetchProductsBySupplier(updatedOrder.supplier._id);
       setShowUpdateConfirmationModal(true);
   };
@@ -1207,6 +1209,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
       products: updatedProducts,
     });
   };
+  
   const handleRemoveItem = (index) => {
     const updatedItems = updatedOrder.products.filter(
       (_, idx) => idx !== index
@@ -1225,6 +1228,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
       });
     }
   };
+
   const handleRemoveCustomItem = (index, noPO = false) => {
     if (noPO) {
       const updatedCustomItems = newInvoiceWithoutPO.custom_products.filter(
@@ -1312,7 +1316,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
   };
   const handleAutomation = (updatedProductId) => {
     // Step 1: Remove the item from the products list by filtering out the one with the matching product_obj_ref._id
-    const updatedItems = updatedOrder.products.map((item) => {
+    const updatedItems = updatedOrder.products.map((item) => { //! get all other items
       if (item.product_obj_ref._id === updatedProductId) {
         return null; // Mark items to be replaced
       }
@@ -1320,12 +1324,12 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
     });
   
     // Step 2: Find all occurrences of the product in the order
-    const getItem = updatedOrder.products.filter(
+    const getItem = updatedOrder.products.filter( //! get the updated product
       (item) => item.product_obj_ref._id === updatedProductId
     );
   
     // Step 3: Find the product that needs to be re-added (optimized filtering)
-    const product = filterProductsBySearchTerm().find(
+    const product = filterProductsBySearchTerm().find( //! Table search bar will show updated product
       (product) => product.product._id === updatedProductId
     );
   
@@ -1789,9 +1793,6 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
       )}
     </div>
   );
-
-  // console.log("filterProductsBySearchTerm", filterProductsBySearchTerm())
-  // console.log("updatedOrder", updatedOrder)
 
   const productPriceModal = (
     <div>
@@ -2735,7 +2736,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
                             <ul className="py-1">
                               {projectState &&
                                 projectState.length > 0 &&
-                                projectState.map((project, index) => (
+                                projectState.filter(proj => proj.suppliers.some(sup => sup._id === newInvoice.supplier)).map((project, index) => (
                                   <li
                                     key={index}
                                     className="flex items-center px-4 py-2 hover:bg-gray-100"

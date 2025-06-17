@@ -26,8 +26,7 @@ const Project_Details = () => {
     const projectState = useSelector((state) => state.projectReducer.projectState);
     const employeeState = useSelector((state) => state.employeeReducer.employeeState); 
     const supplierState = useSelector((state) => state.supplierReducer.supplierState); 
-
-
+    
     // const numberOfEmployeeColumns = Math.ceil(employeeState?.length / 10)
     // const numberOfSupplierColumns = Math.ceil(supplierState?.length / 10)
 
@@ -39,6 +38,9 @@ const Project_Details = () => {
     const [isSelectSupplierListVisible, setSelectSupplierListVisible] = useState(false);
     const [isAddEmployeeListVisible, setAddEmployeeListVisible] = useState(false);
     const [isRemoveEmployeeListVisible, setRemoveEmployeeListVisible] = useState(false);
+
+    const [purchaseOrderState, setPurchaseOrderState] = useState([])
+    const [supplierThatHasPurchaseOrder, setSupplierThatHasPurchaseOrder] = useState([])
 
     const [isLoadingState, setIsLoadingState] = useState(true);
     const [errorState, setErrorState] = useState(null);
@@ -178,6 +180,39 @@ const Project_Details = () => {
         };
         fetchAllSuppliers();
     }, [id, dispatch]);
+
+    useEffect(() => {
+        const fetchOrdersByProject = async () => {
+            try {
+            const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/order`, {
+                credentials: "include",
+                headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${sessionStorage.getItem("jwt")}`,
+                },
+            })
+            if (!res.ok) {
+                throw new Error("Failed to fetch orders")
+            }
+            const data = await res.json()
+
+            if (data.tokenError) {
+                throw new Error(data.tokenError)
+            }
+
+            const filteredOrders = data.filter((order) => order.project._id === projectState?._id)
+
+            setPurchaseOrderState(filteredOrders) // Direct state update instead of dispatch
+            setSupplierThatHasPurchaseOrder(filteredOrders.map(order => order.supplier._id)) // Get a list of suppliers that has PO
+            setIsLoadingState(false)
+            } catch (err) {
+            setErrorState(err.message)
+            setIsLoadingState(false)
+            }
+        }
+
+        fetchOrdersByProject()
+    }, [supplierState])
 
     const handleArchive = async () => {
 
@@ -807,6 +842,7 @@ const Project_Details = () => {
                                 type="checkbox"
                                 checked={selectedSuppliers.has(supplier._id)}
                                 onChange={() => handleSupplierCheckbox(supplier._id)}
+                                disabled={supplierThatHasPurchaseOrder.includes(supplier._id)}
                             />
                             <label className="flex-1 text-gray-800">
                                 <span className="font-semibold">{supplier.supplier_name}</span>

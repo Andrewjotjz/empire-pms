@@ -3,6 +3,7 @@ const projectModel = require('../models/ProjectModel');
 const productModel = require('../models/ProductModel');
 const productPriceModel = require('../models/ProductPriceModel');
 const employeeModel = require('../models/EmployeeModel');
+const orderModel = require('../models/OrderModel');
 
 const mongoose = require('mongoose');
 
@@ -228,11 +229,28 @@ const updateSingleProject = async (req, res) => {
         // Step 4: Find all products that belong to the new suppliers
         const products = await productModel.find({ supplier: { $in: newSuppliers } }).select('_id');
 
-        // Step 5: Remove this project ID from all ProductPrice entries (reset)
-        await productPriceModel.updateMany(
-            { projects: id },
-            { $pull: { projects: id } }
-        );
+        //! THIS STEP IS NO LONGER REQUIRED - Step 5: Remove this project ID from all ProductPrice entries (reset)
+        // await productPriceModel.updateMany(
+        //     { projects: id },
+        //     { $pull: { projects: id } }
+        // );
+
+        // Step 5: Remove project from ProductPrice only if it's not used in any order
+        const allProjectProductPrices = await productPriceModel.find({ projects: id });
+
+        await Promise.all(allProjectProductPrices.map(async (productPrice) => {
+            const hasMatchingOrder = await orderModel.exists({
+                project: id,
+                "products.product_obj_ref": productPrice.product_obj_ref,
+                "products.productprice_obj_ref": productPrice._id
+            });
+
+            if (!hasMatchingOrder) {
+                await productPriceModel.findByIdAndUpdate(productPrice._id, {
+                    $pull: { projects: id }
+                });
+            }
+        }));
 
         // Step 6: Find the most recent product price for each product
         const latestProductPrices = await productPriceModel.aggregate([

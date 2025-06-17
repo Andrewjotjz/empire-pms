@@ -6,13 +6,35 @@ const mongoose = require('mongoose');
 
 
 //Controller function - GET all Product Prices
+//! Commented this because it doesn't filter project that has been archived.
+// const getAllProductPrices = async (req, res) => {
+//     //'req' object not in used
+//     //create a new model called ProductPrices, await, and assign it with all ProductPrices documents in the ProductPrices collection, sort created date in descending order
+//     const ProductPrices = await productPriceModel.find({}).sort({createdAt: -1})
+//     //invoke 'res' object method: status() and json(), pass relevant data to them
+//     res.status(200).json(ProductPrices);
+// }
 const getAllProductPrices = async (req, res) => {
-    //'req' object not in used
-    //create a new model called ProductPrices, await, and assign it with all ProductPrices documents in the ProductPrices collection, sort created date in descending order
-    const ProductPrices = await productPriceModel.find({}).sort({createdAt: -1})
-    //invoke 'res' object method: status() and json(), pass relevant data to them
-    res.status(200).json(ProductPrices);
-}
+  try {
+    // Step 1: Populate the referenced projects
+    const allProductPrices = await productPriceModel
+      .find({})
+      .populate({
+        path: 'projects',
+        match: { project_isarchived: false } // only populate non-archived projects
+      })
+      .sort({ createdAt: -1 });
+
+    // Step 2 (optional): remove productPrices with no valid projects
+    // const filteredProductPrices = allProductPrices.filter(
+    //   (price) => price.projects.length > 0
+    // );
+
+    res.status(200).json(allProductPrices);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 //Controller function - GET single Product Price
 const getSingleProductPrice = async (req, res) => {

@@ -519,7 +519,7 @@ const NewProductForm = () => {
                         <ul className="py-1">
                           {projectState &&
                             projectState.length > 0 &&
-                            projectState.map((project, index) => (
+                            projectState.filter(proj => proj.suppliers.some(sup => sup._id === productDetailsState.supplier)).map((project, index) => (
                               <li key={index} className="relative">
                                 <label className="flex items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                   <input
