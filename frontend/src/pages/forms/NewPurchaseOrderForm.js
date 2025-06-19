@@ -518,6 +518,14 @@ const NewPurchaseOrderForm = () => {
     });
 
     const updatedCustomProducts = orderState.custom_products.map((cproduct, i) => {
+      if (!isCustom) {
+        return {
+          ...cproduct,
+          custom_product_location: copyText,
+          custom_product_area: copyID,
+        };
+      }
+        
       if (isCustom && i > index) {
         return {
           ...cproduct,
@@ -934,7 +942,7 @@ const NewPurchaseOrderForm = () => {
 
             {/* Estimated Delivery Date/Time */}
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-gray-700">Estimated Delivery Date/Time</label>
+              <label className="block text-xs font-medium text-gray-700">Estimated Delivery Date/Time <span className="text-gray-400 italic">(dd/mm/yyyy)</span></label>
               <input
                 type="datetime-local"
                 className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
@@ -1075,7 +1083,7 @@ const NewPurchaseOrderForm = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {/* Regular Products */}
-                  {orderState.products.map((prod, index) => (
+                  {orderState?.products.map((prod, index) => (
                     <tr key={index} className="hover:bg-gray-50 text-sm">
                       <td className="px-2 py-1.5">
                         <div className="text-sm font-medium">{addedProductState[index].product.product_name}</div>
@@ -1137,12 +1145,12 @@ const NewPurchaseOrderForm = () => {
                         </div>
                       </td>
                       <td className="px-2 py-1.5 text-left text-sm">
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                           Math.floor(prod.order_product_price_unit_a * 100) / 100,
                         )}
                       </td>
                       <td className="px-2 py-1.5 text-right text-sm font-medium">
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                           Math.floor(
                             (addedProductState[index].productPrice.product_number_a === 1
                               ? prod.order_product_qty_a *
@@ -1260,7 +1268,7 @@ const NewPurchaseOrderForm = () => {
                       Total Net Amount:
                     </td>
                     <td className="px-2 py-2 text-right text-sm font-medium">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(
                           (orderState.products?.reduce(
                             (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
@@ -1276,7 +1284,7 @@ const NewPurchaseOrderForm = () => {
                       Total Net Amount (incl. GST):
                     </td>
                     <td className="px-2 py-2 text-right text-sm font-bold">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(
                           (orderState.products?.reduce(
                             (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
@@ -2418,7 +2426,7 @@ export default NewPurchaseOrderForm
 //                                             </div>
 //                                             <div
 //                                                 className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-//                                                 title='Paste location to all'
+//                                                 title='Apply location to all items below'
 //                                                 onClick={() => handleApplyLocationToAll(index, false)}
 //                                             >
 //                                                 <svg
@@ -2472,11 +2480,11 @@ export default NewPurchaseOrderForm
 //                                             </div>
 //                                         </td>
 //                                         <td className='hidden lg:table-cell'>
-//                                             <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</label>
+//                                             <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</label>
 //                                         </td>
 //                                         <td className='hidden lg:table-cell'>
 //                                             <label>
-//                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+//                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
 //                                                 addedProductState[index].productPrice.product_number_a === 1 
 //                                                 ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
 //                                                 : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
@@ -2521,7 +2529,7 @@ export default NewPurchaseOrderForm
 //                                         </div>
 //                                         <div
 //                                             className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-//                                             title='Paste location to all'
+//                                             title='Apply location to all items below'
 //                                             onClick={() => handleApplyLocationToAll(index, true)}
 //                                         >
 //                                             <svg
@@ -2596,7 +2604,7 @@ export default NewPurchaseOrderForm
 //                                         <tr>
 //                                             <td className="pt-1">Total Net Amount:</td>
 //                                             <td className="pt-1">
-//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
 //                                                 Math.floor(
 //                                                     (orderState.products?.reduce((total, prod) => total + (Number(prod.order_product_gross_amount) || 0), 0) || 0) * 100
 //                                                 ) / 100
@@ -2606,7 +2614,7 @@ export default NewPurchaseOrderForm
 //                                         <tr>
 //                                             <td className='pt-1'>Total Net Amount (incl. GST):</td>
 //                                             <td className="pt-1">
-//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
 //                                                     Math.floor(
 //                                                     ((orderState.products?.reduce((total, prod) => 
 //                                                         total + (Number(prod.order_product_gross_amount) || 0), 0) * 1.1) || 0) * 100

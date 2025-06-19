@@ -647,7 +647,7 @@ const NewPaymentForm = () => {
                                     {invoice.order.order_status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 border-l-2 border-slate-50">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_raw_total_amount_incl_gst * 100) / 100)}</td>                 
+                                <td className="px-6 py-4 border-l-2 border-slate-50">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoice.invoiced_raw_total_amount_incl_gst * 100) / 100)}</td>                 
                                 <td className="px-6 py-4">
                                     <button
                                         type="button"
@@ -670,7 +670,7 @@ const NewPaymentForm = () => {
                                 <td colSpan={6} className="px-6 py-3"></td>
                                 <td className="px-6 py-3 font-bold text-right">Total Amount:</td>
                                 <td className="px-6 py-3 font-bold">
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((targetInvoices.reduce((totalSum, invoice) => {
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((targetInvoices.reduce((totalSum, invoice) => {
                                         return totalSum + invoice?.invoiced_raw_total_amount_incl_gst
                                     }, 0)) * 100) / 100)}
                                 </td>                                
@@ -680,7 +680,7 @@ const NewPaymentForm = () => {
                                 <td colSpan={6} className="px-6 py-3"></td>
                                 <td className="px-6 py-3 font-bold text-right">Total Due:</td>
                                 <td className={`px-6 py-3 font-bold ${totalBalance === 0 ? 'text-black' : 'text-red-500'}`}>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalBalance)}
+                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(totalBalance)}
                                     {totalBalance === 0 && 
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={`size-5 text-green-500 inline-block ml-2`}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
@@ -719,7 +719,7 @@ const NewPaymentForm = () => {
                                         <div className="flex items-center space-x-12" hidden={selectedInvoice._id === ""}>
                                             <span className="text-sm text-white">{formatDate(selectedInvoice?.invoice_issue_date)}</span>
                                             <span className="text-sm text-white">{selectedInvoice?.invoice_status}</span>
-                                            <span className="text-sm text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(selectedInvoice?.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>                                        
+                                            <span className="text-sm text-white">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(selectedInvoice?.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>                                        
                                         </div>
                                         <button
                                             hidden={selectedInvoice._id === ""}

@@ -253,7 +253,7 @@ const ProductDetails = () => {
                           </span>
                         </div>
                         <div className="text-md font-bold text-green-600">
-                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                             Math.floor(item.productPrice.product_price_unit_a * 100) / 100,
                           )}
                         </div>
@@ -268,7 +268,7 @@ const ProductDetails = () => {
                           </span>
                         </div>
                         <div className="text-md font-bold text-green-600">
-                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                          {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                             Math.floor(item.productPrice.product_price_unit_b * 100) / 100,
                           )}
                         </div>
@@ -691,7 +691,7 @@ export default ProductDetails
 //                           </span>
 //                         </div>
 //                         <div className="text-md font-bold text-green-600">
-//                           {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+//                           {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
 //                             Math.floor(item.productPrice.product_price_unit_a * 100) / 100,
 //                           )}
 //                         </div>
@@ -706,7 +706,7 @@ export default ProductDetails
 //                           </span>
 //                         </div>
 //                         <div className="text-md font-bold text-green-600">
-//                           {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+//                           {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
 //                             Math.floor(item.productPrice.product_price_unit_b * 100) / 100,
 //                           )}
 //                         </div>

@@ -1066,6 +1066,13 @@ const UpdateInvoiceForm = () => {
     });
 
     const updatedCustomProducts = updatedOrder.custom_products.map((cproduct, i) => {
+      if (!isCustom) {
+        return {
+          ...cproduct,
+          custom_product_location: copyText,
+          custom_product_area: copyID,
+        };
+      }
       if (isCustom && i > index) {
         return {
           ...cproduct,
@@ -1536,7 +1543,7 @@ const UpdateInvoiceForm = () => {
                               order.custom_products.length}
                           </td>
                           <td className="border border-gray-300 px-3 py-2">
-                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}
+                          {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(order.order_total_amount * 100) / 100)}
                           </td>
                           <td className="border border-gray-300 px-3 py-2">
                             {order.order_status}
@@ -1683,7 +1690,7 @@ const UpdateInvoiceForm = () => {
                               {item.productPrice.product_unit_a}
                             </label>
                             <div className="mt-1">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_a * 100) / 100)}
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(item.productPrice.product_price_unit_a * 100) / 100)}
                             </div>
                           </td>
                           <td className="border border-gray-300 px-2 py-1">
@@ -1692,7 +1699,7 @@ const UpdateInvoiceForm = () => {
                               {item.productPrice.product_unit_b}
                             </label>
                             <div className="mt-1">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(item.productPrice.product_price_unit_b* 100) / 100)}
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(item.productPrice.product_price_unit_b* 100) / 100)}
                             </div>
                           </td>
                           <td className="border border-gray-300 px-2 py-1 hidden sm:table-cell">
@@ -2010,7 +2017,7 @@ const UpdateInvoiceForm = () => {
                                 </div>
                                 <div
                                     className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-                                    title='Paste location to all'
+                                    title='Apply location to all items below'
                                     onClick={() => handleApplyLocationToAll(index, false)}
                                 >
                                     <svg
@@ -2081,7 +2088,7 @@ const UpdateInvoiceForm = () => {
                               </td>
                               <td className="relative">
                                 <label>
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}
                                 </label>
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -2107,7 +2114,7 @@ const UpdateInvoiceForm = () => {
                               </td>
                               <td className="hidden sm:table-cell">
                                 <label>
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((prod.productprice_obj_ref
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((prod.productprice_obj_ref
                                     .product_number_a === 1
                                     ? prod.order_product_qty_a *
                                       (prod.order_product_price_unit_a || 0) *
@@ -2201,7 +2208,7 @@ const UpdateInvoiceForm = () => {
                               </div>
                               <div
                                   className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-                                  title='Paste location to all'
+                                  title='Apply location to all items below'
                                   onClick={() => handleApplyLocationToAll(index, true)}
                               >
                                   <svg
@@ -3093,17 +3100,17 @@ const UpdateInvoiceForm = () => {
                             </td>
                             <td className="border border-gray-300 px-1 py-2">
                               <label>
-                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.productprice_obj_ref.product_price_unit_a * 100) / 100)}
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(prod.productprice_obj_ref.product_price_unit_a * 100) / 100)}
                               </label>
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
                                 prod.order_product_qty_a *
                                 prod.productprice_obj_ref.product_price_unit_a
                               ) * 100) / 100)}
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                              {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
                                 Math.floor((newInvoice.products?.[index]?.invoice_product_gross_amount_a || 0) * 100) / 100
                               )}
                             </td>
@@ -3229,7 +3236,7 @@ const UpdateInvoiceForm = () => {
                               -
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.custom_products[index]
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(newInvoice.custom_products[index]
                                   ?.custom_order_gross_amount * 100) / 100)}
                             </td>
                           </tr>
@@ -3324,7 +3331,7 @@ const UpdateInvoiceForm = () => {
                           Total Gross Amount:
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(
                           (
                             invoiceState.order.products.reduce(
                               (total, prod) =>
@@ -3338,7 +3345,7 @@ const UpdateInvoiceForm = () => {
                           ) * 100) / 100)}
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
                             newInvoice.invoiced_calculated_total_amount_incl_gst /
                             1.1
                           ) * 100) / 100)}
@@ -3353,7 +3360,7 @@ const UpdateInvoiceForm = () => {
                           Total Gross Amount (incl GST):
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
                             (invoiceState.order.products.reduce(
                               (total, prod) =>
                                 total +
@@ -3367,7 +3374,7 @@ const UpdateInvoiceForm = () => {
                           ) * 100) / 100)}
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-end">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}
                         </td>
                       </tr>
                       <tr className="bg-indigo-100">
@@ -3376,7 +3383,7 @@ const UpdateInvoiceForm = () => {
                           className="px-2 py-2 font-bold text-xs md:text-base text-end border border-gray-400"
                           colSpan={2}
                         >
-                          Total Raw Amount (incl GST):
+                          Total Invoice Amount (incl GST):
                         </td>
                         <td className="px-3 py-2 text-center" colSpan={2}>
                           $
@@ -3394,11 +3401,16 @@ const UpdateInvoiceForm = () => {
                           {(
                             newInvoice.invoiced_raw_total_amount_incl_gst - (Math.floor(newInvoice.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
                           (<span className="text-xs text-red-600 ml-2 font-bold">+
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((newInvoice.invoiced_raw_total_amount_incl_gst - newInvoice.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((newInvoice.invoiced_raw_total_amount_incl_gst - newInvoice.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
                             </span>) : (
+                              <div>
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 inline-block font-bold ml-2">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                              </svg>
+                              <span className="text-xs text-green-600 ml-2 font-bold inline-block">
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((newInvoice.invoiced_raw_total_amount_incl_gst - newInvoice.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                              </span>
+                            </div>
                             ))}
                         </td>
                       </tr>
@@ -3599,7 +3611,7 @@ const UpdateInvoiceForm = () => {
                               />
                             </td>
                             <td className="border border-gray-300 px-3 py-2 text-end">
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(newInvoiceWithoutPO.custom_products[index].custom_order_gross_amount * 100) / 100)}
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(newInvoiceWithoutPO.custom_products[index].custom_order_gross_amount * 100) / 100)}
                             </td>
                           </tr>
                         )
@@ -3684,7 +3696,7 @@ const UpdateInvoiceForm = () => {
                         Total Gross Amount:
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
                           newInvoiceWithoutPO.custom_products.reduce(
                             (total, prod) =>
                               total +
@@ -3704,7 +3716,7 @@ const UpdateInvoiceForm = () => {
                         Total Gross Amount (incl GST):
                       </td>
                       <td className="border border-gray-300 px-3 py-2 text-end">
-                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+                      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
                           (newInvoiceWithoutPO.custom_products.reduce(
                             (total, prod) =>
                               total +
@@ -3723,7 +3735,7 @@ const UpdateInvoiceForm = () => {
                     <tr className="bg-indigo-100">
                       <td colSpan={4}></td>
                       <td className="px-2 py-2 font-bold text-xs md:text-base text-end border border-gray-400">
-                        Total Raw Amount (incl GST):
+                        Total Invoice Amount (incl GST):
                       </td>
                       <td className="px-3 py-2 text-end">
                         $

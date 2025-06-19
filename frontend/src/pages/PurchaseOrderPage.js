@@ -579,7 +579,7 @@ const PurchaseOrder2 = () => {
                                     <td className="p-3 text-gray-600">{formatDateTime(order.order_est_datetime)}</td>
                                     <td className="p-3 text-gray-600">{order.project.project_name}</td>
                                     <td className="p-3 text-gray-600">{order.supplier.supplier_name}</td>
-                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>
+                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>
                                     <td className="p-3">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.invoices.length > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                         {`${order.invoices.length} Invoice${order.invoices.length > 1 ? 's' : ''}`}
@@ -672,7 +672,7 @@ const PurchaseOrder2 = () => {
                         </p>
                         <p className="text-sm text-gray-600 font-bold">
                             Sum:
-                            <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(paginatedData.reduce((totalSum, order) => {return totalSum + (order.order_total_amount || 0);}, 0) * 100) / 100)}</span>
+                            <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(paginatedData.reduce((totalSum, order) => {return totalSum + (order.order_total_amount || 0);}, 0) * 100) / 100)}</span>
                         </p>
                         <div className="flex space-x-2">
                             <button
