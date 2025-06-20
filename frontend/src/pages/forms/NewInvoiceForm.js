@@ -23,6 +23,7 @@ const NewInvoiceForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state;
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
   const { addPrice, addPriceErrorState } = useAddProductPrice();
   const { addInvoice, addInvoiceError } = useAddInvoice();
   const { uploadInvoice, uploadInvoiceError } = useUploadInvoice();
@@ -98,7 +99,7 @@ const NewInvoiceForm = () => {
     invoiced_raw_total_amount_incl_gst: 0,
     invoiced_calculated_total_amount_incl_gst: 0,
     invoice_is_stand_alone: false,
-    invoice_internal_comments: "",
+    invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
     invoice_status: "",
     payment: null,
   });
@@ -135,7 +136,7 @@ const NewInvoiceForm = () => {
     invoiced_raw_total_amount_incl_gst: 0,
     invoiced_calculated_total_amount_incl_gst: 0,
     invoice_is_stand_alone: true,
-    invoice_internal_comments: "",
+    invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
     invoice_status: "",
     invoice_isarchived: false,
     payment: null,
@@ -158,8 +159,6 @@ const NewInvoiceForm = () => {
 
 
   //Component's function and variables
-  const localUser = JSON.parse(localStorage.getItem('localUser'))
-
   const formatDate = (dateString) => {
     if (dateString === null) {
       return "";
@@ -464,7 +463,7 @@ const NewInvoiceForm = () => {
         invoiced_raw_total_amount_incl_gst: 0,
         invoiced_calculated_total_amount_incl_gst: 0,
         invoice_is_stand_alone: false,
-        invoice_internal_comments: "",
+        invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
         invoice_status: "",
       });
       setCurrentOrder(null);
@@ -495,7 +494,7 @@ const NewInvoiceForm = () => {
         invoiced_raw_total_amount_incl_gst: 0,
         invoiced_calculated_total_amount_incl_gst: 0,
         invoice_is_stand_alone: false,
-        invoice_internal_comments: "",
+        invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
         invoice_status: "",
       });
       setCurrentOrder(null);
@@ -609,7 +608,7 @@ const NewInvoiceForm = () => {
           invoiced_raw_total_amount_incl_gst: 0,
           invoiced_calculated_total_amount_incl_gst: 0,
           invoice_is_stand_alone: false,
-          invoice_internal_comments: "",
+          invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
           invoice_status: "",
           payment: null
         });
@@ -779,6 +778,9 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
     const updatedProducts = [...currentState.products];
     const updatedCustomProducts = [...currentState.custom_products];
 
+    
+  console.log("updatedState", updatedState)
+
     // Handle order items details input using index
     if (index !== null) {
       if (name === "invoice_product_qty_a") {
@@ -826,6 +828,28 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
           ? Number(value)
           : value,
       };
+
+      // Handle invoice_internal_comments changes and validation
+      const creatorTag = `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`;
+
+      if (name === "invoice_internal_comments") {
+        let comment = value;
+
+        // If user removes or modifies the tag
+        if (!comment.startsWith(creatorTag)) {
+          alert(`${creatorTag} cannot be removed or modified in Internal Comments.`);
+
+          // Strip any duplicated tag and trim
+          const cleaned = comment.replace(creatorTag, "").trim();
+
+          comment = `${creatorTag} ${cleaned}`;
+          
+          updatedState = {
+            ...currentState,
+            invoice_internal_comments: comment,
+          };
+        }
+      }
     }
 
     // Calculate updatedTotalAmount using updatedProducts and updatedCustomProducts

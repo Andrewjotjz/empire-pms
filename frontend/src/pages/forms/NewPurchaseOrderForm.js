@@ -26,6 +26,7 @@ const NewPurchaseOrderForm = () => {
   const dispatch = useDispatch()
   const location = useLocation()
   const searchInputRef = useRef(null)
+  const localUser = JSON.parse(localStorage.getItem("localUser"))
 
   // Component hooks
   const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier()
@@ -107,7 +108,7 @@ const NewPurchaseOrderForm = () => {
     products: copiedState !== null ? copiedState.products : [],
     custom_products: copiedState !== null ? copiedState.custom_products : [],
     order_total_amount: copiedState !== null ? copiedState.order_total_amount : 0,
-    order_internal_comments: "",
+    order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
     order_notes_to_supplier: copiedState !== null ? copiedState.order_notes_to_supplier : "",
     order_isarchived: false,
     deliveries: [],
@@ -116,9 +117,9 @@ const NewPurchaseOrderForm = () => {
     order_status: "Pending",
   })
 
-  // Component functions and variables
-  const localUser = JSON.parse(localStorage.getItem("localUser"))
+  console.log("localUser",localUser)
 
+  // Component functions and variables
   const handleBackClick = () => navigate(`/EmpirePMS/order`)
 
   const handleProjectChange = (event) => {
@@ -136,7 +137,7 @@ const NewPurchaseOrderForm = () => {
           products: [],
           custom_products: [],
           order_total_amount: 0,
-          order_internal_comments: "",
+          order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
           order_notes_to_supplier: "",
           order_isarchived: false,
           deliveries: [],
@@ -174,7 +175,7 @@ const NewPurchaseOrderForm = () => {
           products: [],
           custom_products: [],
           order_total_amount: 0,
-          order_internal_comments: "",
+          order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
           order_notes_to_supplier: "",
           order_isarchived: false,
           deliveries: [],
@@ -208,7 +209,7 @@ const NewPurchaseOrderForm = () => {
         products: [],
         custom_products: [],
         order_total_amount: 0,
-        order_internal_comments: "",
+        order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
         order_notes_to_supplier: "",
         order_isarchived: false,
         deliveries: [],
@@ -230,7 +231,7 @@ const NewPurchaseOrderForm = () => {
         products: [],
         custom_products: [],
         order_total_amount: 0,
-        order_internal_comments: "",
+        order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
         order_notes_to_supplier: "",
         order_isarchived: false,
         deliveries: [],
@@ -368,6 +369,30 @@ const NewPurchaseOrderForm = () => {
           order_date: value,
           order_est_datetime: formattedOrderEstDate,
         }
+      }
+
+      // Handle order_internal_comments changes and validation
+        // Define once outside the handler if possible
+      const creatorTag = `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`;
+
+      if (name === "order_internal_comments") {
+        // If user tries to delete or modify the creator tag
+        if (!value.startsWith(creatorTag)) {
+          alert(`${creatorTag} cannot be removed or modified in Internal Comments.`);
+
+          // Preserve existing comment content (without duplicating the tag)
+          const existingContent = value.replace(creatorTag, "").trim();
+
+          return {
+            ...prevState,
+            order_internal_comments: `${creatorTag} ${existingContent}`,
+          };
+        }
+
+        return {
+          ...prevState,
+          order_internal_comments: value,
+        };
       }
 
       // Handle other updates

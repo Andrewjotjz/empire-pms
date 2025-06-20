@@ -674,6 +674,7 @@ const InvoicePage2 = () => {
                                     )}
                                 </th>
                                 <th className="p-3">Products</th>
+                                <th className="p-3">Created by</th>
                                 <th className="p-3">Payment</th>
                             </tr>
                         </thead>
@@ -716,6 +717,9 @@ const InvoicePage2 = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>}
                                         </button>
+                                    </td>
+                                    <td className={`p-3 text-gray-600 font-normal text-sm`}>
+                                        {invoice.invoice_internal_comments?.includes("[created by:") ? invoice.invoice_internal_comments.match(/\[created by: (.*?) \(/)?.[1] || invoice.invoice_internal_comments : "-"}
                                     </td>
                                     <td 
                                         className={`p-3 font-medium ${

@@ -25,6 +25,7 @@ const UpdateInvoiceForm = () => {
   const { updatePurchaseOrder, updateOrderErrorState } = useUpdatePurchaseOrder();
 
   //Component's state declaration
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
   const productState = useSelector((state) => state.productReducer.productState);
 
   const [searchOrderTerm, setSearchOrderTerm] = useState("");
@@ -122,8 +123,6 @@ const UpdateInvoiceForm = () => {
   const [productTypeState, setProductTypeState] = useState([]);
 
   //Component's function and variables
-  const localUser = JSON.parse(localStorage.getItem('localUser'))
-
   const fetchSelectedPurchaseOrder = async (id) => {
     setIsFetchOrderLoading(true);
     setFetchOrderError(null);
@@ -269,7 +268,7 @@ const UpdateInvoiceForm = () => {
       invoiced_raw_total_amount_incl_gst: 0,
       invoiced_calculated_total_amount_incl_gst: 0,
       invoice_is_stand_alone: false,
-      invoice_internal_comments: "",
+      invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
       invoice_status: "",
     });
     setCurrentOrder(null);
@@ -377,7 +376,7 @@ const UpdateInvoiceForm = () => {
           invoiced_raw_total_amount_incl_gst: 0,
           invoiced_calculated_total_amount_incl_gst: 0,
           invoice_is_stand_alone: false,
-          invoice_internal_comments: "",
+          invoice_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
           invoice_status: "",
         });
         return;
@@ -466,6 +465,28 @@ const UpdateInvoiceForm = () => {
           ? Number(value)
           : value,
       };
+
+      // Handle invoice_internal_comments changes and validation
+      const creatorTag = `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`;
+
+      if (name === "invoice_internal_comments") {
+        let comment = value;
+
+        // If user removes or modifies the tag
+        if (!comment.startsWith(creatorTag)) {
+          alert(`${creatorTag} cannot be removed or modified in Internal Comments.`);
+
+          // Strip any duplicated tag and trim
+          const cleaned = comment.replace(creatorTag, "").trim();
+
+          comment = `${creatorTag} ${cleaned}`;
+          
+          updatedState = {
+            ...currentState,
+            invoice_internal_comments: comment,
+          };
+        }
+      }
     }
 
     // Calculate updatedTotalAmount using updatedProducts and updatedCustomProducts

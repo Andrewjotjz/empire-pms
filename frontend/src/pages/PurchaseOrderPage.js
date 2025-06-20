@@ -558,6 +558,9 @@ const PurchaseOrder2 = () => {
                                     </svg>
                                     )}
                                 </th>
+                                <th className="p-3 cursor-pointer">
+                                    Placed by
+                                </th>
                                 <th className="p-3">Products</th>
                             </tr>
                         </thead>
@@ -597,6 +600,11 @@ const PurchaseOrder2 = () => {
                                         </span>
                                     </td>
                                     <td className="p-3">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium`}>
+                                        {order.order_internal_comments?.includes("[created by:") ? order.order_internal_comments.match(/\[created by: (.*?) \(/)?.[1] || order.order_internal_comments : "-"}
+                                        </span>
+                                    </td>
+                                    <td className="p-3">
                                         <button
                                         onClick={() => setExpandedRow(expandedRow === order._id ? null : order._id)}
                                         className="text-blue-600 hover:text-blue-800 transition-colors duration-150"
@@ -614,7 +622,7 @@ const PurchaseOrder2 = () => {
                                 </tr>
                                 {expandedRow === order._id && (
                                     <tr>
-                                    <td colSpan="10" className="p-2 bg-gray-50">
+                                    <td colSpan="11" className="p-2 bg-gray-50">
                                         <div className="flex flex-col space-y-1">
                                         {order.products.map((product, index) => (
                                             <div key={index} className="bg-white py-1 px-2 rounded flex items-center text-sm border-b last:border-b-0">
