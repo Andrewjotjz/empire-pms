@@ -288,9 +288,9 @@ const InvoiceDetails = () => {
                                         : parseFloat(product.invoice_product_qty_a).toFixed(4)}
                                 </td>
                                 <td className="border-r-2 px-2 py-1">
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.invoice_product_price_unit * 100) / 100)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(product.invoice_product_price_unit * 100) / 100)}
                                 </td>
-                                <td className="text-end px-2 py-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(product.invoice_product_gross_amount_a * 100) / 100)}</td>
+                                <td className="text-end px-2 py-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(product.invoice_product_gross_amount_a * 100) / 100)}</td>
                             </tr>
                         ))}
                         {/* custom products */}
@@ -300,55 +300,60 @@ const InvoiceDetails = () => {
                                 <td className="px-2 py-1">{cusProduct.custom_product_name}</td>
                                 <td className="px-2 py-1">{cusProduct.custom_product_location}</td>
                                 <td className="px-2 py-1">{cusProduct.custom_order_qty}</td>
-                                <td className="border-r-2 px-2 py-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(cusProduct.custom_order_price * 100) / 100)}</td>
-                                <td className="text-end px-2 py-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(cusProduct.custom_order_gross_amount * 100) / 100)}</td>
+                                <td className="border-r-2 px-2 py-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(cusProduct.custom_order_price * 100) / 100)}</td>
+                                <td className="text-end px-2 py-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(cusProduct.custom_order_gross_amount * 100) / 100)}</td>
                             </tr>
                         ))}
                         {/* Summary rows */}
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Subtotal:</td>
-                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1 - invoiceState.invoiced_delivery_fee - invoiceState.invoiced_other_fee) * 100) / 100)}</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1 - invoiceState.invoiced_delivery_fee - invoiceState.invoiced_other_fee) * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Delivery Fee:</td>
-                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_delivery_fee * 100) / 100)}</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoiceState.invoiced_delivery_fee * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Other Fee(strap/pallet/cut):</td>
-                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_other_fee * 100) / 100)}</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoiceState.invoiced_other_fee * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Credit:</td>
-                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_credit * 100) / 100)}</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoiceState.invoiced_credit * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Total Amount:</td>
-                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1) * 100) / 100)}</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((invoiceState.invoiced_calculated_total_amount_incl_gst / 1.1) * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={3}></td>
                             <td className='pt-1 text-end border-r-2 px-2 py-1' colSpan={2}>Calculated Total Amount (incl. GST):</td>
-                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
+                            <td className='pt-1 text-end px-2 py-1'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
                         </tr>
                         <tr>
                             <td colSpan={2}></td>
                             <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={3}><span className='text-lg'>Printed Total Amount (incl. GST):</span></td>
                             <td className='pt-1 font-bold text-end px-2 py-1'>
-                                <span className='text-lg'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
+                                <span className='text-lg'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
                             {(
                             invoiceState.invoiced_raw_total_amount_incl_gst - (Math.floor(invoiceState.invoiced_calculated_total_amount_incl_gst * 100) / 100) > 3 ? 
                             (<span className="text-xs text-red-600 ml-2 font-bold">+
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.invoiced_raw_total_amount_incl_gst - invoiceState.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((invoiceState.invoiced_raw_total_amount_incl_gst - invoiceState.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
                                 </span>
                                 ) : (
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 font-bold ml-2 inline-block text-end">
+                              <div>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5 text-green-600 inline-block font-bold ml-2">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                </svg>
+                              </svg>
+                              <span className="text-xs text-green-600 ml-2 font-bold">
+                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((invoiceState.invoiced_raw_total_amount_incl_gst - invoiceState.invoiced_calculated_total_amount_incl_gst) * 100) / 100)}
+                              </span>
+                            </div>
                             ))}
                             </td>
                         </tr>
@@ -449,8 +454,8 @@ const InvoiceDetails = () => {
                                         <td className="text-center">{prod.product_obj_ref.product_name}</td>
                                         <td className="text-center">{prod.order_product_location}</td>
                                         <td className="text-center">{prod.order_product_qty_a}</td>
-                                        <td className="text-center">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</td>
-                                        <td className="text-end">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_gross_amount * 100) / 100)}</td>
+                                        <td className="text-center">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</td>
+                                        <td className="text-end">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(prod.order_product_gross_amount * 100) / 100)}</td>
                                     </tr>
                                 ))}
                                 {invoiceState.order.custom_products && invoiceState.order.custom_products.map((cusprod, index) => (
@@ -471,14 +476,14 @@ const InvoiceDetails = () => {
                                 <tr>
                                     <td colSpan={3}></td>
                                     <td colSpan={2} className="text-end">Total Gross Amount:</td>
-                                    <td className="text-end">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.order.products.reduce((totalSum, product) => {
+                                    <td className="text-end">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((invoiceState.order.products.reduce((totalSum, product) => {
                                         return totalSum + product.order_product_gross_amount
                                     }, 0)) * 100) / 100)}</td>
                                 </tr>
                                 <tr>
                                     <td colSpan={3}></td>
                                     <td colSpan={2} className="text-end font-bold">Total Gross Amount (incl. GST):</td>
-                                    <td className="text-end font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((invoiceState.order.products.reduce((totalSum, product) => {
+                                    <td className="text-end font-bold">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((invoiceState.order.products.reduce((totalSum, product) => {
                                         return totalSum + product.order_product_gross_amount
                                     }, 0) * 1.1) * 100) / 100)}</td>
                                 </tr>

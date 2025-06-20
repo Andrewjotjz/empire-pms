@@ -622,7 +622,7 @@ const SupplierDetails = () => {
                   type="checkbox"
                   checked={selectedProjects.has(project._id)}
                   onChange={() => handleProjectCheckbox(project._id, true)}
-                  disabled={supplierState.projects?.some((p) => p._id === project._id)}
+                  disabled={supplierState?.projects?.some((p) => p._id === project._id) || true}
                 />
                 <label className="flex-1 text-gray-800">
                   <span className="ml-2 font-semibold">{project.project_name}</span>
@@ -794,7 +794,7 @@ const SupplierDetails = () => {
                     <td className="hidden sm:table-cell">{product.productPrice.product_number_a}</td>
                     <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
                     <td className="hidden sm:table-cell">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(product.productPrice.product_price_unit_a * 100) / 100,
                       )}
                     </td>
@@ -918,7 +918,7 @@ const SupplierDetails = () => {
                       {order.products.length + order.custom_products.length} products
                     </td>
                     <td className="hidden sm:table-cell">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(order.order_total_amount * 100) / 100,
                       )}
                     </td>
@@ -2145,7 +2145,7 @@ export default SupplierDetails
 //                     <td className="hidden sm:table-cell">{product.productPrice.product_number_a}</td>
 //                     <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
 //                     <td className="hidden sm:table-cell">
-//                       {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+//                       {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
 //                         Math.floor(product.productPrice.product_price_unit_a * 100) / 100,
 //                       )}
 //                     </td>
@@ -2266,7 +2266,7 @@ export default SupplierDetails
 //                       {order.products.length + order.custom_products.length} products
 //                     </td>
 //                     <td className="hidden sm:table-cell">
-//                       {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+//                       {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
 //                         Math.floor(order.order_total_amount * 100) / 100,
 //                       )}
 //                     </td>

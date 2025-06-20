@@ -650,7 +650,7 @@ const InvoicePage2 = () => {
                                     )}
                                 </th>
                                 <th className="p-3 cursor-pointer" onClick={() => requestSort('invoiced_raw_total_amount_incl_gst')}>
-                                    Raw Total Amount (+gst)
+                                    Invoice Total Amount (+gst)
                                     {sortConfig.key === 'invoiced_raw_total_amount_incl_gst' && (
                                     sortConfig.direction === 'ascending' ? 
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="inline ml-1 size-4">
@@ -674,6 +674,7 @@ const InvoicePage2 = () => {
                                     )}
                                 </th>
                                 <th className="p-3">Products</th>
+                                <th className="p-3">Created by</th>
                                 <th className="p-3">Payment</th>
                             </tr>
                         </thead>
@@ -689,8 +690,8 @@ const InvoicePage2 = () => {
                                     <td className="p-3 text-gray-600">{formatDate(invoice.invoice_issue_date)}</td>
                                     <td className="p-3 text-gray-600">{formatDate(invoice.invoice_received_date)}</td>
                                     <td className="p-3 text-gray-600">{formatDate(invoice.invoice_due_date)}</td>
-                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
-                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(invoice.invoiced_raw_total_amount_incl_gst * 100) / 100)}</td>
+                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoice.invoiced_calculated_total_amount_incl_gst * 100) / 100)}</td>
+                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoice.invoiced_raw_total_amount_incl_gst * 100) / 100)}</td>
                                     <td className="p-3">
                                         <span className={`px-2 py-1 rounded-full text-xs text-nowrap font-medium ${
                                         invoice.invoice_status === 'Settled' ? 'bg-green-100 text-green-800' :
@@ -716,6 +717,9 @@ const InvoicePage2 = () => {
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>}
                                         </button>
+                                    </td>
+                                    <td className={`p-3 text-gray-600 font-normal text-sm`}>
+                                        {invoice.invoice_internal_comments?.includes("[created by:") ? invoice.invoice_internal_comments.match(/\[created by: (.*?) \(/)?.[1] || invoice.invoice_internal_comments : "-"}
                                     </td>
                                     <td 
                                         className={`p-3 font-medium ${
@@ -771,11 +775,11 @@ const InvoicePage2 = () => {
                         <div>
                             <p className="text-sm text-gray-600 inline-block font-bold">
                                 Sum (computed):
-                                <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(paginatedData.reduce((totalSum, invoice) => {return totalSum + (invoice.invoiced_calculated_total_amount_incl_gst || 0);}, 0) * 100) / 100)}</span>
+                                <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(paginatedData.reduce((totalSum, invoice) => {return totalSum + (invoice.invoiced_calculated_total_amount_incl_gst || 0);}, 0) * 100) / 100)}</span>
                             </p>
                             <p className="text-sm text-gray-600 inline-block font-bold ml-3">
                                 Sum (raw):
-                                <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(paginatedData.reduce((totalSum, invoice) => {return totalSum + (invoice.invoiced_raw_total_amount_incl_gst || 0);}, 0) * 100) / 100)}</span>
+                                <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(paginatedData.reduce((totalSum, invoice) => {return totalSum + (invoice.invoiced_raw_total_amount_incl_gst || 0);}, 0) * 100) / 100)}</span>
                             </p>
                         </div>
                         <div className="flex space-x-2">

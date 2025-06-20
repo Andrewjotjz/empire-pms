@@ -26,6 +26,8 @@ export default function BudgetPlanner() {
   const [expandedSections, setExpandedSections] = useState({})
   const [selectedIds, setSelectedIds] = useState([])
 
+  console.log("productTypeState", productTypeState)
+
   // Fetch all projects
   useEffect(() => {
     const abortController = new AbortController();

@@ -558,6 +558,9 @@ const PurchaseOrder2 = () => {
                                     </svg>
                                     )}
                                 </th>
+                                <th className="p-3 cursor-pointer">
+                                    Placed by
+                                </th>
                                 <th className="p-3">Products</th>
                             </tr>
                         </thead>
@@ -579,7 +582,7 @@ const PurchaseOrder2 = () => {
                                     <td className="p-3 text-gray-600">{formatDateTime(order.order_est_datetime)}</td>
                                     <td className="p-3 text-gray-600">{order.project.project_name}</td>
                                     <td className="p-3 text-gray-600">{order.supplier.supplier_name}</td>
-                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>
+                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>
                                     <td className="p-3">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.invoices.length > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                         {`${order.invoices.length} Invoice${order.invoices.length > 1 ? 's' : ''}`}
@@ -594,6 +597,11 @@ const PurchaseOrder2 = () => {
                                         'bg-red-100 text-red-800'
                                         }`}>
                                         {order.order_status}
+                                        </span>
+                                    </td>
+                                    <td className="p-3">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium`}>
+                                        {order.order_internal_comments?.includes("[created by:") ? order.order_internal_comments.match(/\[created by: (.*?) \(/)?.[1] || order.order_internal_comments : "-"}
                                         </span>
                                     </td>
                                     <td className="p-3">
@@ -614,7 +622,7 @@ const PurchaseOrder2 = () => {
                                 </tr>
                                 {expandedRow === order._id && (
                                     <tr>
-                                    <td colSpan="10" className="p-2 bg-gray-50">
+                                    <td colSpan="11" className="p-2 bg-gray-50">
                                         <div className="flex flex-col space-y-1">
                                         {order.products.map((product, index) => (
                                             <div key={index} className="bg-white py-1 px-2 rounded flex items-center text-sm border-b last:border-b-0">
@@ -672,7 +680,7 @@ const PurchaseOrder2 = () => {
                         </p>
                         <p className="text-sm text-gray-600 font-bold">
                             Sum:
-                            <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(paginatedData.reduce((totalSum, order) => {return totalSum + (order.order_total_amount || 0);}, 0) * 100) / 100)}</span>
+                            <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(paginatedData.reduce((totalSum, order) => {return totalSum + (order.order_total_amount || 0);}, 0) * 100) / 100)}</span>
                         </p>
                         <div className="flex space-x-2">
                             <button

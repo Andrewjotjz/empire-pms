@@ -26,6 +26,7 @@ const NewPurchaseOrderForm = () => {
   const dispatch = useDispatch()
   const location = useLocation()
   const searchInputRef = useRef(null)
+  const localUser = JSON.parse(localStorage.getItem("localUser"))
 
   // Component hooks
   const { fetchProductsBySupplier, isFetchProductsLoadingState, fetchProductsErrorState } = useFetchProductsBySupplier()
@@ -107,7 +108,7 @@ const NewPurchaseOrderForm = () => {
     products: copiedState !== null ? copiedState.products : [],
     custom_products: copiedState !== null ? copiedState.custom_products : [],
     order_total_amount: copiedState !== null ? copiedState.order_total_amount : 0,
-    order_internal_comments: "",
+    order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
     order_notes_to_supplier: copiedState !== null ? copiedState.order_notes_to_supplier : "",
     order_isarchived: false,
     deliveries: [],
@@ -116,9 +117,9 @@ const NewPurchaseOrderForm = () => {
     order_status: "Pending",
   })
 
-  // Component functions and variables
-  const localUser = JSON.parse(localStorage.getItem("localUser"))
+  console.log("localUser",localUser)
 
+  // Component functions and variables
   const handleBackClick = () => navigate(`/EmpirePMS/order`)
 
   const handleProjectChange = (event) => {
@@ -136,7 +137,7 @@ const NewPurchaseOrderForm = () => {
           products: [],
           custom_products: [],
           order_total_amount: 0,
-          order_internal_comments: "",
+          order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
           order_notes_to_supplier: "",
           order_isarchived: false,
           deliveries: [],
@@ -174,7 +175,7 @@ const NewPurchaseOrderForm = () => {
           products: [],
           custom_products: [],
           order_total_amount: 0,
-          order_internal_comments: "",
+          order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
           order_notes_to_supplier: "",
           order_isarchived: false,
           deliveries: [],
@@ -208,7 +209,7 @@ const NewPurchaseOrderForm = () => {
         products: [],
         custom_products: [],
         order_total_amount: 0,
-        order_internal_comments: "",
+        order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
         order_notes_to_supplier: "",
         order_isarchived: false,
         deliveries: [],
@@ -230,7 +231,7 @@ const NewPurchaseOrderForm = () => {
         products: [],
         custom_products: [],
         order_total_amount: 0,
-        order_internal_comments: "",
+        order_internal_comments: `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`,
         order_notes_to_supplier: "",
         order_isarchived: false,
         deliveries: [],
@@ -368,6 +369,30 @@ const NewPurchaseOrderForm = () => {
           order_date: value,
           order_est_datetime: formattedOrderEstDate,
         }
+      }
+
+      // Handle order_internal_comments changes and validation
+        // Define once outside the handler if possible
+      const creatorTag = `[created by: ${localUser.employee_first_name} ${localUser.employee_last_name} (${localUser.employee_email})]`;
+
+      if (name === "order_internal_comments") {
+        // If user tries to delete or modify the creator tag
+        if (!value.startsWith(creatorTag)) {
+          alert(`${creatorTag} cannot be removed or modified in Internal Comments.`);
+
+          // Preserve existing comment content (without duplicating the tag)
+          const existingContent = value.replace(creatorTag, "").trim();
+
+          return {
+            ...prevState,
+            order_internal_comments: `${creatorTag} ${existingContent}`,
+          };
+        }
+
+        return {
+          ...prevState,
+          order_internal_comments: value,
+        };
       }
 
       // Handle other updates
@@ -518,6 +543,14 @@ const NewPurchaseOrderForm = () => {
     });
 
     const updatedCustomProducts = orderState.custom_products.map((cproduct, i) => {
+      if (!isCustom) {
+        return {
+          ...cproduct,
+          custom_product_location: copyText,
+          custom_product_area: copyID,
+        };
+      }
+        
       if (isCustom && i > index) {
         return {
           ...cproduct,
@@ -934,7 +967,7 @@ const NewPurchaseOrderForm = () => {
 
             {/* Estimated Delivery Date/Time */}
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-gray-700">Estimated Delivery Date/Time</label>
+              <label className="block text-xs font-medium text-gray-700">Estimated Delivery Date/Time <span className="text-gray-400 italic">(dd/mm/yyyy)</span></label>
               <input
                 type="datetime-local"
                 className="w-full px-2 py-1.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm"
@@ -1075,7 +1108,7 @@ const NewPurchaseOrderForm = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {/* Regular Products */}
-                  {orderState.products.map((prod, index) => (
+                  {orderState?.products.map((prod, index) => (
                     <tr key={index} className="hover:bg-gray-50 text-sm">
                       <td className="px-2 py-1.5">
                         <div className="text-sm font-medium">{addedProductState[index].product.product_name}</div>
@@ -1137,12 +1170,12 @@ const NewPurchaseOrderForm = () => {
                         </div>
                       </td>
                       <td className="px-2 py-1.5 text-left text-sm">
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                           Math.floor(prod.order_product_price_unit_a * 100) / 100,
                         )}
                       </td>
                       <td className="px-2 py-1.5 text-right text-sm font-medium">
-                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                           Math.floor(
                             (addedProductState[index].productPrice.product_number_a === 1
                               ? prod.order_product_qty_a *
@@ -1260,7 +1293,7 @@ const NewPurchaseOrderForm = () => {
                       Total Net Amount:
                     </td>
                     <td className="px-2 py-2 text-right text-sm font-medium">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(
                           (orderState.products?.reduce(
                             (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
@@ -1276,7 +1309,7 @@ const NewPurchaseOrderForm = () => {
                       Total Net Amount (incl. GST):
                     </td>
                     <td className="px-2 py-2 text-right text-sm font-bold">
-                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+                      {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(
                           (orderState.products?.reduce(
                             (total, prod) => total + (Number(prod.order_product_gross_amount) || 0),
@@ -2418,7 +2451,7 @@ export default NewPurchaseOrderForm
 //                                             </div>
 //                                             <div
 //                                                 className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-//                                                 title='Paste location to all'
+//                                                 title='Apply location to all items below'
 //                                                 onClick={() => handleApplyLocationToAll(index, false)}
 //                                             >
 //                                                 <svg
@@ -2472,11 +2505,11 @@ export default NewPurchaseOrderForm
 //                                             </div>
 //                                         </td>
 //                                         <td className='hidden lg:table-cell'>
-//                                             <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</label>
+//                                             <label>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(prod.order_product_price_unit_a * 100) / 100)}</label>
 //                                         </td>
 //                                         <td className='hidden lg:table-cell'>
 //                                             <label>
-//                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Math.floor((
+//                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
 //                                                 addedProductState[index].productPrice.product_number_a === 1 
 //                                                 ? (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0) * addedProductState[index].productPrice.product_number_a) 
 //                                                 : (prod.order_product_qty_a * (prod.order_product_price_unit_a || 0))
@@ -2521,7 +2554,7 @@ export default NewPurchaseOrderForm
 //                                         </div>
 //                                         <div
 //                                             className="inline-block align-middle ml-1 text-xs text-gray-600 hover:underline hover:text-blue-600 cursor-pointer"
-//                                             title='Paste location to all'
+//                                             title='Apply location to all items below'
 //                                             onClick={() => handleApplyLocationToAll(index, true)}
 //                                         >
 //                                             <svg
@@ -2596,7 +2629,7 @@ export default NewPurchaseOrderForm
 //                                         <tr>
 //                                             <td className="pt-1">Total Net Amount:</td>
 //                                             <td className="pt-1">
-//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
 //                                                 Math.floor(
 //                                                     (orderState.products?.reduce((total, prod) => total + (Number(prod.order_product_gross_amount) || 0), 0) || 0) * 100
 //                                                 ) / 100
@@ -2606,7 +2639,7 @@ export default NewPurchaseOrderForm
 //                                         <tr>
 //                                             <td className='pt-1'>Total Net Amount (incl. GST):</td>
 //                                             <td className="pt-1">
-//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+//                                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
 //                                                     Math.floor(
 //                                                     ((orderState.products?.reduce((total, prod) => 
 //                                                         total + (Number(prod.order_product_gross_amount) || 0), 0) * 1.1) || 0) * 100
