@@ -11,7 +11,6 @@ const invoiceFileSchema = new mongoose.Schema({
     invoice_file_mime_type: { type: String, required: true }, // Store MIME type
     invoice: { type: Schema.Types.ObjectId, ref: 'Invoice' },
     invoice_file_upload_date: { type: Date, default: Date.now }
-
 });
 
 module.exports = mongoose.model("InvoiceFile", invoiceFileSchema);

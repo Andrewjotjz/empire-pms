@@ -30,14 +30,10 @@ const BudgetVsActual = () => {
   const [categories, setCategories] = useState([])
   const [subcategories, setSubcategories] = useState([])
 
-  console.log("invoiceState", invoiceState)
-  console.log("productTypeState", productTypeState)
-
   // State for processed data
   const [processedData, setProcessedData] = useState(null)
   const [filteredData, setFilteredData] = useState(null)
 
-    console.log("filteredData", filteredData)
   // Loading states
   const [fetchBudgetLoading, setFetchBudgetLoading] = useState(false)
   const [fetchOrderLoading, setFetchOrderLoading] = useState(false)
@@ -330,7 +326,6 @@ const BudgetVsActual = () => {
       // Process area-level product types
       if (areaInfo.product_type_obj_ref && areaInfo.product_type_obj_ref.length > 0) {
         areaInfo.product_type_obj_ref.forEach((typeRef) => {
-          console.log("typeRef", typeRef)
           // Find product type name from productTypeState
           const productType = productTypeState.find((pt) => pt._id === typeRef.type_id.toString())
           const typeName = productType ? productType.type_name : "Unknown Type"
@@ -1027,7 +1022,6 @@ const BudgetVsActual = () => {
 
     // Process each area in the budget
     budgetData.areas.forEach((budgetArea) => {
-      console.log("budgetArea", budgetArea)
       const areaName = budgetArea.area_name
       const actualArea = actualData.areaMap.get(areaName) || { actual: 0, actualM2: 0, typeMap: new Map() }
 
@@ -1047,7 +1041,6 @@ const BudgetVsActual = () => {
 
       // Process area-level product types
       budgetArea.types.forEach((budgetType) => {
-        console.log("budgetType", budgetType)
         const typeId = budgetType.type_id
         const actualType = actualArea.typeMap.get(typeId) || {
           name: "",

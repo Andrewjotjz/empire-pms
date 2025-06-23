@@ -9,8 +9,9 @@ import {
   Briefcase,
   Layers,
   PieChart,
-  BarChart3,
+  FolderPen,
   ChartArea,
+  LibraryBig
 } from "lucide-react"
 import UnauthenticatedSkeleton from "./loaders/UnauthenticateSkeleton"
 
@@ -90,8 +91,9 @@ const Home = () => {
             color="bg-blue-50 hover:bg-blue-100"
           />}
           {localUser.employee_roles === "Admin" &&<NavCard to="/EmpirePMS/budget" title="Budgets" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />}
-          {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/alias" title="Alias" icon={PieChart} color="bg-blue-50 hover:bg-blue-100" />}
+          {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/alias" title="Alias" icon={FolderPen} color="bg-blue-50 hover:bg-blue-100" />}
           {localUser.employee_roles === "Admin" && <NavCard to="/EmpirePMS/product" title="Reports (Beta)" icon={ChartArea} color="bg-blue-50 hover:bg-blue-100" />}
+          <NavCard to="/EmpirePMS/library" title="Library" icon={LibraryBig} color="bg-blue-50 hover:bg-blue-100" />
         </div>
       </div>
     </div>
