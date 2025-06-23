@@ -51,6 +51,7 @@ import UpdatePaymentForm from "./pages/forms/UpdatePaymentForm";
 import Calculator from "./components/Calculator";
 import BudgetVsActual from "./pages/BudgetVsActual";
 import UpdatePriceForm from "./pages/forms/UpdatePriceForm";
+import Library from "./pages/Library";
 
 function App() {
 
@@ -124,8 +125,9 @@ function App() {
             <Route path="/EmpirePMS/alias" element={<AliasPage />} />
             <Route path="/EmpirePMS/alias/:id/edit" element={<UpdateAliasForm />} />
 
-
             <Route path="/EmpirePMS/product" element={<Iframe /> } />
+
+            <Route path="/EmpirePMS/library" element={<Library />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

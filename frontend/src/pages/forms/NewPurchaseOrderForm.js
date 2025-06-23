@@ -117,8 +117,6 @@ const NewPurchaseOrderForm = () => {
     order_status: "Pending",
   })
 
-  console.log("localUser",localUser)
-
   // Component functions and variables
   const handleBackClick = () => navigate(`/EmpirePMS/order`)
 

@@ -779,7 +779,6 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
     const updatedCustomProducts = [...currentState.custom_products];
 
     
-  console.log("updatedState", updatedState)
 
     // Handle order items details input using index
     if (index !== null) {
