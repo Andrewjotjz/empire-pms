@@ -1,7 +1,7 @@
 //import modules
 const express = require('express');
 const multer = require('multer');
-const { uploadFile, getSingleFile, getAllFiles } = require('../controllers/libraryFileController')
+const { uploadFile, getSingleFile, getAllFiles, getSingleFileMeta } = require('../controllers/libraryFileController')
 
 //create express' router
 const router = express.Router();
@@ -21,6 +21,8 @@ router.post('/upload', upload.single("file"), uploadFile)
 //GET - retrieve library file endpoint
 router.get('/:id', getSingleFile);
 
+//GET - view library file
+router.get('/view/:id', getSingleFileMeta);
 
 
 //export router module that handles all employee routes

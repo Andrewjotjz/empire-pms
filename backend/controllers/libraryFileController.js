@@ -148,4 +148,4 @@ const getAllFiles = async (req, res) => {
 
 
 
-module.exports = { uploadFile, getSingleFile, getAllFiles};
+module.exports = { uploadFile, getSingleFile, getAllFiles, getSingleFileMeta};
