@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react"
 import { Search, Download, Building2, FileText, Shield, Wrench, Zap, Droplets, Plus, Loader, Eye } from "lucide-react"
 import FileViewer from "./FileViewer"
+import { useLogout } from "../hooks/useLogout"
 
 const getIconForCategory = (categoryName) => {
   if (!categoryName) return FileText
@@ -33,6 +34,8 @@ export default function LibraryList({ onUploadClick }) {
   const [error, setError] = useState(null)
   const [viewerFile, setViewerFile] = useState(null)
   const [isViewerOpen, setIsViewerOpen] = useState(false)
+    
+  const { logout } = useLogout();
 
   // Fetch resources and product types on component mount
   useEffect(() => {
@@ -212,7 +215,28 @@ export default function LibraryList({ onUploadClick }) {
   }
 
   if (error) {
-    return (
+    if (
+      error.includes("Session expired") ||
+      error.includes("jwt expired") ||
+      error.includes("jwt malformed")
+    ) {
+      return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FileText className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading resources</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={logout}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    )} 
+    else {
+      return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <FileText className="h-12 w-12 text-red-400 mx-auto mb-4" />
@@ -226,7 +250,7 @@ export default function LibraryList({ onUploadClick }) {
           </button>
         </div>
       </div>
-    )
+    )}
   }
 
   return (
