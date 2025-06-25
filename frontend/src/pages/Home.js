@@ -51,12 +51,12 @@ const Home = () => {
           />
           {localUser.employee_roles === "Admin" &&  <NavCard to="/EmpirePMS/invoice" title="Invoices" icon={FileText} color="bg-indigo-100 hover:bg-indigo-200" />}
           <NavCard to="/EmpirePMS/delivery" title="Deliveries" icon={Truck} color="bg-indigo-100 hover:bg-indigo-200" />
-          <NavCard
+          {localUser.employee_roles === "Admin" && <NavCard
             to="/EmpirePMS/payment"
             title="Payments"
             icon={CreditCard}
             color="bg-indigo-100 hover:bg-indigo-200"
-          />
+          />}
         </div>
       </div>
 
@@ -82,7 +82,7 @@ const Home = () => {
 
       {/* Resources Section */}
       <div className="mb-8">
-        {localUser.employee_roles === "Admin" && <h2 className="text-xl font-semibold mb-4 text-gray-700">Resources & Items</h2>}
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Resources & Items</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {localUser.employee_roles === "Admin" && <NavCard
             to="/EmpirePMS/product-type"

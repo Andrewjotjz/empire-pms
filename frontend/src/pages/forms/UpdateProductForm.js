@@ -731,7 +731,11 @@ const UpdateProductForm = () => {
                           <ul className="py-1">
                             {projectState &&
                               projectState.length > 0 &&
-                              projectState.filter(proj => proj.suppliers.some(sup => sup._id === id)).map((project, index) => (
+                              projectState.filter(proj => proj.suppliers.some(sup => sup._id === id)).map((project, index) => {
+                                const isChecked = productPriceState.projects?.includes(project._id);
+                                const isProjectUsed = supplierOrders?.some(order => order.project._id === project._id);
+                                const isSupplierMatched = supplierOrders?.some(order => order.supplier._id === id);
+                                return (
                                 <li key={index} className="relative">
                                   <label className="flex items-center w-full px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                     <input
@@ -750,7 +754,7 @@ const UpdateProductForm = () => {
                                         )
                                       }
                                       onInput={(e) => e.target.setCustomValidity("")}
-                                      disabled={supplierOrders.some(order => order.project._id === project._id) && supplierOrders.some(order => order.supplier._id === id)}
+                                      disabled={isChecked && isProjectUsed && isSupplierMatched}
                                     />
                                     <span className="text-gray-800">{project.project_name}</span>
                                     {productPriceState.projects && productPriceState.projects.includes(project._id) && (
@@ -758,7 +762,7 @@ const UpdateProductForm = () => {
                                     )}
                                   </label>
                                 </li>
-                              ))}
+                              )})}
                           </ul>
                         </div>
                       )}

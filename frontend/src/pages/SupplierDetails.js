@@ -760,9 +760,9 @@ const SupplierDetails = () => {
               <th scope="col" className="hidden sm:table-cell">
                 Unit A
               </th>
-              <th scope="col" className="hidden sm:table-cell">
+              { localUser.employee_roles === "Admin" && <th scope="col" className="hidden sm:table-cell">
                 Price A
-              </th>
+              </th>}
               <th scope="col" className="hidden sm:table-cell">
                 Actual M<span className="text-xs align-top">2</span>/M
               </th>
@@ -793,11 +793,11 @@ const SupplierDetails = () => {
                     <td>{product.product.product_name}</td>
                     <td className="hidden sm:table-cell">{product.productPrice.product_number_a}</td>
                     <td className="hidden sm:table-cell">{product.productPrice.product_unit_a}</td>
-                    <td className="hidden sm:table-cell">
+                    { localUser.employee_roles === "Admin" && <td className="hidden sm:table-cell">
                       {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(product.productPrice.product_price_unit_a * 100) / 100,
                       )}
-                    </td>
+                    </td>}
                     <td className="hidden sm:table-cell">{product.product.product_actual_size}</td>
                     <td className="hidden sm:table-cell">
                       {productTypeState.find((type) => type._id === product.product.product_type)?.type_name ||
@@ -894,9 +894,9 @@ const SupplierDetails = () => {
                 <th scope="col" className="hidden sm:table-cell">
                   Products
                 </th>
-                <th scope="col" className="hidden sm:table-cell">
+                { localUser.employee_roles === "Admin" && <th scope="col" className="hidden sm:table-cell">
                   Gross Amount
-                </th>
+                </th>}
                 <th scope="col">Status</th>
               </tr>
             </thead>
@@ -917,11 +917,11 @@ const SupplierDetails = () => {
                     <td className="hidden sm:table-cell">
                       {order.products.length + order.custom_products.length} products
                     </td>
-                    <td className="hidden sm:table-cell">
+                    { localUser.employee_roles === "Admin" && <td className="hidden sm:table-cell">
                       {new Intl.NumberFormat("en-US", { style: "currency", currency: "AUD" }).format(
                         Math.floor(order.order_total_amount * 100) / 100,
                       )}
-                    </td>
+                    </td>}
                     <td>
                       {order.order_status && (
                         <label

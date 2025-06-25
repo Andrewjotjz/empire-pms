@@ -202,7 +202,7 @@ const ProductDetails = () => {
           <h2 className="text-xl font-bold text-gray-800">Product Prices</h2>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        { localUser.employee_roles === "Admin" ? <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -322,7 +322,8 @@ const ProductDetails = () => {
               </tbody>
             </table>
           </div>
-        </div>
+        </div> :
+        <div>Access denied</div>}
       </div>
     ) : (
       <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">

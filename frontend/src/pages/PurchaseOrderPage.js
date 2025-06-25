@@ -531,7 +531,7 @@ const PurchaseOrder2 = () => {
                                     </svg>
                                     )}
                                 </th>
-                                <th className="p-3 cursor-pointer" onClick={() => requestSort('order_total_amount')}>
+                                { localUser.employee_roles === "Admin" && <th className="p-3 cursor-pointer" onClick={() => requestSort('order_total_amount')}>
                                     Total Amount
                                     {sortConfig.key === 'order_total_amount' && (
                                     sortConfig.direction === 'ascending' ? 
@@ -542,7 +542,7 @@ const PurchaseOrder2 = () => {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                     </svg>
                                     )}
-                                </th>
+                                </th>}
                                 <th className="p-3">
                                     Invoice
                                 </th>
@@ -582,7 +582,7 @@ const PurchaseOrder2 = () => {
                                     <td className="p-3 text-gray-600">{formatDateTime(order.order_est_datetime)}</td>
                                     <td className="p-3 text-gray-600">{order.project.project_name}</td>
                                     <td className="p-3 text-gray-600">{order.supplier.supplier_name}</td>
-                                    <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>
+                                    { localUser.employee_roles === "Admin" && <td className="p-3 text-gray-600">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(order.order_total_amount * 100) / 100)}</td>}
                                     <td className="p-3">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.invoices.length > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                         {`${order.invoices.length} Invoice${order.invoices.length > 1 ? 's' : ''}`}
