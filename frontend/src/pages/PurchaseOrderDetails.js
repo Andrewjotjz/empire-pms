@@ -80,7 +80,7 @@ const PurchaseOrderDetails = () => {
         }));
     };
 
-    const handleProductTableClick = (productId) => { 
+    const handleProductTableClick = (productId) => {
         dispatch(clearProductState());
         navigate(`/EmpirePMS/supplier/${purchaseOrderState.supplier._id}/products/${productId}`, {state: purchaseOrderState.supplier._id})
     }
@@ -558,8 +558,8 @@ const PurchaseOrderDetails = () => {
                             <th scope="col">Location</th>
                             <th scope="col">Qty A</th>
                             <th scope="col">Qty B</th>
-                            <th scope="col">Price A</th>
-                            <th scope="col">Net Amount</th>
+                            { localUser.employee_roles === "Admin" && <th scope="col">Price A</th>}
+                            { localUser.employee_roles === "Admin" && <th scope="col">Net Amount</th>}
                         </tr>
                     </thead>
                     <tbody className="text-center">
@@ -593,16 +593,18 @@ const PurchaseOrderDetails = () => {
                                                 ? product.order_product_qty_b
                                                 : parseFloat(product.order_product_qty_b).toFixed(4)} <span className='text-xs text-gray-400'>{product.productprice_obj_ref.product_unit_b}</span>
                                         </td>
+                                        { localUser.employee_roles === "Admin" &&
                                         <td>
                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
                                                 Math.floor(product.order_product_price_unit_a * 100) / 100
                                             )}
-                                        </td>
+                                        </td>}
+                                        { localUser.employee_roles === "Admin" && 
                                         <td className="text-end">
                                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(
                                                 Math.floor(product.order_product_gross_amount * 100) / 100
                                             )}
-                                        </td>
+                                        </td>}
                                     </tr>
                                 );
                             })}
@@ -626,8 +628,8 @@ const PurchaseOrderDetails = () => {
                                         </label>
                                     </td>
                                     <td>-</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    { localUser.employee_roles === "Admin" && <td>-</td>}
+                                    { localUser.employee_roles === "Admin" && <td>-</td>}
                                 </tr>)
                             })}
                     </tbody>
@@ -640,31 +642,37 @@ const PurchaseOrderDetails = () => {
                         <tbody>
                             <tr>
                                 <td className="pt-1">Subtotal:</td>
-                                <td className="pt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(totalGrossAmount * 100) / 100)}</td>
+                                { localUser.employee_roles === "Admin" ? <td className="pt-1">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(totalGrossAmount * 100) / 100)}</td> : <td>-</td>}
                             </tr>
                             <tr>
-                                <td><span>GST (10%):</span></td>
-                                <td><span>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
-                                        (purchaseOrderState.products.reduce(
-                                            (totalSum, product) => totalSum + product.order_product_gross_amount,
-                                            0
-                                        )) *
-                                        0.1
-                                    ) * 100) / 100)}
-                                </span></td>
+                                <td>
+                                    <span>GST (10%):</span>
+                                </td>
+                                { localUser.employee_roles === "Admin" ? <td>
+                                    <span>
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
+                                            (purchaseOrderState.products.reduce(
+                                                (totalSum, product) => totalSum + product.order_product_gross_amount,
+                                                0
+                                            )) *
+                                            0.1
+                                        ) * 100) / 100)}
+                                    </span>
+                                </td> : <td>-</td>}
                             </tr>
                             <tr>
                                 <td><span className='text-lg'>Total (incl GST):</span></td>
-                                <td><span className='text-lg'>
-                                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
-                                        (purchaseOrderState.products.reduce(
-                                            (totalSum, product) => totalSum + product.order_product_gross_amount,
-                                            0
-                                        )) *
-                                        1.1
-                                    ) * 100) / 100)}
-                                </span></td>
+                                { localUser.employee_roles === "Admin" ? <td>
+                                    <span className='text-lg'>
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor((
+                                            (purchaseOrderState.products.reduce(
+                                                (totalSum, product) => totalSum + product.order_product_gross_amount,
+                                                0
+                                            )) *
+                                            1.1
+                                        ) * 100) / 100)}
+                                    </span>
+                                </td> : <td>-</td>}
                             </tr>
                         </tbody>
                     </table>
@@ -1326,11 +1334,11 @@ const PurchaseOrderDetails = () => {
                         {/* Left Section with Tabs for Invoices and Supplier Details */}
                         <div className='col-span-1 md:col-span-2'>
                             <div className='flex text-xs md:text-sm'>
-                                <button 
+                                { localUser.employee_roles === "Admin" && <button 
                                     className={`${currentLeftTab === 'invoicesTable' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
                                     onClick={() => { setCurrentLeftTab('invoicesTable'); scrollToDiv(invoicesTableRef); }}>
                                     Invoices
-                                </button>
+                                </button>}
                                 <button 
                                     className={`${currentLeftTab === 'deliveriesTable' ? 'border-2 p-2 rounded bg-gray-700 text-white' : 'border-2 p-2 rounded bg-transparent text-black hover:scale-90 transition-transform duration-150'}`}
                                     onClick={() => { setCurrentLeftTab('deliveriesTable'); scrollToDiv(deliveriesTableRef); }}>

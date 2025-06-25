@@ -258,7 +258,7 @@ const Employee = () => {
                             )}
                           </div>
                         </th>
-                        <th className="p-3 cursor-pointer hidden md:table-cell" onClick={() => requestSort("email")}>
+                        { localUser.employee_roles === "Admin" && <th className="p-3 cursor-pointer hidden md:table-cell" onClick={() => requestSort("email")}>
                           <div className="flex items-center">
                             <Mail className="h-4 w-4 mr-1" />
                             Email
@@ -283,8 +283,8 @@ const Employee = () => {
                               </svg>
                             )}
                           </div>
-                        </th>
-                        <th className="p-3 cursor-pointer" onClick={() => requestSort("contact")}>
+                        </th>}
+                        { localUser.employee_roles === "Admin" && <th className="p-3 cursor-pointer" onClick={() => requestSort("contact")}>
                           <div className="flex items-center">
                             <Phone className="h-4 w-4 mr-1" />
                             Contact
@@ -309,7 +309,7 @@ const Employee = () => {
                               </svg>
                             )}
                           </div>
-                        </th>
+                        </th>}
                         <th className="p-3 cursor-pointer hidden md:table-cell" onClick={() => requestSort("role")}>
                           <div className="flex items-center">
                             Role
@@ -375,8 +375,8 @@ const Employee = () => {
                               {`${employee.employee_first_name} ${employee.employee_last_name}`}
                             </div>
                           </td>
-                          <td className="p-3 hidden md:table-cell text-gray-600">{employee.employee_email}</td>
-                          <td className="p-3 text-gray-600">{employee?.employee_mobile_phone || "none"}</td>
+                          { localUser.employee_roles === "Admin" && <td className="p-3 hidden md:table-cell text-gray-600">{employee.employee_email}</td>}
+                          { localUser.employee_roles === "Admin" && <td className="p-3 text-gray-600">{employee?.employee_mobile_phone || "none"}</td>}
                           <td className="p-3 hidden md:table-cell">
                             <span
                               className={`px-2 py-1 rounded-full text-xs font-medium ${

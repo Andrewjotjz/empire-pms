@@ -479,7 +479,8 @@ const UpdateInvoiceForm = () => {
           // Strip any duplicated tag and trim
           const cleaned = comment.replace(creatorTag, "").trim();
 
-          comment = `${creatorTag} ${cleaned}`;
+          // comment = `${creatorTag} ${cleaned}`;
+          comment = `${creatorTag} `;
           
           updatedState = {
             ...currentState,

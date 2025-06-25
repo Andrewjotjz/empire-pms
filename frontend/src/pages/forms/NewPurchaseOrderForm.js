@@ -383,7 +383,8 @@ const NewPurchaseOrderForm = () => {
 
           return {
             ...prevState,
-            order_internal_comments: `${creatorTag} ${existingContent}`,
+            // order_internal_comments: `${creatorTag} ${existingContent}`,
+            order_internal_comments: `${creatorTag} `,
           };
         }
 

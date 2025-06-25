@@ -20,6 +20,7 @@ const EmployeeDetails = () => {
     const projectState = useSelector((state) => state.projectReducer.projectState);
     const { update } = useUpdateEmployee();
     const dispatch = useDispatch()
+    const localUser = JSON.parse(localStorage.getItem("localUser"))
 
     // const numberOfProjectColumns  = Math.ceil(projectState?.length / 5);
     const [selectedProjects, setSelectedProjects] = useState(new Set());  // set all select suppliers to add or remove
@@ -318,11 +319,11 @@ const EmployeeDetails = () => {
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Email:</label>
-                    <p className="form-label">{employeeState?.employee_email}</p>
+                    { localUser.employee_roles === "Admin" && <p className="form-label">{employeeState?.employee_email}</p>}
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Contact:</label>
-                    <p className="form-label">{employeeState?.employee_mobile_phone}</p>
+                    { localUser.employee_roles === "Admin" && <p className="form-label">{employeeState?.employee_mobile_phone}</p>}
                 </div>
                 <div className="col-md-6 mb-3">
                     <label className="form-label fw-bold">Role:</label>
