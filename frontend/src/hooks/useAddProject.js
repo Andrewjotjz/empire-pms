@@ -34,7 +34,7 @@ export const useAddProject = () => {
                 }
 
                 if (!res.ok) {
-                    throw new Error('Failed to POST new employee details')
+                    throw new Error('Failed to POST new project')
                 }
                 if (res.ok) {
                     // navigate client to home page

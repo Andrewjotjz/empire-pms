@@ -22,6 +22,10 @@ const projectSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Supplier'
     }],
+    companies: {
+        type: Schema.Types.ObjectId,
+        ref: 'Company'
+    },
     area_obj_ref: [{
         areas: {
             area_id: {

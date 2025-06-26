@@ -882,7 +882,6 @@ const Project_Details = () => {
     }
     if (!projectState) return <p>No project details available</p>;
 
-    
     return (
         localUser && Object.keys(localUser).length > 0 ? (
         <div className="container mt-5">

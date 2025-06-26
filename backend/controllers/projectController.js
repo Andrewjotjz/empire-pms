@@ -117,11 +117,11 @@ const getSingleProject = async (req, res) => {
 //     }
 // };
 const createNewProject = async (req, res) => {
-    const { project_name, project_address, suppliers, area_obj_ref } = req.body;
+    const { project_name, project_address, suppliers, area_obj_ref, companies } = req.body;
 
     try {
         // Step 1: Create new project
-        const newProject = await projectModel.create({ project_name, project_address, suppliers, area_obj_ref });
+        const newProject = await projectModel.create({ project_name, project_address, suppliers, area_obj_ref, companies });
 
         // Step 2: Find all products belonging to the selected suppliers
         const products = await productModel.find({ supplier: { $in: suppliers } }).select('_id');
@@ -200,7 +200,7 @@ const createNewProject = async (req, res) => {
 
 const updateSingleProject = async (req, res) => {
     const { id } = req.params;
-    const { project_name, project_address, project_isarchived, area_obj_ref, suppliers } = req.body; // Get the new supplier list
+    const { project_name, project_address, project_isarchived, area_obj_ref, suppliers, companies } = req.body; // Get the new supplier list
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(404).json({ msg: "ID exists, however there is no such Project." });
@@ -223,6 +223,7 @@ const updateSingleProject = async (req, res) => {
         existingProject.project_isarchived = project_isarchived;
         existingProject.area_obj_ref = area_obj_ref;
         existingProject.suppliers = suppliers;
+        existingProject.companies = companies;
         
         const updatedProject = await existingProject.save();
 
