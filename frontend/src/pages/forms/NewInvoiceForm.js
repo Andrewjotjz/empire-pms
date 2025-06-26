@@ -3464,7 +3464,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
                                 name="custom_order_price"
                                 value={
                                   newInvoice.custom_products[index]
-                                    .custom_order_price
+                                    ?.custom_order_price
                                 }
                                 onChange={(e) => handleInputChange(e, index)}
                                 step={0.0001}
@@ -3507,7 +3507,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
                             </td>
                             <td className="border border-gray-300 px-1 py-2 text-end">
                             {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(newInvoice.custom_products[index]
-                                  .custom_order_gross_amount * 100) / 100)}
+                                  ?.custom_order_gross_amount * 100) / 100)}
                             </td>
                           </tr>
                         ))}

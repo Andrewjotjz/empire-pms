@@ -52,12 +52,11 @@ const employeeSchema = new Schema({
         type: Boolean,
         default: false
     },
-    companies: {
+    companies: [{
         required: true,
         type: Schema.Types.ObjectId,
-        ref: 'Company',
-        default: '6682523ac777f1c67a29f5ae' // '_id' for Empire CBS 
-    },
+        ref: 'Company'
+    }],
     projects: [{
         type: Schema.Types.ObjectId,
         ref: 'Project'

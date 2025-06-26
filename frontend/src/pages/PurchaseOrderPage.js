@@ -680,7 +680,7 @@ const PurchaseOrder2 = () => {
                         </p>
                         <p className="text-sm text-gray-600 font-bold">
                             Sum:
-                            <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(paginatedData.reduce((totalSum, order) => {return totalSum + (order.order_total_amount || 0);}, 0) * 100) / 100)}</span>
+                            {localUser.employee_roles === "Admin" &&  <span className="ml-1 font-normal">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(paginatedData.reduce((totalSum, order) => {return totalSum + (order.order_total_amount || 0);}, 0) * 100) / 100)}</span>}
                         </p>
                         <div className="flex space-x-2">
                             <button
