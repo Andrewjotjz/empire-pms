@@ -720,8 +720,6 @@ export default function LibraryList({ onUploadClick }) {
 //     )
 //   }
 
-//   console.log("viewerFile", viewerFile)
-
 //   return (
 //     <div className="min-h-screen bg-gray-50">
 //       {/* Header */}
