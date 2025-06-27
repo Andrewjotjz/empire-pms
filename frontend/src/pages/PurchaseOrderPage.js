@@ -137,8 +137,10 @@ const PurchaseOrder2 = () => {
                 throw new Error('Network response was not ok');
             }
             const data = await res.json();
+            
+            const filteredOrderByCompany = data.filter(order => localUser.companies.some(company => company._id === order.project.companies))
 
-            setPurchaseOrderState(data);
+            setPurchaseOrderState(filteredOrderByCompany);
             setIsLoadingState(false);
 
         } catch (error) {

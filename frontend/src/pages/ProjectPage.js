@@ -104,6 +104,7 @@ const Project = () => {
     return filtered
   }
 
+  // Fetch projects
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -125,8 +126,11 @@ const Project = () => {
           throw new Error(data.tokenError)
         }
 
+        // Filter projects based on Employee's company ID
+        const filteredProjectsByCompany = data.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+
         setIsLoadingState(false)
-        setProjectState(data)
+        setProjectState(filteredProjectsByCompany)
         setErrorState(null)
       } catch (error) {
         setErrorState(error.message)

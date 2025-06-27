@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useLocation } from "react-router-dom"
 import SessionExpired from "../../components/SessionExpired"
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton"
 import LoadingSpinner from "../loaders/LoadingSpinner"
@@ -11,7 +11,9 @@ const UpdateProjectForm = () => {
   // Component router
   const navigate = useNavigate()
   const { id } = useParams()
-
+  const location = useLocation()
+  const supplierThatHasPurchaseOrder = location.state || {};
+  
   // Component state declaration
   const [projectState, setProjectState] = useState({
     _id: "",
@@ -675,6 +677,7 @@ const UpdateProjectForm = () => {
                                   type="checkbox"
                                   value={supplier._id}
                                   checked={isSupplierSelected(supplier._id)}
+                                  disabled={supplierThatHasPurchaseOrder.includes(supplier._id)}
                                   onChange={handleCheckboxChange}
                                   className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 mr-3"
                                 />

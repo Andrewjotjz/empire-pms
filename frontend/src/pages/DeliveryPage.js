@@ -17,12 +17,61 @@ export default function DeliveryPage() {
   const [expandedRow, setExpandedRow] = useState(null);
   const [deliveryState, setDeliveryState] = useState([]);
   const [productState, setProductState] = useState([]);
+  const [projectState, setProjectState] = useState([]);
   const [isLoadingState, setIsLoadingState] = useState(true);
   const [errorState, setErrorState] = useState(null);
+  const [fetchProjectErrorState, setFetchProjectErrorState] = useState(null);
+  const [fetchProjectLoadingState, setIsFetchProjectLoadingState] = useState(false);
 
   const navigate = useNavigate();
   const localUser = JSON.parse(localStorage.getItem('localUser'))
 
+  // Fetch projects
+  useEffect(() => {
+    const abortController = new AbortController()
+    const signal = abortController.signal
+
+    const fetchProjects = async () => {
+      setIsFetchProjectLoadingState(true)
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_BASE_URL}/project`, {
+          signal,
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sessionStorage.getItem("jwt")}`, // Include token in Authorization header
+          },
+        })
+        if (!res.ok) {
+          throw new Error("Failed to fetch projects")
+        }
+        const data = await res.json()
+
+        if (data.tokenError) {
+          throw new Error(data.tokenError)
+        }
+
+        setIsFetchProjectLoadingState(false)
+        setProjectState(data)
+        setFetchProjectErrorState(null)
+      } catch (error) {
+        if (error.name === "AbortError") {
+          // do nothing
+        } else {
+          setIsFetchProjectLoadingState(false)
+          setFetchProjectErrorState(error.message)
+        }
+      }
+    }
+
+    fetchProjects()
+
+    return () => {
+      abortController.abort() // Cleanup
+    }
+  }, [])
+
+  // Fetch all Deliveries
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -44,8 +93,14 @@ export default function DeliveryPage() {
                 throw new Error(data.tokenError);
             }
             
+            // First, filter projects by company id based on employee's company
+            const filteredProjects = projectState?.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+            
+            // Then, filter Delivery data by Project based on its order details
+            const filterDeliveryByProjectInOrder = data.filter(delivery => filteredProjects.some(proj => proj._id === delivery.order.project)) 
+
             setIsLoadingState(false);
-            setDeliveryState(data);
+            setDeliveryState(filterDeliveryByProjectInOrder);
             setErrorState(null);
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -62,7 +117,9 @@ export default function DeliveryPage() {
     return () => {
         abortController.abort(); // Cleanup
     };
-}, []);
+}, [projectState]);
+
+  // Fetch Products
   useEffect(() => {
     const abortController = new AbortController();
     const signal = abortController.signal;
@@ -104,6 +161,7 @@ export default function DeliveryPage() {
     };
 }, []);
 
+  // Fetch Deliveries
   useEffect(() => {
     let result = deliveryState;
 
@@ -174,6 +232,9 @@ export default function DeliveryPage() {
     setCurrentPage(1);
   }, [deliveryState, activeTab, searchTerm, dateFilter, sortConfig]);
 
+  
+
+  //
   const requestSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {

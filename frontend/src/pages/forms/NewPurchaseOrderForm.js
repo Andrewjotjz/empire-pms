@@ -683,7 +683,8 @@ const NewPurchaseOrderForm = () => {
         }
 
         setIsFetchProjectLoadingState(false)
-        setProjectState(data)
+        const filteredByCompanyData = data.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+        setProjectState(filteredByCompanyData)
         setFetchProjectErrorState(null)
       } catch (error) {
         if (error.name === "AbortError") {

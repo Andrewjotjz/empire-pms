@@ -109,9 +109,12 @@ const Budget = () => {
         if (data.tokenError) {
           throw new Error(data.tokenError)
         }
+        
+        // Filter budget data by Projects, which are based on employee's company ID
+        const filteredBudgetByProject = data.filter(budget => localUser.companies.some(company => company._id === budget.project.companies))
 
         setIsLoadingState(false)
-        setBudgetState(data)
+        setBudgetState(filteredBudgetByProject)
         setErrorState(null)
       } catch (error) {
         if (error.name === "AbortError") {

@@ -198,7 +198,11 @@ const InvoicePage2 = () => {
             return;
         }
         
-        let result = invoiceState;
+        // First, filter projects by company id based on employee's company
+        const filteredProjects = projectState?.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+
+        // Then, filter Invoice data by Project based on its order details
+        let result = invoiceState.filter(invoice => filteredProjects.some(proj => proj._id === invoice.order.project));
 
         // Filter by search term
         if (searchTerm) {
@@ -263,45 +267,6 @@ const InvoicePage2 = () => {
         
             result = filteredResult; // Update result with the filtered data
         }        
-        // if (startDateFilter) {
-        //     const selectedDate = new Date(startDateFilter);
-
-        //     // Filter by invoice_issue_date
-        //     let filteredResult = result.filter(invoice => {
-        //         const issueDate = new Date(invoice.invoice_issue_date);
-        //         return (
-        //             issueDate.getFullYear() === selectedDate.getFullYear() &&
-        //             issueDate.getMonth() === selectedDate.getMonth() &&
-        //             issueDate.getDate() === selectedDate.getDate()
-        //         );
-        //     });
-
-        //     // If no results, filter by invoice_received_date
-        //     if (filteredResult.length === 0) {
-        //         filteredResult = result.filter(invoice => {
-        //             const receivedDate = new Date(invoice.invoice_received_date);
-        //             return (
-        //                 receivedDate.getFullYear() === selectedDate.getFullYear() &&
-        //                 receivedDate.getMonth() === selectedDate.getMonth() &&
-        //                 receivedDate.getDate() === selectedDate.getDate()
-        //             );
-        //         });
-        //     }
-
-        //     // If no results again, filter by invoice_due_date
-        //     if (filteredResult.length === 0) {
-        //         filteredResult = result.filter(invoice => {
-        //             const dueDate = new Date(invoice.invoice_due_date);
-        //             return (
-        //                 dueDate.getFullYear() === selectedDate.getFullYear() &&
-        //                 dueDate.getMonth() === selectedDate.getMonth() &&
-        //                 dueDate.getDate() === selectedDate.getDate()
-        //             );
-        //         });
-        //     }
-
-        //     result = filteredResult; // Update result with the filtered data
-        // }
 
         // Filter by tab (current/archive)
         result = result.filter(invoice => {
