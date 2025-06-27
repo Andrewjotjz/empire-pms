@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useLocation } from "react-router-dom"
 import SessionExpired from "../../components/SessionExpired"
 import UnauthenticatedSkeleton from "../loaders/UnauthenticateSkeleton"
 import LoadingSpinner from "../loaders/LoadingSpinner"
@@ -11,7 +11,9 @@ const UpdateProjectForm = () => {
   // Component router
   const navigate = useNavigate()
   const { id } = useParams()
-
+  const location = useLocation()
+  const supplierThatHasPurchaseOrder = location.state || {};
+  
   // Component state declaration
   const [projectState, setProjectState] = useState({
     _id: "",
@@ -675,6 +677,7 @@ const UpdateProjectForm = () => {
                                   type="checkbox"
                                   value={supplier._id}
                                   checked={isSupplierSelected(supplier._id)}
+                                  disabled={supplierThatHasPurchaseOrder.includes(supplier._id)}
                                   onChange={handleCheckboxChange}
                                   className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 mr-3"
                                 />
@@ -693,7 +696,24 @@ const UpdateProjectForm = () => {
                 </div>
 
                 {/* Companies */}
-                <div>
+                <FormField label="Company" name="companies" required>
+                  <select
+                    name="companies"
+                    value={projectState.companies}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="">Select a company</option>
+                    {companyState.map((company) => (
+                      <option key={company._id} value={company._id}>
+                        {company.company_name}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+
+                {/* Companies */}
+                {/* <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Select Company
                     <span className="text-red-500 ml-1">*</span>
@@ -750,7 +770,7 @@ const UpdateProjectForm = () => {
                   </div>
                   {formErrors.companies && <p className="mt-1 text-sm text-red-600">{formErrors.companies}</p>}
                   <p className="mt-1 text-xs text-gray-500">Select the company for this project</p>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -1257,7 +1277,6 @@ export default UpdateProjectForm
 //     }
 //   }, [])
 
-//   console.log("companyState", companyState)
 //   // fetch project details
 //   const fetchProjectDetails = useCallback(async () => {
 //     try {
@@ -1274,8 +1293,6 @@ export default UpdateProjectForm
 //       }
 
 //       const data = await res.json()
-
-//       console.log("data", data)
 
 //       setProjectState(data[0])
 //       setIsLoadingState(false)
@@ -1309,8 +1326,6 @@ export default UpdateProjectForm
 //     }
 //     return <div>Error: {errorState}</div>
 //   }
-
-//   console.log("projectState", projectState)
 
 //   return localUser && Object.keys(localUser).length > 0 ? (
 //     <div className="min-h-screen bg-gray-50 py-8">

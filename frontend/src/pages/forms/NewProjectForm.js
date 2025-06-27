@@ -580,7 +580,24 @@ const ProjectForm = () => {
                 </div>
 
                 {/* Companies */}
-                <div>
+                <FormField label="Company" name="companies" required>
+                  <select
+                    name="companies"
+                    value={projectState.companies}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="">Select a company</option>
+                    {companyState.map((company) => (
+                      <option key={company._id} value={company._id}>
+                        {company.company_name}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+                
+                {/* Companies */}
+                {/* <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Select Company
                     <span className="text-red-500 ml-1">*</span>
@@ -637,7 +654,7 @@ const ProjectForm = () => {
                   </div>
                   {formErrors.companies && <p className="mt-1 text-sm text-red-600">{formErrors.companies}</p>}
                   <p className="mt-1 text-xs text-gray-500">Select the company for this project</p>
-                </div>
+                </div> */}
               </div>
             </div>
 

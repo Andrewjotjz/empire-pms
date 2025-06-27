@@ -98,7 +98,11 @@ const SupplierDetails = () => {
   }
 
   const filterOrders = () => {
-    return purchaseOrderState.filter((order) => {
+    // First, filter orders by company
+    const filteredDataByCompany = purchaseOrderState.filter(order => localUser.companies.some(company => company._id === order.project.companies))
+
+    // Then, filter by search term
+    return filteredDataByCompany.filter((order) => {
       const lowerCaseSearchTerm = searchTerm.toLowerCase()
 
       // Check each field for the search term

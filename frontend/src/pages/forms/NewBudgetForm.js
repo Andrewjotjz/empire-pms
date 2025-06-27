@@ -7,6 +7,8 @@ import SessionExpired from "../../components/SessionExpired"
 
 
 export default function BudgetPlanner() {
+  const localUser = JSON.parse(localStorage.getItem('localUser'))
+
   const navigate = useNavigate();
 
   const [projectState, setProjectState] = useState([])
@@ -51,9 +53,12 @@ export default function BudgetPlanner() {
             if (data.tokenError) {
                 throw new Error(data.tokenError);
             }
+
+            // First, filter projects by company id based on employee's company
+            const filteredProjects = data.filter(proj => localUser.companies.some(company => company._id === proj.companies))
             
             setIsFetchProjectLoading(false);
-            setProjectState(data);
+            setProjectState(filteredProjects);
             setFetchProjectError(null);
         } catch (error) {
             if (error.name === 'AbortError') {

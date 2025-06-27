@@ -67,7 +67,7 @@ const Project_Details = () => {
     //Component functions and variables
     const localUser = JSON.parse(localStorage.getItem('localUser'))
 
-    const handleEditClick = () => navigate(`/EmpirePMS/project/${id}/edit`, { state: id });
+    const handleEditClick = () => navigate(`/EmpirePMS/project/${id}/edit`, { state: supplierThatHasPurchaseOrder });
 
     // Dots animation
     const useDotAnimation = (maxDots = 3, intervalMs = 500) => {

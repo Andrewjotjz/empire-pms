@@ -22,7 +22,7 @@ const UpdateEmployeeForm = () => {
     employee_mobile_phone: "",
     employee_email: "",
     employee_password: "",
-    companies: "",
+    companies: [],
     employee_isarchived: false
   })
 
@@ -33,6 +33,8 @@ const UpdateEmployeeForm = () => {
   const [fetchCompanyLoading, setFetchCompanyLoading] = useState(false)
   const [fetchCompanyError, setFetchCompanyError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const [isCompanyDropdownOpen, setCompanyIsDropdownOpen] = useState(false)
 
   const { update, isLoadingState, errorState } = useUpdateEmployee()
   const localUser = JSON.parse(localStorage.getItem("localUser"))
@@ -76,6 +78,10 @@ const UpdateEmployeeForm = () => {
       errors.employee_salary = "Salary must be a valid number"
     }
 
+    if (employeeState.companies.length === 0) {
+      errors.companies = "At least one company must be selected"
+    }
+
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -103,6 +109,23 @@ const UpdateEmployeeForm = () => {
     }
   }
 
+  const handleCheckboxChange = (event) => {
+    const { value, checked, name } = event.target
+
+    if (name === "companies") {
+      setEmployeeState((prevState) => {
+        const updatedCompanies = checked
+          ? [...prevState.companies, { _id: value }]
+          : prevState.companies.filter((company) => company._id !== value)
+        return { ...prevState, companies: updatedCompanies }
+      })
+      // Clear error when selection changes
+      if (formErrors.companies) {
+        setFormErrors((prev) => ({ ...prev, companies: "" }))
+      }
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
@@ -116,6 +139,20 @@ const UpdateEmployeeForm = () => {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Helper function to check if company is selected
+  const isCompanySelected = (companyId) => {
+    return employeeState.companies.some(company => company._id === companyId)
+  }
+  // Helper function to get selected company names
+  const getSelectedCompanyNames = () => {
+    if (employeeState.companies.length === 0) return "Select Company"
+    if (employeeState.companies.length === 1) {
+      const company = companyState.find((c) => c._id === employeeState.companies[0]._id)
+      return company ? company.company_name : "1 Company Selected"
+    }
+    return `${employeeState.companies.length} Companies Selected`
   }
 
   // Fetch employee data
@@ -323,7 +360,8 @@ const UpdateEmployeeForm = () => {
                     </select>
                   </FormField>
 
-                  <FormField label="Company" name="companies" required>
+                  {/* Companies (version 1) */}
+                  {/* <FormField label="Company" name="companies" required>
                     <select
                       name="companies"
                       value={employeeState.companies}
@@ -337,6 +375,108 @@ const UpdateEmployeeForm = () => {
                         </option>
                       ))}
                     </select>
+                  </FormField> */}
+
+                  {/* Companies (version 2) */}
+                  {/* <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Select Company
+                      <span className="text-red-500 ml-1">*</span>
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        className={`w-full px-4 py-3 border rounded-lg text-left focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
+                          formErrors.companies ? "border-red-500 bg-red-50" : "border-gray-300"
+                        }`}
+                        onClick={() => setCompanyIsDropdownOpen(!isCompanyDropdownOpen)}
+                      >
+                        {employeeState.companies.length > 0
+                          ? `${employeeState.companies.length} Company Selected`
+                          : "Select Company"}
+                        <svg
+                          className={`w-5 h-5 float-right mt-0.5 transition-transform ${isCompanyDropdownOpen ? "rotate-180" : ""}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {isCompanyDropdownOpen && (
+                        <div
+                          className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto"
+                          onMouseLeave={() => setCompanyIsDropdownOpen(false)}
+                        >
+                          <div className="py-2">
+                            {companyState && companyState.length > 0 ? (
+                              companyState.map((company) => (
+                                <label
+                                  key={company._id}
+                                  className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    name="companies"
+                                    value={company._id}
+                                    checked={isCompanySelected(company._id)}
+                                    onChange={handleCheckboxChange}
+                                    className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 mr-3"
+                                  />
+                                  <span className="text-gray-900">{company.company_name}</span>
+                                </label>
+                              ))
+                            ) : (
+                              <div className="px-4 py-2 text-gray-500">No companies available</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {formErrors.companies && <p className="mt-1 text-sm text-red-600">{formErrors.companies}</p>}
+                    <p className="mt-1 text-xs text-gray-500">Select the company for this employee</p>
+                  </div> */}
+
+                  {/* Companies (version 3) */}
+                  <FormField label="Company" name="companies" required error={formErrors.companies}>
+                    <button
+                      type="button"
+                      className={`w-full px-4 py-3 border rounded-lg text-left focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
+                        formErrors.companies ? "border-red-500 bg-red-50" : "border-gray-300"
+                      }`}
+                      onClick={() => setCompanyIsDropdownOpen(!isCompanyDropdownOpen)}
+                    >
+                      {getSelectedCompanyNames()}
+                      <svg
+                        className={`w-5 h-5 float-right mt-0.5 transition-transform ${isCompanyDropdownOpen ? "rotate-180" : ""}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isCompanyDropdownOpen && (
+                      <div className="absolute z-10 bg-white shadow-lg rounded-md mt-1 border border-gray-300">
+                        {companyState.map((company) => (
+                          <label
+                            key={company._id}
+                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              name="companies"
+                              value={company._id}
+                              checked={employeeState.companies.some((c) => c._id === company._id)}
+                              onChange={handleCheckboxChange}
+                              className="mr-2"
+                            />
+                            {company.company_name}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {formErrors.companies && <p className="mt-1 text-red-500 text-sm">{formErrors.companies}</p>}
                   </FormField>
                 </div>
               </div>
