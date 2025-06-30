@@ -683,7 +683,7 @@ const NewPurchaseOrderForm = () => {
         }
 
         setIsFetchProjectLoadingState(false)
-        const filteredByCompanyData = data.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+        const filteredByCompanyData = data.filter(proj => localUser.companies.some(company => company._id === proj.companies || company === proj.companies))
         setProjectState(filteredByCompanyData)
         setFetchProjectErrorState(null)
       } catch (error) {

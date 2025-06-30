@@ -94,7 +94,7 @@ export default function DeliveryPage() {
             }
             
             // First, filter projects by company id based on employee's company
-            const filteredProjects = projectState?.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+            const filteredProjects = projectState?.filter(proj => localUser.companies.some(company => company._id === proj.companies || company === proj.companies))
             
             // Then, filter Delivery data by Project based on its order details
             const filterDeliveryByProjectInOrder = data.filter(delivery => filteredProjects.some(proj => proj._id === delivery.order.project)) 

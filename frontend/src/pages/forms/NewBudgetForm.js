@@ -55,7 +55,7 @@ export default function BudgetPlanner() {
             }
 
             // First, filter projects by company id based on employee's company
-            const filteredProjects = data.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+            const filteredProjects = data.filter(proj => localUser.companies.some(company => company._id === proj.companies || company === proj.companies))
             
             setIsFetchProjectLoading(false);
             setProjectState(filteredProjects);

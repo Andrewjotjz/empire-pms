@@ -143,7 +143,7 @@ const UpdateEmployeeForm = () => {
 
   // Helper function to check if company is selected
   const isCompanySelected = (companyId) => {
-    return employeeState.companies.some(company => company._id === companyId)
+    return employeeState.companies.some(company => company._id === companyId || company === companyId)
   }
   // Helper function to get selected company names
   const getSelectedCompanyNames = () => {

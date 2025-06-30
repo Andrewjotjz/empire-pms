@@ -1530,7 +1530,7 @@ const handleApplyLocationToAll = (index, isCustom = false) => {
           throw new Error(data.tokenError);
         }
 
-        const filteredOrderByCompany = data.filter(order => localUser.companies.some(company => company._id === order.project.companies))
+        const filteredOrderByCompany = data.filter(order => localUser.companies.some(company => company._id === order.project.companies || company === order.project.companies))
 
         setIsFetchSupplierLoading(false);
         setPurchaseOrderState(filteredOrderByCompany);

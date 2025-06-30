@@ -337,7 +337,7 @@ const InvoiceDetails = () => {
                         </tr>
                         <tr>
                             <td colSpan={2}></td>
-                            <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={3}><span className='text-lg'>Printed Total Amount (incl. GST):</span></td>
+                            <td className='pt-1 font-bold text-end border-r-2 px-2 py-1' colSpan={3}><span className='text-lg'>Total Invoice Amount (incl. GST):</span></td>
                             <td className='pt-1 font-bold text-end px-2 py-1'>
                                 <span className='text-lg'>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'AUD' }).format(Math.floor(invoiceState.invoiced_raw_total_amount_incl_gst * 100) / 100)}</span>
                             {(

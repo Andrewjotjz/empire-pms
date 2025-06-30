@@ -199,7 +199,7 @@ const InvoicePage2 = () => {
         }
         
         // First, filter projects by company id based on employee's company
-        const filteredProjects = projectState?.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+        const filteredProjects = projectState?.filter(proj => localUser.companies.some(company => company._id === proj.companies || company === proj.companies))
 
         // Then, filter Invoice data by Project based on its order details
         let result = invoiceState.filter(invoice => filteredProjects.some(proj => proj._id === invoice.order.project));
