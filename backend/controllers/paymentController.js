@@ -57,7 +57,9 @@ const createNewPayment = async (req, res) => {
         const paymentId = Payment._id;
 
         // Convert the 'invoices' id array to an array of ObjectId
-        const invoiceIds = invoices.map((id) => new mongoose.Types.ObjectId(id));
+        // const invoiceIds = invoices.map((id) => new mongoose.Types.ObjectId(id));
+        const invoiceIds = invoices.map((invoice) => new mongoose.Types.ObjectId(invoice.invoice_obj_ref));
+        
 
         //Update all invoices in the invoices array with the new payment ID
         await invoiceModel.updateMany(

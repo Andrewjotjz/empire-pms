@@ -138,7 +138,7 @@ const PurchaseOrder2 = () => {
             }
             const data = await res.json();
             
-            const filteredOrderByCompany = data.filter(order => localUser.companies.some(company => company._id === order.project.companies))
+            const filteredOrderByCompany = data.filter(order => localUser.companies.some(company => company._id === order.project.companies || company === order.project.companies))
 
             setPurchaseOrderState(filteredOrderByCompany);
             setIsLoadingState(false);

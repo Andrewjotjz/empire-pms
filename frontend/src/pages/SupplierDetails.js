@@ -99,7 +99,7 @@ const SupplierDetails = () => {
 
   const filterOrders = () => {
     // First, filter orders by company
-    const filteredDataByCompany = purchaseOrderState.filter(order => localUser.companies.some(company => company._id === order.project.companies))
+    const filteredDataByCompany = purchaseOrderState.filter(order => localUser.companies.some(company => company._id === order.project.companies || company === order.project.companies))
 
     // Then, filter by search term
     return filteredDataByCompany.filter((order) => {

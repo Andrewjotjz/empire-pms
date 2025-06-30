@@ -127,7 +127,7 @@ const Project = () => {
         }
 
         // Filter projects based on Employee's company ID
-        const filteredProjectsByCompany = data.filter(proj => localUser.companies.some(company => company._id === proj.companies))
+        const filteredProjectsByCompany = data.filter(proj => localUser.companies.some(company => company._id === proj.companies || company === proj.companies))
 
         setIsLoadingState(false)
         setProjectState(filteredProjectsByCompany)
